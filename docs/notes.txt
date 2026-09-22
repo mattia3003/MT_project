@@ -1,0 +1,689 @@
+Activate the virtual environment: .venv\Scripts\activate
+
+
+--------------------------------------------------------------------
+
+
+Data information:
+
+StanfordSkullStripped_1mm:
+   train --> 105 patient folders
+   test --> 51 patient folders
+
+
+Synthetic_data:
+Seems liks all images are 128x128x2 (first is bravo, second is seg)  
+
+- "black" areas are not always '0' intensity, but in the real data it is
+   Values are often small (0.00..) or even negative -0.00..
+- "brain area" has significantly 'weaker' intensity than real bravo data in ITK-SNAP
+   Synthetic data hovers around 0.1 - 0.7, whereas real data can be way up in thousands
+NB: there might be something with the way the real data format is saved, that affects the intensity
+
+
+-----------------------------------------------------------------------------
+
+
+corrupt_data_detection results:
+
+(.venv) PS C:\Master thesis\MT_project\scripts> python corrupt_data_detection.py
+Auditing 37624 synthetic segmentation slices...
+100%|██████████████████████████████████████████████████████████████| 37624/37624 [06:57<00:00, 90.08it/s]
+
+============================================================
+           SYNTHETIC SEGMENTATION AUDIT RESULTS            
+============================================================
+ Total Slices Audited : 37624
+ Corrupted Masks Found: 2243 (5.96%)
+============================================================
+
+Full list of corrupted filenames saved to: 'corrupted_synthetic_masks_10_0.txt'
+
+IMPORTANT NOTE:
+- after manually inspecting, some of the flagged files are not bad, typically those noted as 11-12 islands
+- In addition, it might not be an issue with files containing just a single outside pixel
+
+
+---------------------------------------------------------------------
+
+
+Exclusion file for synthetic data test run:
+
+Exclusion filter ACTIVE: Loaded 4486 entry rules from 'corrupted_synthetic_masks_10_0.txt'
+Found 37624 total files.
+Skipped 2243 corrupted/excluded files.
+Processing 35381 valid files to convert...
+
+100%|███████████████████████████████████████████████████████████████████████████████████████████| 35381/35381 [08:00<00:00, 73.62it/s]
+
+Successfully converted 35381 files to 2D!
+Images saved to: ..\processed_data\Synthetic_data_2d_10_0\bravo
+Masks saved to:  ..\processed_data\Synthetic_data_2d_10_0\seg
+
+
+---------------------------------------------------------------------
+
+
+Commands to run the unified_train_2d_unet:
+python unified_train_2d_unet.py --dataset_name synthetic --data_dir "../processed_data/Synthetic_data_2d"
+python unified_train_2d_unet.py --dataset_name real --data_dir "../processed_data/StanfordSkullStripped_1mm/train"
+IF we want to manipulate batch_size, add: '--batch_size NUMBER'
+
+Commands to run the new_evaluate_2d_unet:
+python new_evaluate_2d_unet.py --threshold [NUMBER]
+IF we want to save predictions, add: '--save_preds'
+
+Commands to run the new_convert_synthetic_to_2d:
+python new_convert_synthetic_to_2d.py
+IF we want to exclude a set of files in a .txt file, add: '--exclude' and specify path in script
+alternatively, add PATH in command: '--exclusion_file' [FILE PATH]
+
+Commands to run the metrics file:
+python metrics.py [CLI inputs]
+--real_dir "path to real dataset"
+--syn_dir "path to synthetic dataset"
+--exclusion_file "path to exclution file" (if we want to exclude certain data from dataset)
+--modality "bravo" (technically not needed as bravo is auto)
+Score to evaluate:
+   --all
+   --is_score
+   --fid
+   --med_fid
+   --cmmd
+   --ssim
+   --one_nn
+
+
+---------------------------------------------------------------------
+
+
+TS -> Target Size
+RD -> Real Data
+SD -> Synthetic Data
+
+Slice predictions are made with threshold 0.5
+
+
+---------------------------------------------------------------------
+
+
+Test data eval:
+
+best_real_model_TS256_40epochs_unet performance eval ->
+mean Sørensen-Dice Coefficient: 0.4225
+    HD95: 33.4450 voxels
+    (Tested on only slices with masks/metastasis, threshold 0.5)
+
+best_synthetic_model_40epochs_unet performance eval ->
+mean Sørensen-Dice Coefficient: 0.1402
+  HD95: 81.8383 voxels
+    (Tested on only slices with masks/metastasis, threshold 0.5)
+mean Sørensen-Dice Coefficient: 0.1367
+  HD95: 73.7615 voxels
+    (Tested on only slices with masks/metastasis, threshold 0.8)
+
+best_real_model_TS256_40epochs_dynunet performance eval ->
+mean Sørensen-Dice Coefficient: 0.5244
+    HD95: 29.6920 voxels
+    (Tested on only slices with masks/metastasis, threshold 0.5)
+mean Sørensen-Dice Coefficient: 0.4770
+    HD95: 27.8817 voxels
+    (Tested on only slices with masks/metastasis, threshold 0.8)
+
+best_synthetic_model_TS256_40epochs_dynunet performance eval ->
+mean Sørensen-Dice Coefficient: 0.1420
+    HD95: 86.6529 voxels
+    (Tested on only slices with masks/metastasis, threshold 0.5)
+mean Sørensen-Dice Coefficient: 0.1817
+    HD95: 84.2518 voxels
+    (Tested on only slices with masks/metastasis, threshold 0.8)
+
+best_synthetic_model_TS256_40epochs_dynunet_10_0 performance eval ->
+mean Sørensen-Dice Coefficient: 0.2295
+    HD95: 63.0846 voxels
+    (Tested on only slices with masks/metastasis, threshold 0.5)
+mean Sørensen-Dice Coefficient: 0.1990
+    HD95: 59.0603 voxels
+    (Tested on only slices with masks/metastasis, threshold 0.8)
+
+
+
+train data eval:
+
+best_synthetic_model_40epochs_unet performance eval ->
+mean Sørensen-Dice Coefficient: 0.1231
+  HD95: 81.2350 voxels
+    (Tested on only slices with masks/metastasis, threshold 0.5)
+mean Sørensen-Dice Coefficient: 0.1180
+  HD95: 73.9993 voxels
+    (Tested on only slices with masks/metastasis, threshold 0.8)
+
+best_synthetic_model_TS256_40epochs_dynunet_10_0 performance eval ->
+mean Sørensen-Dice Coefficient: 0.2035
+    HD95: 63.6518 voxels
+    (Tested on only slices with masks/metastasis, threshold 0.5)
+mean Sørensen-Dice Coefficient: 0.1730
+    HD95: 59.1550 voxels
+    (Tested on only slices with masks/metastasis, threshold 0.8)
+
+
+---------------------------------------------------------------------
+
+
+best_real_model_TS256_40epochs_unet:
+
+(.venv) PS C:\Master thesis\MT_project\scripts> python new_unified_train_2d_unet.py --dataset_name real --data_dir "../processed_data/StanfordSkullStripped_1mm/train"
+Resolving dataset directory: C:\Master thesis\MT_project\processed_data\StanfordSkullStripped_1mm\train
+Found 3823 BRAVO files and 3823 SEG files.
+Dataset split: 3058 train samples | 765 val samples
+
+--- DATA SANITY CHECK ---
+Batch Image Shape: torch.Size([64, 1, 256, 256]) (Expected: [64, 1, 256, 256])
+Batch Label Shape: torch.Size([64, 1, 256, 256]) (Expected: [64, 1, 256, 256])
+Label Unique Values: tensor([0., 1.])
+-------------------------
+
+
+--- Epoch 1/40 ---
+Epoch [1/40] - Loss: 1.0990 | Val Dice: 0.0219
+   ---> Saved new best checkpoint: best_real_model.pth
+
+--- Epoch 2/40 ---
+Epoch [2/40] - Loss: 1.0441 | Val Dice: 0.0905
+   ---> Saved new best checkpoint: best_real_model.pth
+
+--- Epoch 3/40 ---
+Epoch [3/40] - Loss: 0.9962 | Val Dice: 0.1581
+   ---> Saved new best checkpoint: best_real_model.pth
+
+--- Epoch 4/40 ---
+Epoch [4/40] - Loss: 0.9194 | Val Dice: 0.2549
+   ---> Saved new best checkpoint: best_real_model.pth
+
+--- Epoch 5/40 ---
+Epoch [5/40] - Loss: 0.7884 | Val Dice: 0.3260
+   ---> Saved new best checkpoint: best_real_model.pth
+
+--- Epoch 6/40 ---
+Epoch [6/40] - Loss: 0.6739 | Val Dice: 0.3615
+   ---> Saved new best checkpoint: best_real_model.pth
+
+--- Epoch 7/40 ---
+Epoch [7/40] - Loss: 0.6167 | Val Dice: 0.3937
+   ---> Saved new best checkpoint: best_real_model.pth
+
+--- Epoch 8/40 ---
+Epoch [8/40] - Loss: 0.5851 | Val Dice: 0.3912
+
+--- Epoch 9/40 ---
+Epoch [9/40] - Loss: 0.5661 | Val Dice: 0.4117
+   ---> Saved new best checkpoint: best_real_model.pth
+
+--- Epoch 10/40 ---
+Epoch [10/40] - Loss: 0.5511 | Val Dice: 0.4300
+   ---> Saved new best checkpoint: best_real_model.pth
+
+--- Epoch 11/40 ---
+Epoch [11/40] - Loss: 0.5337 | Val Dice: 0.4443
+   ---> Saved new best checkpoint: best_real_model.pth
+
+--- Epoch 12/40 ---
+Epoch [12/40] - Loss: 0.5222 | Val Dice: 0.4520
+   ---> Saved new best checkpoint: best_real_model.pth
+
+--- Epoch 13/40 ---
+Epoch [13/40] - Loss: 0.5159 | Val Dice: 0.4621
+   ---> Saved new best checkpoint: best_real_model.pth
+
+--- Epoch 14/40 ---
+Epoch [14/40] - Loss: 0.5002 | Val Dice: 0.4622
+   ---> Saved new best checkpoint: best_real_model.pth
+
+--- Epoch 15/40 ---
+Epoch [15/40] - Loss: 0.4968 | Val Dice: 0.4622
+   ---> Saved new best checkpoint: best_real_model.pth
+
+--- Epoch 16/40 ---
+Epoch [16/40] - Loss: 0.4880 | Val Dice: 0.4768
+   ---> Saved new best checkpoint: best_real_model.pth
+
+--- Epoch 17/40 ---
+Epoch [17/40] - Loss: 0.4788 | Val Dice: 0.4858
+   ---> Saved new best checkpoint: best_real_model.pth
+
+--- Epoch 18/40 ---
+Epoch [18/40] - Loss: 0.4713 | Val Dice: 0.4914
+   ---> Saved new best checkpoint: best_real_model.pth
+
+--- Epoch 19/40 ---
+Epoch [19/40] - Loss: 0.4669 | Val Dice: 0.4980
+   ---> Saved new best checkpoint: best_real_model.pth
+
+--- Epoch 20/40 ---
+Epoch [20/40] - Loss: 0.4565 | Val Dice: 0.5123
+   ---> Saved new best checkpoint: best_real_model.pth
+
+--- Epoch 21/40 ---
+Epoch [21/40] - Loss: 0.4508 | Val Dice: 0.5010
+
+--- Epoch 22/40 ---
+Epoch [22/40] - Loss: 0.4450 | Val Dice: 0.5186
+   ---> Saved new best checkpoint: best_real_model.pth
+
+--- Epoch 23/40 ---
+Epoch [23/40] - Loss: 0.4427 | Val Dice: 0.5092
+
+--- Epoch 24/40 ---
+Epoch [24/40] - Loss: 0.4343 | Val Dice: 0.5228
+   ---> Saved new best checkpoint: best_real_model.pth
+
+--- Epoch 25/40 ---
+Epoch [25/40] - Loss: 0.4319 | Val Dice: 0.5192
+
+--- Epoch 26/40 ---
+Epoch [26/40] - Loss: 0.4259 | Val Dice: 0.5252
+   ---> Saved new best checkpoint: best_real_model.pth
+
+--- Epoch 27/40 ---
+Epoch [27/40] - Loss: 0.4275 | Val Dice: 0.5212
+
+--- Epoch 28/40 ---
+Epoch [28/40] - Loss: 0.4215 | Val Dice: 0.5315
+   ---> Saved new best checkpoint: best_real_model.pth
+
+--- Epoch 29/40 ---
+Epoch [29/40] - Loss: 0.4186 | Val Dice: 0.5341
+   ---> Saved new best checkpoint: best_real_model.pth
+
+--- Epoch 30/40 ---
+Epoch [30/40] - Loss: 0.4162 | Val Dice: 0.5383
+   ---> Saved new best checkpoint: best_real_model.pth
+
+--- Epoch 31/40 ---
+Epoch [31/40] - Loss: 0.4111 | Val Dice: 0.5385
+   ---> Saved new best checkpoint: best_real_model.pth
+
+--- Epoch 32/40 ---
+Epoch [32/40] - Loss: 0.4122 | Val Dice: 0.5403
+   ---> Saved new best checkpoint: best_real_model.pth
+
+--- Epoch 33/40 ---
+Epoch [33/40] - Loss: 0.4094 | Val Dice: 0.5375
+
+--- Epoch 34/40 ---
+Epoch [34/40] - Loss: 0.4057 | Val Dice: 0.5395
+
+--- Epoch 35/40 ---
+Epoch [35/40] - Loss: 0.4055 | Val Dice: 0.5408
+   ---> Saved new best checkpoint: best_real_model.pth
+
+--- Epoch 36/40 ---
+Epoch [36/40] - Loss: 0.4045 | Val Dice: 0.5425
+
+--- Epoch 37/40 ---
+Epoch [37/40] - Loss: 0.4039 | Val Dice: 0.5417
+
+--- Epoch 38/40 ---
+Epoch [38/40] - Loss: 0.4037 | Val Dice: 0.5416
+
+--- Epoch 39/40 ---
+Epoch [39/40] - Loss: 0.4044 | Val Dice: 0.5428
+   ---> Saved new best checkpoint: best_real_model.pth
+
+--- Epoch 40/40 ---
+Epoch [40/40] - Loss: 0.4085 | Val Dice: 0.5430
+   ---> Saved new best checkpoint: best_real_model.pth
+
+Training Complete! Best Validation Dice: 0.5430 at Epoch 40
+
+-------------------------------------------------------------------
+
+NEW TRAINING:
+
+best_synthetic_model_TS256_40epochs_unet:
+
+(.venv) PS C:\Master thesis\MT_project\scripts> python new_unified_train_2d_unet.py --dataset_name synthetic --data_dir "../processed_data/Synthetic_data_2d"         
+Resolving dataset directory: C:\Master thesis\MT_project\processed_data\Synthetic_data_2d
+Found 37624 BRAVO files and 37624 SEG files.
+Dataset split: 30099 train samples | 7525 val samples
+
+--- DATA SANITY CHECK ---
+Batch Image Shape: torch.Size([64, 1, 256, 256]) (Expected: [64, 1, 256, 256])
+Batch Label Shape: torch.Size([64, 1, 256, 256]) (Expected: [64, 1, 256, 256])
+Label Unique Values: tensor([0., 1.])
+-------------------------
+
+
+--- Epoch 1/40 ---
+Epoch [1/40] - Loss: 0.7935 | Val Dice: 0.4210
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 2/40 ---
+Epoch [2/40] - Loss: 0.5275 | Val Dice: 0.4763
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 3/40 ---
+Epoch [3/40] - Loss: 0.4834 | Val Dice: 0.5211
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 4/40 ---
+Epoch [4/40] - Loss: 0.4547 | Val Dice: 0.5458
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 5/40 ---
+Epoch [5/40] - Loss: 0.4330 | Val Dice: 0.5541
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 6/40 ---
+Epoch [6/40] - Loss: 0.4180 | Val Dice: 0.5730
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 7/40 ---
+Epoch [7/40] - Loss: 0.4076 | Val Dice: 0.5783
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 8/40 ---
+Epoch [8/40] - Loss: 0.3979 | Val Dice: 0.5895
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 9/40 ---
+Epoch [9/40] - Loss: 0.3913 | Val Dice: 0.5957
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 10/40 ---
+Epoch [10/40] - Loss: 0.3862 | Val Dice: 0.6012
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 11/40 ---
+Epoch [11/40] - Loss: 0.3802 | Val Dice: 0.6074
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 12/40 ---
+Epoch [12/40] - Loss: 0.3759 | Val Dice: 0.6145
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 13/40 ---
+Epoch [13/40] - Loss: 0.3714 | Val Dice: 0.6159
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 14/40 ---
+Epoch [14/40] - Loss: 0.3679 | Val Dice: 0.6194
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 15/40 ---
+Epoch [15/40] - Loss: 0.3648 | Val Dice: 0.6210
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 16/40 ---
+Epoch [16/40] - Loss: 0.3605 | Val Dice: 0.6225
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 17/40 ---
+Epoch [17/40] - Loss: 0.3570 | Val Dice: 0.6275
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 18/40 ---
+Epoch [18/40] - Loss: 0.3551 | Val Dice: 0.6254
+
+--- Epoch 19/40 ---
+Epoch [19/40] - Loss: 0.3531 | Val Dice: 0.6284
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 20/40 ---
+Epoch [20/40] - Loss: 0.3487 | Val Dice: 0.6337
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 21/40 ---
+Epoch [21/40] - Loss: 0.3480 | Val Dice: 0.6364
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 22/40 ---
+Epoch [22/40] - Loss: 0.3447 | Val Dice: 0.6358
+
+--- Epoch 23/40 ---
+Epoch [23/40] - Loss: 0.3429 | Val Dice: 0.6371
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 24/40 ---
+Epoch [24/40] - Loss: 0.3402 | Val Dice: 0.6393
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 25/40 ---
+Epoch [25/40] - Loss: 0.3396 | Val Dice: 0.6393
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 26/40 ---
+Epoch [26/40] - Loss: 0.3381 | Val Dice: 0.6410
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 27/40 ---
+Epoch [27/40] - Loss: 0.3355 | Val Dice: 0.6445
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 28/40 ---
+Epoch [28/40] - Loss: 0.3338 | Val Dice: 0.6451
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 29/40 ---
+Epoch [29/40] - Loss: 0.3328 | Val Dice: 0.6447
+
+--- Epoch 30/40 ---
+Epoch [30/40] - Loss: 0.3312 | Val Dice: 0.6459
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 31/40 ---
+Epoch [31/40] - Loss: 0.3290 | Val Dice: 0.6465
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 32/40 ---
+Epoch [32/40] - Loss: 0.3285 | Val Dice: 0.6475
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 33/40 ---
+Epoch [33/40] - Loss: 0.3282 | Val Dice: 0.6479
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 34/40 ---
+Epoch [34/40] - Loss: 0.3265 | Val Dice: 0.6492
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 35/40 ---
+Epoch [35/40] - Loss: 0.3265 | Val Dice: 0.6491
+
+--- Epoch 36/40 ---
+Epoch [36/40] - Loss: 0.3247 | Val Dice: 0.6489
+
+--- Epoch 37/40 ---
+Epoch [37/40] - Loss: 0.3250 | Val Dice: 0.6503
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 38/40 ---
+Epoch [38/40] - Loss: 0.3242 | Val Dice: 0.6498
+
+--- Epoch 39/40 ---
+Epoch [39/40] - Loss: 0.3244 | Val Dice: 0.6499
+
+--- Epoch 40/40 ---
+Epoch [40/40] - Loss: 0.3251 | Val Dice: 0.6500
+
+Training Complete! Best Validation Dice: 0.6503 at Epoch 37
+
+
+--------------------------------------------------------------------------------
+
+
+best_synthetic_model_TS256_40epochs_dynunet:
+
+
+(.venv) PS C:\Master thesis\MT_project\scripts> python unified_train_2d_dynunet.py --dataset_name synthetic --data_dir "../processed_data/Synthetic_data_2d"
+Resolving dataset directory: C:\Master thesis\MT_project\processed_data\Synthetic_data_2d
+Found 37624 BRAVO files and 37624 SEG files.
+Dataset split: 30099 train samples | 7525 val samples
+
+--- DATA SANITY CHECK ---
+Batch Image Shape: torch.Size([32, 1, 256, 256]) (Expected: [32, 1, 256, 256])
+Batch Label Shape: torch.Size([32, 1, 256, 256]) (Expected: [32, 1, 256, 256])
+Label Unique Values: tensor([0., 1.])
+-------------------------
+
+
+--- Epoch 1/40 ---
+Epoch [1/40] - Loss: 0.9647 | Val Dice: 0.5964
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 2/40 ---
+Epoch [2/40] - Loss: 0.5877 | Val Dice: 0.6395
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 3/40 ---
+Epoch [3/40] - Loss: 0.5395 | Val Dice: 0.6580
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 4/40 ---
+Epoch [4/40] - Loss: 0.5138 | Val Dice: 0.6800
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 5/40 ---
+Epoch [5/40] - Loss: 0.4971 | Val Dice: 0.6828
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 6/40 ---
+Epoch [6/40] - Loss: 0.4842 | Val Dice: 0.6982
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 7/40 ---
+Epoch [7/40] - Loss: 0.4733 | Val Dice: 0.7053
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 8/40 ---
+Epoch [8/40] - Loss: 0.4660 | Val Dice: 0.7134
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 9/40 ---
+Epoch [9/40] - Loss: 0.4583 | Val Dice: 0.6916
+
+--- Epoch 10/40 ---
+Epoch [10/40] - Loss: 0.4518 | Val Dice: 0.7177
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 11/40 ---
+Epoch [11/40] - Loss: 0.4467 | Val Dice: 0.7169
+
+--- Epoch 12/40 ---
+Epoch [12/40] - Loss: 0.4424 | Val Dice: 0.7230
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 13/40 ---
+Epoch [13/40] - Loss: 0.4375 | Val Dice: 0.7224
+
+--- Epoch 14/40 ---
+Epoch [14/40] - Loss: 0.4341 | Val Dice: 0.7289
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 15/40 ---
+Epoch [15/40] - Loss: 0.4308 | Val Dice: 0.7353
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 16/40 ---
+Epoch [16/40] - Loss: 0.4266 | Val Dice: 0.7303
+
+--- Epoch 17/40 ---
+Epoch [17/40] - Loss: 0.4248 | Val Dice: 0.7336
+
+--- Epoch 18/40 ---
+Epoch [18/40] - Loss: 0.4209 | Val Dice: 0.7374
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 19/40 ---
+Epoch [19/40] - Loss: 0.4181 | Val Dice: 0.7421
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 20/40 ---
+Epoch [20/40] - Loss: 0.4137 | Val Dice: 0.7441
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 21/40 ---
+Epoch [21/40] - Loss: 0.4130 | Val Dice: 0.7429
+
+--- Epoch 22/40 ---
+Epoch [22/40] - Loss: 0.4099 | Val Dice: 0.7428
+
+--- Epoch 23/40 ---
+Epoch [23/40] - Loss: 0.4066 | Val Dice: 0.7462
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 24/40 ---
+Epoch [24/40] - Loss: 0.4040 | Val Dice: 0.7498
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 25/40 ---
+Epoch [25/40] - Loss: 0.4020 | Val Dice: 0.7505
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 26/40 ---
+Epoch [26/40] - Loss: 0.3998 | Val Dice: 0.7517
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 27/40 ---
+Epoch [27/40] - Loss: 0.3966 | Val Dice: 0.7520
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 28/40 ---
+Epoch [28/40] - Loss: 0.3942 | Val Dice: 0.7550
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 29/40 ---
+Epoch [29/40] - Loss: 0.3944 | Val Dice: 0.7554
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 30/40 ---
+Epoch [30/40] - Loss: 0.3923 | Val Dice: 0.7570
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 31/40 ---
+Epoch [31/40] - Loss: 0.3908 | Val Dice: 0.7569
+
+--- Epoch 32/40 ---
+Epoch [32/40] - Loss: 0.3880 | Val Dice: 0.7589
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 33/40 ---
+Epoch [33/40] - Loss: 0.3871 | Val Dice: 0.7587
+
+--- Epoch 34/40 ---
+Epoch [34/40] - Loss: 0.3863 | Val Dice: 0.7598
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 35/40 ---
+Epoch [35/40] - Loss: 0.3859 | Val Dice: 0.7595
+
+--- Epoch 36/40 ---
+Epoch [36/40] - Loss: 0.3849 | Val Dice: 0.7605
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 37/40 ---
+Epoch [37/40] - Loss: 0.3856 | Val Dice: 0.7606
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 38/40 ---
+Epoch [38/40] - Loss: 0.3835 | Val Dice: 0.7607
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 39/40 ---
+Epoch [39/40] - Loss: 0.3840 | Val Dice: 0.7609
+   ---> Saved new best checkpoint: best_synthetic_model.pth
+
+--- Epoch 40/40 ---
+Epoch [40/40] - Loss: 0.3837 | Val Dice: 0.7609
+
+Training Complete! Best Validation Dice: 0.7609 at Epoch 39
+
+
+-----------------------------------------------------------------------------------
+
+
+NO DATA FOR TRAINING OF best_real_model_TS256_40epochs_dynunet
+- but final model is from epoch 36
+
+NO DATA FOR TRAINING OF best_synthetic_model_TS256_40epochs_dynunet_10_0
+- but final model is from epoch 35 ish

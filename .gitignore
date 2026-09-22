@@ -1,0 +1,9 @@
+# Virtual environment
+.venv/
+
+# Large data folders
+data/
+processed_data/
+
+# MONAI tutorials
+tutorials/

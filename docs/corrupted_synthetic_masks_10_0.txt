@@ -1,0 +1,2245 @@
+# Corrupted Synthetic Segmentation Files
+# Format: Filename | Failure Reason
+10004.seg.nii.gz | Excessive noise fragments: 31 distinct blobs
+10025.seg.nii.gz | Pixels outside brain: 1
+10045.seg.nii.gz | Pixels outside brain: 1
+10051.seg.nii.gz | Excessive noise fragments: 42 distinct blobs
+10118.seg.nii.gz | Excessive noise fragments: 44 distinct blobs
+10136.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+10171.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 12 distinct blobs
+10183.seg.nii.gz | Excessive noise fragments: 119 distinct blobs
+10194.seg.nii.gz | Excessive noise fragments: 170 distinct blobs
+10200.seg.nii.gz | Pixels outside brain: 1
+10247.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+10294.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 23 distinct blobs
+10296.seg.nii.gz | Excessive noise fragments: 24 distinct blobs
+10300.seg.nii.gz | Excessive noise fragments: 100 distinct blobs
+10318.seg.nii.gz | Excessive noise fragments: 26 distinct blobs
+10337.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+10350.seg.nii.gz | Excessive noise fragments: 71 distinct blobs
+10375.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 309 distinct blobs
+10419.seg.nii.gz | Excessive noise fragments: 35 distinct blobs
+1048.seg.nii.gz | Excessive noise fragments: 27 distinct blobs
+10530.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+10555.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+10592.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+10604.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+10629.seg.nii.gz | Pixels outside brain: 1
+10683.seg.nii.gz | Excessive noise fragments: 144 distinct blobs
+10701.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+10707.seg.nii.gz | Pixels outside brain: 1
+10723.seg.nii.gz | Excessive noise fragments: 30 distinct blobs
+10754.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+10789.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+10812.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+10822.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+10829.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+10860.seg.nii.gz | Pixels outside brain: 1
+10867.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+10870.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 199 distinct blobs
+10871.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+10888.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+10892.seg.nii.gz | Pixels outside brain: 9, Excessive noise fragments: 481 distinct blobs
+10965.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 158 distinct blobs
+10983.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+11010.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 25 distinct blobs
+11059.seg.nii.gz | Pixels outside brain: 1
+11074.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+11178.seg.nii.gz | Excessive noise fragments: 27 distinct blobs
+11197.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 244 distinct blobs
+11232.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+11253.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 25 distinct blobs
+11267.seg.nii.gz | Excessive noise fragments: 32 distinct blobs
+1128.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+11310.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+11395.seg.nii.gz | Excessive noise fragments: 36 distinct blobs
+11396.seg.nii.gz | Pixels outside brain: 7, Excessive noise fragments: 407 distinct blobs
+11407.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 228 distinct blobs
+11414.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+1145.seg.nii.gz | Pixels outside brain: 1
+11453.seg.nii.gz | Excessive noise fragments: 43 distinct blobs
+11471.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+11481.seg.nii.gz | Excessive noise fragments: 110 distinct blobs
+11569.seg.nii.gz | Pixels outside brain: 1
+11597.seg.nii.gz | Excessive noise fragments: 45 distinct blobs
+11612.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+11650.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+11714.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+11764.seg.nii.gz | Pixels outside brain: 4, Excessive noise fragments: 235 distinct blobs
+11826.seg.nii.gz | Excessive noise fragments: 120 distinct blobs
+11925.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+11929.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 14 distinct blobs
+11939.seg.nii.gz | Excessive noise fragments: 56 distinct blobs
+11950.seg.nii.gz | Pixels outside brain: 1
+11953.seg.nii.gz | Excessive noise fragments: 34 distinct blobs
+11955.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 14 distinct blobs
+12001.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+12014.seg.nii.gz | Excessive noise fragments: 39 distinct blobs
+12037.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+12057.seg.nii.gz | Excessive noise fragments: 32 distinct blobs
+12076.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+12090.seg.nii.gz | Excessive noise fragments: 108 distinct blobs
+12108.seg.nii.gz | Excessive noise fragments: 32 distinct blobs
+12142.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+12169.seg.nii.gz | Excessive noise fragments: 106 distinct blobs
+12171.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+12173.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 211 distinct blobs
+12207.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+12272.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+12282.seg.nii.gz | Pixels outside brain: 1
+1233.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+12341.seg.nii.gz | Excessive noise fragments: 86 distinct blobs
+12395.seg.nii.gz | Pixels outside brain: 1
+12404.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 124 distinct blobs
+12409.seg.nii.gz | Pixels outside brain: 4, Excessive noise fragments: 348 distinct blobs
+12458.seg.nii.gz | Excessive noise fragments: 30 distinct blobs
+12465.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+12482.seg.nii.gz | Excessive noise fragments: 103 distinct blobs
+12534.seg.nii.gz | Pixels outside brain: 1
+12540.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+12591.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+12668.seg.nii.gz | Pixels outside brain: 1
+1268.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 26 distinct blobs
+12695.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 15 distinct blobs
+12696.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+12830.seg.nii.gz | Excessive noise fragments: 146 distinct blobs
+1285.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 11 distinct blobs
+1291.seg.nii.gz | Pixels outside brain: 1
+12916.seg.nii.gz | Excessive noise fragments: 71 distinct blobs
+1293.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 248 distinct blobs
+12931.seg.nii.gz | Excessive noise fragments: 37 distinct blobs
+12938.seg.nii.gz | Excessive noise fragments: 92 distinct blobs
+12941.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+12946.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+12947.seg.nii.gz | Excessive noise fragments: 123 distinct blobs
+12962.seg.nii.gz | Excessive noise fragments: 44 distinct blobs
+12968.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+12971.seg.nii.gz | Pixels outside brain: 5, Excessive noise fragments: 342 distinct blobs
+12990.seg.nii.gz | Excessive noise fragments: 66 distinct blobs
+1305.seg.nii.gz | Excessive noise fragments: 91 distinct blobs
+1329.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+1334.seg.nii.gz | Excessive noise fragments: 232 distinct blobs
+1395.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 50 distinct blobs
+143.seg.nii.gz | Excessive noise fragments: 82 distinct blobs
+1435.seg.nii.gz | Excessive noise fragments: 111 distinct blobs
+1443.seg.nii.gz | Excessive noise fragments: 116 distinct blobs
+1458.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+1485.seg.nii.gz | Excessive noise fragments: 58 distinct blobs
+1491.seg.nii.gz | Pixels outside brain: 1
+1501.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+1509.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+1546.seg.nii.gz | Excessive noise fragments: 31 distinct blobs
+1548.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 45 distinct blobs
+1578.seg.nii.gz | Excessive noise fragments: 163 distinct blobs
+1589.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+162.seg.nii.gz | Pixels outside brain: 1
+1637.seg.nii.gz | Pixels outside brain: 1
+1687.seg.nii.gz | Excessive noise fragments: 23 distinct blobs
+1758.seg.nii.gz | Excessive noise fragments: 40 distinct blobs
+1759.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 99 distinct blobs
+1805.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+1836.seg.nii.gz | Excessive noise fragments: 229 distinct blobs
+1857.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+1859.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 15 distinct blobs
+1865.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+1875.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+196.seg.nii.gz | Pixels outside brain: 10, Excessive noise fragments: 415 distinct blobs
+1963.seg.nii.gz | Pixels outside brain: 7, Excessive noise fragments: 224 distinct blobs
+1966.seg.nii.gz | Excessive noise fragments: 169 distinct blobs
+1992.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+2018.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+2030.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+2089.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 291 distinct blobs
+2090.seg.nii.gz | Pixels outside brain: 1
+2108.seg.nii.gz | Excessive noise fragments: 48 distinct blobs
+2110.seg.nii.gz | Pixels outside brain: 1
+2116.seg.nii.gz | Excessive noise fragments: 224 distinct blobs
+2117.seg.nii.gz | Pixels outside brain: 4, Excessive noise fragments: 178 distinct blobs
+2118.seg.nii.gz | Excessive noise fragments: 27 distinct blobs
+2127.seg.nii.gz | Excessive noise fragments: 94 distinct blobs
+213.seg.nii.gz | Excessive noise fragments: 66 distinct blobs
+2149.seg.nii.gz | Excessive noise fragments: 106 distinct blobs
+2156.seg.nii.gz | Pixels outside brain: 1
+2158.seg.nii.gz | Excessive noise fragments: 29 distinct blobs
+2238.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 18 distinct blobs
+225.seg.nii.gz | Excessive noise fragments: 120 distinct blobs
+2253.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+226.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+2266.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+2282.seg.nii.gz | Pixels outside brain: 1
+2283.seg.nii.gz | Excessive noise fragments: 41 distinct blobs
+2302.seg.nii.gz | Pixels outside brain: 1
+2303.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+2328.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+2331.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+2363.seg.nii.gz | Excessive noise fragments: 95 distinct blobs
+2371.seg.nii.gz | Excessive noise fragments: 28 distinct blobs
+2372.seg.nii.gz | Excessive noise fragments: 34 distinct blobs
+2373.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 30 distinct blobs
+2380.seg.nii.gz | Excessive noise fragments: 34 distinct blobs
+2388.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+2393.seg.nii.gz | Excessive noise fragments: 166 distinct blobs
+2428.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+2558.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+256.seg.nii.gz | Excessive noise fragments: 23 distinct blobs
+2643.seg.nii.gz | Excessive noise fragments: 200 distinct blobs
+2651.seg.nii.gz | Pixels outside brain: 1
+2652.seg.nii.gz | Excessive noise fragments: 170 distinct blobs
+2737.seg.nii.gz | Excessive noise fragments: 38 distinct blobs
+2748.seg.nii.gz | Excessive noise fragments: 69 distinct blobs
+2750.seg.nii.gz | Excessive noise fragments: 38 distinct blobs
+2799.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 228 distinct blobs
+2809.seg.nii.gz | Excessive noise fragments: 29 distinct blobs
+2816.seg.nii.gz | Excessive noise fragments: 35 distinct blobs
+2828.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+2865.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+2983.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+2993.seg.nii.gz | Pixels outside brain: 11, Excessive noise fragments: 498 distinct blobs
+3.seg.nii.gz | Pixels outside brain: 4, Excessive noise fragments: 285 distinct blobs
+3041.seg.nii.gz | Pixels outside brain: 1
+3047.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+308.seg.nii.gz | Excessive noise fragments: 24 distinct blobs
+3095.seg.nii.gz | Excessive noise fragments: 49 distinct blobs
+3134.seg.nii.gz | Pixels outside brain: 1
+3157.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+3158.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+3205.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+3239.seg.nii.gz | Excessive noise fragments: 34 distinct blobs
+3285.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 288 distinct blobs
+3330.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+3345.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+3348.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 216 distinct blobs
+3354.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+3394.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+3395.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+3411.seg.nii.gz | Excessive noise fragments: 41 distinct blobs
+3433.seg.nii.gz | Excessive noise fragments: 96 distinct blobs
+3471.seg.nii.gz | Excessive noise fragments: 42 distinct blobs
+3482.seg.nii.gz | Excessive noise fragments: 66 distinct blobs
+3486.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+3490.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+3631.seg.nii.gz | Excessive noise fragments: 49 distinct blobs
+3701.seg.nii.gz | Excessive noise fragments: 30 distinct blobs
+375.seg.nii.gz | Excessive noise fragments: 192 distinct blobs
+3767.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 233 distinct blobs
+3833.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+4001.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+401.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 108 distinct blobs
+4033.seg.nii.gz | Pixels outside brain: 1
+4035.seg.nii.gz | Pixels outside brain: 1
+4040.seg.nii.gz | Excessive noise fragments: 48 distinct blobs
+4057.seg.nii.gz | Pixels outside brain: 1
+407.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+4089.seg.nii.gz | Excessive noise fragments: 112 distinct blobs
+4090.seg.nii.gz | Excessive noise fragments: 39 distinct blobs
+4100.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+4121.seg.nii.gz | Pixels outside brain: 1
+4267.seg.nii.gz | Excessive noise fragments: 58 distinct blobs
+4298.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+4325.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+4385.seg.nii.gz | Excessive noise fragments: 124 distinct blobs
+4391.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+4399.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+441.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 237 distinct blobs
+4469.seg.nii.gz | Excessive noise fragments: 87 distinct blobs
+448.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 29 distinct blobs
+4488.seg.nii.gz | Excessive noise fragments: 125 distinct blobs
+4509.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+4515.seg.nii.gz | Excessive noise fragments: 92 distinct blobs
+453.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+4606.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+4643.seg.nii.gz | Pixels outside brain: 1
+4668.seg.nii.gz | Pixels outside brain: 1
+4677.seg.nii.gz | Pixels outside brain: 4, Excessive noise fragments: 282 distinct blobs
+4746.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+4764.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+4783.seg.nii.gz | Excessive noise fragments: 105 distinct blobs
+4805.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 143 distinct blobs
+4868.seg.nii.gz | Excessive noise fragments: 30 distinct blobs
+487.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+4915.seg.nii.gz | Excessive noise fragments: 54 distinct blobs
+4930.seg.nii.gz | Excessive noise fragments: 41 distinct blobs
+4936.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+4937.seg.nii.gz | Excessive noise fragments: 85 distinct blobs
+4992.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 34 distinct blobs
+5047.seg.nii.gz | Pixels outside brain: 1
+5089.seg.nii.gz | Pixels outside brain: 1
+5121.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+5142.seg.nii.gz | Pixels outside brain: 1
+5150.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+5154.seg.nii.gz | Excessive noise fragments: 54 distinct blobs
+5156.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+5200.seg.nii.gz | Excessive noise fragments: 26 distinct blobs
+5230.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+5231.seg.nii.gz | Pixels outside brain: 6, Excessive noise fragments: 182 distinct blobs
+5283.seg.nii.gz | Excessive noise fragments: 34 distinct blobs
+5308.seg.nii.gz | Excessive noise fragments: 164 distinct blobs
+5343.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 313 distinct blobs
+5371.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+5377.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+5397.seg.nii.gz | Pixels outside brain: 1
+5442.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+5467.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+5468.seg.nii.gz | Pixels outside brain: 2
+5470.seg.nii.gz | Excessive noise fragments: 71 distinct blobs
+5479.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+5492.seg.nii.gz | Excessive noise fragments: 181 distinct blobs
+5566.seg.nii.gz | Excessive noise fragments: 75 distinct blobs
+5590.seg.nii.gz | Excessive noise fragments: 63 distinct blobs
+5659.seg.nii.gz | Excessive noise fragments: 29 distinct blobs
+5679.seg.nii.gz | Pixels outside brain: 1
+5714.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 12 distinct blobs
+5727.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+5734.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+5746.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+576.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 14 distinct blobs
+5785.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+5789.seg.nii.gz | Pixels outside brain: 1
+5845.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+5853.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+5861.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 254 distinct blobs
+5877.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+5889.seg.nii.gz | Excessive noise fragments: 32 distinct blobs
+5894.seg.nii.gz | Excessive noise fragments: 23 distinct blobs
+5915.seg.nii.gz | Excessive noise fragments: 30 distinct blobs
+5944.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 46 distinct blobs
+6001.seg.nii.gz | Excessive noise fragments: 66 distinct blobs
+6014.seg.nii.gz | Excessive noise fragments: 75 distinct blobs
+6043.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+606.seg.nii.gz | Excessive noise fragments: 26 distinct blobs
+6072.seg.nii.gz | Excessive noise fragments: 27 distinct blobs
+6095.seg.nii.gz | Pixels outside brain: 5, Excessive noise fragments: 410 distinct blobs
+6133.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+6257.seg.nii.gz | Excessive noise fragments: 88 distinct blobs
+6266.seg.nii.gz | Excessive noise fragments: 144 distinct blobs
+6334.seg.nii.gz | Excessive noise fragments: 32 distinct blobs
+6338.seg.nii.gz | Excessive noise fragments: 50 distinct blobs
+6340.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+6435.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+6450.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+6472.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+6493.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+6505.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+6590.seg.nii.gz | Excessive noise fragments: 34 distinct blobs
+6596.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+6610.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+6618.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+6650.seg.nii.gz | Excessive noise fragments: 180 distinct blobs
+6682.seg.nii.gz | Excessive noise fragments: 201 distinct blobs
+6692.seg.nii.gz | Excessive noise fragments: 56 distinct blobs
+6735.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 196 distinct blobs
+6738.seg.nii.gz | Excessive noise fragments: 42 distinct blobs
+6749.seg.nii.gz | Pixels outside brain: 1
+6755.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 42 distinct blobs
+6778.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+6794.seg.nii.gz | Excessive noise fragments: 46 distinct blobs
+682.seg.nii.gz | Pixels outside brain: 8, Excessive noise fragments: 330 distinct blobs
+6899.seg.nii.gz | Excessive noise fragments: 140 distinct blobs
+6928.seg.nii.gz | Excessive noise fragments: 28 distinct blobs
+6942.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+6949.seg.nii.gz | Excessive noise fragments: 86 distinct blobs
+698.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+6992.seg.nii.gz | Pixels outside brain: 1
+7030.seg.nii.gz | Pixels outside brain: 1
+7050.seg.nii.gz | Pixels outside brain: 2
+7074.seg.nii.gz | Pixels outside brain: 1
+7107.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+7143.seg.nii.gz | Pixels outside brain: 1
+7166.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 292 distinct blobs
+7218.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+7223.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 48 distinct blobs
+7239.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+7241.seg.nii.gz | Excessive noise fragments: 33 distinct blobs
+7251.seg.nii.gz | Excessive noise fragments: 32 distinct blobs
+7255.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+7267.seg.nii.gz | Pixels outside brain: 11, Excessive noise fragments: 476 distinct blobs
+7273.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+7295.seg.nii.gz | Excessive noise fragments: 135 distinct blobs
+730.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 70 distinct blobs
+7307.seg.nii.gz | Pixels outside brain: 1
+7324.seg.nii.gz | Pixels outside brain: 1
+7339.seg.nii.gz | Excessive noise fragments: 269 distinct blobs
+7422.seg.nii.gz | Excessive noise fragments: 32 distinct blobs
+7499.seg.nii.gz | Excessive noise fragments: 121 distinct blobs
+7507.seg.nii.gz | Excessive noise fragments: 101 distinct blobs
+7514.seg.nii.gz | Pixels outside brain: 1
+7532.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+7543.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+7553.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+7564.seg.nii.gz | Excessive noise fragments: 80 distinct blobs
+7581.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+7615.seg.nii.gz | Excessive noise fragments: 111 distinct blobs
+7650.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+7717.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+7732.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+776.seg.nii.gz | Excessive noise fragments: 66 distinct blobs
+7774.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+778.seg.nii.gz | Pixels outside brain: 1
+7819.seg.nii.gz | Excessive noise fragments: 32 distinct blobs
+7862.seg.nii.gz | Pixels outside brain: 1
+7864.seg.nii.gz | Excessive noise fragments: 33 distinct blobs
+7880.seg.nii.gz | Excessive noise fragments: 36 distinct blobs
+7902.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 261 distinct blobs
+7923.seg.nii.gz | Pixels outside brain: 6, Excessive noise fragments: 349 distinct blobs
+7955.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+7975.seg.nii.gz | Excessive noise fragments: 82 distinct blobs
+8002.seg.nii.gz | Excessive noise fragments: 48 distinct blobs
+8011.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+8040.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+8048.seg.nii.gz | Excessive noise fragments: 40 distinct blobs
+8118.seg.nii.gz | Excessive noise fragments: 140 distinct blobs
+8146.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+8202.seg.nii.gz | Excessive noise fragments: 23 distinct blobs
+8243.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+8253.seg.nii.gz | Excessive noise fragments: 44 distinct blobs
+8264.seg.nii.gz | Excessive noise fragments: 28 distinct blobs
+8279.seg.nii.gz | Excessive noise fragments: 31 distinct blobs
+8332.seg.nii.gz | Excessive noise fragments: 96 distinct blobs
+8344.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+8346.seg.nii.gz | Excessive noise fragments: 108 distinct blobs
+8351.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 215 distinct blobs
+8369.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 126 distinct blobs
+839.seg.nii.gz | Pixels outside brain: 5, Excessive noise fragments: 188 distinct blobs
+840.seg.nii.gz | Excessive noise fragments: 24 distinct blobs
+8425.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+8437.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+8595.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+8599.seg.nii.gz | Pixels outside brain: 1
+8616.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+862.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+8620.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+8642.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 301 distinct blobs
+8668.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+8675.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+8699.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+8719.seg.nii.gz | Excessive noise fragments: 40 distinct blobs
+8724.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+8731.seg.nii.gz | Excessive noise fragments: 32 distinct blobs
+874.seg.nii.gz | Excessive noise fragments: 27 distinct blobs
+8754.seg.nii.gz | Excessive noise fragments: 85 distinct blobs
+8824.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+8852.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+8879.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+8898.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+8953.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+8958.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+896.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+8972.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+9052.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+9053.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 300 distinct blobs
+9095.seg.nii.gz | Excessive noise fragments: 36 distinct blobs
+9107.seg.nii.gz | Pixels outside brain: 1
+9109.seg.nii.gz | Pixels outside brain: 1
+9118.seg.nii.gz | Excessive noise fragments: 95 distinct blobs
+9133.seg.nii.gz | Excessive noise fragments: 32 distinct blobs
+9138.seg.nii.gz | Pixels outside brain: 10, Excessive noise fragments: 481 distinct blobs
+9142.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 153 distinct blobs
+9178.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 213 distinct blobs
+9202.seg.nii.gz | Excessive noise fragments: 64 distinct blobs
+9217.seg.nii.gz | Pixels outside brain: 2
+9221.seg.nii.gz | Pixels outside brain: 1
+9247.seg.nii.gz | Excessive noise fragments: 111 distinct blobs
+9271.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 24 distinct blobs
+9290.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+9337.seg.nii.gz | Excessive noise fragments: 45 distinct blobs
+9385.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+9404.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+9412.seg.nii.gz | Excessive noise fragments: 86 distinct blobs
+9428.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 145 distinct blobs
+9475.seg.nii.gz | Excessive noise fragments: 54 distinct blobs
+9532.seg.nii.gz | Excessive noise fragments: 103 distinct blobs
+9536.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+954.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+9546.seg.nii.gz | Excessive noise fragments: 38 distinct blobs
+9552.seg.nii.gz | Excessive noise fragments: 133 distinct blobs
+9591.seg.nii.gz | Excessive noise fragments: 34 distinct blobs
+9612.seg.nii.gz | Excessive noise fragments: 37 distinct blobs
+9616.seg.nii.gz | Pixels outside brain: 1
+9650.seg.nii.gz | Excessive noise fragments: 56 distinct blobs
+968.seg.nii.gz | Pixels outside brain: 1
+9691.seg.nii.gz | Pixels outside brain: 1
+9736.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+9756.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 317 distinct blobs
+976.seg.nii.gz | Excessive noise fragments: 36 distinct blobs
+9819.seg.nii.gz | Pixels outside brain: 1
+984.seg.nii.gz | Pixels outside brain: 1
+9853.seg.nii.gz | Excessive noise fragments: 55 distinct blobs
+9943.seg.nii.gz | Excessive noise fragments: 49 distinct blobs
+9958.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 55 distinct blobs
+9964.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+file_1033.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_1066.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_1130.seg.nii.gz | Pixels outside brain: 1
+file_1158.seg.nii.gz | Pixels outside brain: 3
+file_1175.seg.nii.gz | Excessive noise fragments: 97 distinct blobs
+file_1203.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 12 distinct blobs
+file_1211.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 56 distinct blobs
+file_1214.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 175 distinct blobs
+file_1217.seg.nii.gz | Excessive noise fragments: 143 distinct blobs
+file_1229.seg.nii.gz | Excessive noise fragments: 115 distinct blobs
+file_1286.seg.nii.gz | Excessive noise fragments: 31 distinct blobs
+file_1345.seg.nii.gz | Excessive noise fragments: 110 distinct blobs
+file_1395.seg.nii.gz | Excessive noise fragments: 45 distinct blobs
+file_1409.seg.nii.gz | Excessive noise fragments: 65 distinct blobs
+file_1429.seg.nii.gz | Excessive noise fragments: 36 distinct blobs
+file_1438.seg.nii.gz | Excessive noise fragments: 37 distinct blobs
+file_1446.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_1458.seg.nii.gz | Excessive noise fragments: 32 distinct blobs
+file_1482.seg.nii.gz | Excessive noise fragments: 38 distinct blobs
+file_1483.seg.nii.gz | Excessive noise fragments: 43 distinct blobs
+file_1551.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 76 distinct blobs
+file_1574.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_1660.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_1663.seg.nii.gz | Pixels outside brain: 1
+file_1713.seg.nii.gz | Excessive noise fragments: 44 distinct blobs
+file_176.seg.nii.gz | Excessive noise fragments: 23 distinct blobs
+file_1775.seg.nii.gz | Excessive noise fragments: 63 distinct blobs
+file_1792.seg.nii.gz | Excessive noise fragments: 70 distinct blobs
+file_1793.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 35 distinct blobs
+file_1814.seg.nii.gz | Excessive noise fragments: 34 distinct blobs
+file_1829.seg.nii.gz | Pixels outside brain: 1
+file_1842.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_1925.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 48 distinct blobs
+file_1928.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 256 distinct blobs
+file_1941.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+file_1950.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_1981.seg.nii.gz | Pixels outside brain: 1
+file_1996.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_2007.seg.nii.gz | Excessive noise fragments: 50 distinct blobs
+file_2023.seg.nii.gz | Excessive noise fragments: 80 distinct blobs
+file_2038.seg.nii.gz | Excessive noise fragments: 66 distinct blobs
+file_2048.seg.nii.gz | Excessive noise fragments: 197 distinct blobs
+file_2082.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 264 distinct blobs
+file_2086.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_2107.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_2108.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_2129.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 146 distinct blobs
+file_2163.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_2181.seg.nii.gz | Excessive noise fragments: 49 distinct blobs
+file_2255.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_2260.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_2281.seg.nii.gz | Pixels outside brain: 1
+file_2289.seg.nii.gz | Pixels outside brain: 2
+file_2348.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_235.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 373 distinct blobs
+file_236.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_2393.seg.nii.gz | Excessive noise fragments: 279 distinct blobs
+file_242.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_2553.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_2588.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 312 distinct blobs
+file_2593.seg.nii.gz | Pixels outside brain: 12, Excessive noise fragments: 528 distinct blobs
+file_2604.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 161 distinct blobs
+file_261.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_2643.seg.nii.gz | Pixels outside brain: 6, Excessive noise fragments: 352 distinct blobs
+file_2644.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_2648.seg.nii.gz | Excessive noise fragments: 246 distinct blobs
+file_2732.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 14 distinct blobs
+file_2798.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_2823.seg.nii.gz | Excessive noise fragments: 111 distinct blobs
+file_2853.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_2867.seg.nii.gz | Pixels outside brain: 1
+file_2901.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+file_2921.seg.nii.gz | Excessive noise fragments: 226 distinct blobs
+file_2940.seg.nii.gz | Excessive noise fragments: 24 distinct blobs
+file_2949.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_2980.seg.nii.gz | Pixels outside brain: 1
+file_2_102.seg.nii.gz | Pixels outside brain: 1
+file_2_1032.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 28 distinct blobs
+file_2_1038.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 152 distinct blobs
+file_2_1040.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_2_1104.seg.nii.gz | Excessive noise fragments: 44 distinct blobs
+file_2_120.seg.nii.gz | Excessive noise fragments: 54 distinct blobs
+file_2_122.seg.nii.gz | Excessive noise fragments: 84 distinct blobs
+file_2_1273.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_2_128.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_2_130.seg.nii.gz | Excessive noise fragments: 210 distinct blobs
+file_2_1303.seg.nii.gz | Excessive noise fragments: 75 distinct blobs
+file_2_1322.seg.nii.gz | Excessive noise fragments: 49 distinct blobs
+file_2_1335.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_2_1339.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 18 distinct blobs
+file_2_1356.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 65 distinct blobs
+file_2_1392.seg.nii.gz | Excessive noise fragments: 34 distinct blobs
+file_2_1451.seg.nii.gz | Pixels outside brain: 1
+file_2_1489.seg.nii.gz | Pixels outside brain: 1
+file_2_1529.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 14 distinct blobs
+file_2_1562.seg.nii.gz | Excessive noise fragments: 56 distinct blobs
+file_2_1564.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_2_1584.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 213 distinct blobs
+file_2_1618.seg.nii.gz | Excessive noise fragments: 179 distinct blobs
+file_2_1718.seg.nii.gz | Excessive noise fragments: 271 distinct blobs
+file_2_175.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 16 distinct blobs
+file_2_1750.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 33 distinct blobs
+file_2_1790.seg.nii.gz | Pixels outside brain: 1
+file_2_1802.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_2_1804.seg.nii.gz | Pixels outside brain: 2
+file_2_1838.seg.nii.gz | Excessive noise fragments: 110 distinct blobs
+file_2_1851.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_2_1863.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_2_1893.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_2_1900.seg.nii.gz | Pixels outside brain: 1
+file_2_1951.seg.nii.gz | Excessive noise fragments: 89 distinct blobs
+file_2_1983.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+file_2_1994.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 195 distinct blobs
+file_2_1995.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 145 distinct blobs
+file_2_2023.seg.nii.gz | Pixels outside brain: 1
+file_2_2090.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 187 distinct blobs
+file_2_2097.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_2_2144.seg.nii.gz | Excessive noise fragments: 36 distinct blobs
+file_2_215.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_2_2151.seg.nii.gz | Excessive noise fragments: 43 distinct blobs
+file_2_2198.seg.nii.gz | Pixels outside brain: 1
+file_2_2201.seg.nii.gz | Excessive noise fragments: 62 distinct blobs
+file_2_2237.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_2_2242.seg.nii.gz | Excessive noise fragments: 23 distinct blobs
+file_2_228.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_2_2296.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_2_2314.seg.nii.gz | Excessive noise fragments: 254 distinct blobs
+file_2_234.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_2_2344.seg.nii.gz | Excessive noise fragments: 59 distinct blobs
+file_2_2356.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 28 distinct blobs
+file_2_2381.seg.nii.gz | Pixels outside brain: 1
+file_2_2389.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 65 distinct blobs
+file_2_2424.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_2_2430.seg.nii.gz | Excessive noise fragments: 23 distinct blobs
+file_2_2459.seg.nii.gz | Pixels outside brain: 1
+file_2_246.seg.nii.gz | Pixels outside brain: 1
+file_2_2500.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_2_2524.seg.nii.gz | Excessive noise fragments: 26 distinct blobs
+file_2_2532.seg.nii.gz | Pixels outside brain: 1
+file_2_256.seg.nii.gz | Excessive noise fragments: 27 distinct blobs
+file_2_2581.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_2_2610.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_2_2621.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+file_2_2649.seg.nii.gz | Excessive noise fragments: 36 distinct blobs
+file_2_2675.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 22 distinct blobs
+file_2_2703.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_2_2730.seg.nii.gz | Excessive noise fragments: 34 distinct blobs
+file_2_2732.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_2_280.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_2_2818.seg.nii.gz | Excessive noise fragments: 101 distinct blobs
+file_2_2834.seg.nii.gz | Excessive noise fragments: 60 distinct blobs
+file_2_2856.seg.nii.gz | Excessive noise fragments: 230 distinct blobs
+file_2_2864.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+file_2_2874.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_2_2901.seg.nii.gz | Excessive noise fragments: 51 distinct blobs
+file_2_2944.seg.nii.gz | Pixels outside brain: 1
+file_2_3061.seg.nii.gz | Pixels outside brain: 4, Excessive noise fragments: 165 distinct blobs
+file_2_3071.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+file_2_3109.seg.nii.gz | Pixels outside brain: 2
+file_2_3150.seg.nii.gz | Excessive noise fragments: 185 distinct blobs
+file_2_3156.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_2_3164.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_2_3171.seg.nii.gz | Excessive noise fragments: 68 distinct blobs
+file_2_3184.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+file_2_3190.seg.nii.gz | Excessive noise fragments: 28 distinct blobs
+file_2_3202.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 249 distinct blobs
+file_2_3256.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_2_3260.seg.nii.gz | Excessive noise fragments: 92 distinct blobs
+file_2_3263.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_2_3270.seg.nii.gz | Excessive noise fragments: 49 distinct blobs
+file_2_3308.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+file_2_3314.seg.nii.gz | Pixels outside brain: 1
+file_2_3416.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_2_3424.seg.nii.gz | Pixels outside brain: 1
+file_2_3510.seg.nii.gz | Excessive noise fragments: 74 distinct blobs
+file_2_3528.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_2_3540.seg.nii.gz | Excessive noise fragments: 43 distinct blobs
+file_2_3561.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 145 distinct blobs
+file_2_3589.seg.nii.gz | Excessive noise fragments: 31 distinct blobs
+file_2_3604.seg.nii.gz | Excessive noise fragments: 28 distinct blobs
+file_2_3620.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 317 distinct blobs
+file_2_3638.seg.nii.gz | Pixels outside brain: 1
+file_2_3663.seg.nii.gz | Excessive noise fragments: 43 distinct blobs
+file_2_3705.seg.nii.gz | Excessive noise fragments: 31 distinct blobs
+file_2_3711.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_2_3721.seg.nii.gz | Pixels outside brain: 1
+file_2_3740.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_2_3756.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_2_3787.seg.nii.gz | Pixels outside brain: 1
+file_2_3794.seg.nii.gz | Excessive noise fragments: 94 distinct blobs
+file_2_3846.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_2_3856.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_2_3913.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+file_2_3941.seg.nii.gz | Excessive noise fragments: 44 distinct blobs
+file_2_399.seg.nii.gz | Excessive noise fragments: 26 distinct blobs
+file_2_4001.seg.nii.gz | Excessive noise fragments: 44 distinct blobs
+file_2_4011.seg.nii.gz | Excessive noise fragments: 27 distinct blobs
+file_2_4044.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+file_2_4098.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+file_2_4107.seg.nii.gz | Excessive noise fragments: 35 distinct blobs
+file_2_4121.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_2_4122.seg.nii.gz | Pixels outside brain: 1
+file_2_4130.seg.nii.gz | Excessive noise fragments: 63 distinct blobs
+file_2_4154.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 181 distinct blobs
+file_2_4167.seg.nii.gz | Pixels outside brain: 2
+file_2_4171.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_2_4212.seg.nii.gz | Excessive noise fragments: 34 distinct blobs
+file_2_4238.seg.nii.gz | Excessive noise fragments: 70 distinct blobs
+file_2_4244.seg.nii.gz | Pixels outside brain: 6, Excessive noise fragments: 432 distinct blobs
+file_2_425.seg.nii.gz | Pixels outside brain: 1
+file_2_4285.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 14 distinct blobs
+file_2_4310.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 44 distinct blobs
+file_2_4335.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 19 distinct blobs
+file_2_4353.seg.nii.gz | Pixels outside brain: 1
+file_2_4382.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 21 distinct blobs
+file_2_4427.seg.nii.gz | Pixels outside brain: 1
+file_2_445.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_2_4456.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_2_4462.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_2_4501.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+file_2_4517.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_2_4520.seg.nii.gz | Pixels outside brain: 1
+file_2_4529.seg.nii.gz | Pixels outside brain: 1
+file_2_4533.seg.nii.gz | Excessive noise fragments: 83 distinct blobs
+file_2_455.seg.nii.gz | Pixels outside brain: 6, Excessive noise fragments: 424 distinct blobs
+file_2_4553.seg.nii.gz | Excessive noise fragments: 35 distinct blobs
+file_2_4608.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_2_4623.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 108 distinct blobs
+file_2_4629.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_2_4643.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 190 distinct blobs
+file_2_4684.seg.nii.gz | Excessive noise fragments: 106 distinct blobs
+file_2_4742.seg.nii.gz | Pixels outside brain: 1
+file_2_4790.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 218 distinct blobs
+file_2_4803.seg.nii.gz | Excessive noise fragments: 39 distinct blobs
+file_2_4812.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_2_4835.seg.nii.gz | Pixels outside brain: 2
+file_2_4921.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_2_493.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_2_50.seg.nii.gz | Excessive noise fragments: 51 distinct blobs
+file_2_500.seg.nii.gz | Excessive noise fragments: 108 distinct blobs
+file_2_5021.seg.nii.gz | Excessive noise fragments: 148 distinct blobs
+file_2_5040.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 359 distinct blobs
+file_2_5092.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_2_5097.seg.nii.gz | Excessive noise fragments: 101 distinct blobs
+file_2_5136.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_2_5144.seg.nii.gz | Excessive noise fragments: 59 distinct blobs
+file_2_5147.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_2_5184.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_2_519.seg.nii.gz | Pixels outside brain: 5, Excessive noise fragments: 290 distinct blobs
+file_2_5198.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_2_5199.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_2_522.seg.nii.gz | Excessive noise fragments: 142 distinct blobs
+file_2_5224.seg.nii.gz | Excessive noise fragments: 34 distinct blobs
+file_2_5254.seg.nii.gz | Excessive noise fragments: 33 distinct blobs
+file_2_526.seg.nii.gz | Excessive noise fragments: 87 distinct blobs
+file_2_5261.seg.nii.gz | Excessive noise fragments: 232 distinct blobs
+file_2_5336.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_2_5351.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 362 distinct blobs
+file_2_5366.seg.nii.gz | Excessive noise fragments: 105 distinct blobs
+file_2_5386.seg.nii.gz | Pixels outside brain: 1
+file_2_5389.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 21 distinct blobs
+file_2_5426.seg.nii.gz | Excessive noise fragments: 43 distinct blobs
+file_2_5453.seg.nii.gz | Pixels outside brain: 6, Excessive noise fragments: 221 distinct blobs
+file_2_5471.seg.nii.gz | Excessive noise fragments: 77 distinct blobs
+file_2_5472.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 26 distinct blobs
+file_2_5483.seg.nii.gz | Excessive noise fragments: 35 distinct blobs
+file_2_5484.seg.nii.gz | Excessive noise fragments: 187 distinct blobs
+file_2_5525.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+file_2_5559.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_2_5615.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 15 distinct blobs
+file_2_5620.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_2_5648.seg.nii.gz | Pixels outside brain: 1
+file_2_5653.seg.nii.gz | Excessive noise fragments: 135 distinct blobs
+file_2_5679.seg.nii.gz | Pixels outside brain: 1
+file_2_5680.seg.nii.gz | Excessive noise fragments: 70 distinct blobs
+file_2_570.seg.nii.gz | Pixels outside brain: 6, Excessive noise fragments: 375 distinct blobs
+file_2_5707.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_2_5726.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_2_5746.seg.nii.gz | Excessive noise fragments: 84 distinct blobs
+file_2_5748.seg.nii.gz | Pixels outside brain: 1
+file_2_5763.seg.nii.gz | Excessive noise fragments: 35 distinct blobs
+file_2_580.seg.nii.gz | Excessive noise fragments: 30 distinct blobs
+file_2_5810.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 121 distinct blobs
+file_2_5861.seg.nii.gz | Excessive noise fragments: 206 distinct blobs
+file_2_5865.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_2_5876.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_2_5899.seg.nii.gz | Pixels outside brain: 10, Excessive noise fragments: 398 distinct blobs
+file_2_5929.seg.nii.gz | Excessive noise fragments: 104 distinct blobs
+file_2_5959.seg.nii.gz | Excessive noise fragments: 55 distinct blobs
+file_2_5967.seg.nii.gz | Excessive noise fragments: 237 distinct blobs
+file_2_6019.seg.nii.gz | Excessive noise fragments: 29 distinct blobs
+file_2_6036.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_2_6063.seg.nii.gz | Pixels outside brain: 1
+file_2_6116.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_2_6214.seg.nii.gz | Pixels outside brain: 2
+file_2_6240.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_2_6288.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 41 distinct blobs
+file_2_6302.seg.nii.gz | Excessive noise fragments: 111 distinct blobs
+file_2_631.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+file_2_6334.seg.nii.gz | Excessive noise fragments: 53 distinct blobs
+file_2_6357.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_2_6361.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+file_2_644.seg.nii.gz | Pixels outside brain: 6, Excessive noise fragments: 300 distinct blobs
+file_2_6472.seg.nii.gz | Excessive noise fragments: 31 distinct blobs
+file_2_65.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 317 distinct blobs
+file_2_6518.seg.nii.gz | Pixels outside brain: 1
+file_2_6642.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 34 distinct blobs
+file_2_6653.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_2_6658.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 166 distinct blobs
+file_2_6696.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_2_6767.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_2_6775.seg.nii.gz | Pixels outside brain: 1
+file_2_6786.seg.nii.gz | Excessive noise fragments: 26 distinct blobs
+file_2_6833.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_2_6850.seg.nii.gz | Excessive noise fragments: 29 distinct blobs
+file_2_6862.seg.nii.gz | Excessive noise fragments: 64 distinct blobs
+file_2_6866.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_2_69.seg.nii.gz | Excessive noise fragments: 51 distinct blobs
+file_2_692.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_2_6922.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_2_6936.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_2_6945.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_2_6950.seg.nii.gz | Excessive noise fragments: 24 distinct blobs
+file_2_6974.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 368 distinct blobs
+file_2_698.seg.nii.gz | Excessive noise fragments: 143 distinct blobs
+file_2_7.seg.nii.gz | Excessive noise fragments: 62 distinct blobs
+file_2_7004.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_2_7050.seg.nii.gz | Pixels outside brain: 1
+file_2_7052.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+file_2_7068.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_2_7099.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 154 distinct blobs
+file_2_7111.seg.nii.gz | Excessive noise fragments: 55 distinct blobs
+file_2_7144.seg.nii.gz | Excessive noise fragments: 27 distinct blobs
+file_2_7155.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 25 distinct blobs
+file_2_7167.seg.nii.gz | Pixels outside brain: 1
+file_2_7173.seg.nii.gz | Pixels outside brain: 1
+file_2_7201.seg.nii.gz | Excessive noise fragments: 47 distinct blobs
+file_2_7209.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_2_7210.seg.nii.gz | Excessive noise fragments: 101 distinct blobs
+file_2_7247.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_2_7262.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_2_729.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_2_7302.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+file_2_7339.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_2_7390.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_2_7408.seg.nii.gz | Pixels outside brain: 1
+file_2_7410.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_2_742.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+file_2_7459.seg.nii.gz | Excessive noise fragments: 26 distinct blobs
+file_2_7483.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_2_7491.seg.nii.gz | Excessive noise fragments: 35 distinct blobs
+file_2_7523.seg.nii.gz | Excessive noise fragments: 307 distinct blobs
+file_2_7566.seg.nii.gz | Pixels outside brain: 1
+file_2_758.seg.nii.gz | Pixels outside brain: 1
+file_2_7599.seg.nii.gz | Excessive noise fragments: 75 distinct blobs
+file_2_7602.seg.nii.gz | Excessive noise fragments: 95 distinct blobs
+file_2_7615.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_2_7618.seg.nii.gz | Excessive noise fragments: 106 distinct blobs
+file_2_7623.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_2_7634.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 258 distinct blobs
+file_2_7638.seg.nii.gz | Excessive noise fragments: 36 distinct blobs
+file_2_7685.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_2_7722.seg.nii.gz | Pixels outside brain: 13, Excessive noise fragments: 512 distinct blobs
+file_2_7738.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 305 distinct blobs
+file_2_7768.seg.nii.gz | Excessive noise fragments: 68 distinct blobs
+file_2_7779.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+file_2_7803.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+file_2_782.seg.nii.gz | Excessive noise fragments: 24 distinct blobs
+file_2_7838.seg.nii.gz | Pixels outside brain: 2
+file_2_7851.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_2_7861.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_2_7867.seg.nii.gz | Excessive noise fragments: 33 distinct blobs
+file_2_7893.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_2_7920.seg.nii.gz | Excessive noise fragments: 49 distinct blobs
+file_2_7928.seg.nii.gz | Excessive noise fragments: 144 distinct blobs
+file_2_7929.seg.nii.gz | Pixels outside brain: 1
+file_2_8001.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_2_8005.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 51 distinct blobs
+file_2_8013.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 13 distinct blobs
+file_2_8032.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 362 distinct blobs
+file_2_8061.seg.nii.gz | Excessive noise fragments: 207 distinct blobs
+file_2_8109.seg.nii.gz | Excessive noise fragments: 34 distinct blobs
+file_2_8135.seg.nii.gz | Excessive noise fragments: 41 distinct blobs
+file_2_8253.seg.nii.gz | Excessive noise fragments: 88 distinct blobs
+file_2_8292.seg.nii.gz | Pixels outside brain: 1
+file_2_8300.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_2_8303.seg.nii.gz | Excessive noise fragments: 24 distinct blobs
+file_2_8344.seg.nii.gz | Pixels outside brain: 4, Excessive noise fragments: 339 distinct blobs
+file_2_8365.seg.nii.gz | Pixels outside brain: 1
+file_2_8393.seg.nii.gz | Excessive noise fragments: 24 distinct blobs
+file_2_8518.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_2_8524.seg.nii.gz | Pixels outside brain: 1
+file_2_8540.seg.nii.gz | Pixels outside brain: 1
+file_2_8613.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_2_8621.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_2_8626.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_2_8648.seg.nii.gz | Excessive noise fragments: 119 distinct blobs
+file_2_8656.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_2_8676.seg.nii.gz | Excessive noise fragments: 29 distinct blobs
+file_2_8690.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_2_8714.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+file_2_8732.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_2_8766.seg.nii.gz | Excessive noise fragments: 80 distinct blobs
+file_2_8791.seg.nii.gz | Excessive noise fragments: 74 distinct blobs
+file_2_8806.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 26 distinct blobs
+file_2_8811.seg.nii.gz | Pixels outside brain: 1
+file_2_883.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_2_8834.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 125 distinct blobs
+file_2_8855.seg.nii.gz | Excessive noise fragments: 147 distinct blobs
+file_2_8858.seg.nii.gz | Excessive noise fragments: 188 distinct blobs
+file_2_8870.seg.nii.gz | Excessive noise fragments: 80 distinct blobs
+file_2_8941.seg.nii.gz | Excessive noise fragments: 40 distinct blobs
+file_2_8948.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_2_8950.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_2_8956.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_2_8961.seg.nii.gz | Pixels outside brain: 1
+file_2_8975.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 46 distinct blobs
+file_2_899.seg.nii.gz | Excessive noise fragments: 164 distinct blobs
+file_2_9000.seg.nii.gz | Excessive noise fragments: 122 distinct blobs
+file_2_9006.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 17 distinct blobs
+file_2_9045.seg.nii.gz | Pixels outside brain: 1
+file_2_9059.seg.nii.gz | Excessive noise fragments: 92 distinct blobs
+file_2_9073.seg.nii.gz | Excessive noise fragments: 23 distinct blobs
+file_2_911.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+file_2_9162.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+file_2_9211.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_2_9230.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+file_2_9236.seg.nii.gz | Excessive noise fragments: 61 distinct blobs
+file_2_9244.seg.nii.gz | Excessive noise fragments: 62 distinct blobs
+file_2_9252.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 176 distinct blobs
+file_2_9280.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+file_2_9347.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 80 distinct blobs
+file_2_9349.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_2_9351.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+file_2_944.seg.nii.gz | Pixels outside brain: 1
+file_3033.seg.nii.gz | Excessive noise fragments: 87 distinct blobs
+file_3068.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_3093.seg.nii.gz | Pixels outside brain: 1
+file_3102.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_3121.seg.nii.gz | Excessive noise fragments: 29 distinct blobs
+file_3173.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_3217.seg.nii.gz | Pixels outside brain: 4, Excessive noise fragments: 176 distinct blobs
+file_326.seg.nii.gz | Excessive noise fragments: 28 distinct blobs
+file_33.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_3330.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+file_3358.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 245 distinct blobs
+file_3364.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_3444.seg.nii.gz | Excessive noise fragments: 57 distinct blobs
+file_3453.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_3460.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_348.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+file_3499.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_3589.seg.nii.gz | Excessive noise fragments: 119 distinct blobs
+file_3629.seg.nii.gz | Excessive noise fragments: 28 distinct blobs
+file_3638.seg.nii.gz | Excessive noise fragments: 47 distinct blobs
+file_3644.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 52 distinct blobs
+file_3651.seg.nii.gz | Excessive noise fragments: 66 distinct blobs
+file_3668.seg.nii.gz | Excessive noise fragments: 33 distinct blobs
+file_3685.seg.nii.gz | Excessive noise fragments: 31 distinct blobs
+file_3718.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_3727.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 24 distinct blobs
+file_3738.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_3754.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+file_3757.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_38.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 166 distinct blobs
+file_3810.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_3837.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_3853.seg.nii.gz | Pixels outside brain: 4, Excessive noise fragments: 197 distinct blobs
+file_3927.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+file_3942.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_3961.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_3966.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_3982.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 89 distinct blobs
+file_3984.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_399.seg.nii.gz | Excessive noise fragments: 28 distinct blobs
+file_3_1049.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_3_1060.seg.nii.gz | Excessive noise fragments: 190 distinct blobs
+file_3_1064.seg.nii.gz | Excessive noise fragments: 67 distinct blobs
+file_3_1097.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_3_1153.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_3_1178.seg.nii.gz | Excessive noise fragments: 40 distinct blobs
+file_3_1207.seg.nii.gz | Excessive noise fragments: 120 distinct blobs
+file_3_1246.seg.nii.gz | Excessive noise fragments: 48 distinct blobs
+file_3_1272.seg.nii.gz | Pixels outside brain: 1
+file_3_1284.seg.nii.gz | Pixels outside brain: 4, Excessive noise fragments: 401 distinct blobs
+file_3_1308.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 11 distinct blobs
+file_3_1335.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_3_1371.seg.nii.gz | Pixels outside brain: 1
+file_3_1375.seg.nii.gz | Excessive noise fragments: 76 distinct blobs
+file_3_1422.seg.nii.gz | Excessive noise fragments: 49 distinct blobs
+file_3_1465.seg.nii.gz | Excessive noise fragments: 26 distinct blobs
+file_3_1478.seg.nii.gz | Excessive noise fragments: 23 distinct blobs
+file_3_1486.seg.nii.gz | Excessive noise fragments: 65 distinct blobs
+file_3_1509.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_3_1558.seg.nii.gz | Excessive noise fragments: 56 distinct blobs
+file_3_1572.seg.nii.gz | Pixels outside brain: 1
+file_3_1582.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 20 distinct blobs
+file_3_1606.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_3_164.seg.nii.gz | Excessive noise fragments: 105 distinct blobs
+file_3_1673.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_3_1678.seg.nii.gz | Pixels outside brain: 1
+file_3_1706.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_3_1708.seg.nii.gz | Pixels outside brain: 8, Excessive noise fragments: 502 distinct blobs
+file_3_174.seg.nii.gz | Pixels outside brain: 1
+file_3_1786.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+file_3_1808.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_3_1832.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+file_3_186.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_3_1876.seg.nii.gz | Excessive noise fragments: 36 distinct blobs
+file_3_1886.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 267 distinct blobs
+file_3_1945.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_3_2012.seg.nii.gz | Pixels outside brain: 1
+file_3_2031.seg.nii.gz | Excessive noise fragments: 40 distinct blobs
+file_3_212.seg.nii.gz | Pixels outside brain: 1
+file_3_2133.seg.nii.gz | Pixels outside brain: 1
+file_3_2145.seg.nii.gz | Excessive noise fragments: 39 distinct blobs
+file_3_215.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 53 distinct blobs
+file_3_2153.seg.nii.gz | Excessive noise fragments: 152 distinct blobs
+file_3_2181.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_3_2188.seg.nii.gz | Excessive noise fragments: 32 distinct blobs
+file_3_2234.seg.nii.gz | Excessive noise fragments: 40 distinct blobs
+file_3_2237.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_3_2246.seg.nii.gz | Excessive noise fragments: 251 distinct blobs
+file_3_2274.seg.nii.gz | Excessive noise fragments: 135 distinct blobs
+file_3_2294.seg.nii.gz | Excessive noise fragments: 41 distinct blobs
+file_3_2340.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_3_2367.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_3_2440.seg.nii.gz | Pixels outside brain: 1
+file_3_2476.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+file_3_2496.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 159 distinct blobs
+file_3_2527.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_3_2552.seg.nii.gz | Excessive noise fragments: 26 distinct blobs
+file_3_2570.seg.nii.gz | Pixels outside brain: 1
+file_3_2589.seg.nii.gz | Excessive noise fragments: 24 distinct blobs
+file_3_26.seg.nii.gz | Pixels outside brain: 1
+file_3_2603.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 117 distinct blobs
+file_3_2604.seg.nii.gz | Excessive noise fragments: 53 distinct blobs
+file_3_2609.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_3_2614.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 177 distinct blobs
+file_3_2616.seg.nii.gz | Excessive noise fragments: 147 distinct blobs
+file_3_2636.seg.nii.gz | Excessive noise fragments: 30 distinct blobs
+file_3_264.seg.nii.gz | Excessive noise fragments: 75 distinct blobs
+file_3_2696.seg.nii.gz | Excessive noise fragments: 33 distinct blobs
+file_3_2731.seg.nii.gz | Excessive noise fragments: 36 distinct blobs
+file_3_2769.seg.nii.gz | Excessive noise fragments: 73 distinct blobs
+file_3_2774.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_3_2801.seg.nii.gz | Pixels outside brain: 1
+file_3_281.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_3_2814.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_3_2835.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_3_2839.seg.nii.gz | Pixels outside brain: 1
+file_3_2858.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_3_2890.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_3_294.seg.nii.gz | Excessive noise fragments: 47 distinct blobs
+file_3_2967.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_3_2985.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_3_3006.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_3_3008.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_3_3018.seg.nii.gz | Excessive noise fragments: 42 distinct blobs
+file_3_3028.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_3_3037.seg.nii.gz | Excessive noise fragments: 85 distinct blobs
+file_3_3051.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 16 distinct blobs
+file_3_3127.seg.nii.gz | Pixels outside brain: 1
+file_3_3143.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_3_3168.seg.nii.gz | Excessive noise fragments: 50 distinct blobs
+file_3_3169.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_3_3170.seg.nii.gz | Excessive noise fragments: 29 distinct blobs
+file_3_3178.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 270 distinct blobs
+file_3_3179.seg.nii.gz | Excessive noise fragments: 36 distinct blobs
+file_3_3182.seg.nii.gz | Pixels outside brain: 1
+file_3_3185.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_3_3196.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+file_3_3222.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_3_3236.seg.nii.gz | Pixels outside brain: 1
+file_3_3264.seg.nii.gz | Excessive noise fragments: 94 distinct blobs
+file_3_3282.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 207 distinct blobs
+file_3_3287.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_3_33.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_3_3308.seg.nii.gz | Pixels outside brain: 1
+file_3_3326.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_3_3352.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_3_3357.seg.nii.gz | Pixels outside brain: 1
+file_3_3400.seg.nii.gz | Excessive noise fragments: 51 distinct blobs
+file_3_3413.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_3_3421.seg.nii.gz | Excessive noise fragments: 27 distinct blobs
+file_3_3429.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 393 distinct blobs
+file_3_3462.seg.nii.gz | Excessive noise fragments: 165 distinct blobs
+file_3_35.seg.nii.gz | Pixels outside brain: 1
+file_3_3507.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_3_3560.seg.nii.gz | Excessive noise fragments: 28 distinct blobs
+file_3_3581.seg.nii.gz | Excessive noise fragments: 28 distinct blobs
+file_3_3594.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_3_3622.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+file_3_3660.seg.nii.gz | Excessive noise fragments: 26 distinct blobs
+file_3_3699.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+file_3_3739.seg.nii.gz | Excessive noise fragments: 36 distinct blobs
+file_3_3755.seg.nii.gz | Excessive noise fragments: 36 distinct blobs
+file_3_3764.seg.nii.gz | Excessive noise fragments: 57 distinct blobs
+file_3_3784.seg.nii.gz | Excessive noise fragments: 26 distinct blobs
+file_3_3796.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 360 distinct blobs
+file_3_3859.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+file_3_3888.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 24 distinct blobs
+file_3_3974.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_3_3981.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_3_4021.seg.nii.gz | Excessive noise fragments: 127 distinct blobs
+file_3_4026.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 312 distinct blobs
+file_3_4045.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 68 distinct blobs
+file_3_4084.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_3_4097.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+file_3_41.seg.nii.gz | Excessive noise fragments: 74 distinct blobs
+file_3_4169.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_3_4221.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+file_3_4226.seg.nii.gz | Excessive noise fragments: 27 distinct blobs
+file_3_424.seg.nii.gz | Pixels outside brain: 1
+file_3_4258.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 258 distinct blobs
+file_3_4287.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_3_4302.seg.nii.gz | Excessive noise fragments: 39 distinct blobs
+file_3_431.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_3_4324.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 31 distinct blobs
+file_3_4371.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_3_4391.seg.nii.gz | Pixels outside brain: 1
+file_3_443.seg.nii.gz | Excessive noise fragments: 50 distinct blobs
+file_3_4478.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_3_4500.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_3_451.seg.nii.gz | Excessive noise fragments: 26 distinct blobs
+file_3_4512.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_3_4639.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 433 distinct blobs
+file_3_465.seg.nii.gz | Pixels outside brain: 1
+file_3_4652.seg.nii.gz | Excessive noise fragments: 29 distinct blobs
+file_3_4683.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_3_4698.seg.nii.gz | Pixels outside brain: 9, Excessive noise fragments: 446 distinct blobs
+file_3_4706.seg.nii.gz | Pixels outside brain: 1
+file_3_4714.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 51 distinct blobs
+file_3_472.seg.nii.gz | Excessive noise fragments: 29 distinct blobs
+file_3_4732.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 83 distinct blobs
+file_3_4738.seg.nii.gz | Excessive noise fragments: 108 distinct blobs
+file_3_4754.seg.nii.gz | Excessive noise fragments: 181 distinct blobs
+file_3_4775.seg.nii.gz | Pixels outside brain: 1
+file_3_4777.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_3_4786.seg.nii.gz | Pixels outside brain: 1
+file_3_4824.seg.nii.gz | Excessive noise fragments: 191 distinct blobs
+file_3_4848.seg.nii.gz | Pixels outside brain: 1
+file_3_4876.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 16 distinct blobs
+file_3_4890.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 20 distinct blobs
+file_3_4892.seg.nii.gz | Pixels outside brain: 1
+file_3_491.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_3_4912.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_3_4954.seg.nii.gz | Pixels outside brain: 1
+file_3_5029.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+file_3_5146.seg.nii.gz | Excessive noise fragments: 24 distinct blobs
+file_3_5178.seg.nii.gz | Excessive noise fragments: 52 distinct blobs
+file_3_5180.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_3_5184.seg.nii.gz | Excessive noise fragments: 43 distinct blobs
+file_3_5198.seg.nii.gz | Excessive noise fragments: 46 distinct blobs
+file_3_5211.seg.nii.gz | Pixels outside brain: 1
+file_3_5243.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_3_5256.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 61 distinct blobs
+file_3_5272.seg.nii.gz | Excessive noise fragments: 44 distinct blobs
+file_3_5283.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_3_5286.seg.nii.gz | Pixels outside brain: 1
+file_3_5297.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_3_5355.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 21 distinct blobs
+file_3_536.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_3_5374.seg.nii.gz | Pixels outside brain: 1
+file_3_5377.seg.nii.gz | Excessive noise fragments: 72 distinct blobs
+file_3_5395.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_3_5525.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_3_5555.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_3_5598.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 32 distinct blobs
+file_3_5643.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_3_5657.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_3_5660.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 211 distinct blobs
+file_3_5708.seg.nii.gz | Excessive noise fragments: 35 distinct blobs
+file_3_5721.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_3_5733.seg.nii.gz | Excessive noise fragments: 24 distinct blobs
+file_3_5737.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_3_5738.seg.nii.gz | Excessive noise fragments: 107 distinct blobs
+file_3_5751.seg.nii.gz | Excessive noise fragments: 184 distinct blobs
+file_3_5799.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_3_5807.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+file_3_5830.seg.nii.gz | Pixels outside brain: 1
+file_3_5869.seg.nii.gz | Excessive noise fragments: 33 distinct blobs
+file_3_587.seg.nii.gz | Excessive noise fragments: 35 distinct blobs
+file_3_5879.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_3_5889.seg.nii.gz | Excessive noise fragments: 113 distinct blobs
+file_3_5917.seg.nii.gz | Pixels outside brain: 1
+file_3_5978.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_3_5987.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 13 distinct blobs
+file_3_601.seg.nii.gz | Excessive noise fragments: 78 distinct blobs
+file_3_6045.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+file_3_6059.seg.nii.gz | Pixels outside brain: 1
+file_3_6065.seg.nii.gz | Excessive noise fragments: 47 distinct blobs
+file_3_6077.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 13 distinct blobs
+file_3_6111.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 385 distinct blobs
+file_3_616.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_3_6161.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_3_6163.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_3_6172.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_3_6184.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_3_6186.seg.nii.gz | Pixels outside brain: 6, Excessive noise fragments: 164 distinct blobs
+file_3_6200.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_3_6237.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 53 distinct blobs
+file_3_624.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+file_3_6241.seg.nii.gz | Excessive noise fragments: 27 distinct blobs
+file_3_6246.seg.nii.gz | Excessive noise fragments: 103 distinct blobs
+file_3_6269.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_3_6276.seg.nii.gz | Excessive noise fragments: 29 distinct blobs
+file_3_6289.seg.nii.gz | Excessive noise fragments: 29 distinct blobs
+file_3_6306.seg.nii.gz | Excessive noise fragments: 84 distinct blobs
+file_3_6308.seg.nii.gz | Excessive noise fragments: 27 distinct blobs
+file_3_6319.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 101 distinct blobs
+file_3_6329.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_3_6345.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 184 distinct blobs
+file_3_6347.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_3_6362.seg.nii.gz | Excessive noise fragments: 36 distinct blobs
+file_3_6366.seg.nii.gz | Pixels outside brain: 1
+file_3_6370.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_3_6398.seg.nii.gz | Pixels outside brain: 1
+file_3_6410.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_3_6447.seg.nii.gz | Excessive noise fragments: 61 distinct blobs
+file_3_6467.seg.nii.gz | Excessive noise fragments: 56 distinct blobs
+file_3_6468.seg.nii.gz | Pixels outside brain: 4, Excessive noise fragments: 150 distinct blobs
+file_3_6482.seg.nii.gz | Excessive noise fragments: 200 distinct blobs
+file_3_6503.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_3_6505.seg.nii.gz | Excessive noise fragments: 245 distinct blobs
+file_3_6545.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 368 distinct blobs
+file_3_6615.seg.nii.gz | Pixels outside brain: 1
+file_3_6619.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_3_6650.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 306 distinct blobs
+file_3_6669.seg.nii.gz | Pixels outside brain: 1
+file_3_667.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_3_6727.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_3_6748.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_3_6769.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+file_3_6782.seg.nii.gz | Pixels outside brain: 4, Excessive noise fragments: 401 distinct blobs
+file_3_6811.seg.nii.gz | Excessive noise fragments: 64 distinct blobs
+file_3_6816.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 98 distinct blobs
+file_3_6833.seg.nii.gz | Excessive noise fragments: 86 distinct blobs
+file_3_6847.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_3_6852.seg.nii.gz | Pixels outside brain: 1
+file_3_6857.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_3_6858.seg.nii.gz | Pixels outside brain: 1
+file_3_6875.seg.nii.gz | Excessive noise fragments: 24 distinct blobs
+file_3_6885.seg.nii.gz | Excessive noise fragments: 85 distinct blobs
+file_3_6899.seg.nii.gz | Pixels outside brain: 5, Excessive noise fragments: 197 distinct blobs
+file_3_6915.seg.nii.gz | Excessive noise fragments: 88 distinct blobs
+file_3_6943.seg.nii.gz | Excessive noise fragments: 157 distinct blobs
+file_3_6945.seg.nii.gz | Excessive noise fragments: 46 distinct blobs
+file_3_6981.seg.nii.gz | Excessive noise fragments: 189 distinct blobs
+file_3_6987.seg.nii.gz | Excessive noise fragments: 34 distinct blobs
+file_3_7020.seg.nii.gz | Excessive noise fragments: 72 distinct blobs
+file_3_7025.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_3_7092.seg.nii.gz | Excessive noise fragments: 57 distinct blobs
+file_3_7115.seg.nii.gz | Excessive noise fragments: 85 distinct blobs
+file_3_7176.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 413 distinct blobs
+file_3_7178.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_3_7182.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_3_7217.seg.nii.gz | Pixels outside brain: 1
+file_3_7228.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_3_7240.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_3_7267.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_3_7269.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+file_3_7308.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_3_7311.seg.nii.gz | Excessive noise fragments: 23 distinct blobs
+file_3_7329.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_3_7347.seg.nii.gz | Excessive noise fragments: 108 distinct blobs
+file_3_7417.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_3_7458.seg.nii.gz | Excessive noise fragments: 26 distinct blobs
+file_3_7463.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 239 distinct blobs
+file_3_7476.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_3_7479.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_3_749.seg.nii.gz | Excessive noise fragments: 52 distinct blobs
+file_3_7506.seg.nii.gz | Excessive noise fragments: 57 distinct blobs
+file_3_752.seg.nii.gz | Pixels outside brain: 5, Excessive noise fragments: 386 distinct blobs
+file_3_7524.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_3_7610.seg.nii.gz | Pixels outside brain: 2
+file_3_7620.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_3_7624.seg.nii.gz | Pixels outside brain: 1
+file_3_7660.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_3_7684.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_3_7774.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_3_7776.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 28 distinct blobs
+file_3_7780.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 22 distinct blobs
+file_3_7797.seg.nii.gz | Excessive noise fragments: 46 distinct blobs
+file_3_7807.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 171 distinct blobs
+file_3_7854.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 120 distinct blobs
+file_3_7866.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 290 distinct blobs
+file_3_7883.seg.nii.gz | Excessive noise fragments: 48 distinct blobs
+file_3_7932.seg.nii.gz | Excessive noise fragments: 39 distinct blobs
+file_3_7976.seg.nii.gz | Pixels outside brain: 1
+file_3_8001.seg.nii.gz | Excessive noise fragments: 72 distinct blobs
+file_3_8005.seg.nii.gz | Excessive noise fragments: 70 distinct blobs
+file_3_8014.seg.nii.gz | Excessive noise fragments: 55 distinct blobs
+file_3_8022.seg.nii.gz | Excessive noise fragments: 27 distinct blobs
+file_3_8034.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_3_8046.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_3_8081.seg.nii.gz | Pixels outside brain: 1
+file_3_8083.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_3_8092.seg.nii.gz | Excessive noise fragments: 26 distinct blobs
+file_3_8125.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_3_8140.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_3_8150.seg.nii.gz | Excessive noise fragments: 186 distinct blobs
+file_3_8167.seg.nii.gz | Excessive noise fragments: 53 distinct blobs
+file_3_8198.seg.nii.gz | Pixels outside brain: 1
+file_3_831.seg.nii.gz | Excessive noise fragments: 103 distinct blobs
+file_3_8327.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+file_3_835.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_3_839.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_3_8392.seg.nii.gz | Pixels outside brain: 13, Excessive noise fragments: 493 distinct blobs
+file_3_8395.seg.nii.gz | Excessive noise fragments: 84 distinct blobs
+file_3_8407.seg.nii.gz | Excessive noise fragments: 32 distinct blobs
+file_3_8434.seg.nii.gz | Excessive noise fragments: 97 distinct blobs
+file_3_8450.seg.nii.gz | Excessive noise fragments: 32 distinct blobs
+file_3_8490.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_3_8500.seg.nii.gz | Excessive noise fragments: 32 distinct blobs
+file_3_8501.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_3_8520.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 17 distinct blobs
+file_3_8523.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_3_8555.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_3_8559.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 31 distinct blobs
+file_3_8594.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_3_8645.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 318 distinct blobs
+file_3_8665.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_3_8728.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_3_8736.seg.nii.gz | Pixels outside brain: 1
+file_3_8760.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_3_8811.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_3_8849.seg.nii.gz | Excessive noise fragments: 182 distinct blobs
+file_3_8864.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_3_8879.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 234 distinct blobs
+file_3_8894.seg.nii.gz | Pixels outside brain: 1
+file_3_892.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 167 distinct blobs
+file_3_8938.seg.nii.gz | Excessive noise fragments: 24 distinct blobs
+file_3_8945.seg.nii.gz | Pixels outside brain: 1
+file_3_8981.seg.nii.gz | Pixels outside brain: 1
+file_3_90.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 267 distinct blobs
+file_3_9040.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 77 distinct blobs
+file_3_9053.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_3_9080.seg.nii.gz | Excessive noise fragments: 55 distinct blobs
+file_3_9153.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_3_9159.seg.nii.gz | Excessive noise fragments: 55 distinct blobs
+file_3_9166.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 167 distinct blobs
+file_3_9195.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 291 distinct blobs
+file_3_9199.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 117 distinct blobs
+file_3_9242.seg.nii.gz | Pixels outside brain: 10, Excessive noise fragments: 450 distinct blobs
+file_3_9256.seg.nii.gz | Excessive noise fragments: 33 distinct blobs
+file_3_9265.seg.nii.gz | Pixels outside brain: 7, Excessive noise fragments: 447 distinct blobs
+file_3_931.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 24 distinct blobs
+file_3_9316.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_3_9461.seg.nii.gz | Excessive noise fragments: 32 distinct blobs
+file_3_9487.seg.nii.gz | Pixels outside brain: 1
+file_3_972.seg.nii.gz | Excessive noise fragments: 44 distinct blobs
+file_3_99.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 13 distinct blobs
+file_40.seg.nii.gz | Excessive noise fragments: 30 distinct blobs
+file_4003.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_4029.seg.nii.gz | Pixels outside brain: 4, Excessive noise fragments: 212 distinct blobs
+file_4038.seg.nii.gz | Excessive noise fragments: 109 distinct blobs
+file_4056.seg.nii.gz | Excessive noise fragments: 70 distinct blobs
+file_4090.seg.nii.gz | Excessive noise fragments: 58 distinct blobs
+file_4096.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 262 distinct blobs
+file_4100.seg.nii.gz | Excessive noise fragments: 54 distinct blobs
+file_412.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_4136.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 29 distinct blobs
+file_4172.seg.nii.gz | Excessive noise fragments: 29 distinct blobs
+file_4174.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 21 distinct blobs
+file_4182.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_4183.seg.nii.gz | Excessive noise fragments: 28 distinct blobs
+file_4322.seg.nii.gz | Excessive noise fragments: 86 distinct blobs
+file_4326.seg.nii.gz | Excessive noise fragments: 56 distinct blobs
+file_4342.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+file_4343.seg.nii.gz | Excessive noise fragments: 100 distinct blobs
+file_4363.seg.nii.gz | Excessive noise fragments: 212 distinct blobs
+file_4371.seg.nii.gz | Excessive noise fragments: 65 distinct blobs
+file_4416.seg.nii.gz | Excessive noise fragments: 64 distinct blobs
+file_4422.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 204 distinct blobs
+file_4435.seg.nii.gz | Excessive noise fragments: 26 distinct blobs
+file_4441.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 18 distinct blobs
+file_450.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 38 distinct blobs
+file_4512.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_4537.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_4567.seg.nii.gz | Excessive noise fragments: 318 distinct blobs
+file_4573.seg.nii.gz | Excessive noise fragments: 32 distinct blobs
+file_4615.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 353 distinct blobs
+file_4653.seg.nii.gz | Excessive noise fragments: 44 distinct blobs
+file_4697.seg.nii.gz | Excessive noise fragments: 239 distinct blobs
+file_4713.seg.nii.gz | Excessive noise fragments: 40 distinct blobs
+file_4751.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_4775.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_4822.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_484.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 259 distinct blobs
+file_4853.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+file_4910.seg.nii.gz | Excessive noise fragments: 33 distinct blobs
+file_4920.seg.nii.gz | Excessive noise fragments: 59 distinct blobs
+file_4968.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_4_1020.seg.nii.gz | Pixels outside brain: 1
+file_4_1024.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_4_1027.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 32 distinct blobs
+file_4_1051.seg.nii.gz | Excessive noise fragments: 46 distinct blobs
+file_4_106.seg.nii.gz | Excessive noise fragments: 88 distinct blobs
+file_4_1085.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_4_1095.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_4_1096.seg.nii.gz | Excessive noise fragments: 38 distinct blobs
+file_4_1099.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_4_1197.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_4_1211.seg.nii.gz | Excessive noise fragments: 27 distinct blobs
+file_4_1223.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 26 distinct blobs
+file_4_1236.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_4_1248.seg.nii.gz | Pixels outside brain: 1
+file_4_1276.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 282 distinct blobs
+file_4_1286.seg.nii.gz | Pixels outside brain: 1
+file_4_1287.seg.nii.gz | Excessive noise fragments: 28 distinct blobs
+file_4_1293.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_4_1300.seg.nii.gz | Excessive noise fragments: 23 distinct blobs
+file_4_1371.seg.nii.gz | Excessive noise fragments: 51 distinct blobs
+file_4_14.seg.nii.gz | Pixels outside brain: 1
+file_4_1401.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_4_1406.seg.nii.gz | Excessive noise fragments: 104 distinct blobs
+file_4_1472.seg.nii.gz | Pixels outside brain: 4, Excessive noise fragments: 328 distinct blobs
+file_4_1480.seg.nii.gz | Excessive noise fragments: 117 distinct blobs
+file_4_1521.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_4_1528.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_4_1599.seg.nii.gz | Pixels outside brain: 1
+file_4_1617.seg.nii.gz | Excessive noise fragments: 49 distinct blobs
+file_4_1641.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+file_4_1665.seg.nii.gz | Excessive noise fragments: 186 distinct blobs
+file_4_1700.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_4_1740.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_4_1754.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 105 distinct blobs
+file_4_1783.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 12 distinct blobs
+file_4_1815.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 174 distinct blobs
+file_4_1852.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_4_1892.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_4_1956.seg.nii.gz | Excessive noise fragments: 68 distinct blobs
+file_4_1980.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 173 distinct blobs
+file_4_2039.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 88 distinct blobs
+file_4_2067.seg.nii.gz | Excessive noise fragments: 90 distinct blobs
+file_4_2109.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 21 distinct blobs
+file_4_2162.seg.nii.gz | Excessive noise fragments: 103 distinct blobs
+file_4_2182.seg.nii.gz | Excessive noise fragments: 123 distinct blobs
+file_4_2249.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 222 distinct blobs
+file_4_2294.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_4_2310.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_4_2322.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_4_2334.seg.nii.gz | Pixels outside brain: 6, Excessive noise fragments: 369 distinct blobs
+file_4_235.seg.nii.gz | Excessive noise fragments: 29 distinct blobs
+file_4_24.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_4_2414.seg.nii.gz | Excessive noise fragments: 28 distinct blobs
+file_4_2449.seg.nii.gz | Pixels outside brain: 5, Excessive noise fragments: 443 distinct blobs
+file_4_2475.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+file_4_2485.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_4_2492.seg.nii.gz | Pixels outside brain: 1
+file_4_2496.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_4_2513.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_4_252.seg.nii.gz | Pixels outside brain: 1
+file_4_2562.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_4_2575.seg.nii.gz | Excessive noise fragments: 27 distinct blobs
+file_4_259.seg.nii.gz | Excessive noise fragments: 73 distinct blobs
+file_4_2598.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_4_2636.seg.nii.gz | Pixels outside brain: 1
+file_4_2647.seg.nii.gz | Excessive noise fragments: 110 distinct blobs
+file_4_2666.seg.nii.gz | Excessive noise fragments: 41 distinct blobs
+file_4_2712.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_4_2756.seg.nii.gz | Excessive noise fragments: 71 distinct blobs
+file_4_2786.seg.nii.gz | Excessive noise fragments: 97 distinct blobs
+file_4_2833.seg.nii.gz | Pixels outside brain: 1
+file_4_2835.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 14 distinct blobs
+file_4_2868.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_4_2873.seg.nii.gz | Pixels outside brain: 1
+file_4_2881.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_4_2915.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_4_2966.seg.nii.gz | Excessive noise fragments: 31 distinct blobs
+file_4_2990.seg.nii.gz | Excessive noise fragments: 41 distinct blobs
+file_4_2991.seg.nii.gz | Pixels outside brain: 1
+file_4_2999.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+file_4_3043.seg.nii.gz | Pixels outside brain: 1
+file_4_3049.seg.nii.gz | Excessive noise fragments: 117 distinct blobs
+file_4_3092.seg.nii.gz | Excessive noise fragments: 31 distinct blobs
+file_4_3117.seg.nii.gz | Excessive noise fragments: 144 distinct blobs
+file_4_3121.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 35 distinct blobs
+file_4_3172.seg.nii.gz | Excessive noise fragments: 69 distinct blobs
+file_4_3177.seg.nii.gz | Pixels outside brain: 11, Excessive noise fragments: 445 distinct blobs
+file_4_318.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 41 distinct blobs
+file_4_3204.seg.nii.gz | Pixels outside brain: 1
+file_4_3236.seg.nii.gz | Pixels outside brain: 1
+file_4_3237.seg.nii.gz | Pixels outside brain: 1
+file_4_331.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_4_3320.seg.nii.gz | Pixels outside brain: 1
+file_4_3347.seg.nii.gz | Excessive noise fragments: 66 distinct blobs
+file_4_3364.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 242 distinct blobs
+file_4_3382.seg.nii.gz | Excessive noise fragments: 55 distinct blobs
+file_4_3419.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+file_4_3428.seg.nii.gz | Excessive noise fragments: 38 distinct blobs
+file_4_344.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 13 distinct blobs
+file_4_3503.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_4_3510.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_4_3541.seg.nii.gz | Excessive noise fragments: 26 distinct blobs
+file_4_362.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_4_3651.seg.nii.gz | Pixels outside brain: 1
+file_4_367.seg.nii.gz | Excessive noise fragments: 116 distinct blobs
+file_4_3678.seg.nii.gz | Excessive noise fragments: 68 distinct blobs
+file_4_3712.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_4_3752.seg.nii.gz | Excessive noise fragments: 43 distinct blobs
+file_4_3755.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_4_3757.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+file_4_376.seg.nii.gz | Excessive noise fragments: 88 distinct blobs
+file_4_3782.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+file_4_3785.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_4_3789.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 30 distinct blobs
+file_4_3808.seg.nii.gz | Excessive noise fragments: 80 distinct blobs
+file_4_3847.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 20 distinct blobs
+file_4_3856.seg.nii.gz | Excessive noise fragments: 141 distinct blobs
+file_4_3878.seg.nii.gz | Excessive noise fragments: 50 distinct blobs
+file_4_3918.seg.nii.gz | Excessive noise fragments: 23 distinct blobs
+file_4_3939.seg.nii.gz | Excessive noise fragments: 45 distinct blobs
+file_4_3965.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 26 distinct blobs
+file_4_3982.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 12 distinct blobs
+file_4_4049.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_4_4065.seg.nii.gz | Pixels outside brain: 1
+file_4_4066.seg.nii.gz | Excessive noise fragments: 23 distinct blobs
+file_4_4095.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_4_4106.seg.nii.gz | Excessive noise fragments: 133 distinct blobs
+file_4_4170.seg.nii.gz | Excessive noise fragments: 66 distinct blobs
+file_4_4206.seg.nii.gz | Pixels outside brain: 1
+file_4_4210.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_4_4214.seg.nii.gz | Excessive noise fragments: 185 distinct blobs
+file_4_4237.seg.nii.gz | Pixels outside brain: 1
+file_4_4243.seg.nii.gz | Excessive noise fragments: 29 distinct blobs
+file_4_4252.seg.nii.gz | Pixels outside brain: 1
+file_4_4270.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+file_4_4272.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_4_4275.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+file_4_4299.seg.nii.gz | Excessive noise fragments: 57 distinct blobs
+file_4_4312.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_4_4343.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_4_4344.seg.nii.gz | Pixels outside brain: 2
+file_4_4350.seg.nii.gz | Excessive noise fragments: 258 distinct blobs
+file_4_4372.seg.nii.gz | Excessive noise fragments: 50 distinct blobs
+file_4_4398.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+file_4_4444.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 151 distinct blobs
+file_4_447.seg.nii.gz | Excessive noise fragments: 42 distinct blobs
+file_4_4574.seg.nii.gz | Excessive noise fragments: 23 distinct blobs
+file_4_4582.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 119 distinct blobs
+file_4_459.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_4_4603.seg.nii.gz | Pixels outside brain: 1
+file_4_4648.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 14 distinct blobs
+file_4_4669.seg.nii.gz | Excessive noise fragments: 75 distinct blobs
+file_4_4725.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_4_4732.seg.nii.gz | Pixels outside brain: 1
+file_4_4738.seg.nii.gz | Pixels outside brain: 1
+file_4_4767.seg.nii.gz | Excessive noise fragments: 230 distinct blobs
+file_4_4770.seg.nii.gz | Excessive noise fragments: 45 distinct blobs
+file_4_4789.seg.nii.gz | Pixels outside brain: 1
+file_4_4863.seg.nii.gz | Pixels outside brain: 1
+file_4_4969.seg.nii.gz | Excessive noise fragments: 29 distinct blobs
+file_4_497.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_4_4974.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+file_4_4993.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 127 distinct blobs
+file_4_5022.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 114 distinct blobs
+file_4_5055.seg.nii.gz | Excessive noise fragments: 109 distinct blobs
+file_4_5213.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_4_5225.seg.nii.gz | Excessive noise fragments: 34 distinct blobs
+file_4_523.seg.nii.gz | Pixels outside brain: 1
+file_4_5253.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 44 distinct blobs
+file_4_5281.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_4_5289.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_4_532.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_4_5359.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+file_4_5360.seg.nii.gz | Pixels outside brain: 1
+file_4_5365.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_4_537.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_4_5429.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_4_545.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_4_5457.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 11 distinct blobs
+file_4_5483.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_4_5545.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_4_5552.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+file_4_5588.seg.nii.gz | Pixels outside brain: 1
+file_4_5633.seg.nii.gz | Excessive noise fragments: 89 distinct blobs
+file_4_5636.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 169 distinct blobs
+file_4_5654.seg.nii.gz | Excessive noise fragments: 31 distinct blobs
+file_4_5659.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 64 distinct blobs
+file_4_567.seg.nii.gz | Pixels outside brain: 8, Excessive noise fragments: 293 distinct blobs
+file_4_5675.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+file_4_5692.seg.nii.gz | Excessive noise fragments: 82 distinct blobs
+file_4_5693.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_4_5701.seg.nii.gz | Pixels outside brain: 1
+file_4_5704.seg.nii.gz | Pixels outside brain: 1
+file_4_5708.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_4_571.seg.nii.gz | Excessive noise fragments: 40 distinct blobs
+file_4_5710.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_4_5730.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_4_5742.seg.nii.gz | Excessive noise fragments: 52 distinct blobs
+file_4_5779.seg.nii.gz | Pixels outside brain: 1
+file_4_5798.seg.nii.gz | Excessive noise fragments: 81 distinct blobs
+file_4_5812.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_4_582.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 262 distinct blobs
+file_4_5828.seg.nii.gz | Excessive noise fragments: 64 distinct blobs
+file_4_5960.seg.nii.gz | Pixels outside brain: 1
+file_4_5999.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+file_4_6000.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 15 distinct blobs
+file_4_6028.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_4_6045.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_4_6084.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_4_6096.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_4_6120.seg.nii.gz | Pixels outside brain: 1
+file_4_6166.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_4_6184.seg.nii.gz | Excessive noise fragments: 87 distinct blobs
+file_4_6201.seg.nii.gz | Excessive noise fragments: 77 distinct blobs
+file_4_6211.seg.nii.gz | Pixels outside brain: 1
+file_4_6215.seg.nii.gz | Pixels outside brain: 4, Excessive noise fragments: 306 distinct blobs
+file_4_6260.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_4_6276.seg.nii.gz | Excessive noise fragments: 88 distinct blobs
+file_4_6284.seg.nii.gz | Pixels outside brain: 1
+file_4_6291.seg.nii.gz | Excessive noise fragments: 126 distinct blobs
+file_4_6298.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_4_63.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_4_6315.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 12 distinct blobs
+file_4_6316.seg.nii.gz | Excessive noise fragments: 256 distinct blobs
+file_4_6317.seg.nii.gz | Excessive noise fragments: 24 distinct blobs
+file_4_6319.seg.nii.gz | Excessive noise fragments: 219 distinct blobs
+file_4_6345.seg.nii.gz | Excessive noise fragments: 112 distinct blobs
+file_4_6363.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_4_6364.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_4_6368.seg.nii.gz | Excessive noise fragments: 167 distinct blobs
+file_4_640.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_4_6431.seg.nii.gz | Pixels outside brain: 1
+file_4_6494.seg.nii.gz | Pixels outside brain: 1
+file_4_6503.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 47 distinct blobs
+file_4_6519.seg.nii.gz | Excessive noise fragments: 46 distinct blobs
+file_4_6535.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+file_4_6551.seg.nii.gz | Excessive noise fragments: 77 distinct blobs
+file_4_6569.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_4_6592.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_4_6609.seg.nii.gz | Excessive noise fragments: 195 distinct blobs
+file_4_6641.seg.nii.gz | Pixels outside brain: 1
+file_4_6678.seg.nii.gz | Excessive noise fragments: 103 distinct blobs
+file_4_6717.seg.nii.gz | Excessive noise fragments: 36 distinct blobs
+file_4_6746.seg.nii.gz | Excessive noise fragments: 113 distinct blobs
+file_4_6766.seg.nii.gz | Pixels outside brain: 4, Excessive noise fragments: 318 distinct blobs
+file_4_6783.seg.nii.gz | Pixels outside brain: 2
+file_4_6795.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_4_6797.seg.nii.gz | Excessive noise fragments: 125 distinct blobs
+file_4_680.seg.nii.gz | Excessive noise fragments: 82 distinct blobs
+file_4_6846.seg.nii.gz | Excessive noise fragments: 84 distinct blobs
+file_4_6856.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_4_6859.seg.nii.gz | Excessive noise fragments: 37 distinct blobs
+file_4_6881.seg.nii.gz | Excessive noise fragments: 53 distinct blobs
+file_4_6976.seg.nii.gz | Pixels outside brain: 1
+file_4_7001.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+file_4_7023.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_4_7030.seg.nii.gz | Pixels outside brain: 4, Excessive noise fragments: 327 distinct blobs
+file_4_710.seg.nii.gz | Excessive noise fragments: 23 distinct blobs
+file_4_7101.seg.nii.gz | Excessive noise fragments: 30 distinct blobs
+file_4_7131.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_4_7134.seg.nii.gz | Excessive noise fragments: 51 distinct blobs
+file_4_7156.seg.nii.gz | Pixels outside brain: 1
+file_4_7170.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_4_7173.seg.nii.gz | Excessive noise fragments: 26 distinct blobs
+file_4_7179.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_4_7227.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_4_7240.seg.nii.gz | Excessive noise fragments: 113 distinct blobs
+file_4_7275.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_4_7300.seg.nii.gz | Excessive noise fragments: 45 distinct blobs
+file_4_7340.seg.nii.gz | Excessive noise fragments: 64 distinct blobs
+file_4_7368.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 237 distinct blobs
+file_4_7372.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_4_740.seg.nii.gz | Excessive noise fragments: 27 distinct blobs
+file_4_7421.seg.nii.gz | Excessive noise fragments: 104 distinct blobs
+file_4_7437.seg.nii.gz | Excessive noise fragments: 33 distinct blobs
+file_4_7449.seg.nii.gz | Pixels outside brain: 1
+file_4_7480.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 151 distinct blobs
+file_4_7526.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_4_7537.seg.nii.gz | Excessive noise fragments: 28 distinct blobs
+file_4_7573.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_4_7586.seg.nii.gz | Excessive noise fragments: 40 distinct blobs
+file_4_7588.seg.nii.gz | Pixels outside brain: 8, Excessive noise fragments: 239 distinct blobs
+file_4_7596.seg.nii.gz | Excessive noise fragments: 35 distinct blobs
+file_4_7607.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 24 distinct blobs
+file_4_7622.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 299 distinct blobs
+file_4_7652.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_4_7670.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_4_7676.seg.nii.gz | Excessive noise fragments: 329 distinct blobs
+file_4_7694.seg.nii.gz | Excessive noise fragments: 117 distinct blobs
+file_4_7706.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+file_4_7720.seg.nii.gz | Excessive noise fragments: 28 distinct blobs
+file_4_777.seg.nii.gz | Pixels outside brain: 1
+file_4_7781.seg.nii.gz | Excessive noise fragments: 36 distinct blobs
+file_4_7791.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_4_7797.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+file_4_7827.seg.nii.gz | Excessive noise fragments: 114 distinct blobs
+file_4_7864.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_4_7879.seg.nii.gz | Pixels outside brain: 1
+file_4_7923.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_4_7931.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+file_4_8027.seg.nii.gz | Excessive noise fragments: 49 distinct blobs
+file_4_8072.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 151 distinct blobs
+file_4_8095.seg.nii.gz | Excessive noise fragments: 42 distinct blobs
+file_4_8105.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 311 distinct blobs
+file_4_8107.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+file_4_8116.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_4_8117.seg.nii.gz | Excessive noise fragments: 35 distinct blobs
+file_4_8124.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_4_8143.seg.nii.gz | Excessive noise fragments: 41 distinct blobs
+file_4_8154.seg.nii.gz | Excessive noise fragments: 50 distinct blobs
+file_4_8164.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_4_8214.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 271 distinct blobs
+file_4_8238.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_4_8250.seg.nii.gz | Excessive noise fragments: 47 distinct blobs
+file_4_830.seg.nii.gz | Pixels outside brain: 5, Excessive noise fragments: 272 distinct blobs
+file_4_8318.seg.nii.gz | Excessive noise fragments: 191 distinct blobs
+file_4_8352.seg.nii.gz | Excessive noise fragments: 153 distinct blobs
+file_4_836.seg.nii.gz | Excessive noise fragments: 118 distinct blobs
+file_4_8390.seg.nii.gz | Pixels outside brain: 1
+file_4_8394.seg.nii.gz | Pixels outside brain: 1
+file_4_8395.seg.nii.gz | Excessive noise fragments: 74 distinct blobs
+file_4_8416.seg.nii.gz | Excessive noise fragments: 82 distinct blobs
+file_4_8458.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_4_8464.seg.nii.gz | Pixels outside brain: 1
+file_4_8475.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_4_8492.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_4_8505.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_4_8513.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_4_8556.seg.nii.gz | Pixels outside brain: 2
+file_4_8562.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_4_8577.seg.nii.gz | Excessive noise fragments: 90 distinct blobs
+file_4_859.seg.nii.gz | Excessive noise fragments: 143 distinct blobs
+file_4_8631.seg.nii.gz | Pixels outside brain: 1
+file_4_8672.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 63 distinct blobs
+file_4_8693.seg.nii.gz | Excessive noise fragments: 85 distinct blobs
+file_4_8694.seg.nii.gz | Excessive noise fragments: 113 distinct blobs
+file_4_8722.seg.nii.gz | Excessive noise fragments: 107 distinct blobs
+file_4_8732.seg.nii.gz | Excessive noise fragments: 81 distinct blobs
+file_4_8757.seg.nii.gz | Excessive noise fragments: 74 distinct blobs
+file_4_8776.seg.nii.gz | Pixels outside brain: 1
+file_4_8778.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_4_8799.seg.nii.gz | Excessive noise fragments: 76 distinct blobs
+file_4_8849.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_4_8865.seg.nii.gz | Excessive noise fragments: 288 distinct blobs
+file_4_8887.seg.nii.gz | Excessive noise fragments: 47 distinct blobs
+file_4_8950.seg.nii.gz | Pixels outside brain: 1
+file_4_8969.seg.nii.gz | Excessive noise fragments: 47 distinct blobs
+file_4_996.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 19 distinct blobs
+file_4_999.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 206 distinct blobs
+file_502.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_5038.seg.nii.gz | Pixels outside brain: 19, Excessive noise fragments: 561 distinct blobs
+file_5066.seg.nii.gz | Excessive noise fragments: 51 distinct blobs
+file_5068.seg.nii.gz | Excessive noise fragments: 40 distinct blobs
+file_5097.seg.nii.gz | Excessive noise fragments: 87 distinct blobs
+file_512.seg.nii.gz | Excessive noise fragments: 117 distinct blobs
+file_5148.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_5153.seg.nii.gz | Excessive noise fragments: 58 distinct blobs
+file_5207.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_5231.seg.nii.gz | Excessive noise fragments: 39 distinct blobs
+file_5236.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+file_528.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+file_5281.seg.nii.gz | Excessive noise fragments: 43 distinct blobs
+file_5316.seg.nii.gz | Excessive noise fragments: 31 distinct blobs
+file_5349.seg.nii.gz | Excessive noise fragments: 23 distinct blobs
+file_5366.seg.nii.gz | Excessive noise fragments: 36 distinct blobs
+file_5368.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_537.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+file_5376.seg.nii.gz | Excessive noise fragments: 73 distinct blobs
+file_5388.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+file_5401.seg.nii.gz | Pixels outside brain: 4, Excessive noise fragments: 466 distinct blobs
+file_5426.seg.nii.gz | Pixels outside brain: 1
+file_545.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 116 distinct blobs
+file_5499.seg.nii.gz | Excessive noise fragments: 94 distinct blobs
+file_5526.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_5545.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_5602.seg.nii.gz | Excessive noise fragments: 37 distinct blobs
+file_5642.seg.nii.gz | Excessive noise fragments: 91 distinct blobs
+file_5665.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_5698.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_5720.seg.nii.gz | Excessive noise fragments: 45 distinct blobs
+file_5721.seg.nii.gz | Excessive noise fragments: 119 distinct blobs
+file_5739.seg.nii.gz | Excessive noise fragments: 53 distinct blobs
+file_5753.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_5784.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_5846.seg.nii.gz | Excessive noise fragments: 30 distinct blobs
+file_5850.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_5876.seg.nii.gz | Excessive noise fragments: 214 distinct blobs
+file_589.seg.nii.gz | Excessive noise fragments: 137 distinct blobs
+file_591.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_5921.seg.nii.gz | Excessive noise fragments: 40 distinct blobs
+file_5922.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 262 distinct blobs
+file_5926.seg.nii.gz | Excessive noise fragments: 30 distinct blobs
+file_5937.seg.nii.gz | Excessive noise fragments: 98 distinct blobs
+file_5954.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_5_10030.seg.nii.gz | Excessive noise fragments: 28 distinct blobs
+file_5_10052.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 67 distinct blobs
+file_5_10112.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_5_10137.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 16 distinct blobs
+file_5_10175.seg.nii.gz | Pixels outside brain: 1
+file_5_10189.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+file_5_10204.seg.nii.gz | Excessive noise fragments: 50 distinct blobs
+file_5_10235.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_5_10245.seg.nii.gz | Pixels outside brain: 1
+file_5_10253.seg.nii.gz | Excessive noise fragments: 191 distinct blobs
+file_5_10281.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_5_10323.seg.nii.gz | Excessive noise fragments: 58 distinct blobs
+file_5_10351.seg.nii.gz | Excessive noise fragments: 55 distinct blobs
+file_5_10377.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_5_10384.seg.nii.gz | Pixels outside brain: 1
+file_5_10453.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_5_10517.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 12 distinct blobs
+file_5_10532.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 188 distinct blobs
+file_5_10573.seg.nii.gz | Excessive noise fragments: 120 distinct blobs
+file_5_10599.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 31 distinct blobs
+file_5_10608.seg.nii.gz | Pixels outside brain: 1
+file_5_10643.seg.nii.gz | Pixels outside brain: 1
+file_5_10664.seg.nii.gz | Pixels outside brain: 1
+file_5_10680.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+file_5_10690.seg.nii.gz | Excessive noise fragments: 268 distinct blobs
+file_5_10706.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_5_10787.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_5_10791.seg.nii.gz | Excessive noise fragments: 341 distinct blobs
+file_5_10808.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_5_10840.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 23 distinct blobs
+file_5_10869.seg.nii.gz | Pixels outside brain: 1
+file_5_10911.seg.nii.gz | Excessive noise fragments: 80 distinct blobs
+file_5_10912.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 156 distinct blobs
+file_5_10970.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_5_10976.seg.nii.gz | Excessive noise fragments: 48 distinct blobs
+file_5_10993.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+file_5_11022.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_5_11027.seg.nii.gz | Excessive noise fragments: 46 distinct blobs
+file_5_11074.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_5_11079.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_5_11153.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_5_11176.seg.nii.gz | Excessive noise fragments: 73 distinct blobs
+file_5_11184.seg.nii.gz | Excessive noise fragments: 260 distinct blobs
+file_5_11192.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_5_11234.seg.nii.gz | Excessive noise fragments: 29 distinct blobs
+file_5_11235.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_5_11242.seg.nii.gz | Excessive noise fragments: 28 distinct blobs
+file_5_11256.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 96 distinct blobs
+file_5_11257.seg.nii.gz | Excessive noise fragments: 163 distinct blobs
+file_5_11318.seg.nii.gz | Excessive noise fragments: 36 distinct blobs
+file_5_11328.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 16 distinct blobs
+file_5_11341.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 36 distinct blobs
+file_5_11346.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_5_11382.seg.nii.gz | Excessive noise fragments: 42 distinct blobs
+file_5_11440.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 92 distinct blobs
+file_5_11455.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_5_11459.seg.nii.gz | Excessive noise fragments: 36 distinct blobs
+file_5_11466.seg.nii.gz | Excessive noise fragments: 90 distinct blobs
+file_5_11536.seg.nii.gz | Excessive noise fragments: 80 distinct blobs
+file_5_11555.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+file_5_11616.seg.nii.gz | Excessive noise fragments: 30 distinct blobs
+file_5_11650.seg.nii.gz | Pixels outside brain: 1
+file_5_11656.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_5_11722.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_5_11743.seg.nii.gz | Excessive noise fragments: 122 distinct blobs
+file_5_11746.seg.nii.gz | Excessive noise fragments: 137 distinct blobs
+file_5_11747.seg.nii.gz | Pixels outside brain: 1
+file_5_11755.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_5_11766.seg.nii.gz | Pixels outside brain: 1
+file_5_11767.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_5_11816.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_5_11826.seg.nii.gz | Excessive noise fragments: 85 distinct blobs
+file_5_11842.seg.nii.gz | Excessive noise fragments: 75 distinct blobs
+file_5_11846.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_5_11875.seg.nii.gz | Excessive noise fragments: 40 distinct blobs
+file_5_11876.seg.nii.gz | Pixels outside brain: 4, Excessive noise fragments: 251 distinct blobs
+file_5_11902.seg.nii.gz | Excessive noise fragments: 127 distinct blobs
+file_5_11905.seg.nii.gz | Excessive noise fragments: 89 distinct blobs
+file_5_11931.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 12 distinct blobs
+file_5_11933.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 26 distinct blobs
+file_5_11975.seg.nii.gz | Excessive noise fragments: 28 distinct blobs
+file_5_11989.seg.nii.gz | Pixels outside brain: 2
+file_5_11996.seg.nii.gz | Excessive noise fragments: 33 distinct blobs
+file_5_12013.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_5_12018.seg.nii.gz | Excessive noise fragments: 150 distinct blobs
+file_5_12032.seg.nii.gz | Excessive noise fragments: 28 distinct blobs
+file_5_12045.seg.nii.gz | Excessive noise fragments: 181 distinct blobs
+file_5_12061.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 217 distinct blobs
+file_5_12072.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_5_12113.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 255 distinct blobs
+file_5_12115.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+file_5_12120.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_5_12148.seg.nii.gz | Excessive noise fragments: 128 distinct blobs
+file_5_12169.seg.nii.gz | Excessive noise fragments: 78 distinct blobs
+file_5_12200.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_5_12214.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_5_12240.seg.nii.gz | Excessive noise fragments: 89 distinct blobs
+file_5_12270.seg.nii.gz | Excessive noise fragments: 40 distinct blobs
+file_5_12284.seg.nii.gz | Excessive noise fragments: 41 distinct blobs
+file_5_12307.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+file_5_12324.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_5_12350.seg.nii.gz | Excessive noise fragments: 30 distinct blobs
+file_5_12351.seg.nii.gz | Excessive noise fragments: 51 distinct blobs
+file_5_12370.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_5_12384.seg.nii.gz | Excessive noise fragments: 42 distinct blobs
+file_5_12451.seg.nii.gz | Excessive noise fragments: 87 distinct blobs
+file_5_12481.seg.nii.gz | Excessive noise fragments: 135 distinct blobs
+file_5_12509.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_5_12549.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_5_12563.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_5_12576.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_5_12600.seg.nii.gz | Pixels outside brain: 1
+file_5_12653.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+file_5_12656.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_5_12667.seg.nii.gz | Pixels outside brain: 1
+file_5_12671.seg.nii.gz | Excessive noise fragments: 63 distinct blobs
+file_5_12733.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_5_12760.seg.nii.gz | Pixels outside brain: 1
+file_5_12768.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 160 distinct blobs
+file_5_12788.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 292 distinct blobs
+file_5_12810.seg.nii.gz | Pixels outside brain: 1
+file_5_12828.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_5_12853.seg.nii.gz | Pixels outside brain: 1
+file_5_12866.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+file_5_12903.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_5_12905.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_5_12938.seg.nii.gz | Excessive noise fragments: 148 distinct blobs
+file_5_12944.seg.nii.gz | Excessive noise fragments: 27 distinct blobs
+file_5_12955.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_5_12965.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 16 distinct blobs
+file_5_12966.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_5_12983.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+file_5_13027.seg.nii.gz | Pixels outside brain: 5, Excessive noise fragments: 279 distinct blobs
+file_5_4034.seg.nii.gz | Excessive noise fragments: 23 distinct blobs
+file_5_4035.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+file_5_4048.seg.nii.gz | Pixels outside brain: 1
+file_5_4061.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 124 distinct blobs
+file_5_4065.seg.nii.gz | Excessive noise fragments: 34 distinct blobs
+file_5_4103.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_5_4117.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_5_4164.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_5_4178.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_5_4217.seg.nii.gz | Pixels outside brain: 1
+file_5_4241.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 290 distinct blobs
+file_5_4257.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_5_4267.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_5_4287.seg.nii.gz | Excessive noise fragments: 38 distinct blobs
+file_5_4341.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+file_5_4362.seg.nii.gz | Excessive noise fragments: 26 distinct blobs
+file_5_4379.seg.nii.gz | Excessive noise fragments: 61 distinct blobs
+file_5_4482.seg.nii.gz | Excessive noise fragments: 67 distinct blobs
+file_5_4500.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_5_4617.seg.nii.gz | Excessive noise fragments: 147 distinct blobs
+file_5_4619.seg.nii.gz | Excessive noise fragments: 30 distinct blobs
+file_5_4622.seg.nii.gz | Excessive noise fragments: 106 distinct blobs
+file_5_4645.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+file_5_4651.seg.nii.gz | Excessive noise fragments: 49 distinct blobs
+file_5_4696.seg.nii.gz | Pixels outside brain: 1
+file_5_4736.seg.nii.gz | Pixels outside brain: 1
+file_5_4806.seg.nii.gz | Excessive noise fragments: 94 distinct blobs
+file_5_4872.seg.nii.gz | Pixels outside brain: 1
+file_5_4900.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 34 distinct blobs
+file_5_4949.seg.nii.gz | Pixels outside brain: 1
+file_5_4963.seg.nii.gz | Excessive noise fragments: 27 distinct blobs
+file_5_4968.seg.nii.gz | Pixels outside brain: 1
+file_5_4972.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 66 distinct blobs
+file_5_5010.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_5_5047.seg.nii.gz | Excessive noise fragments: 78 distinct blobs
+file_5_5129.seg.nii.gz | Excessive noise fragments: 71 distinct blobs
+file_5_5131.seg.nii.gz | Pixels outside brain: 1
+file_5_5136.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 17 distinct blobs
+file_5_5152.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+file_5_5160.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_5_5186.seg.nii.gz | Pixels outside brain: 1
+file_5_5205.seg.nii.gz | Pixels outside brain: 1
+file_5_5222.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+file_5_5374.seg.nii.gz | Pixels outside brain: 5, Excessive noise fragments: 313 distinct blobs
+file_5_5378.seg.nii.gz | Excessive noise fragments: 226 distinct blobs
+file_5_5471.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 321 distinct blobs
+file_5_5533.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_5_5555.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_5_5584.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+file_5_5599.seg.nii.gz | Excessive noise fragments: 27 distinct blobs
+file_5_5602.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_5_5611.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_5_5622.seg.nii.gz | Pixels outside brain: 1
+file_5_5639.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 234 distinct blobs
+file_5_5653.seg.nii.gz | Excessive noise fragments: 24 distinct blobs
+file_5_5655.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+file_5_5679.seg.nii.gz | Excessive noise fragments: 127 distinct blobs
+file_5_5716.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_5_5719.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_5_5732.seg.nii.gz | Pixels outside brain: 1
+file_5_5769.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_5_5770.seg.nii.gz | Excessive noise fragments: 114 distinct blobs
+file_5_5875.seg.nii.gz | Pixels outside brain: 1
+file_5_5891.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 336 distinct blobs
+file_5_5908.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_5_5917.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 230 distinct blobs
+file_5_5918.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 448 distinct blobs
+file_5_5928.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 304 distinct blobs
+file_5_5936.seg.nii.gz | Excessive noise fragments: 58 distinct blobs
+file_5_5938.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_5_5941.seg.nii.gz | Excessive noise fragments: 29 distinct blobs
+file_5_5958.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_5_6008.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_5_6027.seg.nii.gz | Excessive noise fragments: 76 distinct blobs
+file_5_6072.seg.nii.gz | Excessive noise fragments: 23 distinct blobs
+file_5_6084.seg.nii.gz | Pixels outside brain: 1
+file_5_6106.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 18 distinct blobs
+file_5_6139.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_5_6227.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_5_6282.seg.nii.gz | Excessive noise fragments: 102 distinct blobs
+file_5_6301.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+file_5_6307.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_5_6317.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_5_6355.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+file_5_6383.seg.nii.gz | Excessive noise fragments: 46 distinct blobs
+file_5_6461.seg.nii.gz | Excessive noise fragments: 145 distinct blobs
+file_5_6502.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 11 distinct blobs
+file_5_6535.seg.nii.gz | Pixels outside brain: 1
+file_5_6598.seg.nii.gz | Excessive noise fragments: 28 distinct blobs
+file_5_6689.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_5_6750.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 311 distinct blobs
+file_5_6759.seg.nii.gz | Pixels outside brain: 1
+file_5_6776.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_5_6794.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 23 distinct blobs
+file_5_6816.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+file_5_6831.seg.nii.gz | Excessive noise fragments: 20 distinct blobs
+file_5_6864.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_5_6878.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_5_6890.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_5_6932.seg.nii.gz | Excessive noise fragments: 145 distinct blobs
+file_5_6943.seg.nii.gz | Pixels outside brain: 1
+file_5_6982.seg.nii.gz | Excessive noise fragments: 31 distinct blobs
+file_5_7013.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+file_5_7106.seg.nii.gz | Pixels outside brain: 1
+file_5_7122.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_5_7161.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_5_7202.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 261 distinct blobs
+file_5_7233.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 275 distinct blobs
+file_5_7320.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 172 distinct blobs
+file_5_7327.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 19 distinct blobs
+file_5_7344.seg.nii.gz | Excessive noise fragments: 150 distinct blobs
+file_5_7367.seg.nii.gz | Excessive noise fragments: 146 distinct blobs
+file_5_7392.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_5_7407.seg.nii.gz | Excessive noise fragments: 24 distinct blobs
+file_5_7412.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+file_5_7415.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 146 distinct blobs
+file_5_7450.seg.nii.gz | Excessive noise fragments: 32 distinct blobs
+file_5_7454.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_5_7476.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_5_7488.seg.nii.gz | Pixels outside brain: 1
+file_5_7502.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 11 distinct blobs
+file_5_7522.seg.nii.gz | Excessive noise fragments: 112 distinct blobs
+file_5_7573.seg.nii.gz | Pixels outside brain: 1
+file_5_7581.seg.nii.gz | Pixels outside brain: 4, Excessive noise fragments: 228 distinct blobs
+file_5_7582.seg.nii.gz | Excessive noise fragments: 146 distinct blobs
+file_5_7635.seg.nii.gz | Excessive noise fragments: 39 distinct blobs
+file_5_7669.seg.nii.gz | Pixels outside brain: 1
+file_5_7675.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 352 distinct blobs
+file_5_7705.seg.nii.gz | Pixels outside brain: 4, Excessive noise fragments: 260 distinct blobs
+file_5_7721.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_5_7732.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_5_7738.seg.nii.gz | Excessive noise fragments: 63 distinct blobs
+file_5_7768.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_5_7794.seg.nii.gz | Excessive noise fragments: 43 distinct blobs
+file_5_7806.seg.nii.gz | Pixels outside brain: 1
+file_5_7810.seg.nii.gz | Excessive noise fragments: 114 distinct blobs
+file_5_7891.seg.nii.gz | Excessive noise fragments: 94 distinct blobs
+file_5_7894.seg.nii.gz | Excessive noise fragments: 28 distinct blobs
+file_5_7916.seg.nii.gz | Excessive noise fragments: 79 distinct blobs
+file_5_7961.seg.nii.gz | Excessive noise fragments: 39 distinct blobs
+file_5_7967.seg.nii.gz | Excessive noise fragments: 65 distinct blobs
+file_5_7969.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 60 distinct blobs
+file_5_7972.seg.nii.gz | Excessive noise fragments: 23 distinct blobs
+file_5_7988.seg.nii.gz | Pixels outside brain: 1
+file_5_8026.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_5_8052.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+file_5_8070.seg.nii.gz | Pixels outside brain: 7, Excessive noise fragments: 375 distinct blobs
+file_5_8074.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 32 distinct blobs
+file_5_8095.seg.nii.gz | Pixels outside brain: 1
+file_5_8135.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_5_8145.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_5_8152.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_5_8261.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 237 distinct blobs
+file_5_8277.seg.nii.gz | Excessive noise fragments: 50 distinct blobs
+file_5_8294.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_5_8299.seg.nii.gz | Pixels outside brain: 1
+file_5_8308.seg.nii.gz | Excessive noise fragments: 24 distinct blobs
+file_5_8311.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_5_8335.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_5_8366.seg.nii.gz | Excessive noise fragments: 30 distinct blobs
+file_5_8369.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_5_8410.seg.nii.gz | Excessive noise fragments: 53 distinct blobs
+file_5_8411.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_5_8422.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_5_8438.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 12 distinct blobs
+file_5_8451.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_5_8501.seg.nii.gz | Excessive noise fragments: 72 distinct blobs
+file_5_8522.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+file_5_8532.seg.nii.gz | Excessive noise fragments: 93 distinct blobs
+file_5_8539.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_5_8611.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_5_8648.seg.nii.gz | Excessive noise fragments: 32 distinct blobs
+file_5_8673.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_5_8706.seg.nii.gz | Pixels outside brain: 1
+file_5_8707.seg.nii.gz | Excessive noise fragments: 33 distinct blobs
+file_5_8715.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_5_8718.seg.nii.gz | Pixels outside brain: 1
+file_5_8732.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_5_8844.seg.nii.gz | Excessive noise fragments: 43 distinct blobs
+file_5_8924.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+file_5_8926.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_5_8930.seg.nii.gz | Excessive noise fragments: 42 distinct blobs
+file_5_8965.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 313 distinct blobs
+file_5_8973.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_5_9015.seg.nii.gz | Pixels outside brain: 1
+file_5_9116.seg.nii.gz | Excessive noise fragments: 57 distinct blobs
+file_5_9183.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_5_9206.seg.nii.gz | Excessive noise fragments: 59 distinct blobs
+file_5_9224.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_5_9279.seg.nii.gz | Excessive noise fragments: 113 distinct blobs
+file_5_9299.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+file_5_9301.seg.nii.gz | Excessive noise fragments: 23 distinct blobs
+file_5_9360.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 15 distinct blobs
+file_5_9390.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+file_5_9419.seg.nii.gz | Pixels outside brain: 1
+file_5_9465.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_5_9508.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 334 distinct blobs
+file_5_9580.seg.nii.gz | Excessive noise fragments: 61 distinct blobs
+file_5_9606.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_5_9676.seg.nii.gz | Pixels outside brain: 1
+file_5_9716.seg.nii.gz | Excessive noise fragments: 37 distinct blobs
+file_5_9741.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+file_5_9774.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_5_9796.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 11 distinct blobs
+file_5_9878.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 11 distinct blobs
+file_5_9906.seg.nii.gz | Excessive noise fragments: 80 distinct blobs
+file_5_9913.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_5_9927.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 167 distinct blobs
+file_5_9942.seg.nii.gz | Pixels outside brain: 2
+file_5_9975.seg.nii.gz | Excessive noise fragments: 77 distinct blobs
+file_6041.seg.nii.gz | Pixels outside brain: 1
+file_6095.seg.nii.gz | Excessive noise fragments: 70 distinct blobs
+file_6143.seg.nii.gz | Excessive noise fragments: 30 distinct blobs
+file_6150.seg.nii.gz | Excessive noise fragments: 63 distinct blobs
+file_6202.seg.nii.gz | Excessive noise fragments: 127 distinct blobs
+file_6249.seg.nii.gz | Excessive noise fragments: 44 distinct blobs
+file_626.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_6265.seg.nii.gz | Excessive noise fragments: 39 distinct blobs
+file_6283.seg.nii.gz | Pixels outside brain: 1
+file_6305.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 292 distinct blobs
+file_632.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_6327.seg.nii.gz | Pixels outside brain: 1
+file_6355.seg.nii.gz | Excessive noise fragments: 184 distinct blobs
+file_6414.seg.nii.gz | Pixels outside brain: 1
+file_6426.seg.nii.gz | Pixels outside brain: 1
+file_6430.seg.nii.gz | Excessive noise fragments: 83 distinct blobs
+file_6432.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_6450.seg.nii.gz | Excessive noise fragments: 89 distinct blobs
+file_6457.seg.nii.gz | Excessive noise fragments: 110 distinct blobs
+file_6520.seg.nii.gz | Excessive noise fragments: 29 distinct blobs
+file_6539.seg.nii.gz | Excessive noise fragments: 69 distinct blobs
+file_6549.seg.nii.gz | Pixels outside brain: 4, Excessive noise fragments: 441 distinct blobs
+file_6551.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_6554.seg.nii.gz | Pixels outside brain: 1
+file_6562.seg.nii.gz | Excessive noise fragments: 30 distinct blobs
+file_6606.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 213 distinct blobs
+file_6635.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_6705.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_6724.seg.nii.gz | Pixels outside brain: 1
+file_6758.seg.nii.gz | Excessive noise fragments: 37 distinct blobs
+file_6771.seg.nii.gz | Excessive noise fragments: 30 distinct blobs
+file_6782.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_6800.seg.nii.gz | Excessive noise fragments: 41 distinct blobs
+file_684.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_685.seg.nii.gz | Excessive noise fragments: 36 distinct blobs
+file_6857.seg.nii.gz | Excessive noise fragments: 102 distinct blobs
+file_6871.seg.nii.gz | Pixels outside brain: 1
+file_692.seg.nii.gz | Pixels outside brain: 1
+file_7008.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_7021.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 14 distinct blobs
+file_7057.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_7075.seg.nii.gz | Excessive noise fragments: 152 distinct blobs
+file_7099.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 239 distinct blobs
+file_7106.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+file_7124.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_715.seg.nii.gz | Excessive noise fragments: 50 distinct blobs
+file_7166.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 27 distinct blobs
+file_7170.seg.nii.gz | Excessive noise fragments: 14 distinct blobs
+file_7176.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_7190.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 327 distinct blobs
+file_7222.seg.nii.gz | Excessive noise fragments: 124 distinct blobs
+file_7227.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 272 distinct blobs
+file_7291.seg.nii.gz | Excessive noise fragments: 34 distinct blobs
+file_7310.seg.nii.gz | Excessive noise fragments: 24 distinct blobs
+file_7339.seg.nii.gz | Pixels outside brain: 1
+file_7420.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 154 distinct blobs
+file_7452.seg.nii.gz | Excessive noise fragments: 43 distinct blobs
+file_7546.seg.nii.gz | Excessive noise fragments: 81 distinct blobs
+file_755.seg.nii.gz | Pixels outside brain: 1
+file_7577.seg.nii.gz | Pixels outside brain: 3, Excessive noise fragments: 264 distinct blobs
+file_7598.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_7602.seg.nii.gz | Pixels outside brain: 1
+file_7628.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 22 distinct blobs
+file_7644.seg.nii.gz | Excessive noise fragments: 73 distinct blobs
+file_7671.seg.nii.gz | Pixels outside brain: 1
+file_7693.seg.nii.gz | Excessive noise fragments: 90 distinct blobs
+file_7696.seg.nii.gz | Excessive noise fragments: 137 distinct blobs
+file_770.seg.nii.gz | Pixels outside brain: 1
+file_774.seg.nii.gz | Excessive noise fragments: 65 distinct blobs
+file_7786.seg.nii.gz | Excessive noise fragments: 33 distinct blobs
+file_7797.seg.nii.gz | Excessive noise fragments: 31 distinct blobs
+file_78.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_7812.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 93 distinct blobs
+file_7855.seg.nii.gz | Excessive noise fragments: 45 distinct blobs
+file_7889.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_7952.seg.nii.gz | Excessive noise fragments: 16 distinct blobs
+file_796.seg.nii.gz | Pixels outside brain: 1
+file_7968.seg.nii.gz | Excessive noise fragments: 35 distinct blobs
+file_7982.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+file_8062.seg.nii.gz | Excessive noise fragments: 15 distinct blobs
+file_808.seg.nii.gz | Excessive noise fragments: 42 distinct blobs
+file_8087.seg.nii.gz | Excessive noise fragments: 42 distinct blobs
+file_8103.seg.nii.gz | Excessive noise fragments: 27 distinct blobs
+file_8105.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_8107.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_8114.seg.nii.gz | Excessive noise fragments: 24 distinct blobs
+file_813.seg.nii.gz | Excessive noise fragments: 35 distinct blobs
+file_8148.seg.nii.gz | Pixels outside brain: 4, Excessive noise fragments: 376 distinct blobs
+file_8173.seg.nii.gz | Excessive noise fragments: 23 distinct blobs
+file_8183.seg.nii.gz | Excessive noise fragments: 95 distinct blobs
+file_827.seg.nii.gz | Pixels outside brain: 1
+file_8275.seg.nii.gz | Pixels outside brain: 1
+file_8277.seg.nii.gz | Excessive noise fragments: 19 distinct blobs
+file_8281.seg.nii.gz | Pixels outside brain: 7, Excessive noise fragments: 201 distinct blobs
+file_8310.seg.nii.gz | Pixels outside brain: 1
+file_8320.seg.nii.gz | Excessive noise fragments: 72 distinct blobs
+file_8322.seg.nii.gz | Pixels outside brain: 1
+file_8339.seg.nii.gz | Excessive noise fragments: 35 distinct blobs
+file_8423.seg.nii.gz | Excessive noise fragments: 17 distinct blobs
+file_8426.seg.nii.gz | Excessive noise fragments: 242 distinct blobs
+file_8438.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 112 distinct blobs
+file_8510.seg.nii.gz | Excessive noise fragments: 33 distinct blobs
+file_862.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 127 distinct blobs
+file_8650.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 14 distinct blobs
+file_8654.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_8668.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 30 distinct blobs
+file_8678.seg.nii.gz | Excessive noise fragments: 74 distinct blobs
+file_8681.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_8692.seg.nii.gz | Excessive noise fragments: 26 distinct blobs
+file_8695.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 42 distinct blobs
+file_8723.seg.nii.gz | Excessive noise fragments: 166 distinct blobs
+file_8727.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_8736.seg.nii.gz | Excessive noise fragments: 302 distinct blobs
+file_8744.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 89 distinct blobs
+file_8811.seg.nii.gz | Pixels outside brain: 1
+file_8847.seg.nii.gz | Excessive noise fragments: 18 distinct blobs
+file_8899.seg.nii.gz | Excessive noise fragments: 286 distinct blobs
+file_8945.seg.nii.gz | Excessive noise fragments: 69 distinct blobs
+file_8951.seg.nii.gz | Excessive noise fragments: 22 distinct blobs
+file_8986.seg.nii.gz | Excessive noise fragments: 38 distinct blobs
+file_8991.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_9018.seg.nii.gz | Pixels outside brain: 2, Excessive noise fragments: 231 distinct blobs
+file_9035.seg.nii.gz | Excessive noise fragments: 46 distinct blobs
+file_9047.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_905.seg.nii.gz | Pixels outside brain: 1
+file_9074.seg.nii.gz | Excessive noise fragments: 66 distinct blobs
+file_9088.seg.nii.gz | Excessive noise fragments: 145 distinct blobs
+file_9110.seg.nii.gz | Excessive noise fragments: 11 distinct blobs
+file_9111.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_9122.seg.nii.gz | Excessive noise fragments: 53 distinct blobs
+file_9132.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+file_9144.seg.nii.gz | Excessive noise fragments: 84 distinct blobs
+file_9184.seg.nii.gz | Pixels outside brain: 1
+file_9205.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 16 distinct blobs
+file_9223.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+file_9251.seg.nii.gz | Excessive noise fragments: 25 distinct blobs
+file_9271.seg.nii.gz | Excessive noise fragments: 12 distinct blobs
+file_9286.seg.nii.gz | Excessive noise fragments: 13 distinct blobs
+file_9344.seg.nii.gz | Excessive noise fragments: 46 distinct blobs
+file_9366.seg.nii.gz | Pixels outside brain: 1
+file_9387.seg.nii.gz | Excessive noise fragments: 266 distinct blobs
+file_9470.seg.nii.gz | Excessive noise fragments: 21 distinct blobs
+file_9487.seg.nii.gz | Pixels outside brain: 1
+file_9532.seg.nii.gz | Pixels outside brain: 1, Excessive noise fragments: 13 distinct blobs
+file_994.seg.nii.gz | Excessive noise fragments: 62 distinct blobs
