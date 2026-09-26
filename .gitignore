@@ -7,3 +7,6 @@ processed_data/
 
 # MONAI tutorials
 tutorials/
+
+# Python cache files
+__pycache__/

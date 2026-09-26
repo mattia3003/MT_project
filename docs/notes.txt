@@ -88,10 +88,23 @@ Score to evaluate:
    --all
    --is_score
    --fid
-   --med_fid
+   --med_fid (use --med_fid_weights "PATH TO RESNET50" in addition for med_fid to work)
+   
+   for both fid metrics:
+      --fid_samples [NUMBER] (selects seeded random NUMBER samples to be used from each dataset. No specification selects all)
+      --seed [NUMBER] (specifies seed for 'random generator' for reproducability, default=42)
+   
    --cmmd
-   --ssim
+      --cmmd_model
+      --cmmd_block_size
+      --cmmd_sigma
+      --cmmd_samples
+   --rad_mmd
+      --rad_mmd_sigma
+      --rad_mmd_samples
+   --ssim (SAFTY --> --ssim_paired <-- THIS IS REQUIRED FOR THE SSIM TO RUN. VERIFY THAT THE DATA LOADED ARE PAIRWISE CORRESPONDING)
    --one_nn
+      --one_nn_samples
 
 
 ---------------------------------------------------------------------
@@ -687,3 +700,19 @@ NO DATA FOR TRAINING OF best_real_model_TS256_40epochs_dynunet
 
 NO DATA FOR TRAINING OF best_synthetic_model_TS256_40epochs_dynunet_10_0
 - but final model is from epoch 35 ish
+
+
+-------------------------------------------------------------------------------------
+
+RANDOM:
+
+Running IS verification on cuda using CIFAR-10...
+100%|███████████████████████████████████████████████████████████████████████████████████████████████| 170M/170M [43:02<00:00, 66.0kB/s]
+C:\Master thesis\MT_project\.venv\Lib\site-packages\torchmetrics\utilities\prints.py:43: UserWarning: Metric `InceptionScore` will save all extracted features in buffer. For large datasets this may lead to large memory footprint.
+  warnings.warn(*args, **kwargs)
+Testing CIFAR-10 IS: 100%|███████████████████████████████████████████████████████████████████████████| 313/313 [00:16<00:00, 18.47it/s]
+
+==========================================
+ CIFAR-10 Benchmark Inception Score (IS): 10.9474 +/- 0.4062
+ Expected Reference Range:              ~9.5 - 11.2
+==========================================
