@@ -35,6 +35,7 @@ from monai.transforms import (
     LoadImaged,
     EnsureChannelFirstd,
     ResizeWithPadOrCropd,
+    Resized,
     ScaleIntensityd,
     EnsureTyped
 )
@@ -87,9 +88,13 @@ class NiftiSliceDataset(Dataset):
         data_dir: Path, 
         exclusion_set: Set[str], 
         modality: str = "bravo", 
-        target_size: Tuple[int, int] = (256, 256)
+        target_size: Tuple[int, int] = (256, 256),
+        resize_mode: str = "pad_crop",
     ):
         self.data_dir = data_dir
+
+        if resize_mode not in {"pad_crop", "resize"}:
+            raise ValueError("resize_mode must be 'pad_crop' or 'resize'")
         
         # 1. Find all NIfTI files inside target modality subfolders (ignoring 'seg')
         all_found = sorted(list(data_dir.glob(f"**/{modality}/*.nii*")))
@@ -112,11 +117,16 @@ class NiftiSliceDataset(Dataset):
             raise RuntimeError(f"No valid .nii/.nii.gz files found in {data_dir} under modality subfolder '{modality}'.")
 
         # MONAI Image Loading & Preprocessing Pipeline
+        spatial_transform = (
+            ResizeWithPadOrCropd(keys=["image"], spatial_size=target_size, mode="constant")
+            if resize_mode == "pad_crop"
+            else Resized(keys=["image"], spatial_size=target_size, mode="bilinear")
+        )
         self.transforms = Compose([
             LoadImaged(keys=["image"], image_only=True),
             EnsureChannelFirstd(keys=["image"]),
             ScaleIntensityd(keys=["image"], minv=0.0, maxv=1.0),
-            ResizeWithPadOrCropd(keys=["image"], spatial_size=target_size, mode="constant"),
+            spatial_transform,
             EnsureTyped(keys=["image"], dtype=torch.float32)
         ])
 
@@ -636,6 +646,13 @@ def main():
     parser.add_argument("--real_dir", type=str, required=True, help="Path to Real root dir ('train' or 'test')")
     parser.add_argument("--syn_dir", type=str, default=None, help="Path to Synthetic root dir")
     parser.add_argument("--modality", type=str, default="bravo", help="Subfolder modality name to evaluate ('bravo')")
+    parser.add_argument("--target_size", type=int, nargs=2, default=(256, 256), metavar=("HEIGHT", "WIDTH"))
+    parser.add_argument(
+        "--resize_mode",
+        choices=("pad_crop", "resize"),
+        default="pad_crop",
+        help="Spatial preprocessing before metric calculation: preserve pixel scale with pad/crop, or resample to target_size.",
+    )
     parser.add_argument("--exclusion_file", type=str, default="corrupted_files.txt", help="Path to corrupted list .txt")
     parser.add_argument("--batch_size", type=int, default=32, help="Batch size for metric loader")
     parser.add_argument(
@@ -722,12 +739,24 @@ def main():
     exclusion_set = load_exclusion_list(Path(args.exclusion_file))
 
     # Instantiate Datasets
-    real_ds = NiftiSliceDataset(Path(args.real_dir), exclusion_set=set(), modality=args.modality)
+    real_ds = NiftiSliceDataset(
+        Path(args.real_dir),
+        exclusion_set=set(),
+        modality=args.modality,
+        target_size=tuple(args.target_size),
+        resize_mode=args.resize_mode,
+    )
     real_loader = DataLoader(real_ds, batch_size=args.batch_size, shuffle=False, num_workers=2)
 
     syn_loader = None
     if args.syn_dir:
-        syn_ds = NiftiSliceDataset(Path(args.syn_dir), exclusion_set=exclusion_set, modality=args.modality)
+        syn_ds = NiftiSliceDataset(
+            Path(args.syn_dir),
+            exclusion_set=exclusion_set,
+            modality=args.modality,
+            target_size=tuple(args.target_size),
+            resize_mode=args.resize_mode,
+        )
         syn_loader = DataLoader(syn_ds, batch_size=args.batch_size, shuffle=False, num_workers=2)
 
     evaluator = MetricEvaluator(device=device)
