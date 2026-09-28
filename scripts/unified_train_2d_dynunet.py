@@ -5,7 +5,7 @@ from pathlib import Path
 
 from monai.transforms import (
     Compose, LoadImaged, EnsureChannelFirstd,
-    ResizeWithPadOrCropd, NormalizeIntensityd, RandRotated,
+    ResizeWithPadOrCropd, Resized, NormalizeIntensityd, RandRotated,
     RandFlipd, RandAffined, RandGaussianNoised, RandAdjustContrastd, EnsureTyped
 )
 from monai.data import Dataset, DataLoader
@@ -16,28 +16,46 @@ from monai.metrics import DiceMetric
 # ==============================================================================
 # 1. UNIFIED DATASET BUILDER
 # ==============================================================================
-def get_dataloaders(data_dir, target_size=(256, 256), batch_size=32, seed=42):
-    random.seed(seed)
+def _pair_files(base_path):
+    pairs = {}
+    for image_path in base_path.glob("**/bravo/*.nii*"):
+        relative = image_path.relative_to(base_path)
+        stem = image_path.name.replace(".nii.gz", "").replace(".nii", "")
+        stem = stem.removesuffix("_bravo").removesuffix(".bravo")
+        patient_id = relative.parts[-3] if len(relative.parts) >= 3 else stem
+        pairs[(patient_id, stem)] = {"image": str(image_path), "group": patient_id}
+
+    labels = {}
+    for label_path in base_path.glob("**/seg/*.nii*"):
+        relative = label_path.relative_to(base_path)
+        stem = label_path.name.replace(".nii.gz", "").replace(".nii", "")
+        stem = stem.removesuffix("_seg").removesuffix(".seg")
+        patient_id = relative.parts[-3] if len(relative.parts) >= 3 else stem
+        labels[(patient_id, stem)] = str(label_path)
+
+    if set(pairs) != set(labels):
+        raise ValueError(
+            f"BRAVO/SEG pairing mismatch: {len(pairs)} images, {len(labels)} labels, "
+            f"{len(set(pairs) - set(labels))} missing labels, "
+            f"{len(set(labels) - set(pairs))} missing images."
+        )
+    return [{**pairs[key], "label": labels[key]} for key in sorted(pairs)]
+
+
+def get_dataloaders(data_dir, target_size=(256, 256), resize_mode="pad_crop", batch_size=32, seed=42):
     base_path = Path(data_dir).resolve()
     print(f"Resolving dataset directory: {base_path}")
 
     if not base_path.exists():
         raise FileNotFoundError(f"Directory does not exist: {base_path}")
 
-    # Finds all files inside /bravo and /seg subfolders
-    bravo_files = sorted([str(p) for p in base_path.glob("**/bravo/*.nii*")])
-    seg_files = sorted([str(p) for p in base_path.glob("**/seg/*.nii*")])
+    data_dicts = _pair_files(base_path)
+    print(f"Found {len(data_dicts)} validated BRAVO/SEG pairs.")
 
-    print(f"Found {len(bravo_files)} BRAVO files and {len(seg_files)} SEG files.")
-
-    if len(bravo_files) == 0 or len(seg_files) == 0:
+    if len(data_dicts) == 0:
         raise FileNotFoundError(f"No NIfTI files found in '{base_path}/bravo/' or '{base_path}/seg/'.")
 
-    if len(bravo_files) != len(seg_files):
-        raise ValueError(f"File count mismatch: {len(bravo_files)} BRAVO vs {len(seg_files)} SEG files.")
-
-    data_dicts = [{"image": b, "label": s} for b, s in zip(bravo_files, seg_files)]
-    random.shuffle(data_dicts)
+    rng = random.Random(seed)
 
     # Standard MONAI Loaders
     load_transforms = [
@@ -46,9 +64,14 @@ def get_dataloaders(data_dir, target_size=(256, 256), batch_size=32, seed=42):
     ]
 
     # Preprocessing & Data Augmentation
+    spatial_transform = (
+        ResizeWithPadOrCropd(keys=["image", "label"], spatial_size=target_size, mode=("constant", "constant"))
+        if resize_mode == "pad_crop"
+        else Resized(keys=["image", "label"], spatial_size=target_size, mode=("bilinear", "nearest"))
+    )
     common_train_transforms = Compose([
         *load_transforms,
-        ResizeWithPadOrCropd(keys=["image", "label"], spatial_size=target_size, mode="constant"),
+        spatial_transform,
         NormalizeIntensityd(keys=["image"], nonzero=True, channel_wise=True),
         
         # Augmentations
@@ -64,15 +87,21 @@ def get_dataloaders(data_dir, target_size=(256, 256), batch_size=32, seed=42):
 
     common_val_transforms = Compose([
         *load_transforms,
-        ResizeWithPadOrCropd(keys=["image", "label"], spatial_size=target_size, mode="constant"),
+        spatial_transform,
         NormalizeIntensityd(keys=["image"], nonzero=True, channel_wise=True),
         EnsureTyped(keys=["image", "label"])
     ])
 
-    # 80/20 Train/Validation Split
-    split_idx = int(0.8 * len(data_dicts))
-    train_files = data_dicts[:split_idx]
-    val_files = data_dicts[split_idx:]
+    groups = {}
+    for item in data_dicts:
+        groups.setdefault(item["group"], []).append(item)
+    group_ids = list(groups)
+    rng.shuffle(group_ids)
+    split_idx = max(1, min(len(group_ids) - 1, int(0.8 * len(group_ids)))) if len(group_ids) > 1 else 1
+    train_files = [item for group_id in group_ids[:split_idx] for item in groups[group_id]]
+    val_files = [item for group_id in group_ids[split_idx:] for item in groups[group_id]]
+    if len(group_ids) == 1:
+        print("Warning: no patient-level folders detected; validation is slice-level.")
 
     print(f"Dataset split: {len(train_files)} train samples | {len(val_files)} val samples")
 
@@ -94,10 +123,14 @@ def main():
     parser.add_argument("--data_dir", type=str, required=True, help="Path to the folder containing bravo/ and seg/ subfolders")
     parser.add_argument("--epochs", type=int, default=40)
     parser.add_argument("--batch_size", type=int, default=32)
+    parser.add_argument("--target_size", type=int, nargs=2, default=(256, 256), metavar=("HEIGHT", "WIDTH"))
+    parser.add_argument("--resize_mode", choices=("pad_crop", "resize"), default="pad_crop")
     args = parser.parse_args()
 
     train_loader, val_loader = get_dataloaders(
         data_dir=args.data_dir,
+        target_size=tuple(args.target_size),
+        resize_mode=args.resize_mode,
         batch_size=args.batch_size
     )
 
@@ -120,6 +153,16 @@ def main():
         norm_name="instance",
         deep_supervision=True
     ).to(device)
+
+    model.eval()
+    with torch.no_grad():
+        output_probe = model(check_batch["image"].to(device))
+    if isinstance(output_probe, torch.Tensor):
+        print(f"DynUNet output shape: {tuple(output_probe.shape)}")
+    else:
+        print(f"DynUNet output type: {type(output_probe).__name__}")
+        print(f"DynUNet output shapes: {[tuple(output.shape) for output in output_probe]}")
+    model.train()
 
     base_loss = DiceCELoss(sigmoid=True, squared_pred=True, lambda_dice=1.0, lambda_ce=0.2)
     loss_function = DeepSupervisionLoss(base_loss, weights=[1.0, 0.5, 0.25, 0.125])
