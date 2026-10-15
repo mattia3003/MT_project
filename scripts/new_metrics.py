@@ -31,13 +31,13 @@ from torchvision.models import resnet50
 # MONAI Imports
 import monai
 from monai.transforms import (
-    Compose,
-    LoadImaged,
-    EnsureChannelFirstd,
-    ResizeWithPadOrCropd,
-    Resized,
-    ScaleIntensityd,
-    EnsureTyped
+    Compose, # type: ignore
+    LoadImaged, # type: ignore
+    EnsureChannelFirstd, # type: ignore
+    ResizeWithPadOrCropd, # type: ignore
+    Resized, # type: ignore
+    ScaleIntensityd, # type: ignore
+    EnsureTyped # type: ignore
 )
 
 # TorchMetrics Imports
@@ -152,11 +152,11 @@ class MetricEvaluator:
         seed: int,
     ) -> DataLoader:
         """Return a reproducible random subset without changing image transforms."""
-        if max_samples is None or max_samples >= len(loader.dataset):
+        if max_samples is None or max_samples >= len(loader.dataset): # type: ignore
             return loader
 
         generator = torch.Generator().manual_seed(seed)
-        indices = torch.randperm(len(loader.dataset), generator=generator)[:max_samples].tolist()
+        indices = torch.randperm(len(loader.dataset), generator=generator)[:max_samples].tolist() # type: ignore
         return DataLoader(
             Subset(loader.dataset, indices),
             batch_size=loader.batch_size,
@@ -257,12 +257,12 @@ class MetricEvaluator:
         covariance_product = covariance_real @ covariance_syn
         covariance_mean = sqrtm(covariance_product)
         if np.iscomplexobj(covariance_mean):
-            covariance_mean = covariance_mean.real
+            covariance_mean = covariance_mean.real # type: ignore
 
         mean_difference = mean_real - mean_syn
         distance = (
             mean_difference @ mean_difference
-            + np.trace(covariance_real + covariance_syn - 2.0 * covariance_mean)
+            + np.trace(covariance_real + covariance_syn - 2.0 * covariance_mean) # type: ignore
         )
         return float(max(distance, 0.0))
 
@@ -360,8 +360,8 @@ class MetricEvaluator:
         real_loader = self._sample_loader(real_loader, max_samples, seed)
         syn_loader = self._sample_loader(syn_loader, max_samples, seed + 1)
         print(
-            f"FID sample size: real={len(real_loader.dataset)}, "
-            f"synthetic={len(syn_loader.dataset)}; seeds: real={seed}, synthetic={seed + 1}"
+            f"FID sample size: real={len(real_loader.dataset)}, " # type: ignore
+            f"synthetic={len(syn_loader.dataset)}; seeds: real={seed}, synthetic={seed + 1}" # type: ignore
         )
 
         if not use_medical_backbone:
@@ -419,8 +419,8 @@ class MetricEvaluator:
         real_loader = self._sample_loader(real_loader, max_samples, seed)
         syn_loader = self._sample_loader(syn_loader, max_samples, seed + 1)
         print(
-            f"CMMD sample size: real={len(real_loader.dataset)}, "
-            f"synthetic={len(syn_loader.dataset)}; seeds: real={seed}, synthetic={seed + 1}"
+            f"CMMD sample size: real={len(real_loader.dataset)}, " # type: ignore
+            f"synthetic={len(syn_loader.dataset)}; seeds: real={seed}, synthetic={seed + 1}" # type: ignore
         )
         try:
             from transformers import CLIPImageProcessor, CLIPVisionModelWithProjection
@@ -428,7 +428,7 @@ class MetricEvaluator:
             raise ImportError("Please install `transformers` via `py -3 -m pip install transformers` to compute CMMD.")
 
         processor = CLIPImageProcessor.from_pretrained(clip_model_name)
-        model = CLIPVisionModelWithProjection.from_pretrained(clip_model_name).to(self.device)
+        model = CLIPVisionModelWithProjection.from_pretrained(clip_model_name).to(self.device) # type: ignore
         model.eval()
 
         image_size = processor.crop_size.get("height", 224)
@@ -508,8 +508,8 @@ class MetricEvaluator:
         real_loader = self._sample_loader(real_loader, max_samples, seed)
         syn_loader = self._sample_loader(syn_loader, max_samples, seed + 1)
         print(
-            f"RadImageNet-MMD sample size: real={len(real_loader.dataset)}, "
-            f"synthetic={len(syn_loader.dataset)}; seeds: real={seed}, synthetic={seed + 1}"
+            f"RadImageNet-MMD sample size: real={len(real_loader.dataset)}, " # type: ignore
+            f"synthetic={len(syn_loader.dataset)}; seeds: real={seed}, synthetic={seed + 1}" # type: ignore
         )
         feature_extractor = self._load_radimagenet_backbone(medical_weights)
 
@@ -550,7 +550,7 @@ class MetricEvaluator:
                 "The current real and synthetic datasets are unpaired; "
                 "provide a paired loader or omit --ssim."
             )
-        if len(real_loader.dataset) != len(syn_loader.dataset):
+        if len(real_loader.dataset) != len(syn_loader.dataset): # type: ignore
             raise ValueError(
                 "Paired SSIM/MS-SSIM requires equal numbers of real and synthetic images."
             )
@@ -600,8 +600,8 @@ class MetricEvaluator:
         real_loader = self._sample_loader(real_loader, max_samples, seed)
         syn_loader = self._sample_loader(syn_loader, max_samples, seed + 1)
         print(
-            f"1-NN sample size: real={len(real_loader.dataset)}, "
-            f"synthetic={len(syn_loader.dataset)}; seeds: real={seed}, synthetic={seed + 1}"
+            f"1-NN sample size: real={len(real_loader.dataset)}, " # type: ignore
+            f"synthetic={len(syn_loader.dataset)}; seeds: real={seed}, synthetic={seed + 1}" # type: ignore
         )
         feature_extractor = self._load_radimagenet_backbone(medical_weights)
 

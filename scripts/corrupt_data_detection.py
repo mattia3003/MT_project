@@ -22,7 +22,7 @@ def load_array(filepath):
     if path_str.endswith(".npy"):
         arr = np.load(path_str)
     else:
-        arr = nib.load(path_str).get_fdata()
+        arr = nib.load(path_str).get_fdata() # type: ignore
     return np.squeeze(arr).astype(np.float32)
 
 def audit_dataset():
@@ -60,7 +60,7 @@ def audit_dataset():
             reasons.append(f"Pixels outside brain: {pixels_outside_brain}")
 
         # Check 2: "Starry Sky" test (Count distinct disconnected mask fragments)
-        labeled_array, num_features = label(binary_seg)
+        labeled_array, num_features = label(binary_seg) # type: ignore
         if num_features > MAX_ALLOWED_COMPONENTS:
             reasons.append(f"Excessive noise fragments: {num_features} distinct blobs")
 
