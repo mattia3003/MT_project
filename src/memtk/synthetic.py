@@ -22,6 +22,14 @@ from memtk.io import load_image
 EIGHT_CONNECTED = np.ones((3, 3), dtype=bool)
 
 
+def count_components(mask: np.ndarray) -> int:
+    """Number of 8-connected foreground components of a 2D mask."""
+    result = ndimage.label(mask > 0, structure=EIGHT_CONNECTED)
+    if not isinstance(result, tuple):  # only an int when an `output` array is passed
+        raise TypeError("ndimage.label returned no label array")
+    return int(result[1])
+
+
 def sample_id(path: str | Path) -> str:
     """Full file stem without the NIfTI extension(s): 'file_1033.nii.gz' -> 'file_1033'."""
     name = Path(path).name
@@ -88,7 +96,7 @@ def index_pool(pool_name: str, pool_cfg: dict, spatial_size: list[int]) -> pd.Da
             "pool": pool_name, "sample_id": sid, "filename": path.name, "name_scheme": name_scheme(sid),
             "shape": "x".join(map(str, image.shape)), "shape_ok": shape_ok, "mask_binary": mask_binary,
             "mask_px": int((mask > 0).sum()),
-            "n_components_8conn": int(ndimage.label(mask > 0, EIGHT_CONNECTED)[1]) if mask.ndim == 2 else -1,
+            "n_components_8conn": count_components(mask) if mask.ndim == 2 else -1,
             "img_min": float(image.min()), "img_max": float(image.max()), "img_mean": float(image.mean()),
             "legacy_excluded": sid in legacy, "legacy_reason": legacy.get(sid, ""),
         })
