@@ -14,6 +14,8 @@ Reference docs (read the relevant one before starting work):
   organized by report section. Raw material for the written report.
 - `docs/architecture.md`: pipeline flow chart, module diagram (Mermaid) and data dictionary
   (every file the pipeline reads or writes, with its columns).
+- `docs/e0b-plan.md`: E0b implementation plan, stage status and decisions made so far.
+  Read it before continuing E0b work; update its status table when a stage is done.
 This file is a summary. If it disagrees with the docs, the docs win; flag the mismatch.
 
 ## Data
