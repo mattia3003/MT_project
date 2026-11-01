@@ -82,8 +82,9 @@ def _package_versions() -> dict:
     return versions
 
 
-def write_run_info(out_dir: str | Path, cfg: dict, script: str, extra: dict | None = None) -> Path:
-    """Write `run_info.json` (time, command, seed, full config, versions) into `out_dir`."""
+def write_run_info(out_dir: str | Path, cfg: dict, script: str, extra: dict | None = None,
+                   filename: str = "run_info.json") -> Path:
+    """Write a run log (time, command, seed, full config, versions) into `out_dir`."""
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     info = {
@@ -96,7 +97,7 @@ def write_run_info(out_dir: str | Path, cfg: dict, script: str, extra: dict | No
         "config": cfg,
         **(extra or {}),
     }
-    path = out_dir / "run_info.json"
+    path = out_dir / filename
     with open(path, "w", encoding="utf-8") as f:
         json.dump(info, f, indent=2, default=str)
     return path
