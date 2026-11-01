@@ -10,6 +10,8 @@ Reference docs (read the relevant one before starting work):
 - `docs/experiment-plan.md`: procedures for E0–E8, shared setup and definitions, schedule, open decisions.
   This is the main reference when implementing an experiment.
 - `docs/literature-timeline.md`: literature timeline and notes.
+- `docs/report-notes.md`: running log of decisions, findings, limitations and open questions,
+  organized by report section. Raw material for the written report.
 This file is a summary. If it disagrees with the docs, the docs win; flag the mismatch.
 
 ## Data
@@ -204,4 +206,7 @@ Not aimed at publication for now. Original weights (Branch A) only as a fallback
   config, versions). Stages refuse to overwrite without `--overwrite`.
 - Slice index `z` is the 0-based array index. Model-space volumes use an identity affine.
 - The user stages and commits all git changes manually; work in small steps, each one
-  reviewed before the next. Earlier segmentation work is under the git tag `segmentation-final`.
+  reviewed before the next.
+- At the end of each step, and whenever a decision, finding, limitation or open question comes
+  up in discussion, suggest additions to `docs/report-notes.md` (dated, with their source) for
+  the user to review. Never record a number without saying where it comes from. Earlier segmentation work is under the git tag `segmentation-final`.
