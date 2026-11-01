@@ -19,5 +19,13 @@ dependencies = [
     "matplotlib",
 ]
 
+[project.optional-dependencies]
+dev = ["pytest"]
+
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# anyio's pytest plugin (installed for other tools in the venv) emits a deprecation warning
+addopts = ["-p", "no:anyio"]

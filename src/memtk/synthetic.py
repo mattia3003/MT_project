@@ -13,21 +13,11 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from scipy import ndimage
 from tqdm import tqdm
 
 from memtk.config import resolve_path
 from memtk.io import load_image
-
-EIGHT_CONNECTED = np.ones((3, 3), dtype=bool)
-
-
-def count_components(mask: np.ndarray) -> int:
-    """Number of 8-connected foreground components of a 2D mask."""
-    result = ndimage.label(mask > 0, structure=EIGHT_CONNECTED)
-    if not isinstance(result, tuple):  # only an int when an `output` array is passed
-        raise TypeError("ndimage.label returned no label array")
-    return int(result[1])
+from memtk.lesions import count_components
 
 
 def sample_id(path: str | Path) -> str:

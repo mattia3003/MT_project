@@ -209,6 +209,10 @@ Not aimed at publication for now. Original weights (Branch A) only as a fallback
   in `results/<dataset|pool>/<experiment>/` (in git); every stage writes a run_info JSON (seed,
   config, versions). Stages refuse to overwrite without `--overwrite`.
 - Slice index `z` is the 0-based array index. Model-space volumes use an identity affine.
+- Unit tests: `tests/` (pytest, `.venv\Scripts\python.exe -m pytest`); core logic used by later
+  experiments (lesion labelling, detectors) gets tests on small hand-built inputs.
+- E0b decisions follow review stage -> user sets the config value (null until decided) ->
+  production stage, which refuses to run while its value is null.
 - The user stages and commits all git changes manually; work in small steps, each one
   reviewed before the next.
 - At the end of each step, and whenever a decision, finding, limitation or open question comes

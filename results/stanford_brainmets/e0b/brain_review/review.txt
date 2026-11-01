@@ -1,0 +1,34 @@
+E0b brain-review: dataset 'stanford_brainmets' (T only), pool 'amibekk_v1' (2000 random samples for the methods), seed 2026
+Lesions = components >= 4 px (provisional; decision B comes later)
+
+Candidate brain-mask methods:
+                         slices  lesions  over_half_outside  share_over_half_outside  any_outside  share_any_outside  brain_px_p1  brain_px_p5  brain_px_median
+group method                                                                                                                                                   
+T     otsu                 3823     6101                 74                   0.0121          561             0.0920       641.44      1956.10           7255.0
+      otsu_dilate1         3823     6101                 69                   0.0113          105             0.0172       816.88      2232.40           7829.0
+      otsu_dilate2         3823     6101                 66                   0.0108           74             0.0121       992.76      2496.30           8296.0
+      otsu_all             3823     6101                 13                   0.0021          518             0.0849       848.32      1962.80           7261.0
+      low_threshold        3823     6101                 33                   0.0054          121             0.0198      1073.70      2160.10           7765.0
+      low_threshold_all    3823     6101                  1                   0.0002           89             0.0146      1188.44      2174.30           7765.0
+S     otsu                 2000     3250                120                   0.0369          438             0.1348        69.96       598.90           2781.0
+      otsu_dilate1         2000     3250                115                   0.0354          133             0.0409       118.91       768.85           3112.5
+      otsu_dilate2         2000     3250                107                   0.0329          117             0.0360       170.96       912.95           3405.5
+      otsu_all             2000     3250                 85                   0.0262          410             0.1262        75.98       600.90           2781.0
+      low_threshold        2000     3250                 82                   0.0252          130             0.0400       131.94       707.75           2974.0
+      low_threshold_all    2000     3250                 52                   0.0160          100             0.0308       171.91       707.75           2975.0
+
+Proposed brain.method: low_threshold_all
+  rule: fewest T lesions even partly outside the brain, among methods with at most 0.5% of T lesions more than half outside
+
+Failed-MRI cut-off: samples and T lesion slices below each tissue cut (all 37624 samples)
+ cut  S_below  S_share_below  T_slices_below
+  20      152       0.004040               0
+  50      192       0.005103               1
+ 100      267       0.007097               1
+ 150      331       0.008798               1
+ 200      405       0.010764               2
+ 300      576       0.015309               4
+ 400      776       0.020625               8
+Choose brain.min_tissue_px from near_blank_amibekk_v1.png: the highest cut below which every synthetic image is near-blank, staying clear of the smallest real slices.
+
+Then set both values in configs/default.yaml (dated comment) and run the 'brain' stage.

@@ -10,7 +10,7 @@ and open the Markdown preview.
 **Keeping it current:** updating this file is part of finishing each experiment, together with
 the status table in `scripts/README.md` and the entries in `docs/report-notes.md`.
 
-*Status: E0a implemented (2026-11-01).*
+*Status: E0a implemented; E0b in progress, `brain-review` implemented (2026-11-01).*
 
 ---
 
@@ -18,7 +18,8 @@ the status table in `scripts/README.md` and the entries in `docs/report-notes.md
 
 One script per experiment; its steps are subcommands (stages). Every stage reads
 `configs/default.yaml` (datasets, pools, seed 2026, parameters) and writes a run log next to its
-outputs. Cylinders are data products, the diamond is the go/no-go gate.
+outputs. Cylinders are data products, the diamond is the go/no-go gate. Dotted arrows inside E0b
+are decisions you make by hand in the config, after viewing the evidence of a review stage.
 
 ```mermaid
 flowchart TD
@@ -43,7 +44,22 @@ flowchart TD
     POOL --> SYN --> INDEX
     SPLITCSV & VOLS & INDEX --> CHECK --> REPORT
 
-    E0B["E0b · e0b_audit.py<br/>lesion table · mask QC · statistics"]:::planned
+    subgraph E0B["E0b · e0b_audit.py (in progress)"]
+        BREV["brain-review ✅"]
+        BRAIN["brain"]:::planned
+        LREV["lesions-review"]:::planned
+        LES["lesions · view"]:::planned
+        QREV["qc-review"]:::planned
+        QC["qc"]:::planned
+        STATS["stats · check"]:::planned
+    end
+    BREV -.->|"decision A"| BRAIN
+    BRAIN --> LREV
+    LREV -.->|"decisions B, C"| LES
+    LES --> QREV
+    QREV -.->|"decision D"| QC
+    QC --> STATS
+
     E3["E3 · e3_calibrate.py<br/>E1 + E2 detectors on H-cal"]:::planned
     FROZEN[("FREEZE: thresholds + bound<br/>S is never scored before here")]:::planned
     E4{"E4 · e4_validate.py<br/>planted copies: gate"}:::planned
@@ -52,7 +68,8 @@ flowchart TD
     E7["E7 · e7_reports.py<br/>match reports · deletion test"]:::planned
     E8["E8 · e8_paired_mri.py<br/>optional"]:::planned
 
-    VOLS & INDEX --> E0B --> E3 --> FROZEN --> E4
+    VOLS & INDEX --> BREV
+    STATS --> E3 --> FROZEN --> E4
     E4 -->|pass| E5
     E4 -.->|"fail: adjust on H-cal, re-freeze"| E3
     E5 --> E6 & E7
@@ -68,7 +85,12 @@ flowchart TD
 | | `real` | ✅ | raw real volumes, split CSV | `volumes/`, `patients.csv`, `lesion_slices.csv` |
 | | `synthetic` | ✅ | raw synthetic pool, legacy QC list | `synthetic_index.csv` |
 | | `check` | ✅ | all of the above, raw data | `check_report_<pool>.txt`, `check_grid_<pool>.png` |
-| `e0b_audit.py` | *tbd* | planned | E0a outputs | lesion table, QC classes, E0 statistics |
+| `e0b_audit.py` | `brain-review` | ✅ | E0a outputs (T only), synthetic pool | `results/<dataset>/e0b/brain_review/` (evidence for decision A) |
+| | `brain` | planned | decision A | brain masks and boxes |
+| | `lesions-review` | planned | T | evidence for decisions B, C |
+| | `lesions`, `view` | planned | decisions B, C | lesion table, label maps, overview sheets |
+| | `qc-review`, `qc` | planned | lesion table | evidence for decision D, QC classes |
+| | `stats`, `check` | planned | all E0b outputs | E0 statistics; consistency checks |
 | `e3_calibrate.py` | *tbd* | planned | E0b outputs, H-cal | frozen thresholds |
 | `e4_validate.py` | *tbd* | planned | frozen thresholds, T, H-eval | validation table, planted copies |
 | `e5_audit.py` | — | planned | frozen thresholds, S | main audit tables |
@@ -89,20 +111,26 @@ YAML config and the repository root.
 ```mermaid
 flowchart LR
     S_E0A["scripts/e0a_prepare_data.py"]
+    S_E0B["scripts/e0b_audit.py"]
 
     subgraph MEMTK["src/memtk"]
         M_CHECKS["checks"]
+        M_AUDIT["audit"]
         M_SPLIT["split"]
         M_SYN["synthetic"]
+        M_PLOT["plotting"]
+        M_LESIONS["lesions"]
         M_TRANSFORMS["transforms"]
         M_IO["io"]
         M_CONFIG["config"]
     end
 
     S_E0A --> M_CHECKS & M_SPLIT & M_SYN & M_TRANSFORMS & M_IO & M_CONFIG
-    M_CHECKS --> M_SYN & M_TRANSFORMS & M_IO & M_CONFIG
+    S_E0B --> M_AUDIT & M_LESIONS & M_SYN & M_IO & M_CONFIG
+    M_CHECKS --> M_LESIONS & M_SYN & M_TRANSFORMS & M_IO & M_CONFIG
+    M_AUDIT --> M_LESIONS & M_PLOT
     M_SPLIT --> M_TRANSFORMS & M_IO
-    M_SYN --> M_IO & M_CONFIG
+    M_SYN --> M_LESIONS & M_IO & M_CONFIG
     M_IO --> M_CONFIG
 ```
 
@@ -112,15 +140,20 @@ flowchart LR
 | `io` | Read and write NIfTI; locate patients and their files | `load_image`, `save_nifti`, `list_patients`, `patient_files` | nibabel |
 | `transforms` | The original training transform (model space) and slice counts | `model_space_transform`, `convert_volume_pair`, `binarize_mask`, `lesion_px_per_slice` | MONAI, PyTorch |
 | `split` | Seeded matched-pair split into T / H-cal / H-eval | `make_split`, `paired_split`, `summarize_split` | pandas |
-| `synthetic` | Read synthetic samples in place; sample IDs; index a pool; parse the legacy QC list | `index_pool`, `load_sample`, `sample_id`, `name_scheme`, `read_legacy_exclusions`, `count_components` | SciPy |
+| `synthetic` | Read synthetic samples in place; sample IDs; index a pool; parse the legacy QC list | `index_pool`, `load_sample`, `sample_id`, `name_scheme`, `read_legacy_exclusions` | — |
+| `lesions` | 8-connected labelling; brain masks (five candidate methods), tissue area, brain box. Attach-or-drop and lesion features follow in the E0b `lesions` stage. | `label_components`, `count_components`, `brain_mask`, `tissue_px`, `brain_box`, `fraction_outside` | SciPy, scikit-image |
 | `checks` | E0a consistency checks, independent reference transform, sample grid | `CheckReport`, `check_split`, `check_real_volumes`, `check_recompute`, `check_synthetic_index`, `sample_grid` | PyTorch, matplotlib |
+| `audit` | Evidence for the E0b review stages: candidate comparisons, figures, proposals | `evaluate_brain_methods`, `summarize_brain_methods`, `propose_brain_method`, `method_grid`, `sorted_sheet`, `tissue_counts`, `tissue_histogram` | pandas, matplotlib |
+| `plotting` | Shared figure helpers (no pyplot, so importing memtk never changes the plotting backend) | `tile_figure`, `show_slice`, `hide_unused`, `save` | matplotlib |
+
+Tests: `tests/test_lesions.py` (pytest) covers labelling, brain masks, tissue area and the brain box
+on small hand-built images. Run with `.venv\Scripts\python.exe -m pytest`.
 
 **Planned modules** (from the experiment plan; names may change when each experiment is planned):
 
 | Module | For | Purpose |
 | --- | --- | --- |
-| `lesions` | E0b | 8-connected labelling, attach-or-drop, lesion features, brain box. Takes over `count_components` from `synthetic`. |
-| `qc` | E0b | Synthetic mask quality classes (clean / minor / noisy) |
+| `qc` | E0b | Synthetic mask quality classes (clean / minor / noisy / no_lesion / mri_failed) |
 | `detectors/whole_mask` | E1 | Dice, top-k candidates, shift search |
 | `detectors/lesion_level` | E2 | Lesion score s(a, b), Hungarian C(q, t), prefilters, the three output tables |
 | `calibration` | E3 | Percentile thresholds, informative-lesion bound |
@@ -146,7 +179,9 @@ with the stage that writes them.
 
 Keys: `seed`; `output_root`, `results_root`, `splits_dir`; `default_real_dataset`,
 `default_synthetic_pool`; `preprocessing` (`spatial_size`, `interpolation`, `mask_threshold`,
-`slice_axis`); `real_datasets.<name>` (`root`, `image_file`, `mask_file`, `train_split`,
+`slice_axis`); E0b decisions, `null` until decided: `brain` (`method`, `min_tissue_px`),
+`lesions` (`connectivity`, `min_lesion_area`, `attach_gap`), `qc` (`max_isolated_specks`,
+`edge_outside_frac`, `small_lesion_px`); `real_datasets.<name>` (`root`, `image_file`, `mask_file`, `train_split`,
 `heldout_split`, `heldout_sets`); `synthetic_pools.<name>` (`dir`, `glob`, `image_channel`,
 `mask_channel`, `trained_on`, `legacy_exclusion_file`).
 
@@ -226,6 +261,21 @@ Written by `check`. In git.
 | `check_report_<pool>.txt` | One PASS/FAIL line per check, with counts and failing examples |
 | `check_grid_<pool>.png` | Random lesion slices of T, H-cal and H-eval, and random synthetic samples, with mask outlines |
 | `check_<pool>.run_info.json` | Run log |
+
+### Results: `results/<dataset>/e0b/brain_review/`
+
+Written by `brain-review`. In git. Evidence for decision A; nothing here is used by later stages.
+
+| File | Content |
+| --- | --- |
+| `review.txt` | Method comparison, proposed `brain.method` with its rule, tissue-cut counts, what to set next |
+| `brain_methods_<pool>.csv` | Per group (T, S sample) and method: lesions (≥ provisional min area), share more than half outside / partly outside the brain, brain-area 1st/5th percentile and median |
+| `methods_real.png` | T slices where plain Otsu fails, plus random ones; one column per method; cyan = brain, red = lesion |
+| `methods_synthetic_<pool>.png` | The same for small synthetic brains, synthetic lesions outside, and random samples |
+| `near_blank_<pool>.png` | Synthetic MRIs with the least brain tissue, samples just above candidate cuts, and the T slices with the least tissue |
+| `tissue_hist_<pool>.png` | Tissue area of all synthetic samples vs T lesion slices (log axes) |
+| `tissue_counts_<pool>.csv` | For each candidate `min_tissue_px`: synthetic samples below it, and T lesion slices below it |
+| `run_info.json` | Run log |
 
 ### Run logs: `run_info.json` and `*.run_info.json`
 

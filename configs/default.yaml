@@ -20,6 +20,32 @@ preprocessing:
   mask_threshold: 0.01       # strict '>', as make_binary in the original repo
   slice_axis: 2              # axial
 
+# --- E0b decisions -------------------------------------------------------------------------
+# Values marked null are decided by viewing the evidence of a review stage; set them by hand with
+# a dated comment. A production stage refuses to run while a value it needs is null.
+
+brain:
+  # Decision A (evidence: `e0b_audit.py brain-review`)
+  # options: otsu | otsu_dilate1 | otsu_dilate2 | otsu_all | low_threshold | low_threshold_all
+  method: low_threshold_all   # decided 2026-11-01: 1/6101 T lesions >50% outside the brain
+                              # (Otsu: 74), 1.5% partly outside; keeps separate pieces in low slices
+  # a synthetic MRI with less brain tissue than this counts as failed (near-blank);
+  # tissue = pixels above 0.02 in regions >= 30 px (memtk.lesions.tissue_px)
+  min_tissue_px: 20           # decided 2026-11-01: below 20 px all viewed synthetic MRIs have no
+                              # brain (152 samples); the smallest real T lesion slice has 31 px
+
+lesions:
+  connectivity: 8
+  # Decisions B and C (evidence: `e0b_audit.py lesions-review`)
+  min_lesion_area: null   # px; smaller components are specks
+  attach_gap: null        # max background px between a speck and a lesion for the speck to be attached
+
+qc:
+  # Decision D (evidence: `e0b_audit.py qc-review`)
+  max_isolated_specks: null   # minor if 1..N isolated specks, noisy if more (plan suggests 3)
+  edge_outside_frac: 0.5      # flag a real-sized lesion if more than this fraction lies outside the brain
+  small_lesion_px: 40         # the sampling filter's "at least one lesion under 40 px"
+
 real_datasets:
   stanford_brainmets:
     root: data/StanfordSkullStripped_1mm

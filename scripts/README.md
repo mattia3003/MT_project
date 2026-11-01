@@ -21,13 +21,24 @@ Status: ✅ implemented · ⏳ planned
 | `e0a_prepare_data.py real` | ✅ | raw real dataset, split CSV | `<output_root>/<dataset>/volumes/<pid>/{bravo,seg_soft,seg}.nii.gz` (128×128×D), `patients.csv`, `lesion_slices.csv`, `run_info.json` |
 | `e0a_prepare_data.py synthetic` | ✅ | raw synthetic pool (read in place) | `<output_root>/<pool>/synthetic_index.csv` (one row per sample: ID, naming scheme, read/shape/binary checks, mask px, components, image range, legacy QC flag), `run_info.json` |
 | `e0a_prepare_data.py check` | ✅ | outputs of the stages above, raw data | `results/<dataset>/e0a/check_report_<pool>.txt` (PASS/FAIL per check; exit code 1 on any failure), `check_grid_<pool>.png`, `check_<pool>.run_info.json` |
-| `e0b_audit.py` | ⏳ | E0a outputs | lesion table, mask QC classes, E0 statistics |
+| `e0b_audit.py brain-review` | ✅ | E0a outputs (T only), synthetic pool | `results/<dataset>/e0b/brain_review/`: method comparison, example figures, near-blank sheet, tissue counts, proposal (`review.txt`) → **decision A** in the config |
+| `e0b_audit.py brain` | ⏳ | decision A | brain masks and boxes for all real lesion slices and synthetic samples |
+| `e0b_audit.py lesions-review` | ⏳ | T | evidence for **decisions B, C** (minimum lesion area, attach gap) |
+| `e0b_audit.py lesions` / `view` | ⏳ | decisions B, C | lesion table, label maps, overview sheets; `view` shows one slice |
+| `e0b_audit.py qc-review` / `qc` | ⏳ | lesion table | evidence for **decision D** (speck cut-off), then QC classes |
+| `e0b_audit.py stats` / `check` | ⏳ | all E0b outputs | E0 statistics and figures; consistency checks |
 | `e3_calibrate.py` | ⏳ | E0 outputs, H-cal | frozen thresholds (runs the E1 + E2 detectors from `memtk`) |
 | `e4_validate.py` | ⏳ | thresholds, T, H-eval | planted-copy validation table (gate) |
 | `e5_audit.py` | ⏳ | validated config, S | main audit tables |
 | `e6_exposure.py` | ⏳ | E5 outputs | patient exposure, rarity, duplication |
 | `e7_reports.py` | ⏳ | E5, E6 outputs, planted copies | match reports, deletion test, correctness |
 | `e8_paired_mri.py` | ⏳ (optional) | E5 outputs, paired MRIs | paired-MRI similarity |
+
+**Review → decision → production.** E0b's review stages only produce evidence and a proposed
+value. You set the value by hand in `configs/default.yaml` (with a dated comment); the production
+stage that needs it refuses to run while it is still `null`.
+
+**Unit tests:** `.venv\Scripts\python.exe -m pytest` (in `tests/`).
 
 The split is fixed for the whole project: `split` refuses to replace an existing split file
 unless `--overwrite` is given (re-running with the same seed gives an identical file).

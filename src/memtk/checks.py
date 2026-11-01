@@ -21,7 +21,8 @@ from tqdm import tqdm
 
 from memtk.config import resolve_path
 from memtk.io import list_patients, load_image, patient_files
-from memtk.synthetic import count_components, list_pool_files, load_sample, read_legacy_exclusions
+from memtk.lesions import count_components
+from memtk.synthetic import list_pool_files, load_sample, read_legacy_exclusions
 from memtk.transforms import convert_volume_pair, lesion_px_per_slice
 
 VOLUME_FILES = ("bravo.nii.gz", "seg_soft.nii.gz", "seg.nii.gz")

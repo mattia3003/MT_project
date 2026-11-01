@@ -51,7 +51,8 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
   differently. *Source: `synthetic_index.csv`, 2026-11-01.*
 - **187 synthetic MRIs are nearly blank** (maximum intensity < 0.3; lowest 0.055). Synthetic
   intensities go slightly negative (minimum −0.047); real model-space data lies in [0, 1].
-  *Source: `synthetic_index.csv`, 2026-11-01.*
+  *Source: `synthetic_index.csv`, 2026-11-01.* Maximum intensity later turned out not to
+  identify failed images; see "failed synthetic MRI" in section 2.
 - **Old quality-control list: 2,243 masks** (1,583 "excessive noise fragments", 660 "pixels
   outside brain", the latter triggered by a single pixel). All entries match a file.
   *Source: `docs/corrupted_synthetic_masks_10_0.txt`, check report, 2026-11-01.*
@@ -64,6 +65,42 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
 - **All comparisons happen in model space, converted from the 3D volumes.** Why: ScaleIntensity
   uses each volume's min and max, so the model space cannot be derived from single slices. The
   earlier per-slice native-resolution files were therefore not reusable. 2026-11-01.
+- **Brain mask: fixed threshold 0.02, keep every region ≥ 30 px, fill holes** (`low_threshold_all`;
+  decision A, set in the config 2026-11-01). Six candidates were compared on all 6,101 T lesions
+  (≥ 4 px) and 2,000 random synthetic samples. Share of lesions more than half outside the
+  brain / even partly outside:
+
+  | Method | T >half | T partly | S >half |
+  | --- | --- | --- | --- |
+  | Otsu, largest region | 74 (1.21%) | 9.2% | 3.7% |
+  | Otsu + 2 px dilation | 66 (1.08%) | 1.2% | 3.3% |
+  | Otsu, all regions | 13 (0.21%) | 8.5% | 2.6% |
+  | 0.02, largest region | 33 (0.54%) | 2.0% | 2.5% |
+  | 0.02, all regions | 1 (0.02%) | 1.5% | 1.6% |
+
+  Plain Otsu fails in two independent ways:
+  - It keeps only the largest region. Low slices show the brain as separate pieces (lower lobes,
+    cerebellum), and lesions in the discarded pieces look outside. Keeping all regions ≥ 30 px
+    fixes this under either threshold (74 → 13; 33 → 1).
+  - It trims the dim brain edge. The Otsu threshold (~0.10) lands at the intensity of dim
+    tissue (~0.09), so lesions at the edge are cut. A fixed 0.02 works because the images are
+    skull-stripped: background lies near 0 (99.9th percentile ~0.001). Dilation is a blunt fix:
+    it pushes the edge out everywhere but does not recover lost pieces (74 → 66).
+
+  Rejected: Otsu variants. Without dilation the edge stays trimmed (8.5% partly outside even with
+  all regions); with dilation the separate pieces are still lost (66 more than half outside).
+  A dilated Otsu with all regions was not tested, as the fixed threshold already solves both.
+  *Source: `results/stanford_brainmets/e0b/brain_review/review.txt` and `methods_real.png`;
+  intensity levels from a read-only sample of 600 T and 600 synthetic slices, 2026-11-01.*
+- **A failed synthetic MRI is judged by its brain tissue area, not its maximum intensity**
+  (`brain.min_tissue_px` = 20 px, decision A, set 2026-11-01: below 20 px every viewed sample has
+  no brain at all, and the smallest real T lesion slice has 31 px). Tissue = pixels of the brain
+  mask above. Why: a bright
+  lesion on an otherwise blank image gives a high maximum, while some normal but dim brains have
+  a low one. Among the synthetic samples, 82 with maximum ≥ 0.3 have < 100 px of tissue, and 38
+  with maximum < 0.3 have ≥ 400 px. A small brain alone is never a failure (see section 3).
+  *Source: read-only check on the full pool, 2026-11-01; tissue counts in
+  `results/stanford_brainmets/e0b/brain_review/tissue_counts_amibekk_v1.csv`.*
 - **H-cal/H-eval split by matched pairs, seed 2026.** Sort the 51 test patients by number of
   lesion slices, pair neighbours, and assign one of each pair at random to each set; the odd
   patient out goes to H-eval. Why: lesion burden ranges from 3 to 119 slices, and a plain random
@@ -102,7 +139,20 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
   reading is that synthetic samples resemble slices from near the top of the head. The centroid
   spread uses the masks only, so it does not depend on the brain-mask method.
   *Source: read-only sample, all T lesion slices vs 3,000 synthetic samples (old-QC and
-  near-blank excluded), 2026-11-01.*
+  near-blank excluded), 2026-11-01.* With the proposed brain mask (`low_threshold_all`), 1.6% of
+  synthetic lesions lie more than half outside the brain (T: 0.02%). *Source: brain-review
+  `review.txt`, 2000 random samples, 2026-11-01.*
+- **The smaller synthetic brains look like genuine anatomy**, not a brain-mask artefact: compact
+  slices resembling the top or bottom of the head, outlined well by every method. Median brain
+  area 2,975 px (S) vs 7,765 px (T lesion slices). *Source:
+  `results/stanford_brainmets/e0b/brain_review/methods_synthetic_amibekk_v1.png`, `review.txt`,
+  2026-11-01.* `stats` compares them with real slices by height.
+- **Some synthetic MRIs contain no brain at all.** 152 of 37,624 samples have < 20 px of brain
+  tissue; the 32 lowest have 0 px (a black image with only a lesion or a faint smudge). Between
+  ~50 and ~400 px the images show small brain fragments, similar to the smallest real T lesion
+  slices (lowest: 31 px, then 183 px and 236 px; 8 T slices have < 400 px). *Source:
+  `results/stanford_brainmets/e0b/brain_review/near_blank_amibekk_v1.png`,
+  `tissue_counts_amibekk_v1.csv`, 2026-11-01.*
 
 ## 4. Limitations and assumptions
 
@@ -178,3 +228,6 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
 - **Native vs model-space figure:** one slice before and after conversion, with the soft mask
   and the 0.01 threshold. It illustrates lesion enlargement. A draft exists outside the repo;
   produce it properly in E0b.
+- **Brain-mask method figure:** `results/stanford_brainmets/e0b/brain_review/methods_real.png`
+  (rows 1–4: where plain Otsu fails; six methods side by side). A reduced version (Otsu vs
+  `low_threshold_all`, 3 rows) would fit a methods appendix.
