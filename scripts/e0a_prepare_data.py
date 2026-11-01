@@ -2,15 +2,24 @@
 
 Stages, run in this order. Each one can be run and checked on its own:
   split   seeded patient split of a real dataset -> splits/<dataset>_seed<seed>.csv
+  real    real volumes into the 128x128 model space -> <output_root>/<dataset>/
+          volumes/<pid>/{bravo,seg_soft,seg}.nii.gz, patients.csv, lesion_slices.csv
 
 Example (from the repository root):
   .venv\\Scripts\\python.exe scripts\\e0a_prepare_data.py split
 """
 
 import argparse
+import shutil
+
+import numpy as np
+import pandas as pd
+from tqdm import tqdm
 
 from memtk import config
+from memtk.io import load_image, patient_files, save_nifti
 from memtk.split import make_split, summarize_split
+from memtk.transforms import convert_volume_pair, lesion_px_per_slice
 
 
 def run_split(cfg: dict, args: argparse.Namespace) -> None:
@@ -31,6 +40,64 @@ def run_split(cfg: dict, args: argparse.Namespace) -> None:
     print(f"Wrote {out_path}")
 
 
+def run_real(cfg: dict, args: argparse.Namespace) -> None:
+    name, dataset_cfg = config.real_dataset(cfg, args.dataset)
+    prep = cfg["preprocessing"]
+    axis = prep["slice_axis"]
+    split_path = config.split_file(cfg, name)
+    if not split_path.exists():
+        raise SystemExit(f"{split_path} not found; run the 'split' stage first.")
+    out_dir = config.output_dir(cfg, name)
+    volumes_dir = out_dir / "volumes"
+    if volumes_dir.exists():
+        if not args.overwrite:
+            raise SystemExit(f"{volumes_dir} already exists; pass --overwrite to regenerate.")
+        shutil.rmtree(volumes_dir)  # no stale patient folders survive a regeneration
+
+    split_df = pd.read_csv(split_path)
+    patient_rows, slice_rows = [], []
+    columns = split_df[["patient_id", "orig_split", "set"]].itertuples(index=False, name=None)
+    for pid, orig_split, set_name in tqdm(columns, total=len(split_df), desc=f"Converting {name}"):
+        pid, orig_split, set_name = str(pid), str(orig_split), str(set_name)
+        image_path, mask_path = patient_files(dataset_cfg, orig_split, pid)
+        mask_native = np.asanyarray(load_image(mask_path).dataobj)
+        bravo, seg_soft, seg = convert_volume_pair(image_path, mask_path, prep)
+
+        vol_dir = volumes_dir / pid
+        save_nifti(bravo, vol_dir / "bravo.nii.gz")
+        save_nifti(seg_soft, vol_dir / "seg_soft.nii.gz")
+        save_nifti(seg, vol_dir / "seg.nii.gz")
+
+        px_native = lesion_px_per_slice(mask_native, axis)
+        px_model = lesion_px_per_slice(seg, axis)
+        in_plane = [s for i, s in enumerate(mask_native.shape) if i != axis]
+        patient_rows.append({
+            "patient_id": pid, "orig_split": orig_split, "set": set_name,
+            "native_dim0": in_plane[0], "native_dim1": in_plane[1], "n_slices": mask_native.shape[axis],
+            "n_lesion_slices_native": int((px_native > 0).sum()),
+            "n_lesion_slices_model": int((px_model > 0).sum()),
+            "lesion_px_native": int(px_native.sum()), "lesion_px_model": int(px_model.sum()),
+        })
+        # Every slice with a lesion in either space, so a lesion lost or gained by conversion shows up
+        for z in np.flatnonzero((px_native > 0) | (px_model > 0)):
+            slice_rows.append({
+                "dataset": name, "patient_id": pid, "orig_split": orig_split,
+                "set": set_name, "z": int(z),
+                "lesion_px_native": int(px_native[z]), "lesion_px_model": int(px_model[z]),
+            })
+
+    patients = pd.DataFrame(patient_rows)
+    slices = pd.DataFrame(slice_rows)
+    patients.to_csv(out_dir / "patients.csv", index=False)
+    slices.to_csv(out_dir / "lesion_slices.csv", index=False)
+    config.write_run_info(out_dir, cfg, script=__file__, extra={"stage": "real", "split_file": str(split_path)})
+
+    summary = patients.groupby("set", sort=False)[
+        ["n_lesion_slices_native", "n_lesion_slices_model", "lesion_px_native", "lesion_px_model"]].sum()
+    print(f"\n{summary.to_string()}\n")
+    print(f"Wrote {len(patients)} patients to {out_dir}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     stages = parser.add_subparsers(dest="stage", required=True)
@@ -40,6 +107,12 @@ def main() -> None:
     p.add_argument("--dataset", help="real dataset name in the config (default: default_real_dataset)")
     p.add_argument("--overwrite", action="store_true", help="replace an existing split file")
     p.set_defaults(func=run_split)
+
+    p = stages.add_parser("real", help="real volumes into the 128x128 model space")
+    config.add_config_arg(p)
+    p.add_argument("--dataset", help="real dataset name in the config (default: default_real_dataset)")
+    p.add_argument("--overwrite", action="store_true", help="regenerate existing output")
+    p.set_defaults(func=run_real)
 
     args = parser.parse_args()
     args.func(config.load_config(args.config), args)

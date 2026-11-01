@@ -18,7 +18,7 @@ Status: ✅ implemented · ⏳ planned
 | Script / stage | Status | Inputs | Outputs |
 | --- | --- | --- | --- |
 | `e0a_prepare_data.py split` | ✅ | raw real dataset | `splits/<dataset>_seed<seed>.csv` (patient → T / H-cal / H-eval), `.run_info.json` |
-| `e0a_prepare_data.py real` | ⏳ | raw real dataset, split CSV | `<output_root>/<dataset>/volumes/<pid>/{bravo,seg_soft,seg}.nii.gz` (128×128×D), `lesion_slices.csv` |
+| `e0a_prepare_data.py real` | ✅ | raw real dataset, split CSV | `<output_root>/<dataset>/volumes/<pid>/{bravo,seg_soft,seg}.nii.gz` (128×128×D), `patients.csv`, `lesion_slices.csv`, `run_info.json` |
 | `e0a_prepare_data.py synthetic` | ⏳ | raw synthetic pool | `<output_root>/<pool>/synthetic_index.csv` |
 | `e0a_prepare_data.py check` | ⏳ | outputs of the stages above | assertion report, `results/<dataset>/E0/preprocessing_grid.png` |
 | `e0b_audit.py` | ⏳ | E0a outputs | lesion table, mask QC classes, E0 statistics |

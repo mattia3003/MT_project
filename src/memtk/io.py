@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import nibabel as nib
+import numpy as np
 from nibabel.dataobj_images import DataobjImage
 
 from memtk.config import resolve_path
@@ -16,6 +17,17 @@ def load_image(path: str | Path) -> DataobjImage:
     if not isinstance(img, DataobjImage):
         raise TypeError(f"Not an array-backed image: {path}")
     return img
+
+
+def save_nifti(array: np.ndarray, path: str | Path) -> None:
+    """Save an array as NIfTI with its own dtype and an identity affine.
+
+    Model-space arrays are resampled, so the native affine no longer applies; array index
+    (i, j, z) is the only coordinate system used downstream.
+    """
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    nib.save(nib.Nifti1Image(array, np.eye(4)), path)
 
 
 def list_patients(dataset_cfg: dict, split: str) -> list[str]:
