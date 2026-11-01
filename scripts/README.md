@@ -20,7 +20,7 @@ Status: ✅ implemented · ⏳ planned
 | `e0a_prepare_data.py split` | ✅ | raw real dataset | `splits/<dataset>_seed<seed>.csv` (patient → T / H-cal / H-eval), `.run_info.json` |
 | `e0a_prepare_data.py real` | ✅ | raw real dataset, split CSV | `<output_root>/<dataset>/volumes/<pid>/{bravo,seg_soft,seg}.nii.gz` (128×128×D), `patients.csv`, `lesion_slices.csv`, `run_info.json` |
 | `e0a_prepare_data.py synthetic` | ✅ | raw synthetic pool (read in place) | `<output_root>/<pool>/synthetic_index.csv` (one row per sample: ID, shape/binary checks, mask px, components, image range, legacy QC flag), `run_info.json` |
-| `e0a_prepare_data.py check` | ⏳ | outputs of the stages above | assertion report, `results/<dataset>/E0/preprocessing_grid.png` |
+| `e0a_prepare_data.py check` | ✅ | outputs of the stages above, raw data | `results/<dataset>/e0a/check_report.txt` (PASS/FAIL per check; exit code 1 on any failure), `check_grid.png`, `run_info.json` |
 | `e0b_audit.py` | ⏳ | E0a outputs | lesion table, mask QC classes, E0 statistics |
 | `e3_calibrate.py` | ⏳ | E0 outputs, H-cal | frozen thresholds (runs the E1 + E2 detectors from `memtk`) |
 | `e4_validate.py` | ⏳ | thresholds, T, H-eval | planted-copy validation table (gate) |

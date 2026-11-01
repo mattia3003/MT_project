@@ -1,0 +1,34 @@
+E0a check: dataset 'stanford_brainmets', pool 'amibekk_v1', seed 2026
+
+[PASS] pool 'amibekk_v1' was trained on dataset 'stanford_brainmets': trained_on = stanford_brainmets
+[PASS] split: patient IDs unique
+[PASS] split: 'train' patients in CSV == patients on disk: 105 patients
+[PASS] split: 'test' patients in CSV == patients on disk: 51 patients
+[PASS] split: all training patients in T
+[PASS] split: held-out patients only in held-out sets
+[PASS] split: held-out sets differ by at most one patient: T=105, H-eval=26, H-cal=25
+[PASS] real: patients.csv covers exactly the split patients: 156 rows
+[PASS] real: all three volume files present
+[PASS] real: shapes equal, in-plane [128, 128]
+[PASS] real: dtypes bravo/seg_soft float32, seg uint8
+[PASS] real: bravo within [0, 1]
+[PASS] real: seg_soft within [0, 1]
+[PASS] real: seg only 0/1
+[PASS] real: seg == (seg_soft > 0.01) exactly
+[PASS] real: depth == native number of slices
+[PASS] real: lesion_slices.csv model px == recount from seg
+[PASS] real: lesion_slices.csv native px == recount from raw mask
+[PASS] real: patients.csv totals == recount
+[PASS] real: no lesion slice lost or gained by conversion: 5909 lesion slices; lost 0, gained 0
+[PASS] recompute: saved volumes == fresh MONAI run (bit-exact): patients ['Mets_285', 'Mets_065', 'Mets_021']
+[PASS] recompute: saved volumes == independent nibabel+torch reference (atol 1e-05): max abs difference 0.00e+00
+[PASS] recompute: binary masks agree with the reference
+[PASS] synthetic: index rows == files in pool folder: 37624 rows, 37624 files
+[PASS] synthetic: sample IDs unique
+[PASS] synthetic: all samples 128x128
+[PASS] synthetic: all masks binary
+[PASS] synthetic: no empty masks
+[PASS] synthetic: legacy exclusion flags == legacy list: 2243 entries, 2243 flagged
+[PASS] synthetic: stored values == recomputed from files: 300 random samples
+
+30 passed, 0 failed

@@ -62,6 +62,11 @@ def output_dir(cfg: dict, name: str) -> Path:
     return resolve_path(cfg["output_root"]) / name
 
 
+def results_dir(cfg: dict, name: str, experiment: str) -> Path:
+    """Results folder of one experiment for a dataset or pool: `<results_root>/<name>/<experiment>`."""
+    return resolve_path(cfg["results_root"]) / name / experiment
+
+
 def split_file(cfg: dict, dataset_name: str) -> Path:
     """Patient-split CSV for a real dataset: `<splits_dir>/<dataset>_seed<seed>.csv`."""
     return resolve_path(cfg["splits_dir"]) / f"{dataset_name}_seed{cfg['seed']}.csv"
