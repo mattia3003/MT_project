@@ -4,6 +4,8 @@ Stages, run in this order. Each one can be run and checked on its own:
   split   seeded patient split of a real dataset -> splits/<dataset>_seed<seed>.csv
   real    real volumes into the 128x128 model space -> <output_root>/<dataset>/
           volumes/<pid>/{bravo,seg_soft,seg}.nii.gz, patients.csv, lesion_slices.csv
+  synthetic  index of a synthetic pool (files are read in place, not copied)
+          -> <output_root>/<pool>/synthetic_index.csv
 
 Example (from the repository root):
   .venv\\Scripts\\python.exe scripts\\e0a_prepare_data.py split
@@ -19,6 +21,7 @@ from tqdm import tqdm
 from memtk import config
 from memtk.io import load_image, patient_files, save_nifti
 from memtk.split import make_split, summarize_split
+from memtk.synthetic import index_pool
 from memtk.transforms import convert_volume_pair, lesion_px_per_slice
 
 
@@ -98,6 +101,29 @@ def run_real(cfg: dict, args: argparse.Namespace) -> None:
     print(f"Wrote {len(patients)} patients to {out_dir}")
 
 
+def run_synthetic(cfg: dict, args: argparse.Namespace) -> None:
+    name, pool_cfg = config.synthetic_pool(cfg, args.pool)
+    out_dir = config.output_dir(cfg, name)
+    out_path = out_dir / "synthetic_index.csv"
+    if out_path.exists() and not args.overwrite:
+        raise SystemExit(f"{out_path} already exists; pass --overwrite to regenerate.")
+
+    df = index_pool(name, pool_cfg, cfg["preprocessing"]["spatial_size"])
+    out_dir.mkdir(parents=True, exist_ok=True)
+    df.to_csv(out_path, index=False)
+    config.write_run_info(out_dir, cfg, script=__file__, extra={"stage": "synthetic"})
+
+    bad = df[~df["shape_ok"] | ~df["mask_binary"]]
+    print(f"\nSamples: {len(df)}  by naming scheme: {df['name_scheme'].value_counts().to_dict()}")
+    print(f"Wrong shape: {(~df['shape_ok']).sum()}  non-binary mask: {(~df['mask_binary']).sum()}"
+          f"  empty mask: {(df['mask_px'] == 0).sum()}")
+    if len(bad):
+        print(f"Failing samples (first 10): {bad['sample_id'].tolist()[:10]}")
+    print(f"Legacy-excluded: {df['legacy_excluded'].sum()}")
+    print(f"\n{df[['mask_px', 'n_components_8conn', 'img_min', 'img_max']].describe().round(3).to_string()}\n")
+    print(f"Wrote {out_path}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     stages = parser.add_subparsers(dest="stage", required=True)
@@ -113,6 +139,12 @@ def main() -> None:
     p.add_argument("--dataset", help="real dataset name in the config (default: default_real_dataset)")
     p.add_argument("--overwrite", action="store_true", help="regenerate existing output")
     p.set_defaults(func=run_real)
+
+    p = stages.add_parser("synthetic", help="index of a synthetic pool")
+    config.add_config_arg(p)
+    p.add_argument("--pool", help="synthetic pool name in the config (default: default_synthetic_pool)")
+    p.add_argument("--overwrite", action="store_true", help="regenerate an existing index")
+    p.set_defaults(func=run_synthetic)
 
     args = parser.parse_args()
     args.func(config.load_config(args.config), args)
