@@ -1,0 +1,40 @@
+# Default project config. Relative paths are resolved from the repository root.
+# To run on new data, add an entry under real_datasets / synthetic_pools (or copy this file)
+# and pass --dataset / --pool / --config to the scripts.
+
+seed: 2026                          # single global seed for every random step
+
+output_root: processed_data/model_space   # processed data, one subfolder per dataset/pool
+results_root: results                     # experiment outputs (tables, figures)
+splits_dir: splits                        # patient splits (version-controlled)
+
+default_real_dataset: stanford_brainmets
+default_synthetic_pool: amibekk_v1
+
+# Conversion of real data to the 128x128 "model space", identical to the original training
+# transform: LoadImage -> EnsureChannelFirst -> ToTensor -> ScaleIntensity(0, 1) (per volume)
+# -> Resize((128, 128, -1)) -> mask > threshold.
+preprocessing:
+  spatial_size: [128, 128]   # in-plane size; depth is kept (-1 in MONAI Resize)
+  interpolation: area        # MONAI Resize default
+  mask_threshold: 0.01       # strict '>', as make_binary in the original repo
+  slice_axis: 2              # axial
+
+real_datasets:
+  stanford_brainmets:
+    root: data/StanfordSkullStripped_1mm
+    image_file: bravo.nii
+    mask_file: seg.nii
+    train_split: train        # source folder of training patients -> set T
+    heldout_split: test       # source folder of held-out patients -> split below
+    heldout_sets: [H-cal, H-eval]   # first set gets floor(n/2) patients, second the rest
+
+synthetic_pools:
+  amibekk_v1:
+    # ~37.6k samples from the previous thesis; each file is (128, 128, 2) = [MRI, mask]
+    dir: data/Synthetic_data/mask_conditioned_synthesis
+    glob: "*.nii"
+    image_channel: 0
+    mask_channel: 1
+    trained_on: stanford_brainmets   # real dataset whose train split trained the generator
+    legacy_exclusion_file: docs/corrupted_synthetic_masks_10_0.txt   # old QC list, comparison only

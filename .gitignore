@@ -10,3 +10,6 @@ tutorials/
 
 # Python cache files
 __pycache__/
+
+# Editable-install metadata
+*.egg-info/

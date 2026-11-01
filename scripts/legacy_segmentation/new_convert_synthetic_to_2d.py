@@ -79,7 +79,7 @@ def convert_synthetic_to_2d(src_dir: Path, dst_dir: Path, use_exclusion: bool, e
 
     for filepath in tqdm(synthetic_files):
         img_obj = nib.load(filepath)
-        arr = img_obj.get_fdata().squeeze()
+        arr = img_obj.get_fdata().squeeze() # type: ignore
 
         # Fix spatial orientation: ensure shape is [2, H, W]
         if arr.ndim == 3 and arr.shape[-1] == 2:
@@ -91,8 +91,8 @@ def convert_synthetic_to_2d(src_dir: Path, dst_dir: Path, use_exclusion: bool, e
         # Save image slice to /bravo and mask slice to /seg
         stem = filepath.name.replace(".gz", "").replace(".nii", "")
         
-        nib.save(nib.Nifti1Image(image_slice, img_obj.affine), bravo_dir / f"{stem}.bravo.nii.gz")
-        nib.save(nib.Nifti1Image(mask_slice, img_obj.affine), seg_dir / f"{stem}.seg.nii.gz")
+        nib.save(nib.Nifti1Image(image_slice, img_obj.affine), bravo_dir / f"{stem}.bravo.nii.gz") # type: ignore
+        nib.save(nib.Nifti1Image(mask_slice, img_obj.affine), seg_dir / f"{stem}.seg.nii.gz") # type: ignore
 
     print(f"\nSuccessfully converted {len(synthetic_files)} files to 2D!")
     print(f"Images saved to: {bravo_dir}")

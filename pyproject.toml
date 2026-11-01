@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "memtk"
+version = "0.1.0"
+description = "Memorization toolkit: auditing a mask->MRI diffusion cascade for copied training masks"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "scipy",
+    "scikit-image",
+    "nibabel",
+    "monai",
+    "torch",
+    "pandas",
+    "pyyaml",
+    "matplotlib",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
