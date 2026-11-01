@@ -5,6 +5,9 @@
 data/
 processed_data/
 
+# Model weights and predictions (never versioned; the diffusion models are retrained in the master thesis)
+models/
+
 # MONAI tutorials
 tutorials/
 
