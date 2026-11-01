@@ -93,7 +93,7 @@ Your pool has about 37,000 samples. They were generated in several rounds with a
 
 ## E0 – Data audit and lesion statistics
 
-**Purpose:** Confirm the data are what you think they are, and describe the lesions. The same statistics feed the informative-lesion bound and the optional null model (E3), and the rarity measure (E6).
+**Purpose:** Confirm the data are what you think they are, and describe the lesions. The same statistics feed the informative-lesion bound (E3) and the rarity measure (E6).
 
 **Inputs:** T, H-cal, H-eval, S, and the previous thesis's training code and configs.
 
@@ -226,7 +226,7 @@ The check never changes C or the copy class. It is supporting evidence for the m
 
 ## E3 – Chance calibration
 
-**Purpose:** Turn raw scores into a meaningful "copy" decision, and decide which lesions are large enough to count as evidence. The reference is real patients the model never saw (H-cal), which shows how close a mask gets to the training set when it was *not* copied. A null model is an optional extra.
+**Purpose:** Turn raw scores into a meaningful "copy" decision, and decide which lesions are large enough to count as evidence. The reference is real patients the model never saw (H-cal), which shows how close a mask gets to the training set when it was *not* copied. The optional null model was dropped (see step 6).
 
 **Inputs:** H-cal, the lesion table from E0, and the detectors from E1 and E2.
 
@@ -245,15 +245,12 @@ The check never changes C or the copy class. It is supporting evidence for the m
 3. **Confirm the prefilter is exact.** Check that at the prefilter distance (0.2 of the brain box), s stays below τ\_L for every lesion size.
 4. **Check sensitivity with one alternative per setting:** σ of 0.08 instead of 0.05, the 99th percentile instead of the 95th, and a bound one step lower.
 5. **Freeze.** Write all thresholds and settings to a config file under version control, before E4 and well before E5.
-6. **Optional, if time allows: a null model.**
-   - Build as many fake masks as there are in S from H-cal lesions placed at independent positions (drawn from a 2D density of H-cal centroids, inside the brain box, without overlap).
-   - Match the lesion counts to S's distribution.
-   - Run both detectors on them. This gives stable chance rates for partial copies, especially in multi-lesion slices where H-cal is sparse.
+6. **Null model: dropped (decision 2026-11-01).** It was planned as an optional set of fake masks built from H-cal lesions at independent positions, to give stable chance rates for partial copies. Its main use was the recombination question, which is out of scope, and held-out real patients are the more credible baseline. The cost: chance rates for multi-lesion slices rest on H-cal alone, which has 303 multi-lesion slices from 17 patients (≥2 lesions of ≥4 px), or 192 from 12 patients (≥2 lesions of ≥15 px). To handle this, report a bootstrap-by-patient confidence interval for every threshold, and pool the single- and multi-lesion thresholds if the multi-lesion one is unstable.
 
 **Outputs:**
 
 - A frozen threshold file: τ\_D, τ\_C and τ\_L (stratified by lesion count), the informative-lesion bound, and the prefilter distance.
-- Chance rates from H-cal, and from the null model if it was built.
+- Chance rates from H-cal, with bootstrap-by-patient confidence intervals for each threshold.
 - How many lesions and slices the bound excludes.
 - A short sensitivity table.
 
@@ -302,7 +299,7 @@ The check never changes C or the copy class. It is supporting evidence for the m
 
 **Purpose:** Answer whether the mask generator copies more than chance (RQ1), and whether lesion-level matching finds copies that whole-mask matching misses (RQ2). This is the first time S is scored against frozen thresholds.
 
-**Inputs:** S, H-eval, the null masks from E3 if they were built, the frozen thresholds, and both validated detectors.
+**Inputs:** S, H-eval, the frozen thresholds, and both validated detectors.
 
 **Procedure**
 
@@ -312,19 +309,19 @@ The check never changes C or the copy class. It is supporting evidence for the m
    - Do this for both detectors, split into single-lesion and multi-lesion masks.
 3. **RQ1, copy rate (first part of H1).**
    - Compute the share of S flagged as full copies, with a 95% bootstrap confidence interval. Synthetic samples are independent, so resample them directly.
-   - Compare with the H-eval rate (bootstrap by patient, since its slices are clustered) and, if it was built, with the null rate.
-   - Memorization beyond chance means the S rate sits clearly above both. Report rates on the clean and minor masks. Then repeat with the noisy masks included, using the whole-mask detector only, to show that the exclusion doesn't hide copies. Also re-run the lesion-level detector with drop-only (no attaching), to show that the stray-pixel rule doesn't change the conclusions.
+   - Compare with the H-eval rate (bootstrap by patient, since its slices are clustered).
+   - Memorization beyond chance means the S rate sits clearly above it. Report rates on the clean and minor masks. Then repeat with the noisy masks included, using the whole-mask detector only, to show that the exclusion doesn't hide copies. Also re-run the lesion-level detector with drop-only (no attaching), to show that the stray-pixel rule doesn't change the conclusions.
 4. **Remove adjacent-slice duplicates.** Group flagged synthetic masks by source patient and slice window (±2 slices), and count each group once. Report both the raw count and the grouped count. The gap shows how much near-duplicate adjacent slices inflate the raw number.
 5. **Count near-exact copies separately** (whole-mask Dice > 0.9). These are unambiguous and make strong figure examples.
 6. **RQ2, missed by whole-mask.**
    - Cross-tabulate the whole-mask flag (yes or no) against the lesion-level class (full, partial, novel). Use only slices with at least one informative lesion, so both detectors are compared on the same subset.
    - The headline number: the share of lesion-level flags that whole-mask Dice does not flag. To test H2, compare the two detectors at the same false-positive rate on H-eval.
-   - Compare the partial-copy rate in S with the H-eval rate, and with the null rate if it was built. Partial copies only matter if S produces them more often than chance.
+   - Compare the partial-copy rate in S with the H-eval rate. Partial copies only matter if S produces them more often than chance.
 
 **Outputs:**
 
-- A main results table: rates with confidence intervals for S, H-eval and, if built, the null, for each detector and class.
-- A score-distribution figure (S, H-eval and null overlaid).
+- A main results table: rates with confidence intervals for S and H-eval, for each detector and class.
+- A score-distribution figure (S and H-eval overlaid).
 - The cross-tabulation for RQ2.
 - A list of flagged synthetic masks, which feeds E6 and E7.
 
@@ -332,8 +329,8 @@ The check never changes C or the copy class. It is supporting evidence for the m
 
 | Outcome | Meaning |
 | --- | --- |
-| S rate clearly above H-eval and null | Memorization beyond chance; go on to E6 and E7 as planned |
-| S rate near H-eval and null, but a few near-exact copies | Rare but real memorization; E6 and E7 focus on those cases |
+| S rate clearly above H-eval | Memorization beyond chance; go on to E6 and E7 as planned |
+| S rate near H-eval, but a few near-exact copies | Rare but real memorization; E6 and E7 focus on those cases |
 | S rate at or below chance, no near-exact copies | A validated negative result (E4 shows the detector works); the master thesis centres on RQ-M1 and RQ-M2 |
 
 ## E6 – Patient exposure, rarity and duplication (RQ1 H1, RQ3a H3)
@@ -343,7 +340,7 @@ The check never changes C or the copy class. It is supporting evidence for the m
 **Inputs:**
 
 - Flagged copies from E5, grouped by slice window.
-- NN assignments for H-eval, and for the null masks if they were built.
+- NN assignments for H-eval.
 - The lesion table from E0.
 
 **Procedure**
@@ -351,7 +348,7 @@ The check never changes C or the copy class. It is supporting evidence for the m
 1. **Observed exposure.** For each training patient p, count the grouped copies whose source patient is p. Count full copies and partial copies separately. Use every stored slice pair above threshold, not only nearest neighbours, so a lesion copied across adjacent training slices credits all of them.
 2. **Expected exposure.**
    - Some patients attract matches simply because they have many slices or common-looking lesions.
-   - Estimate this from the H-eval masks, and from the null masks if they were built: each gets an NN patient even when not flagged, so their shares give the expected share π\_p for each patient.
+   - Estimate this from the H-eval masks: each gets an NN patient even when not flagged, so their shares give the expected share π\_p for each patient.
    - Exposure ratio = observed copies of p / (π\_p × total copies). A ratio well above 1 means over-exposed.
 3. **Rarity per slice.** For every training slice, compute 1 minus its highest configuration score C against slices from *other* training patients. High rarity means no other patient has anything similar. This uses the E2 detector's own similarity scale, so rarity and copying are measured on the same scale.
 4. **Rarity per patient.**
@@ -455,7 +452,7 @@ The full draft goes to your supervisor by Nov 30, 2026, and the final report is 
 | --- | --- | --- | --- |
 | 31 Oct | E0, including mask quality control | Split confirmed; preprocessing and quality-control rules fixed; lesion table cached | Must |
 | 9 Nov | E1, E2, E3 | Both detectors run on H-cal; informative-lesion bound and thresholds frozen | Must |
-| 9 Nov, if time | E3 null model | Stable chance rates for partial copies | Could |
+| — | E3 null model | Dropped (2026-11-01); see E3 step 6 | — |
 | 13 Nov | E4 (gate) | Validation passed | Must |
 | 17 Nov | E5 | Main audit tables for RQ1 and RQ2 | Must |
 | 24 Nov | E6; E7 match reports, deletion test and correctness on planted copies | Results for RQ3a, H1, H3 and RQ3b | Must |
@@ -469,7 +466,7 @@ The full draft goes to your supervisor by Nov 30, 2026, and the final report is 
 
 1. E8 (optional RQ4). Move it to the master thesis.
 2. The optional small-lesion agreement in E2 and E7.
-3. The optional null model in E3, if it hasn't been built yet.
+3. The optional null model in E3. (Already dropped, 2026-11-01.)
 4. The E7 taxonomy. Keep the deletion test and the correctness check on planted copies.
 5. The lesion-level part of the E7 correctness check. Keep source-patient correctness.
 
@@ -478,7 +475,7 @@ Never cut E4: without validation, a negative result means nothing.
 **Deliverables for the written report**
 
 - **Tables:** data description (E0); validation (E4); main rates with confidence intervals (E5); RQ2 cross-tabulation (E5); most-exposed patients (E6).
-- **Figures:** lesion distributions (E0); score distributions for S, H-eval and the null (E5); exposure concentration and rarity scatter (E6); 3–4 anonymized match reports (E7).
+- **Figures:** lesion distributions (E0); score distributions for S and H-eval (E5); exposure concentration and rarity scatter (E6); 3–4 anonymized match reports (E7).
 - **Code:** a reusable mask-memorization toolkit (preprocessing, both detectors, calibration, report generator). The master thesis runs it again on retrained or original models.
 
 **Decisions still open**

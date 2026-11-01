@@ -109,7 +109,7 @@ original weights = Branch A fallback); the preliminary toolkit is reused in the 
 Timeline: full draft to supervisor by 30 Nov 2026, submission 9 Dec 2026. Milestones:
 E0 + mask QC by 31 Oct; E1-E3 (bound + thresholds frozen) by 9 Nov; E4 gate by 13 Nov;
 E5 by 17 Nov; E6/E7 by 24 Nov; E8 (optional RQ4) last, if time. If behind, cut: E8 (moves to
-the master thesis), then optional small-lesion agreement (E2/E7), then optional null model,
+the master thesis), then optional small-lesion agreement (E2/E7) (null model already dropped),
 then E7 taxonomy, then the lesion-level part of
 the E7 correctness check (keep source-patient correctness + deletion test). Never cut E4.
 ALL comparisons are between slices WITH metastases: T = the ~3,800 lesion-containing training
@@ -120,7 +120,9 @@ pipeline for brain-metastasis MRI synthesis memorize patient-specific lesion con
 can this be detected and explained using generated outputs alone?
 - RQ1: To what extent do synthetic brain-metastasis segmentation masks match training masks
   more closely than held-out real masks do? Calibrate against held-out test patients (H-cal,
-  95th-percentile thresholds, as in Dar et al. 2024). Null model is OPTIONAL.
+  95th-percentile thresholds, as in Dar et al. 2024). Null model DROPPED (2026-11-01): chance
+  rates come from H-cal only; multi-lesion strata rest on 12-17 H-cal patients, so report
+  bootstrap-by-patient CIs for thresholds and pool single/multi strata if unstable.
 - RQ2: Does lesion-level matching reveal memorization (partial copies) that whole-mask Dice
   misses? Recombinations across patients are OUT OF SCOPE (optional master-thesis idea).
 - RQ3a: Which patients are most exposed, and is exposure linked to how unusual their

@@ -75,6 +75,10 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
 - **The old QC list does not define the audited set S.** Why: its outside-brain rule drops a mask
   for a single pixel, while the plan flags only lesions with >50% of their area outside the
   brain. It is kept only to compare with the fresh QC in E0b. 2026-11-01.
+- **Null model dropped.** The optional null model (fake masks from H-cal lesions at independent
+  positions) mainly served the recombination question, which is out of scope. Held-out real
+  patients are the more credible chance baseline. Decided to manage workload. Chance rates come
+  from H-cal only; see the limitation in section 4. 2026-11-01.
 - **Reproducibility setup:** one config file (`configs/default.yaml`) and one global seed (2026).
   Every stage writes a run log (seed, full config, package versions). Stages refuse to overwrite
   existing outputs, and the split is fixed for the whole project. The earlier segmentation work
@@ -89,6 +93,16 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
   mainly for the distribution comparison. *Source: check grid, 2026-11-01.*
 - *Observation:* some synthetic masks are dominated by scattered specks across the background
   (e.g. sample `2750`). *Source: check grid, 2026-11-01.*
+- *Preliminary, to quantify in E0b `stats`:* **synthetic lesions are spatially concentrated.**
+  Lesion centroids (lesions ≥4 px) spread less than in T: row SD 14.9 vs 24.1 px, column SD 18.6
+  vs 25.3 px, around the same centre. Synthetic brain boxes are smaller (median 63×66 vs
+  103×95 px; Otsu brain area median ~3,000 vs ~7,200 px). Only 3.8% of synthetic lesions lie more
+  than half outside the synthetic brain (T: 1.4%). So stage 2 draws smaller brains around
+  concentrated lesions, rather than too-small brains around normally spread ones. One possible
+  reading is that synthetic samples resemble slices from near the top of the head. The centroid
+  spread uses the masks only, so it does not depend on the brain-mask method.
+  *Source: read-only sample, all T lesion slices vs 3,000 synthetic samples (old-QC and
+  near-blank excluded), 2026-11-01.*
 
 ## 4. Limitations and assumptions
 
@@ -119,6 +133,12 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
 - **How the synthetic pool was produced is only partly known.** The repo's sampling script makes
   15,000 attempts with three filters; the pool shows six naming schemes and partly violates the
   <40 px filter (see section 1). E0b checks each filter on the data.
+- **Chance rates for multi-lesion slices rest on few patients** (null model dropped). H-cal has
+  303 multi-lesion slices from 17 patients (≥2 lesions ≥4 px), or 192 from 12 patients (≥2
+  lesions ≥15 px). Slices of one patient are near-duplicates, so the patient count is the
+  effective sample size. Mitigation in E3: bootstrap-by-patient CIs for each threshold, and pool
+  single- and multi-lesion thresholds if the multi-lesion one is unstable.
+  *Source: `lesion_slices.csv` + seg volumes, 2026-11-01.*
 - **The orientation check is specific to this dataset.** All raw affines are the identity, so
   the independent check cannot detect re-orientation problems here. A new dataset with
   non-identity affines needs its own orientation check. 2026-11-01.
@@ -137,6 +157,16 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
 **Project decisions** (from the experiment plan)
 - [ ] Informative-lesion bound: decided during E0b/E3 coding, by its effect on the synthetic pool.
 - [ ] E4 go/no-go criteria: fixed before E4 runs.
+- [ ] **Position frame for copy detection (E2), a deviation from the plan to decide when E2 is
+      planned.** The plan measures lesion position relative to the brain box of the paired MRI.
+      But stage 1 generates masks without seeing a brain, so a memorized mask reproduces its
+      training mask at the same *pixel* positions. The synthetic brain box comes from stage 2,
+      and synthetic brains are clearly smaller (section 3), so even a pixel-perfect copy can get
+      shifted brain-relative coordinates. E4 cannot reveal this: planted copies are real masks
+      with their own real MRI. Recommendation: absolute model-space coordinates for copy
+      detection (consistent with E1's pixel-wise Dice); brain-relative coordinates for
+      anatomical questions (density figure, E6 rarity). E0b stores all three frames, so nothing
+      is lost either way. 2026-11-01.
 
 ## 6. Figure and table candidates
 

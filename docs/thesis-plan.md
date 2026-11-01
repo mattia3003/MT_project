@@ -53,7 +53,7 @@ There are four core research questions (RQ1, RQ2, RQ3a and RQ3b) and one optiona
 **Research questions**
 
 - **RQ1 – Memorization beyond chance:** To what extent do synthetic brain-metastasis segmentation masks from a 2D unconditional diffusion model match training masks more closely than held-out real masks do?
-  - *Details:* Metastases are small, often single, and cluster in common locations, so some matches will happen by chance. Calibrate against held-out masks; a null model is optional.
+  - *Details:* Metastases are small, often single, and cluster in common locations, so some matches will happen by chance. Calibrate against held-out masks. (A null model was considered and dropped on 2026-11-01; see the Experiment Plan, E3.)
 - **RQ2 – Lesion-level versus whole-mask:** Does matching individual lesions reveal memorization that whole-mask similarity misses?
   - *Details:* The case to look for is the partial copy: some lesions match one training slice, and the others are new. Only lesions above an informative size bound count, since blobs of a few pixels match each other by chance.
 - **RQ3a – Patient exposure:** Which patients are most exposed, and is exposure linked to how unusual their metastasis configuration is (lesion count, size, location, slice position)?
@@ -114,7 +114,7 @@ The method has six steps, and each output is reused in the master thesis. The pl
    - For each synthetic–training slice pair, match lesions one-to-one with the Hungarian algorithm, and score the configuration by the matched lesion scores divided by the larger lesion count. This detects full and partial copies. Only pairs that can score above zero are computed (a position prefilter and candidate slices), which keeps about 35,000 × 3,800 slice pairs affordable.
 4. **Chance calibration.**
    - Set the copy threshold at the 95th percentile of held-out-to-training nearest-neighbour similarity, as in Dar et al. 2024.
-   - Optionally, add a null model: build fake configurations by drawing lesions independently from the empirical distribution of lesion positions and sizes. The match rate of these fakes is the chance level.
+   - A null model (fake configurations with lesions drawn independently from the empirical distribution of positions and sizes) was considered and dropped on 2026-11-01. It mainly served the out-of-scope recombination question, and held-out patients are the more credible baseline. Thresholds get bootstrap-by-patient confidence intervals instead.
 5. **Detector validation.** Plant known copies before trusting any result: real training masks, some shifted, rotated or eroded, mixed into the synthetic set. Report the detector's recall and precision on them. This is cheap and answers the first question a reviewer will ask.
 6. **Patient level and explanation.**
    - Aggregate matches per patient, normalized by the patient's number of training slices. Synthetic samples carry no patient ID or slice index, so the nearest training match is what assigns each one to a patient.
@@ -127,7 +127,7 @@ The method has six steps, and each output is reused in the master thesis. The pl
 | Complete by | Work | Output |
 | --- | --- | --- |
 | 31 Oct | Data audit and mask quality control; read Dar et al. 2024 and DeepSSIM | Data description and confirmed training split |
-| 9 Nov | Whole-mask and lesion-level detectors; informative-lesion bound; held-out thresholds (null model optional) | Frozen thresholds |
+| 9 Nov | Whole-mask and lesion-level detectors; informative-lesion bound; held-out thresholds | Frozen thresholds |
 | 17 Nov | Planted-copy validation (gate); main audit | Results for RQ1 and RQ2 |
 | 24 Nov | Patient exposure, duplication and rarity tests; match reports, deletion test and correctness on planted copies; optional RQ4 (E8) if time | Results for RQ3a, RQ3b, H1 and H3 |
 | 30 Nov | Writing, started in early November | Full draft to supervisor |
