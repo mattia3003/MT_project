@@ -31,8 +31,8 @@ Every experiment uses the same four data sets, one preprocessing pipeline and fi
 | Name | Content | Role |
 | --- | --- | --- |
 | T (training reference) | About 3,800 lesion-containing mask slices of the 105 training patients, each with patient ID, slice index and paired real BRAVO slice | What stage 1 could have memorized |
-| H-cal (held-out, calibration) | Lesion slices from a random half of the 51 test patients (about 25) | Sets thresholds (E3) |
-| H-eval (held-out, evaluation) | Lesion slices from the other half (about 26) | Negatives for validation (E4) and the baseline in E5 |
+| H-cal (held-out, calibration) | Lesion slices from 25 of the 51 test patients (992 slices), chosen by the seeded split below | Sets thresholds (E3) |
+| H-eval (held-out, evaluation) | Lesion slices from the other 26 test patients (1,094 slices) | Negatives for validation (E4) and the baseline in E5 |
 | S (synthetic) | About 37,000 synthetic masks from stage 1, each with the synthetic MRI it conditioned. After quality control (E0), the clean and minor masks. | What is being audited |
 
 **Only slices with metastases are compared.**
@@ -44,6 +44,8 @@ Every experiment uses the same four data sets, one preprocessing pipeline and fi
 All comparisons in E1–E7 are therefore between metastasis-containing slices.
 
 Split the test patients into H-cal and H-eval by patient, with a fixed seed, and keep the split for the whole project. Using the same held-out masks both to set thresholds and to measure false positives would be circular.
+
+*Implemented (E0a):* a matched-pair split, so both halves cover the same range of lesion burden. Sort the 51 test patients by their number of lesion slices, cut the list into consecutive pairs, and send one patient of each pair at random to H-cal and the other to H-eval (seed 2026). The odd patient out goes to H-eval. Result: H-cal 25 patients (median 35 lesion slices, range 3–110), H-eval 26 (median 36, range 3–119). The split is stored in `splits/stanford_brainmets_seed2026.csv`.
 
 **Preprocessing (identical for all four sets)**
 
@@ -57,7 +59,8 @@ Split the test patients into H-cal and H-eval by patient, with a fixed seed, and
 
 - **Aspect ratio is not kept.** `Resize((128, 128, -1))` scales each in-plane axis independently, so a 160×176 slice is squeezed by factors of 0.80 and 0.73. The distortion differs per patient, which is why positions use brain-relative coordinates and all comparisons happen in model space.
 - **Depth is not resampled** (the −1), so slice indices and adjacency are preserved.
-- **Masks are area-averaged, then thresholded at 0.01.** Any pixel with more than 1% lesion coverage becomes lesion, which enlarges small lesions by about one pixel at the edge. Synthetic masks were also thresholded at 0.01.
+- **Masks are area-averaged, then thresholded at 0.01.** Any pixel with more than 1% lesion coverage becomes lesion, which enlarges lesions by about one pixel at the edge. For small lesions that is a large share of their area. Measured in E0a, per patient, the lesion area after conversion is a median of 1.5 times what plain downscaling would give (range 1.08–2.70). E0 step 5 measures it per lesion. No lesion slice is lost or gained by the conversion. Synthetic masks were also thresholded at 0.01.
+- **The stage-1 slice selection is not fully known.** The repo's training loop computes an empty-slice filter (`np.sum(image) > 1.0`) but never applies it, and as written it could not train the mask-only model, since it passes the two-channel batch to a one-channel network. The mask channel is binarized at 0.01 in every case, matching our conversion. If the filter actually used dropped slices with at most 1 or 2 lesion pixels, T contains 2 or 10 of its 3,823 slices that stage 1 never saw. That bound is small enough to state as a limitation rather than act on.
 - **BRAVO intensity is per-volume min–max scaling to \[0, 1\]** (`ScaleIntensity`), not a histogram method.
 - **There is no augmentation** (no flips or rotations), so exact-position copies are plausible.
 - **There are no seeds.** The training script in the repo would also not run as written (it is missing the `time` import and calls `merge_data` with the wrong number of arguments). The repo is very close to the code that was run; differences are probably limited to file paths and small fixes like these.

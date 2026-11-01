@@ -58,8 +58,13 @@ def list_pool_files(pool_cfg: dict) -> list[Path]:
 
 
 def load_sample(path: str | Path, pool_cfg: dict) -> tuple[np.ndarray, np.ndarray]:
-    """(image, mask) of one synthetic sample as saved, float32. Shape is not checked here."""
+    """(image, mask) of one synthetic sample as saved, float32.
+
+    Requires a (H, W, C) array; the in-plane size is not checked here.
+    """
     arr = np.asanyarray(load_image(path).dataobj).astype(np.float32)
+    if arr.ndim != 3:
+        raise ValueError(f"Expected a (H, W, channels) array, got shape {arr.shape}: {path}")
     return arr[..., pool_cfg["image_channel"]], arr[..., pool_cfg["mask_channel"]]
 
 
@@ -80,7 +85,9 @@ def read_legacy_exclusions(path: str | Path) -> dict[str, str]:
 def index_pool(pool_name: str, pool_cfg: dict, spatial_size: list[int]) -> pd.DataFrame:
     """One row per sample: ID, file, shape check, mask statistics and image range.
 
-    Samples are only described, never filtered: quality control happens in E0b.
+    Samples are only described, never filtered: quality control happens in E0b. A file that
+    cannot be read gets a row with read_ok = False and the error message, instead of stopping
+    the run; its statistics are -1 / NaN.
     """
     files = list_pool_files(pool_cfg)
     legacy_file = pool_cfg.get("legacy_exclusion_file")
@@ -89,17 +96,27 @@ def index_pool(pool_name: str, pool_cfg: dict, spatial_size: list[int]) -> pd.Da
     rows = []
     for path in tqdm(files, desc=f"Indexing {pool_name}"):
         sid = sample_id(path)
-        image, mask = load_sample(path, pool_cfg)
-        shape_ok = list(image.shape) == list(spatial_size)
-        mask_binary = bool(np.isin(mask, (0.0, 1.0)).all())
-        rows.append({
-            "pool": pool_name, "sample_id": sid, "filename": path.name, "name_scheme": name_scheme(sid),
-            "shape": "x".join(map(str, image.shape)), "shape_ok": shape_ok, "mask_binary": mask_binary,
+        # free-text columns that are usually empty go last, so empty fields only end a row
+        row = {"pool": pool_name, "sample_id": sid, "filename": path.name, "name_scheme": name_scheme(sid),
+               "read_ok": True, "shape": "", "shape_ok": False, "mask_binary": False,
+               "mask_px": -1, "n_components_8conn": -1,
+               "img_min": np.nan, "img_max": np.nan, "img_mean": np.nan,
+               "legacy_excluded": sid in legacy, "legacy_reason": legacy.get(sid, ""), "read_error": ""}
+        try:
+            image, mask = load_sample(path, pool_cfg)
+        except Exception as e:  # recorded per file, reported by the 'check' stage
+            row.update(read_ok=False, read_error=f"{type(e).__name__}: {e}")
+            rows.append(row)
+            continue
+        row.update({
+            "shape": "x".join(map(str, image.shape)),
+            "shape_ok": list(image.shape) == list(spatial_size),
+            "mask_binary": bool(np.isin(mask, (0.0, 1.0)).all()),
             "mask_px": int((mask > 0).sum()),
-            "n_components_8conn": count_components(mask) if mask.ndim == 2 else -1,
+            "n_components_8conn": count_components(mask),
             "img_min": float(image.min()), "img_max": float(image.max()), "img_mean": float(image.mean()),
-            "legacy_excluded": sid in legacy, "legacy_reason": legacy.get(sid, ""),
         })
+        rows.append(row)
     df = pd.DataFrame(rows)
 
     unmatched = sorted(set(legacy) - set(df["sample_id"]))

@@ -7,7 +7,8 @@ Stages, run in this order. Each one can be run and checked on its own:
   synthetic  index of a synthetic pool (files are read in place, not copied)
           -> <output_root>/<pool>/synthetic_index.csv
   check   consistency checks of all outputs above, plus a visual sample grid
-          -> results/<dataset>/e0a/check_report.txt, check_grid.png (exit code 1 on failure)
+          -> results/<dataset>/e0a/check_report_<pool>.txt, check_grid_<pool>.png
+          (exit code 1 on failure)
 
 Example (from the repository root):
   .venv\\Scripts\\python.exe scripts\\e0a_prepare_data.py split
@@ -115,10 +116,10 @@ def run_synthetic(cfg: dict, args: argparse.Namespace) -> None:
     df.to_csv(out_path, index=False)
     config.write_run_info(out_dir, cfg, script=__file__, extra={"stage": "synthetic"})
 
-    bad = df[~df["shape_ok"] | ~df["mask_binary"]]
+    bad = df[~df["read_ok"] | ~df["shape_ok"] | ~df["mask_binary"]]
     print(f"\nSamples: {len(df)}  by naming scheme: {df['name_scheme'].value_counts().to_dict()}")
-    print(f"Wrong shape: {(~df['shape_ok']).sum()}  non-binary mask: {(~df['mask_binary']).sum()}"
-          f"  empty mask: {(df['mask_px'] == 0).sum()}")
+    print(f"Unreadable: {(~df['read_ok']).sum()}  wrong shape: {(~df['shape_ok']).sum()}"
+          f"  non-binary mask: {(~df['mask_binary']).sum()}  empty mask: {(df['mask_px'] == 0).sum()}")
     if len(bad):
         print(f"Failing samples (first 10): {bad['sample_id'].tolist()[:10]}")
     print(f"Legacy-excluded: {df['legacy_excluded'].sum()}")
@@ -151,14 +152,16 @@ def run_check(cfg: dict, args: argparse.Namespace) -> None:
         recompute_ids += [str(pid) for pid in picks]
     checks.check_recompute(report, split_df, dataset_cfg, real_dir, prep, recompute_ids)
     checks.check_synthetic_index(report, index_df, pool_cfg, prep["spatial_size"], rng, args.n_synthetic)
-    checks.sample_grid(lesion_slices, real_dir, index_df, pool_cfg, prep, rng, args.grid_cols,
-                       results / "check_grid.png")
+    # one set of outputs per pool, so checking a second pool never overwrites the first
+    report_path, grid_path = results / f"check_report_{pool_name}.txt", results / f"check_grid_{pool_name}.png"
+    checks.sample_grid(lesion_slices, real_dir, index_df, pool_cfg, prep, rng, args.grid_cols, grid_path)
 
     text = f"E0a check: dataset '{name}', pool '{pool_name}', seed {cfg['seed']}\n\n{report.to_text()}\n"
     results.mkdir(parents=True, exist_ok=True)
-    (results / "check_report.txt").write_text(text, encoding="utf-8")
-    config.write_run_info(results, cfg, script=__file__, extra={"stage": "check", "pool": pool_name})
-    print(f"\n{text}\nWrote {results / 'check_report.txt'} and {results / 'check_grid.png'}")
+    report_path.write_text(text, encoding="utf-8")
+    config.write_run_info(results, cfg, script=__file__, extra={"stage": "check", "pool": pool_name},
+                          filename=f"check_{pool_name}.run_info.json")
+    print(f"\n{text}\nWrote {report_path} and {grid_path}")
     if not report.all_passed:
         raise SystemExit(1)
 

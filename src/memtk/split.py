@@ -12,13 +12,13 @@ import numpy as np
 import pandas as pd
 
 from memtk.io import list_patients, load_image, patient_files
+from memtk.transforms import lesion_px_per_slice
 
 
 def count_lesion_slices(mask_path, axis: int) -> int:
     """Number of slices along `axis` with at least one non-zero mask voxel (native resolution)."""
     mask = np.asanyarray(load_image(mask_path).dataobj)
-    other_axes = tuple(i for i in range(mask.ndim) if i != axis)
-    return int((mask != 0).any(axis=other_axes).sum())
+    return int((lesion_px_per_slice(mask, axis) > 0).sum())
 
 
 def paired_split(patient_ids: list[str], counts: list[int], set_names: list[str],

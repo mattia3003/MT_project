@@ -8,6 +8,7 @@ E0a check: dataset 'stanford_brainmets', pool 'amibekk_v1', seed 2026
 [PASS] split: held-out patients only in held-out sets
 [PASS] split: held-out sets differ by at most one patient: T=105, H-eval=26, H-cal=25
 [PASS] real: patients.csv covers exactly the split patients: 156 rows
+[PASS] real: 'set' in patients.csv and lesion_slices.csv == split CSV
 [PASS] real: all three volume files present
 [PASS] real: shapes equal, in-plane [128, 128]
 [PASS] real: dtypes bravo/seg_soft float32, seg uint8
@@ -25,10 +26,11 @@ E0a check: dataset 'stanford_brainmets', pool 'amibekk_v1', seed 2026
 [PASS] recompute: binary masks agree with the reference
 [PASS] synthetic: index rows == files in pool folder: 37624 rows, 37624 files
 [PASS] synthetic: sample IDs unique
-[PASS] synthetic: all samples 128x128
-[PASS] synthetic: all masks binary
+[PASS] synthetic: all files readable as (H, W, channels)
+[PASS] synthetic: all readable samples 128x128
+[PASS] synthetic: all readable masks binary
 [PASS] synthetic: no empty masks
 [PASS] synthetic: legacy exclusion flags == legacy list: 2243 entries, 2243 flagged
 [PASS] synthetic: stored values == recomputed from files: 300 random samples
 
-30 passed, 0 failed
+32 passed, 0 failed

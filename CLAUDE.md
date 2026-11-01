@@ -23,15 +23,25 @@ This file is a summary. If it disagrees with the docs, the docs win; flag the mi
   Training transform per volume: LoadImage -> EnsureChannelFirst -> ToTensor ->
   ScaleIntensity(0, 1) (per-volume min-max) -> Resize((128, 128, -1)) (MONAI default
   interpolation = area). Aspect ratio NOT kept (axes squeezed independently); depth NOT
-  resampled. Masks binarized after resize at threshold 0.01 (enlarges small lesions ~1 px).
+  resampled. Masks binarized after resize at threshold 0.01 (enlarges lesions by ~1 px at the edge;
+  measured lesion area per patient = median 1.5x plain downscaling, range 1.08-2.70).
 - No augmentation, no seeds.
 - Stage 1 trained on slices whose mask sum > thres (lesion slices); stage 2 on all non-empty slices.
 - All synthetic data (masks and MRI) is 128x128. ALL comparisons are done in this 128x128
   "model space": real data must go through exactly the same transform before comparison.
 - Real masks are binary (0/1) at native resolution; area-resize + 0.01 threshold enlarges them
-  slightly in model space. Learn the minimum real lesion size from converted real masks.
-- Synthetic pool in hand: ~37,000 samples, generated in several rounds with a script very close
-  to the repo version (repo shows 15,000 attempts per run). Repo filters: mask min-max scaled then
+  in model space (see above; strongest for small lesions). No lesion slice is lost or gained.
+  Learn the minimum real lesion size from converted real masks.
+- Split (E0a, fixed): `splits/stanford_brainmets_seed2026.csv`. T = 105 train patients (3,823
+  lesion slices); test patients split by matched pairs on lesion-slice count, seed 2026:
+  H-cal 25 (992 slices), H-eval 26 (1,094 slices).
+- Stage-1 slice selection is not fully known (repo's empty-slice filter is never applied; its
+  mask-only branch could not run as written). Bounded impact: if slices with <=1 or <=2 lesion px
+  were dropped, 2 or 10 of the 3,823 T slices were never seen. State as a limitation.
+- Synthetic pool in hand: 37,624 files in six naming schemes (`<n>`, `file_<n>`, `file_2_<n>` ...
+  `file_5_<n>`, most likely one per generation round; they look alike on all index statistics).
+  The sample ID is the full file stem, never a parsed number (`1033` and `file_1033` differ).
+  Generated in several rounds with a script very close to the repo version (repo shows 15,000 attempts per run). Repo filters: mask min-max scaled then
   thresholded at 0.01; kept only if pixel sum < 2000, at least one lesion < 40 px, all lesion
   pixels inside synthetic brain. An earlier check flagged ~2,243 poor masks; RE-RUN quality
   control fresh in E0 to verify that count. Verify which filters actually hold on the data and
@@ -179,3 +189,19 @@ Not aimed at publication for now. Original weights (Branch A) only as a fallback
 - Always split and aggregate by patient ID, never by slice.
 - Never let test-patient data leak into any training or threshold-fitting step.
 - Set and log random seeds for every training/sampling run.
+
+## Code layout and working rules
+- `configs/default.yaml`: datasets, synthetic pools, paths, seed (2026) and parameters. New data
+  is a new config entry, not new code. Relative paths resolve from the repo root.
+- `src/memtk/`: reusable library (installed editable: `pip install -e .`). Building blocks such
+  as transforms, IO and the E1/E2 detectors live here, with no hardcoded paths.
+- `scripts/`: one entry script per experiment, named so that alphabetical order is run order
+  (`e0a_prepare_data.py`, `e0b_audit.py`, `e3_calibrate.py`, ...). Steps are subcommands
+  (`e0a_prepare_data.py split|real|synthetic|check`). `scripts/README.md` has the run order,
+  inputs and outputs. E1/E2 have no scripts; they run inside E3/E4/E5.
+- Outputs: processed data in `processed_data/model_space/<dataset|pool>/` (not in git); results
+  in `results/<dataset|pool>/<experiment>/` (in git); every stage writes a run_info JSON (seed,
+  config, versions). Stages refuse to overwrite without `--overwrite`.
+- Slice index `z` is the 0-based array index. Model-space volumes use an identity affine.
+- The user stages and commits all git changes manually; work in small steps, each one
+  reviewed before the next. Earlier segmentation work is under the git tag `segmentation-final`.

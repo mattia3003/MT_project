@@ -10,13 +10,13 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import torch
 import torch.nn.functional as F
+# Figure is used directly instead of pyplot: it needs no GUI backend, so importing this module
+# never changes the plotting setup of a notebook or script.
+from matplotlib.figure import Figure
 from tqdm import tqdm
 
 from memtk.config import resolve_path
@@ -84,6 +84,12 @@ def check_real_volumes(report: CheckReport, split_df: pd.DataFrame, dataset_cfg:
     report.add("real: patients.csv covers exactly the split patients",
                set(patients["patient_id"]) == set(split_df["patient_id"]) and len(patients) == len(split_df),
                f"{len(patients)} rows")
+    # the `set` columns are copies of the split; a regenerated split without a re-run of 'real'
+    # would leave them stale
+    split_set = dict(zip(split_df["patient_id"], split_df["set"]))
+    stale = sorted({pid for df in (patients, slices) for pid, s in zip(df["patient_id"], df["set"])
+                    if split_set.get(pid) != s})
+    report.add("real: 'set' in patients.csv and lesion_slices.csv == split CSV", not stale, _examples(stale))
 
     axis, thr = prep["slice_axis"], prep["mask_threshold"]
     failures: dict[str, list[str]] = {k: [] for k in (
@@ -210,12 +216,16 @@ def check_synthetic_index(report: CheckReport, index_df: pd.DataFrame, pool_cfg:
                set(index_df["filename"]) == {f.name for f in files} and len(index_df) == len(files),
                f"{len(index_df)} rows, {len(files)} files")
     report.add("synthetic: sample IDs unique", not index_df["sample_id"].duplicated().any())
-    report.add(f"synthetic: all samples {spatial_size[0]}x{spatial_size[1]}", index_df["shape_ok"].all(),
-               _examples(index_df.loc[~index_df["shape_ok"], "sample_id"].tolist()))
-    report.add("synthetic: all masks binary", index_df["mask_binary"].all(),
-               _examples(index_df.loc[~index_df["mask_binary"], "sample_id"].tolist()))
-    report.add("synthetic: no empty masks", (index_df["mask_px"] > 0).all(),
-               _examples(index_df.loc[index_df["mask_px"] == 0, "sample_id"].tolist()))
+    report.add("synthetic: all files readable as (H, W, channels)", index_df["read_ok"].all(),
+               _examples(index_df.loc[~index_df["read_ok"], "sample_id"].tolist()))
+    # content checks on readable files only, so an unreadable file is reported once, above
+    readable = index_df[index_df["read_ok"]]
+    report.add(f"synthetic: all readable samples {spatial_size[0]}x{spatial_size[1]}", readable["shape_ok"].all(),
+               _examples(readable.loc[~readable["shape_ok"], "sample_id"].tolist()))
+    report.add("synthetic: all readable masks binary", readable["mask_binary"].all(),
+               _examples(readable.loc[~readable["mask_binary"], "sample_id"].tolist()))
+    report.add("synthetic: no empty masks", (readable["mask_px"] > 0).all(),
+               _examples(readable.loc[readable["mask_px"] == 0, "sample_id"].tolist()))
 
     legacy_file = pool_cfg.get("legacy_exclusion_file")
     if legacy_file:
@@ -226,7 +236,7 @@ def check_synthetic_index(report: CheckReport, index_df: pd.DataFrame, pool_cfg:
 
     # spot-check stored values against the files
     pool_dir = resolve_path(pool_cfg["dir"])
-    sample = index_df.iloc[rng.choice(len(index_df), size=min(n_recompute, len(index_df)), replace=False)]
+    sample = readable.iloc[rng.choice(len(readable), size=min(n_recompute, len(readable)), replace=False)]
     mismatches = []
     for sid, fname, px, ncomp, img_max in zip(sample["sample_id"], sample["filename"], sample["mask_px"],
                                               sample["n_components_8conn"], sample["img_max"]):
@@ -247,7 +257,8 @@ def sample_grid(lesion_slices: pd.DataFrame, out_dir: Path, index_df: pd.DataFra
     All images use the same display range [0, 1], so intensity differences are visible.
     """
     sets = list(dict.fromkeys(lesion_slices["set"]))  # keeps T, H-cal, H-eval in file order
-    fig, axes = plt.subplots(len(sets) + 1, n_cols, figsize=(2.2 * n_cols, 2.4 * (len(sets) + 1)))
+    fig = Figure(figsize=(2.2 * n_cols, 2.4 * (len(sets) + 1)))
+    axes = fig.subplots(len(sets) + 1, n_cols, squeeze=False)
     axis = prep["slice_axis"]
 
     for r, set_name in enumerate(sets):
@@ -260,7 +271,8 @@ def sample_grid(lesion_slices: pd.DataFrame, out_dir: Path, index_df: pd.DataFra
             _show(axes[r, c], bravo, seg, f"{set_name} {pid} z={z}")
 
     pool_dir = resolve_path(pool_cfg["dir"])
-    picks = index_df.iloc[rng.choice(len(index_df), size=n_cols, replace=False)]
+    readable = index_df[index_df["read_ok"]]
+    picks = readable.iloc[rng.choice(len(readable), size=n_cols, replace=False)]
     for c, (sid, fname) in enumerate(zip(picks["sample_id"], picks["filename"])):
         image, mask = load_sample(pool_dir / fname, pool_cfg)
         _show(axes[-1, c], image, mask, f"S {sid}")
@@ -270,7 +282,6 @@ def sample_grid(lesion_slices: pd.DataFrame, out_dir: Path, index_df: pd.DataFra
     fig.tight_layout()
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, dpi=90)
-    plt.close(fig)
 
 
 def _show(ax, image: np.ndarray, mask: np.ndarray, title: str) -> None:
