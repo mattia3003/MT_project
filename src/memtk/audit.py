@@ -170,12 +170,8 @@ def component_table(mask: np.ndarray) -> list[tuple[int, int, int]]:
     sizes = np.bincount(comp.ravel(), minlength=n + 1)
     labels, first = np.unique(comp.ravel(), return_index=True)
     width = mask.shape[1]
-    out = []
-    for lab, f in zip(labels, first):
-        if lab > 0:
-            row, col = divmod(int(f), width)
-            out.append((int(sizes[lab]), row, col))
-    return out
+    return [(int(sizes[lab]), *divmod(int(f), width))  # pyright: ignore[reportReturnType]  # unpacked divmod is 2 ints
+            for lab, f in zip(labels, first) if lab > 0]
 
 
 def gap_to_nearest_lesion(mask: np.ndarray, row: int, col: int, min_area: int) -> int:
@@ -253,7 +249,8 @@ def size_figure(components: pd.DataFrame, min_area: int, path: Path, title: str,
     sizes = np.arange(1, max_size + 2)
     for k, (group, d) in enumerate(components.groupby("group", sort=False)):
         share = d["size"].clip(upper=max_size + 1).value_counts(normalize=True).reindex(sizes, fill_value=0)
-        ax.bar(np.add(sizes, (k - 1.5) * 0.2), share.to_numpy(), width=0.2, label=f"{group} ({len(d)})")
+        offset = sizes + (k - 1.5) * 0.2  # pyright: ignore[reportOperatorIssue]  # numpy stubs: array + float is valid
+        ax.bar(offset, share.to_numpy(), width=0.2, label=f"{group} ({len(d)})")
     ax.axvline(min_area - 0.5, color="k", ls="--", lw=1)
     ax.text(min_area - 0.4, ax.get_ylim()[1] * 0.5, f" lesion >= {min_area} px", fontsize=8)
     ax.set_yscale("log")
@@ -282,6 +279,26 @@ def crop_sheet(items: list[tuple[str, np.ndarray, np.ndarray, int, int]], path: 
                    tile_title)
     hide_unused(axes, len(items))
     return save(fig, path, title)
+
+
+# --- lesions: overview of the production lesion tables ---------------------------------------
+
+def summarize_lesions(slices: pd.DataFrame, lesions: pd.DataFrame, by: str) -> pd.DataFrame:
+    """Per group (column `by` in both tables): slices and lesions, slices without a lesion, share
+    of slices with a small lesion, lesion area percentiles, attached strays, isolated specks
+    (and the share of them outside the brain), lesions more than half outside the brain."""
+    s, les = slices.groupby(by, sort=False), lesions.groupby(by, sort=False)
+    return pd.DataFrame({
+        "slices": s.size(), "lesions": s["n_lesions"].sum(), "lesions_per_slice": s["n_lesions"].mean(),
+        "no_lesion": s["n_lesions"].agg(lambda x: int((x == 0).sum())),
+        "share_with_lesion_lt40": s["has_lesion_lt40"].mean(),
+        "area_p5": les["area"].quantile(0.05), "area_median": les["area"].median(),
+        "area_p95": les["area"].quantile(0.95),
+        "strays": s["n_strays"].sum(), "stray_px": s["stray_px"].sum(),
+        "specks": s["n_specks"].sum(), "slices_with_specks": s["n_specks"].agg(lambda x: int((x > 0).sum())),
+        "specks_outside_brain_share": s["specks_outside_brain"].sum() / s["n_specks"].sum(),
+        "lesions_over_half_outside": les["frac_outside_brain"].agg(lambda x: int((x > 0.5).sum())),
+    })
 
 
 # --- brain: overview of the production brain masks -------------------------------------------

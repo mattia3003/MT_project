@@ -7,9 +7,21 @@ from pathlib import Path
 
 import nibabel as nib
 import numpy as np
+import pandas as pd
 from nibabel.dataobj_images import DataobjImage
 
 from memtk.config import resolve_path
+
+# Columns that hold IDs. They must stay text: a sample ID such as `1033` would otherwise be read as
+# a number and no longer match its key.
+ID_COLUMNS = ("source", "key", "lesion_id", "patient_id", "sample_id", "set", "filename")
+
+
+def read_table(path: str | Path) -> pd.DataFrame:
+    """Read a pipeline CSV with every ID column as text (see ID_COLUMNS)."""
+    path = Path(path)
+    header = pd.read_csv(path, nrows=0).columns
+    return pd.read_csv(path, dtype={c: str for c in ID_COLUMNS if c in header})
 
 
 def load_image(path: str | Path) -> DataobjImage:

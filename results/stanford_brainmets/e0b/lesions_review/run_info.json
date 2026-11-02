@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-11-02T20:16:39",
+  "timestamp": "2026-11-02T21:45:02",
   "script": "C:\\Master thesis\\MT_project\\scripts\\e0b_audit.py",
   "argv": [
     "scripts\\e0b_audit.py",
@@ -41,8 +41,8 @@
     },
     "lesions": {
       "connectivity": 8,
-      "min_lesion_area": null,
-      "attach_gap": null
+      "min_lesion_area": 4,
+      "attach_gap": 2
     },
     "qc": {
       "max_isolated_specks": null,

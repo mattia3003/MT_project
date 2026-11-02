@@ -1,0 +1,7 @@
+E0b lesions: 'amibekk_v1', min_lesion_area 4 px, attach_gap 2 px; a lesion counts as small below 40 px
+
+       slices  lesions  lesions_per_slice  no_lesion  share_with_lesion_lt40  area_p5  area_median  area_p95  strays  stray_px  specks  slices_with_specks  specks_outside_brain_share  lesions_over_half_outside
+group                                                                                                                                                                                                            
+S       37624    61635              1.638        463                   0.854      4.0         13.0      72.0   17101     20649  115980                5405                        0.82                       1213
+
+Columns: slices; lesions and per slice; slices without a lesion; slices with a lesion under 40 px; lesion area percentiles; attached strays (components, px); isolated specks (total, slices with one, share outside the brain); lesions more than half outside the brain.

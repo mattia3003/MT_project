@@ -3,7 +3,9 @@
 import numpy as np
 import pytest
 
-from memtk.io import LabelStack, LabelStackWriter, MaskStack, MaskStackWriter
+import pandas as pd
+
+from memtk.io import LabelStack, LabelStackWriter, MaskStack, MaskStackWriter, read_table
 
 
 def test_round_trip_keeps_every_mask_exactly(tmp_path):
@@ -54,6 +56,16 @@ def test_label_stack_refuses_bad_input(tmp_path):
     writer.add("a", np.ones((3, 3), dtype=int))
     with pytest.raises(ValueError):
         writer.save(tmp_path / "labels.npz")
+
+
+def test_read_table_keeps_numeric_looking_ids_as_text(tmp_path):
+    path = tmp_path / "lesions.csv"
+    pd.DataFrame({"sample_id": ["0", "1033", "007"], "lesion_id": ["0/L1", "1033/L1", "007/L2"],
+                  "area": [46, 12, 5], "centroid_row_brain": [0.5, None, 0.2]}).to_csv(path, index=False)
+    table = read_table(path)
+    assert table["sample_id"].tolist() == ["0", "1033", "007"]     # not 0, 1033, 7
+    assert table["area"].dtype.kind == "i"                          # other columns keep their types
+    assert table["centroid_row_brain"].isna().tolist() == [False, True, False]
 
 
 def test_wrong_shape_and_duplicate_keys_are_refused(tmp_path):

@@ -24,7 +24,8 @@ Status: ✅ implemented · ⏳ planned
 | `e0b_audit.py brain-review` | ✅ | E0a outputs (T only), synthetic pool | `results/<dataset>/e0b/brain_review/`: method comparison, example figures, near-blank sheet, tissue counts, proposal (`review.txt`) → **decision A** in the config |
 | `e0b_audit.py brain` | ✅ | decision A, E0a outputs, synthetic pool | `<output_root>/<dataset>/brain.csv` + `brain_masks.npz` (all lesion slices); `<output_root>/<pool>/brain.csv` + `brain_masks.npz` + `masks_raw.npz` (all samples, failed-MRI flag); `results/<dataset\|pool>/e0b/brain/` (summary, outline sheet) |
 | `e0b_audit.py lesions-review` | ✅ | E0a outputs, `masks_raw.npz` from `brain` | `results/<dataset>/e0b/lesions_review/`: component sizes, attach-or-drop counts for nearby settings, specks by gap, crop sheets, proposal (`review.txt`) → **decisions B, C** |
-| `e0b_audit.py lesions` / `view` | ⏳ | decisions B, C | lesion table, label maps, overview sheets; `view` shows one slice |
+| `e0b_audit.py lesions` | ✅ | decisions B, C, `brain` outputs | `<output_root>/<dataset\|pool>/lesions.csv` (one row per lesion, ID + features), `slices.csv`, `labels.npz`; `volumes/<pid>/labels.nii.gz` (real); `results/<dataset\|pool>/e0b/lesions/summary.txt` |
+| `e0b_audit.py view` | ⏳ | lesion outputs | one slice at full size with its lesion rows |
 | `e0b_audit.py qc-review` / `qc` | ⏳ | lesion table | evidence for **decision D** (speck cut-off), then QC classes |
 | `e0b_audit.py stats` / `check` | ⏳ | all E0b outputs | E0 statistics and figures; consistency checks |
 | `e3_calibrate.py` | ⏳ | E0 outputs, H-cal | frozen thresholds (runs the E1 + E2 detectors from `memtk`) |
@@ -47,4 +48,7 @@ Conventions:
 - Slice index `z` is always the 0-based array index along the slice axis. ITK-SNAP numbers
   slices from 1: its slice 83 is our `z82`.
 - Synthetic `sample_id` is the full file stem (e.g. `file_1033`, `1033`: different samples), never an int.
+  Read pipeline tables with `memtk.io.read_table`, which keeps ID columns as text (plain
+  `pd.read_csv` would turn an ID like `1033` into a number).
+- Lesion IDs follow `memtk.ids`: `<slice key>/L<n>`, e.g. `Mets_005/z127/L1`, `file_2_1033/L2`.
 - Real data is compared only in model space (128×128, per-volume min–max, area resize, mask > 0.01).

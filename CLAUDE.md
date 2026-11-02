@@ -213,6 +213,10 @@ Not aimed at publication for now. Original weights (Branch A) only as a fallback
 - Slice index `z` is the 0-based array index. Model-space volumes use an identity affine.
 - Unit tests: `tests/` (pytest, `.venv\Scripts\python.exe -m pytest`); core logic used by later
   experiments (lesion labelling, detectors) gets tests on small hand-built inputs.
+- Type checking: Pylance/pyright in "standard" mode (`[tool.pyright]` in `pyproject.toml`).
+  Fix a warning by rewriting only if the rewrite is also clearer code. A false alarm from
+  library type stubs (numpy/scipy/pandas) gets a one-line `# pyright: ignore[<rule>]` with a
+  short reason. Never add a helper or restructure code only to satisfy the checker.
 - E0b decisions follow review stage -> user sets the config value (null until decided) ->
   production stage, which refuses to run while its value is null.
 - The user stages and commits all git changes manually; work in small steps, each one

@@ -29,3 +29,8 @@ where = ["src"]
 testpaths = ["tests"]
 # anyio's pytest plugin (installed for other tools in the venv) emits a deprecation warning
 addopts = ["-p", "no:anyio"]
+
+[tool.pyright]
+# Type checking for Pylance/pyright, shared by everyone working on the repo. False alarms from
+# library type stubs get a one-line ignore with a reason (see CLAUDE.md), not a code rewrite.
+typeCheckingMode = "standard"

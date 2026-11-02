@@ -17,7 +17,13 @@ Stages, run in this order. Each one can be run and checked on its own:
                  sizes of all real lesion slices and synthetic masks, attach-or-drop counts for
                  nearby settings, specks by gap; proposal from T only
                  -> results/<dataset>/e0b/lesions_review/
-  (planned: lesions, view, qc-review, qc, stats, check)
+  lesions        (needs decisions B, C) attach-or-drop of every real lesion slice and every
+                 synthetic mask as saved: one row per lesion (ID, features in three position
+                 frames), one row per slice, label maps; a label volume per real patient
+                 -> <output_root>/<dataset|pool>/lesions.csv + slices.csv + labels.npz,
+                    <output_root>/<dataset>/volumes/<pid>/labels.nii.gz,
+                    results/<dataset|pool>/e0b/lesions/summary.txt
+  (planned: view, qc-review, qc, stats, check)
 
 Example (from the repository root):
   .venv\\Scripts\\python.exe scripts\\e0b_audit.py brain-review
@@ -30,9 +36,10 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from memtk import audit, config
-from memtk.io import MaskStack, MaskStackWriter, load_image
-from memtk.lesions import brain_box, brain_mask, tissue_px
+from memtk import audit, config, ids
+from memtk.io import LabelStackWriter, MaskStack, MaskStackWriter, load_image, read_table, save_nifti
+from memtk.lesions import (LesionLabels, attach_or_drop, brain_box, brain_mask, fraction_outside, label_components,
+                           lesion_features, tissue_px)
 from memtk.synthetic import load_sample
 
 BOX_COLUMNS = ["box_r0", "box_r1", "box_c0", "box_c1"]
@@ -65,9 +72,9 @@ def run_brain_review(cfg: dict, args: argparse.Namespace) -> None:
     pool_dir = config.resolve_path(pool_cfg["dir"])
     low = float(decided(cfg, "brain", "low_threshold", "brain-review"))
 
-    slices = pd.read_csv(real_dir / "lesion_slices.csv")
+    slices = read_table(real_dir / "lesion_slices.csv")
     t_slices = slices[slices["set"] == "T"]  # decisions use T only; H-cal/H-eval stay untouched
-    index = pd.read_csv(config.output_dir(cfg, pool_name) / "synthetic_index.csv", keep_default_na=False)
+    index = read_table(config.output_dir(cfg, pool_name) / "synthetic_index.csv")
     index = index[index["read_ok"]]
 
     def load_t(pid: str):
@@ -80,7 +87,7 @@ def run_brain_review(cfg: dict, args: argparse.Namespace) -> None:
     for pid, group in tqdm(t_slices.groupby("patient_id"), desc="T lesion slices"):
         bravo, seg = load_t(str(pid))
         for z in group["z"]:
-            key = f"{pid}/z{z}"
+            key = ids.slice_key(str(pid), int(z))
             t_tissue.append({"key": key, "pid": pid, "z": int(z), "tissue_px": tissue_px(bravo[:, :, z], low)})
             for r in audit.evaluate_brain_methods(bravo[:, :, z], seg[:, :, z], args.min_area, low):
                 rows.append({"group": "T", "key": key, "pid": pid, "z": int(z), **r})
@@ -199,20 +206,20 @@ def run_brain(cfg: dict, args: argparse.Namespace) -> None:
              "min_tissue_px": min_tissue}
 
     # real: every lesion slice of every set (T, H-cal, H-eval)
-    slices = pd.read_csv(real_dir / "lesion_slices.csv")
+    slices = read_table(real_dir / "lesion_slices.csv")
     slices = slices[slices["lesion_px_model"] > 0]
     real_brains, rows = MaskStackWriter(shape), []
     for pid, group in tqdm(slices.groupby("patient_id"), desc=f"{name} lesion slices"):
         bravo, _ = load_real(real_dir, str(pid))
         for z, set_name in zip(group["z"], group["set"]):
-            key = f"{pid}/z{z}"
+            key = ids.slice_key(str(pid), int(z))
             brain, _, row = brain_of(bravo[:, :, int(z)], method, low)
             real_brains.add(key, brain)
             rows.append({"key": key, "patient_id": pid, "set": set_name, "z": int(z), **row})
     real = pd.DataFrame(rows)
 
     # synthetic: every readable sample; the mask as saved is cached for later stages
-    index = pd.read_csv(syn_dir / "synthetic_index.csv", keep_default_na=False)
+    index = read_table(syn_dir / "synthetic_index.csv")
     n_unreadable = int((~index["read_ok"]).sum())
     index = index[index["read_ok"]]
     syn_brains, raw_masks, rows = MaskStackWriter(shape), MaskStackWriter(shape), []
@@ -221,8 +228,8 @@ def run_brain(cfg: dict, args: argparse.Namespace) -> None:
         if not np.isin(mask, (0.0, 1.0)).all():
             raise ValueError(f"Mask of {sid} is not binary; masks_raw.npz stores masks as 0/1")
         brain, _, row = brain_of(image, method, low)
-        syn_brains.add(str(sid), brain)
-        raw_masks.add(str(sid), mask > 0)
+        syn_brains.add(ids.sample_key(str(sid)), brain)
+        raw_masks.add(ids.sample_key(str(sid)), mask > 0)
         rows.append({"sample_id": sid, **row, "mri_failed": row["tissue_px"] < min_tissue})
     syn = pd.DataFrame(rows)
 
@@ -291,13 +298,13 @@ def run_lesions_review(cfg: dict, args: argparse.Namespace) -> None:
     pool_dir = config.resolve_path(pool_cfg["dir"])
 
     # every component of every real lesion slice (all sets) and every synthetic mask as saved
-    slices = pd.read_csv(real_dir / "lesion_slices.csv")
+    slices = read_table(real_dir / "lesion_slices.csv")
     slices = slices[slices["lesion_px_model"] > 0]
     masks: dict[str, tuple[str, np.ndarray]] = {}
     for pid, group in tqdm(slices.groupby("patient_id"), desc=f"{name} lesion slices"):
         _, seg = load_real(real_dir, str(pid))
         for z, set_name in zip(group["z"], group["set"]):
-            masks[f"{pid}/z{z}"] = (str(set_name), seg[:, :, int(z)] > 0)
+            masks[ids.slice_key(str(pid), int(z))] = (str(set_name), seg[:, :, int(z)] > 0)
     raw = MaskStack(syn_dir / "masks_raw.npz")
     rows = [{"group": g, "key": k, "size": s, "row": r, "col": c}
             for k, (g, m) in masks.items() for s, r, c in audit.component_table(m)]
@@ -328,18 +335,21 @@ def run_lesions_review(cfg: dict, args: argparse.Namespace) -> None:
     def pick(df: pd.DataFrame, n: int) -> pd.DataFrame:
         return df.iloc[np.sort(rng.choice(len(df), size=min(n, len(df)), replace=False))] if len(df) else df
 
-    index = pd.read_csv(syn_dir / "synthetic_index.csv", keep_default_na=False)
+    index = read_table(syn_dir / "synthetic_index.csv")
     files = dict(zip(index["sample_id"], index["filename"]))
 
     def image_of(group: str, key: str) -> np.ndarray:
         if group == "S":
             return load_sample(pool_dir / files[key], pool_cfg)[0]
-        pid, z = key.split("/z")
-        return load_real(real_dir, pid)[0][:, :, int(z)]
+        pid, z = ids.parse_slice_key(key)
+        return load_real(real_dir, pid)[0][:, :, z]
 
     def crops(df: pd.DataFrame, label) -> list:
-        return [(label(rec), image_of(rec.group, rec.key), masks[rec.key][1] if rec.key in masks else raw[rec.key],
-                 int(rec.row), int(rec.col)) for rec in df.itertuples(index=False)]
+        # pandas stubs type namedtuple fields as any scalar; these columns hold str and int
+        return [(label(rec), image_of(rec.group, rec.key),  # pyright: ignore[reportArgumentType]
+                 masks[rec.key][1] if rec.key in masks else raw[rec.key],  # pyright: ignore[reportArgumentType]
+                 int(rec.row), int(rec.col))  # pyright: ignore[reportArgumentType]
+                for rec in df.itertuples(index=False)]
 
     audit.size_figure(components, m, out / f"component_sizes_{pool_name}.png",
                       f"Component sizes (8-connected) of real lesion slices per set and synthetic masks as saved; "
@@ -366,12 +376,12 @@ def run_lesions_review(cfg: dict, args: argparse.Namespace) -> None:
 
     # every small T component, findable in a viewer: model-space and approximate native position
     # (native index ~ (model index + 0.5) * native size / 128 - 0.5; z is the same in both)
-    patients = pd.read_csv(real_dir / "patients.csv").set_index("patient_id")
+    patients = read_table(real_dir / "patients.csv").set_index("patient_id")
     h, w = cfg["preprocessing"]["spatial_size"]
     small = t_comp[t_comp["size"] <= m + 1].sort_values(["size", "key"]).copy()
-    pid_z = small["key"].str.split("/z", expand=True)
-    small.insert(1, "patient_id", pid_z[0])
-    small.insert(2, "z", pid_z[1].astype(int))
+    pid_z = [ids.parse_slice_key(k) for k in small["key"]]
+    small.insert(1, "patient_id", [p for p, _ in pid_z])
+    small.insert(2, "z", [z for _, z in pid_z])
     small["gap_to_lesion"] = [audit.gap_to_nearest_lesion(masks[k][1], r, c, m)
                               for k, r, c in zip(small["key"], small["row"], small["col"])]
     dims = patients.loc[small["patient_id"], ["native_dim0", "native_dim1"]].to_numpy()
@@ -404,6 +414,116 @@ def run_lesions_review(cfg: dict, args: argparse.Namespace) -> None:
     print(f"\n{text}\nWrote {out}")
 
 
+def boxes_of(brain_csv: pd.DataFrame, key_col: str) -> dict[str, tuple[int, int, int, int] | None]:
+    """Brain box per slice key from a brain.csv (None where the slice has no brain)."""
+    return {str(k): (int(r0), int(r1), int(c0), int(c1)) if r0 >= 0 else None
+            for k, r0, r1, c0, c1 in brain_csv[[key_col, *BOX_COLUMNS]].itertuples(index=False)}
+
+
+class Labeller:
+    """Attach-or-drop with the decided settings, collecting the lesion and slice rows and the
+    label maps of one source (a dataset or pool). Real and synthetic data take the same path."""
+
+    def __init__(self, source: str, min_area: int, gap: int, small_lesion_px: int, shape):
+        self.source, self.min_area, self.gap, self.small_lesion_px = source, min_area, gap, small_lesion_px
+        self.lesion_rows: list[dict] = []
+        self.slice_rows: list[dict] = []
+        self.labels = LabelStackWriter(shape)
+
+    def add(self, key: str, ident: dict, mask: np.ndarray, brain: np.ndarray, box) -> LesionLabels:
+        res = attach_or_drop(mask, self.min_area, self.gap)
+        features = lesion_features(res, brain, box)
+        for f in features:
+            self.lesion_rows.append({"source": self.source, "lesion_id": ids.lesion_id(key, f["label"]),
+                                     "key": key, **ident, **f})
+        specks, n_specks = label_components(res.dropped)
+        areas = [f["area"] for f in features]
+        self.slice_rows.append({
+            "source": self.source, "key": key, **ident,
+            "n_components": res.n_lesions + res.n_strays + res.n_specks, "n_lesions": res.n_lesions,
+            "lesion_px": int((res.labels > 0).sum()), "largest_lesion_px": max(areas, default=0),
+            "has_lesion_lt40": any(a < self.small_lesion_px for a in areas),
+            "n_strays": res.n_strays, "stray_px": int(res.attached.sum()),
+            "n_specks": res.n_specks, "speck_px": int(res.dropped.sum()),
+            "specks_outside_brain": sum(fraction_outside(specks == i, brain) > 0.5 for i in range(1, n_specks + 1)),
+        })
+        self.labels.add(key, res.labels)
+        return res
+
+    def save(self, out_dir: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
+        lesions = pd.DataFrame(self.lesion_rows)
+        lesions.insert(1, "lesion_idx", np.arange(len(lesions)))
+        slices = pd.DataFrame(self.slice_rows)
+        lesions.to_csv(out_dir / "lesions.csv", index=False)
+        slices.to_csv(out_dir / "slices.csv", index=False)
+        self.labels.save(out_dir / "labels.npz")
+        return lesions, slices
+
+
+def run_lesions(cfg: dict, args: argparse.Namespace) -> None:
+    min_area = int(decided(cfg, "lesions", "min_lesion_area", "lesions-review"))
+    gap = int(decided(cfg, "lesions", "attach_gap", "lesions-review"))
+    small_lesion_px = int(cfg["qc"]["small_lesion_px"])
+    name, _ = config.real_dataset(cfg, args.dataset)
+    pool_name, _ = config.synthetic_pool(cfg, args.pool)
+    real_dir, syn_dir = config.output_dir(cfg, name), config.output_dir(cfg, pool_name)
+    real_res = config.results_dir(cfg, name, "e0b") / "lesions"
+    syn_res = config.results_dir(cfg, pool_name, "e0b") / "lesions"
+    existing = [p for p in (real_dir / "lesions.csv", syn_dir / "lesions.csv", real_res, syn_res) if p.exists()]
+    if existing and not args.overwrite:
+        raise SystemExit(f"{existing[0]} already exists; pass --overwrite to regenerate.")
+    for d in (real_dir, syn_dir):
+        if not (d / "brain_masks.npz").exists():
+            raise SystemExit(f"{d / 'brain_masks.npz'} not found; run the 'brain' stage first.")
+    shape = cfg["preprocessing"]["spatial_size"]
+    extra = {"stage": "lesions", "dataset": name, "pool": pool_name, "min_lesion_area": min_area,
+             "attach_gap": gap, "small_lesion_px": small_lesion_px}
+
+    # real: every lesion slice of every set; also a label volume per patient for viewers
+    real = Labeller(name, min_area, gap, small_lesion_px, shape)
+    brains, boxes = MaskStack(real_dir / "brain_masks.npz"), boxes_of(read_table(real_dir / "brain.csv"), "key")
+    slices = read_table(real_dir / "lesion_slices.csv")
+    slices = slices[slices["lesion_px_model"] > 0].sort_values(["patient_id", "z"])
+    for pid, group in tqdm(slices.groupby("patient_id"), desc=f"{name} lesion slices"):
+        _, seg = load_real(real_dir, str(pid))
+        volume = np.zeros(seg.shape, dtype=np.uint16)
+        for z, set_name in zip(group["z"], group["set"]):
+            key = ids.slice_key(str(pid), int(z))
+            res = real.add(key, {"patient_id": pid, "set": set_name, "z": int(z)}, seg[:, :, int(z)] > 0,
+                           brains[key], boxes[key])
+            volume[:, :, int(z)] = res.labels
+        save_nifti(volume, real_dir / "volumes" / str(pid) / "labels.nii.gz")
+    real_lesions, real_slices = real.save(real_dir)
+
+    # synthetic: every sample, from the masks as saved
+    syn = Labeller(pool_name, min_area, gap, small_lesion_px, shape)
+    raw, brains = MaskStack(syn_dir / "masks_raw.npz"), MaskStack(syn_dir / "brain_masks.npz")
+    boxes = boxes_of(read_table(syn_dir / "brain.csv"), "sample_id")
+    for sid in tqdm(raw.keys, desc=pool_name):
+        syn.add(ids.sample_key(sid), {"sample_id": sid}, raw[sid], brains[sid], boxes[sid])
+    syn_lesions, syn_slices = syn.save(syn_dir)
+    for d in (real_dir, syn_dir):
+        config.write_run_info(d, cfg, script=__file__, extra=extra, filename="lesions.run_info.json")
+
+    settings = (f"min_lesion_area {min_area} px, attach_gap {gap} px; a lesion counts as small below "
+                f"{small_lesion_px} px")
+    texts = []
+    for res_dir, source, lesions, slices_df, by in (
+            (real_res, name, real_lesions, real_slices, "set"),
+            (syn_res, pool_name, syn_lesions.assign(group="S"), syn_slices.assign(group="S"), "group")):
+        summary = audit.summarize_lesions(slices_df, lesions, by)
+        text = (f"E0b lesions: '{source}', {settings}\n\n{summary.round(3).to_string()}\n\n"
+                f"Columns: slices; lesions and per slice; slices without a lesion; slices with a lesion under "
+                f"{small_lesion_px} px; lesion area percentiles; attached strays (components, px); isolated "
+                f"specks (total, slices with one, share outside the brain); lesions more than half outside "
+                f"the brain.\n")
+        res_dir.mkdir(parents=True, exist_ok=True)
+        (res_dir / "summary.txt").write_text(text, encoding="utf-8")
+        config.write_run_info(res_dir, cfg, script=__file__, extra=extra)
+        texts.append(text)
+    print("\n" + "\n".join(texts) + f"\nWrote {real_dir}, {syn_dir}, {real_res}, {syn_res}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     stages = parser.add_subparsers(dest="stage", required=True)
@@ -432,6 +552,13 @@ def main() -> None:
     p.add_argument("--pool", help="synthetic pool name in the config (default: default_synthetic_pool)")
     p.add_argument("--overwrite", action="store_true", help="regenerate existing output")
     p.set_defaults(func=run_lesions_review)
+
+    p = stages.add_parser("lesions", help="lesion table, slice table and label maps for all data (needs B, C)")
+    config.add_config_arg(p)
+    p.add_argument("--dataset", help="real dataset name in the config (default: default_real_dataset)")
+    p.add_argument("--pool", help="synthetic pool name in the config (default: default_synthetic_pool)")
+    p.add_argument("--overwrite", action="store_true", help="regenerate existing output")
+    p.set_defaults(func=run_lesions)
 
     args = parser.parse_args()
     args.func(config.load_config(args.config), args)

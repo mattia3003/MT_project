@@ -1,0 +1,9 @@
+E0b lesions: 'stanford_brainmets', min_lesion_area 4 px, attach_gap 2 px; a lesion counts as small below 40 px
+
+        slices  lesions  lesions_per_slice  no_lesion  share_with_lesion_lt40  area_p5  area_median  area_p95  strays  stray_px  specks  slices_with_specks  specks_outside_brain_share  lesions_over_half_outside
+set                                                                                                                                                                                                               
+T         3823     6101              1.596         19                   0.739      6.0         19.0    186.00       4        10      57                  56                         0.0                          1
+H-cal      992     1548              1.560          3                   0.746      7.0         23.0    148.65       0         0       7                   7                         0.0                          0
+H-eval    1094     2098              1.918          5                   0.760      6.0         17.0    110.15       0         0      11                  11                         0.0                          1
+
+Columns: slices; lesions and per slice; slices without a lesion; slices with a lesion under 40 px; lesion area percentiles; attached strays (components, px); isolated specks (total, slices with one, share outside the brain); lesions more than half outside the brain.

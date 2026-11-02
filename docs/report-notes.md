@@ -245,6 +245,16 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
   lesion edges seen in one slice rather than annotation noise. *Source: manual ITK-SNAP
   inspection of Mets_120 at 128×128 (a patient with many metastases), using
   `lesions_review/small_components_T.csv`, 2026-11-02; other patients not inspected.*
+- **Synthetic lesions are smaller than real ones.** Median lesion area 13 px in S against 19 px
+  in T (H-cal 23, H-eval 17); 5th percentile 4 px against 6 px. 85% of synthetic masks have a
+  lesion under 40 px (T 74%, H-cal 75%, H-eval 76%), so the sampling script's "at least one lesion
+  under 40 px" filter shows in the pool, but 15% of the pool has no such lesion. Lesions per
+  slice are similar (S 1.64, T 1.60). *Source: `results/stanford_brainmets/e0b/lesions/summary.txt`
+  and `results/amibekk_v1/e0b/lesions/summary.txt` (min lesion area 4 px, attach gap 2), 2026-11-02.*
+- **2.0% of synthetic lesions lie more than half outside the brain** (1,213 of 61,635), against
+  1 of 6,101 in T (H-cal 0, H-eval 1). Part of this comes from the 152 failed MRIs without any
+  brain, where every lesion counts as outside; the `qc` edge check separates the two. 82% of the
+  isolated specks lie outside the brain (T: none). *Source: as above, 2026-11-02.*
 - **Attached strays barely change lesions in clean masks; the distortion sits in noisy masks.**
   At 4 px / gap 2, by provisional QC group (cut at 3 isolated specks; decision D pending):
 
