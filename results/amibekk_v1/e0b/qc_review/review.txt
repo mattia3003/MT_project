@@ -1,0 +1,25 @@
+E0b qc-review: pool 'amibekk_v1' (masks as saved; attach-or-drop at 4 px, gap 2), seed 2026
+
+Masks by number of isolated specks (all 37624 masks):
+         masks  share  cum_share  failed_mri  no_lesion  lesions_per_mask  specks_outside_brain  lesions_with_strays  lesions_grown_gt25pct  lesions_mostly_outside  old_qc_excluded
+stratum                                                                                                                                                                             
+0        32219  0.856      0.856          82          0             1.611                   NaN                0.059                  0.004                   0.018            0.008
+1         2614  0.069      0.926          64        406             1.472                 0.602                0.277                  0.026                   0.014            0.053
+2          585  0.016      0.941           6         45             1.726                 0.735                0.533                  0.098                   0.016            0.159
+3          294  0.008      0.949           0          4             1.881                 0.790                0.613                  0.110                   0.005            0.289
+4-5        361  0.010      0.959           0          4             2.003                 0.853                0.694                  0.137                   0.011            0.485
+6-9        309  0.008      0.967           0          3             2.019                 0.855                0.764                  0.175                   0.022            0.786
+10-19      294  0.008      0.975           0          0             2.116                 0.859                0.772                  0.228                   0.024            1.000
+>=20       948  0.025      1.000           0          1             2.485                 0.823                0.809                  0.278                   0.078            1.000
+Columns: masks, share, cumulative share; failed MRIs; masks without a lesion; lesions per mask; share of specks outside the brain; share of lesions with an attached stray, and grown > 25% by strays; share of lesions more than half outside the brain; share excluded by the old QC list.
+
+Exact counts, masks with 0..20 isolated specks and more:
+           0     1    2    3    4    5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  >20
+masks  32219  2614  585  294  215  146  94  85  74  56  39  32  31  28  29  31  26  25  25  28  20  928
+
+Proposed qc.max_isolated_specks: 3 (the plan's suggestion). A mask with 1..N isolated specks is minor (kept; specks are not lesions), more than N is noisy (left out of the main audit).
+  Choose N from speck_strata_amibekk_v1.png: the largest number at which masks still look like clean masks with a few stray dots, before they turn into fields of noise.
+
+Edge check (qc.edge_outside_frac = 0.5): 829 clean masks have a lesion more than half outside the brain; see edge_clean_amibekk_v1.png. The 'qc' stage flags them; whether a flag excludes is decided there (recommendation: flag only, see docs/report-notes.md).
+
+Then set qc.max_isolated_specks in configs/default.yaml (dated comment) and run the 'qc' stage.

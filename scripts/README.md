@@ -24,7 +24,8 @@ Status: ✅ implemented · ⏳ planned
 | `e0b_audit.py lesions-review` | ✅ | E0a outputs, `masks_raw.npz` from `brain` | `results/<dataset>/e0b/lesions_review/`: component sizes, attach-or-drop counts for nearby settings, specks by gap, crop sheets, proposal (`review.txt`) → **decisions B, C** |
 | `e0b_audit.py lesions` | ✅ | decisions B, C, `brain` outputs | `<output_root>/<dataset\|pool>/lesions.csv` (one row per lesion, ID + features), `slices.csv`, `labels.npz`; `volumes/<pid>/labels.nii.gz` (real); `results/<dataset\|pool>/e0b/lesions/summary.txt` + `overview.png` |
 | `e0b_audit.py view` | ✅ | lesion outputs | helper: `view --sample <id>` or `view --patient <id> --z <z>` → `results/<dataset\|pool>/e0b/views/<key>.png` (slice at full size + its lesion rows); `--nifti` also writes a synthetic sample's image and labels for ITK-SNAP |
-| `e0b_audit.py qc-review` / `qc` | ⏳ | lesion table | evidence for **decision D** (speck cut-off), then QC classes |
+| `e0b_audit.py qc-review` | ✅ | `lesions` and `brain` outputs, synthetic index | `results/<pool>/e0b/qc_review/`: masks by number of isolated specks, exact counts, sheets per stratum, clean masks with a lesion outside the brain, proposal (`review.txt`) → **decision D** |
+| `e0b_audit.py qc` | ⏳ | decision D | QC class per synthetic sample |
 | `e0b_audit.py stats` / `check` | ⏳ | all E0b outputs | E0 statistics and figures; consistency checks |
 | `e3_calibrate.py` | ⏳ | E0 outputs, H-cal | frozen thresholds (runs the E1 + E2 detectors from `memtk`) |
 | `e4_validate.py` | ⏳ | thresholds, T, H-eval | planted-copy validation table (gate) |
@@ -54,6 +55,7 @@ the production stage)
 .venv\Scripts\python.exe scripts\e0b_audit.py brain              # needs A: brain masks, boxes, failed-MRI flag
 .venv\Scripts\python.exe scripts\e0b_audit.py lesions-review     # evidence for decisions B, C
 .venv\Scripts\python.exe scripts\e0b_audit.py lesions            # needs B, C: lesion table, label maps, overview
+.venv\Scripts\python.exe scripts\e0b_audit.py qc-review          # evidence for decision D (speck cut-off)
 ```
 `brain-review` also takes `--n-synthetic 2000` (samples for the method comparison) and
 `--min-area 4` (provisional lesion size for that comparison).

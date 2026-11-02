@@ -1,0 +1,78 @@
+{
+  "timestamp": "2026-11-02T22:33:21",
+  "script": "C:\\Master thesis\\MT_project\\scripts\\e0b_audit.py",
+  "argv": [
+    "scripts\\e0b_audit.py",
+    "qc-review"
+  ],
+  "seed": 2026,
+  "python": "3.11.9",
+  "packages": {
+    "memtk": "0.1.0",
+    "numpy": "2.4.6",
+    "scipy": "1.17.1",
+    "scikit-image": "0.26.0",
+    "nibabel": "5.4.2",
+    "monai": "1.6.0",
+    "torch": "2.6.0+cu124",
+    "pandas": "2.3.3"
+  },
+  "config": {
+    "seed": 2026,
+    "output_root": "processed_data/model_space",
+    "results_root": "results",
+    "splits_dir": "splits",
+    "default_real_dataset": "stanford_brainmets",
+    "default_synthetic_pool": "amibekk_v1",
+    "preprocessing": {
+      "spatial_size": [
+        128,
+        128
+      ],
+      "interpolation": "area",
+      "mask_threshold": 0.01,
+      "slice_axis": 2
+    },
+    "brain": {
+      "low_threshold": 0.02,
+      "method": "low_threshold_all",
+      "min_tissue_px": 20
+    },
+    "lesions": {
+      "connectivity": 8,
+      "min_lesion_area": 4,
+      "attach_gap": 2
+    },
+    "qc": {
+      "max_isolated_specks": null,
+      "edge_outside_frac": 0.5,
+      "small_lesion_px": 40
+    },
+    "real_datasets": {
+      "stanford_brainmets": {
+        "root": "data/StanfordSkullStripped_1mm",
+        "image_file": "bravo.nii",
+        "mask_file": "seg.nii",
+        "train_split": "train",
+        "heldout_split": "test",
+        "heldout_sets": [
+          "H-cal",
+          "H-eval"
+        ]
+      }
+    },
+    "synthetic_pools": {
+      "amibekk_v1": {
+        "dir": "data/Synthetic_data/mask_conditioned_synthesis",
+        "glob": "*.nii",
+        "image_channel": 0,
+        "mask_channel": 1,
+        "trained_on": "stanford_brainmets",
+        "legacy_exclusion_file": "docs/corrupted_synthetic_masks_10_0.txt"
+      }
+    },
+    "_config_path": "C:\\Master thesis\\MT_project\\configs\\default.yaml"
+  },
+  "stage": "qc-review",
+  "pool": "amibekk_v1"
+}

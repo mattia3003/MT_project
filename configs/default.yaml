@@ -50,7 +50,9 @@ lesions:
 
 qc:
   # Decision D (evidence: `e0b_audit.py qc-review`)
-  max_isolated_specks: null   # minor if 1..N isolated specks, noisy if more (plan suggests 3)
+  # minor if 1..N isolated specks (kept), noisy if more (left out of the main audit)
+  max_isolated_specks: 9      # decided 2026-11-02: masks per speck count fall steadily up to ~9, then a
+                              # flat tail (~25-30 per count) of noise fields; old QC list excluded all >= 10
   edge_outside_frac: 0.5      # flag a real-sized lesion if more than this fraction lies outside the brain
   small_lesion_px: 40         # the sampling filter's "at least one lesion under 40 px"
 

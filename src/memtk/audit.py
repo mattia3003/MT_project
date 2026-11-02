@@ -306,6 +306,40 @@ def summarize_lesions(slices: pd.DataFrame, lesions: pd.DataFrame, by: str) -> p
     })
 
 
+# --- qc-review: isolated-speck cut-off -------------------------------------------------------
+
+# Strata of isolated specks per mask, for the evidence on the minor/noisy cut-off
+SPECK_STRATA = ["0", "1", "2", "3", "4-5", "6-9", "10-19", ">=20"]
+
+
+def speck_stratum(n_specks: pd.Series) -> pd.Series:
+    """The SPECK_STRATA label of each mask's number of isolated specks."""
+    return pd.cut(n_specks, bins=[-0.5, 0.5, 1.5, 2.5, 3.5, 5.5, 9.5, 19.5, np.inf], labels=SPECK_STRATA)
+
+
+def summarize_speck_strata(slices: pd.DataFrame, lesions: pd.DataFrame) -> pd.DataFrame:
+    """Per speck stratum: masks (share, cumulative share), failed MRIs, masks without a lesion,
+    lesions per mask, share of specks outside the brain, share of lesions with strays and grown
+    by more than 25% through them, share of lesions mostly outside the brain, and the share the
+    old QC list excluded. Expects slices with `stratum`, `mri_failed` and `legacy_excluded`."""
+    les = lesions.merge(slices[["key", "stratum"]], on="key")
+    les["grown"] = les["stray_px"] > 0.25 * (les["area"] - les["stray_px"])
+    s, g = slices.groupby("stratum", observed=True), les.groupby("stratum", observed=True)
+    out = pd.DataFrame({
+        "masks": s.size(), "failed_mri": s["mri_failed"].sum(),
+        "no_lesion": s["n_lesions"].agg(lambda x: int((x == 0).sum())),
+        "lesions_per_mask": s["n_lesions"].mean(),
+        "specks_outside_brain": s["specks_outside_brain"].sum() / s["n_specks"].sum(),
+        "lesions_with_strays": g["stray_px"].agg(lambda x: (x > 0).mean()),
+        "lesions_grown_gt25pct": g["grown"].mean(),
+        "lesions_mostly_outside": g["frac_outside_brain"].agg(lambda x: (x > 0.5).mean()),
+        "old_qc_excluded": s["legacy_excluded"].mean(),
+    })
+    out.insert(1, "share", out["masks"] / len(slices))
+    out.insert(2, "cum_share", out["share"].cumsum())
+    return out
+
+
 # --- brain: overview of the production brain masks -------------------------------------------
 
 def summarize_brains(df: pd.DataFrame, by: str) -> pd.DataFrame:

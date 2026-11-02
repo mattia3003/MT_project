@@ -26,7 +26,10 @@ Stages, run in this order. Each one can be run and checked on its own:
   view           (helper, after lesions) one slice at full size with its lesion rows; optionally
                  a synthetic sample's image and labels as NIfTI for ITK-SNAP
                  -> results/<dataset|pool>/e0b/views/<key>.png
-  (planned: qc-review, qc, stats, check)
+  qc-review      evidence for decision D (isolated-speck cut-off between minor and noisy masks):
+                 masks by number of isolated specks, sheets per stratum, clean masks with a
+                 lesion outside the brain -> results/<pool>/e0b/qc_review/
+  (planned: qc, stats, check)
 
 Examples (from the repository root):
   .venv\\Scripts\\python.exe scripts\\e0b_audit.py brain-review
@@ -581,6 +584,85 @@ def run_lesions(cfg: dict, args: argparse.Namespace) -> None:
     print("\n" + "\n".join(texts) + f"\nWrote {real_dir}, {syn_dir}, {real_res}, {syn_res}")
 
 
+def run_qc_review(cfg: dict, args: argparse.Namespace) -> None:
+    min_area = int(decided(cfg, "lesions", "min_lesion_area", "lesions-review"))
+    gap = int(decided(cfg, "lesions", "attach_gap", "lesions-review"))
+    edge_frac = float(cfg["qc"]["edge_outside_frac"])
+    pool_name, pool_cfg = config.synthetic_pool(cfg, args.pool)
+    syn_dir = config.output_dir(cfg, pool_name)
+    out = config.results_dir(cfg, pool_name, "e0b") / "qc_review"
+    if out.exists() and not args.overwrite:
+        raise SystemExit(f"{out} already exists; pass --overwrite to regenerate.")
+    if not (syn_dir / "lesions.csv").exists():
+        raise SystemExit(f"{syn_dir / 'lesions.csv'} not found; run the 'lesions' stage first.")
+    rng = np.random.default_rng(cfg["seed"])
+
+    # decision D views synthetic masks only; no detector has touched S yet
+    index = read_table(syn_dir / "synthetic_index.csv")
+    slices = (read_table(syn_dir / "slices.csv")
+              .merge(read_table(syn_dir / "brain.csv")[["sample_id", "mri_failed"]], on="sample_id")
+              .merge(index[["sample_id", "legacy_excluded"]], on="sample_id"))
+    slices["stratum"] = audit.speck_stratum(slices["n_specks"])
+    lesions = read_table(syn_dir / "lesions.csv")
+    summary = audit.summarize_speck_strata(slices, lesions)
+    exact = slices["n_specks"].clip(upper=21).value_counts().reindex(range(22), fill_value=0)
+    exact.index = [*map(str, range(21)), ">20"]
+
+    def pick(df: pd.DataFrame, n: int) -> pd.DataFrame:
+        return df.iloc[np.sort(rng.choice(len(df), size=min(n, len(df)), replace=False))] if len(df) else df
+
+    src = Slices(syn_dir, pool_cfg)
+
+    def tiles(picks: pd.DataFrame, label) -> list:
+        items = []
+        for rec in picks.itertuples(index=False):
+            image, mask, brain, box = src[str(rec.key)]
+            items.append((label(rec), image, attach_or_drop(mask, min_area, gap), brain, box))
+        return items
+
+    legend = ("lesions coloured with their number, attached strays lighter, isolated specks orange x, "
+              "brain cyan, brain box dashed yellow")
+    ok = slices[~slices["mri_failed"]]
+    items = []
+    for stratum in audit.SPECK_STRATA:
+        items += tiles(pick(ok[ok["stratum"] == stratum], 12),
+                       lambda r: f"{r.key}\n{r.n_specks} speck{'' if r.n_specks == 1 else 's'}, {r.n_lesions} les.")
+    audit.lesion_sheet(items, out / f"speck_strata_{pool_name}.png",
+                       f"{pool_name}: 12 random masks per number of isolated specks, one row per stratum "
+                       f"({', '.join(audit.SPECK_STRATA)}); failed MRIs left out. {legend}", n_cols=12)
+
+    outside = lesions[lesions["frac_outside_brain"] > edge_frac].groupby("key")["lesion_id"].apply(
+        lambda s: ", ".join(i.rsplit("/", 1)[1] for i in s))
+    clean = ok[(ok["n_specks"] == 0) & ok["key"].isin(outside.index)]
+    audit.lesion_sheet(tiles(pick(clean, 24), lambda r: f"{r.key}\noutside: {outside[r.key]}"),
+                       out / f"edge_clean_{pool_name}.png",
+                       f"{pool_name}: 24 random clean masks (no isolated speck) with a lesion more than "
+                       f"{edge_frac:.0%} outside the brain (named in the tile title); {len(clean)} such masks "
+                       f"in total. {legend}")
+
+    summary.to_csv(out / f"speck_strata_{pool_name}.csv")
+    exact.rename("masks").to_csv(out / f"speck_counts_{pool_name}.csv", index_label="isolated_specks")
+    text = (f"E0b qc-review: pool '{pool_name}' (masks as saved; attach-or-drop at {min_area} px, gap {gap}), "
+            f"seed {cfg['seed']}\n\n"
+            f"Masks by number of isolated specks (all {len(slices)} masks):\n{summary.round(3).to_string()}\n"
+            f"Columns: masks, share, cumulative share; failed MRIs; masks without a lesion; lesions per mask; "
+            f"share of specks outside the brain; share of lesions with an attached stray, and grown > 25% by "
+            f"strays; share of lesions more than half outside the brain; share excluded by the old QC list.\n\n"
+            f"Exact counts, masks with 0..20 isolated specks and more:\n"
+            f"{exact.to_frame('masks').T.to_string()}\n\n"
+            f"Proposed qc.max_isolated_specks: 3 (the plan's suggestion). A mask with 1..N isolated specks is "
+            f"minor (kept; specks are not lesions), more than N is noisy (left out of the main audit).\n"
+            f"  Choose N from speck_strata_{pool_name}.png: the largest number at which masks still look like "
+            f"clean masks with a few stray dots, before they turn into fields of noise.\n\n"
+            f"Edge check (qc.edge_outside_frac = {edge_frac}): {len(clean)} clean masks have a lesion more than "
+            f"half outside the brain; see edge_clean_{pool_name}.png. The 'qc' stage flags them; whether a flag "
+            f"excludes is decided there (recommendation: flag only, see docs/report-notes.md).\n\n"
+            f"Then set qc.max_isolated_specks in configs/default.yaml (dated comment) and run the 'qc' stage.\n")
+    (out / "review.txt").write_text(text, encoding="utf-8")
+    config.write_run_info(out, cfg, script=__file__, extra={"stage": "qc-review", "pool": pool_name})
+    print(f"\n{text}\nWrote {out}")
+
+
 # lesions.csv columns in the view's table, with short headers
 VIEW_COLUMNS = {"lesion_id": "lesion", "area": "area px", "stray_px": "strays px", "centroid_row": "row",
                 "centroid_col": "col", "centroid_row_brain": "row in brain", "centroid_col_brain": "col in brain",
@@ -666,6 +748,12 @@ def main() -> None:
     p.add_argument("--pool", help="synthetic pool name in the config (default: default_synthetic_pool)")
     p.add_argument("--overwrite", action="store_true", help="regenerate existing output")
     p.set_defaults(func=run_lesions)
+
+    p = stages.add_parser("qc-review", help="evidence for decision D: isolated-speck cut-off (minor vs noisy)")
+    config.add_config_arg(p)
+    p.add_argument("--pool", help="synthetic pool name in the config (default: default_synthetic_pool)")
+    p.add_argument("--overwrite", action="store_true", help="regenerate existing output")
+    p.set_defaults(func=run_qc_review)
 
     p = stages.add_parser("view", help="one slice at full size with its lesion rows (helper, after 'lesions')")
     config.add_config_arg(p)

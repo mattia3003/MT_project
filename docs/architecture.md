@@ -10,7 +10,7 @@ and open the Markdown preview.
 **Keeping it current:** updating this file is part of finishing each experiment, together with
 the status table in `scripts/README.md` and the entries in `docs/report-notes.md`.
 
-*Status: E0a implemented; E0b in progress, `brain-review`, `brain`, `lesions-review` and `lesions` implemented (2026-11-02).*
+*Status: E0a implemented; E0b in progress, `brain-review`, `brain`, `lesions-review`, `lesions`, `view` and `qc-review` implemented (2026-11-02).*
 
 ---
 
@@ -49,7 +49,7 @@ flowchart TD
         BRAIN["brain ✅"]
         LREV["lesions-review ✅"]
         LES["lesions ✅ · view ✅"]
-        QREV["qc-review"]:::planned
+        QREV["qc-review ✅"]
         QC["qc"]:::planned
         STATS["stats · check"]:::planned
     end
@@ -92,7 +92,8 @@ flowchart TD
 | | `lesions-review` | ✅ | E0a outputs, `masks_raw.npz` | `results/<dataset>/e0b/lesions_review/` (evidence for decisions B, C) |
 | | `lesions` | ✅ | decisions B, C, `brain` outputs, real `seg` volumes | `lesions.csv`, `slices.csv`, `labels.npz` (dataset and pool), `volumes/<pid>/labels.nii.gz`, `results/<dataset\|pool>/e0b/lesions/` |
 | | `view` (helper) | ✅ | lesion outputs | `results/<dataset\|pool>/e0b/views/<key>.png`; with `--nifti`, a synthetic sample's image and labels as NIfTI |
-| | `qc-review`, `qc` | planned | lesion table | evidence for decision D, QC classes |
+| | `qc-review` | ✅ | `lesions` and `brain` outputs, synthetic index | `results/<pool>/e0b/qc_review/` (evidence for decision D) |
+| | `qc` | planned | decision D | QC classes |
 | | `stats`, `check` | planned | all E0b outputs | E0 statistics; consistency checks |
 | `e3_calibrate.py` | *tbd* | planned | E0b outputs, H-cal | frozen thresholds |
 | `e4_validate.py` | *tbd* | planned | frozen thresholds, T, H-eval | validation table, planted copies |
@@ -148,7 +149,7 @@ flowchart LR
 | `synthetic` | Read synthetic samples in place; sample IDs; index a pool; parse the legacy QC list | `index_pool`, `load_sample`, `sample_id`, `name_scheme`, `read_legacy_exclusions` | — |
 | `lesions` | 8-connected labelling; attach-or-drop (specks below the minimum area become strays of a lesion within the gap, or are dropped; lesions numbered by area); lesion features (centroid in three frames, bbox, shape, fraction outside the brain); brain masks (six candidate methods), tissue area, brain box; distance and growing helpers | `label_components`, `count_components`, `attach_or_drop` (→ `LesionLabels`), `speck_gaps`, `lesion_features`, `brain_mask`, `tissue_px`, `brain_box`, `fraction_outside`, `chessboard_distance`, `grow` | SciPy, scikit-image |
 | `checks` | E0a consistency checks, independent reference transform, sample grid | `CheckReport`, `check_split`, `check_real_volumes`, `check_recompute`, `check_synthetic_index`, `sample_grid` | PyTorch, matplotlib |
-| `audit` | Evidence for the E0b review stages (candidate comparisons, figures, proposals) and overviews of the production stages | `evaluate_brain_methods`, `summarize_brain_methods`, `propose_brain_method`, `method_grid`, `threshold_sensitivity`, `summarize_threshold_sensitivity`, `sorted_sheet`, `tissue_counts`, `tissue_histogram`, `component_table`, `propose_min_area`, `size_counts`, `mask_specks`, `summarize_attach_or_drop`, `gap_counts`, `size_figure`, `crop_sheet`, `summarize_lesions`, `draw_lesions`, `lesion_sheet`, `lesion_view`, `summarize_brains`, `brain_sheet`, `draw_box` | pandas, matplotlib |
+| `audit` | Evidence for the E0b review stages (candidate comparisons, figures, proposals) and overviews of the production stages | `evaluate_brain_methods`, `summarize_brain_methods`, `propose_brain_method`, `method_grid`, `threshold_sensitivity`, `summarize_threshold_sensitivity`, `sorted_sheet`, `tissue_counts`, `tissue_histogram`, `component_table`, `propose_min_area`, `size_counts`, `mask_specks`, `summarize_attach_or_drop`, `gap_counts`, `size_figure`, `crop_sheet`, `summarize_lesions`, `speck_stratum`, `summarize_speck_strata`, `draw_lesions`, `lesion_sheet`, `lesion_view`, `summarize_brains`, `brain_sheet`, `draw_box` | pandas, matplotlib |
 | `plotting` | Shared figure helpers (no pyplot, so importing memtk never changes the plotting backend). `save` wraps the figure title to the figure width and uses the constrained layout, so the title never covers tile titles or runs off the image | `tile_figure`, `show_slice`, `hide_unused`, `save` | matplotlib |
 
 Tests (pytest, on small hand-built inputs): `tests/test_lesions.py` covers labelling,
@@ -320,6 +321,20 @@ Written by the `view` helper, one file per request: `<key>.png` (slice key with 
 `_`, e.g. `Mets_120_z40.png`): the slice at full size, drawn as in `overview.png`, with its
 `lesions.csv` rows as a table. With `--nifti`, a synthetic sample also gets `<key>_image.nii.gz`
 and `<key>_labels.nii.gz` for ITK-SNAP (real slices already have `volumes/<pid>/labels.nii.gz`).
+
+### Results: `results/<pool>/e0b/qc_review/`
+
+Written by `qc-review`. In git. Evidence for decision D (`qc.max_isolated_specks`); nothing here
+is used by later stages. Synthetic masks only (no detector has touched S yet).
+
+| File | Content |
+| --- | --- |
+| `review.txt` | The tables below, proposed cut-off, the edge-check count, what to set next |
+| `speck_strata_<pool>.csv` | Per number of isolated specks (0, 1, 2, 3, 4–5, 6–9, 10–19, ≥ 20): masks, share, cumulative share, failed MRIs, masks without a lesion, lesions per mask, share of specks outside the brain, share of lesions with a stray and grown > 25% by strays, share of lesions mostly outside the brain, share excluded by the old QC list |
+| `speck_counts_<pool>.csv` | Masks with exactly 0..20 isolated specks, and more |
+| `speck_strata_<pool>.png` | 12 random masks per stratum (failed MRIs left out), drawn as in the lesion overview |
+| `edge_clean_<pool>.png` | 24 random clean masks with a lesion more than `qc.edge_outside_frac` outside the brain, the lesion named in the tile title |
+| `run_info.json` | Run log |
 
 ### Results: `results/<dataset>/e0b/lesions_review/`
 

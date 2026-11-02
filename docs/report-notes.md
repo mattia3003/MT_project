@@ -177,6 +177,26 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
 
   The plan's default (2) was thus confirmed by the data. *Source: `lesions_review/review.txt`,
   `speck_gaps_amibekk_v1.csv`, `specks_by_gap_amibekk_v1.png`, 2026-11-02.*
+- **Noisy masks: more than 9 isolated specks** (`qc.max_isolated_specks`, decision D, set
+  2026-11-02). Masks with 1–9 isolated specks are *minor* (kept; specks are not lesions), more
+  than 9 *noisy* (left out of the main audit; results also reported with them included).
+  - *Evidence:* masks per exact speck count fall steadily from 1 to about 9 (2,614, 585, 294,
+    215, 146, 94, 85, 74, 56), then turn into a flat tail of about 25–30 masks per count from
+    10 to 20, plus 928 masks with more than 20: two populations, occasional specks and noise
+    fields. The stratified sheet shows the same change: up to 9 specks the masks look like
+    clean ones with a few dots, from 10 the dots spread over the image.
+  - *Effect:* 1,242 noisy masks (3.3%); main audit on 36,382 clean and minor masks. The plan's
+    suggested cut of 3 would have excluded 670 more masks (4–9 specks) that look and behave
+    like clean ones: lesions mostly outside the brain stay at the clean-mask level (1–2%) up to
+    19 specks, and rise to 7.8% only at 20 or more.
+  - *Cost:* more stray growth in the 4–9 group (14–18% of lesions grown > 25% by strays, against
+    11% at 3 specks); covered by E5's drop-only re-run and by reporting with and without
+    noisy masks.
+  - *Chosen from the data's own break* rather than a fixed number, so the same rule carries over
+    to a new pool.
+
+  *Source: `results/amibekk_v1/e0b/qc_review/review.txt`, `speck_counts_amibekk_v1.csv`,
+  `speck_strata_amibekk_v1.csv` and `.png`, 2026-11-02.*
 - **The lesion definition and the informative-lesion bound are separate settings.**
   `min_lesion_area` defines what a lesion is (object vs noise) everywhere: QC speck counts,
   `no_lesion`, the lesion table and IDs, cleaned masks for E1, lesion counts and rarity. The
@@ -256,6 +276,11 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
   brain, where every lesion counts as outside; the `qc` edge check separates the two. 82% of the
   isolated specks lie outside the brain (T: none). *Source: as above, 2026-11-02.* Broken down
   by QC group in the next entry.
+- **The old QC list (2,243 masks) evidently cut at about 10 fragments.** It excluded every mask
+  with 10 or more isolated specks, and fewer below that (79% at 6–9, 49% at 4–5, 29% at 3, 5% at
+  1, 0.8% at 0). That explains its count, and it agrees with the break used for decision D.
+  *Source: `results/amibekk_v1/e0b/qc_review/speck_strata_amibekk_v1.csv` (column
+  `old_qc_excluded`), 2026-11-02.* The full cross-table follows in the `qc` stage.
 - **Most synthetic lesions outside the brain sit in clean masks, not noisy ones.** Lesions more
   than half outside the synthetic brain, by provisional QC group (cut at 3 isolated specks;
   decision D pending):
