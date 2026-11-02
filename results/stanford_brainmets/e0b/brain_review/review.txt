@@ -1,5 +1,27 @@
 E0b brain-review: dataset 'stanford_brainmets' (T only), pool 'amibekk_v1' (2000 random samples for the methods), seed 2026
 Lesions = components >= 4 px (provisional; decision B comes later)
+brain.low_threshold = 0.02 (used by the low_threshold methods and the tissue area)
+
+Does brain.low_threshold sit in an empty gap between background and tissue?
+Brain area (low_threshold_all) at multiples of the threshold, change relative to 0.02 (slices with a brain >= 500 px):
+                 slices  median_change  p95_abs_change
+group threshold                                       
+T     0.005        3811         0.0103          0.0267
+      0.010        3811         0.0063          0.0168
+      0.020        3811         0.0000          0.0000
+      0.040        3811        -0.0109          0.0312
+      0.060        3811        -0.0223          0.0655
+S     0.005        1936         0.0165          0.0381
+      0.010        1936         0.0090          0.0196
+      0.020        1936         0.0000          0.0000
+      0.040        1936        -0.0132          0.0319
+      0.060        1936        -0.0276          0.0727
+Background noise (99.9th percentile, > 3 px from the brain and > 1 px from the mask), for the median slice and a near-worst slice (99th percentile):
+       background_p999_median  background_p999_worst1pct
+group                                                   
+T                       0.000                     0.0058
+S                       0.001                     0.0212
+Read: area changes of a few percent and background levels well below the threshold mean it separates background from tissue. Large changes, or background near the threshold, mean it must be revisited for this data (set brain.low_threshold).
 
 Candidate brain-mask methods:
                          slices  lesions  over_half_outside  share_over_half_outside  any_outside  share_any_outside  brain_px_p1  brain_px_p5  brain_px_median

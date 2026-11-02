@@ -22,6 +22,7 @@ from tqdm import tqdm
 from memtk.config import resolve_path
 from memtk.io import list_patients, load_image, patient_files
 from memtk.lesions import count_components
+from memtk.plotting import save
 from memtk.synthetic import list_pool_files, load_sample, read_legacy_exclusions
 from memtk.transforms import convert_volume_pair, lesion_px_per_slice
 
@@ -278,11 +279,7 @@ def sample_grid(lesion_slices: pd.DataFrame, out_dir: Path, index_df: pd.DataFra
         image, mask = load_sample(pool_dir / fname, pool_cfg)
         _show(axes[-1, c], image, mask, f"S {sid}")
 
-    fig.suptitle("Model space (128x128): real lesion slices per set and synthetic samples; red = mask",
-                 fontsize=10)
-    fig.tight_layout()
-    path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(path, dpi=90)
+    save(fig, path, "Model space (128x128): real lesion slices per set and synthetic samples; red = mask")
 
 
 def _show(ax, image: np.ndarray, mask: np.ndarray, title: str) -> None:

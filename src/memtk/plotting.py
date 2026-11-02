@@ -6,11 +6,14 @@ changes the plotting backend of a notebook or script.
 
 from __future__ import annotations
 
+import textwrap
 from collections.abc import Sequence
 from pathlib import Path
 
 import numpy as np
 from matplotlib.figure import Figure
+
+TITLE_FONTSIZE = 10
 
 
 def tile_figure(n_rows: int, n_cols: int, tile: float = 2.2) -> tuple[Figure, np.ndarray]:
@@ -37,10 +40,15 @@ def hide_unused(axes: np.ndarray, n_used: int) -> None:
 
 
 def save(fig: Figure, path: Path, title: str = "", dpi: int = 90) -> Path:
-    """Add an optional title, lay out and save; creates the folder."""
+    """Add an optional title, lay out and save; creates the folder.
+
+    The title is wrapped to the figure width, and the constrained layout reserves room for it, so
+    it neither covers the tile titles of the first row nor runs off the image.
+    """
     if title:
-        fig.suptitle(title, fontsize=10)
-    fig.tight_layout()
+        chars_per_line = max(30, int(fig.get_figwidth() * 72 / (0.6 * TITLE_FONTSIZE)))
+        fig.suptitle(textwrap.fill(title, chars_per_line), fontsize=TITLE_FONTSIZE)
+    fig.set_layout_engine("constrained")
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, dpi=dpi)
     return path

@@ -92,6 +92,18 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
   A dilated Otsu with all regions was not tested, as the fixed threshold already solves both.
   *Source: `results/stanford_brainmets/e0b/brain_review/review.txt` and `methods_real.png`;
   intensity levels from a read-only sample of 600 T and 600 synthetic slices, 2026-11-01.*
+- **The brain threshold (0.02) is a config value, checked per dataset, and holds here.**
+  `brain.low_threshold` depends on the data (it assumes skull-stripped images with a near-zero
+  background), so it is set in the config, and `brain-review` reports whether it sits in an
+  empty gap between background and tissue. On this data, moving it to 0.01 / 0.04 changes the
+  brain area by a median of +0.6% / −1.1% on T (95th percentile 1.7% / 3.1%) and +0.9% / −1.3% on
+  S (2.0% / 3.2%). Background noise (99.9th percentile per slice, away from brain and mask) is
+  0.000 / 0.001 for the median slice, and 0.006 (T) / 0.021 (S) for the near-worst 1%. The
+  synthetic near-worst is at the threshold, but such bright background pixels are isolated and
+  fall below the 30 px region minimum, which the small area changes confirm.
+  *Source: `results/stanford_brainmets/e0b/brain_review/review.txt` and
+  `threshold_sensitivity_amibekk_v1.csv` (all 3,823 T lesion slices, 2,000 random synthetic
+  samples), 2026-11-02.*
 - **A failed synthetic MRI is judged by its brain tissue area, not its maximum intensity**
   (`brain.min_tissue_px` = 20 px, decision A, set 2026-11-01: below 20 px every viewed sample has
   no brain at all, and the smallest real T lesion slice has 31 px). Tissue = pixels of the brain
@@ -101,6 +113,27 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
   with maximum < 0.3 have ≥ 400 px. A small brain alone is never a failure (see section 3).
   *Source: read-only check on the full pool, 2026-11-01; tissue counts in
   `results/stanford_brainmets/e0b/brain_review/tissue_counts_amibekk_v1.csv`.*
+- **A failed synthetic MRI means no brain region at all; a stricter rule was rejected.** Every
+  kept tissue region has ≥ 30 px, so `min_tissue_px` = 20 fails exactly the images without any
+  brain region (152 samples, 0.40%). The `brain` outline sheet showed small images that pass:
+  a lesion with a thin rim of tissue, or a small faint patch elsewhere, on black.
+  - *Tested:* failing images with < 20 px of tissue farther than 5 px from the lesions (mask
+    components ≥ 4 px). This flagged 243 samples (+91) and no T slice.
+  - *Rejected, for three reasons:*
+    - It did not rank images by plausibility: it scored compact small slices with a central
+      lesion (`file_5622`, `file_5_4695`: 142–158 px of tissue, 12 px away) below fragmented
+      images (`12212`, `file_5412`: 112–120 px, 80–83 px away).
+    - A genuine top-of-head slice with a metastasis also has most of its tissue near the
+      lesion: T has Mets_314/z137 with 31 px of tissue.
+    - It would add two pool-specific thresholds (margin, speck size), which a new pool would
+      have to retune.
+  - *Also found:* measured from the raw mask, the specks of noisy masks, grown by the margin,
+    covered normal brains; ignoring components < 4 px fixed that.
+  - The code was removed after the decision.
+
+  *Source: manual inspection and a temporary `brain-review` extension (since removed), its counts
+  and sheet `near_blank_away_amibekk_v1.png`; `results/amibekk_v1/e0b/brain/outlines.png`,
+  2026-11-02.*
 - **H-cal/H-eval split by matched pairs, seed 2026.** Sort the 51 test patients by number of
   lesion slices, pair neighbours, and assign one of each pair at random to each set; the odd
   patient out goes to H-eval. Why: lesion burden ranges from 3 to 119 slices, and a plain random
@@ -142,6 +175,13 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
   near-blank excluded), 2026-11-01.* With the proposed brain mask (`low_threshold_all`), 1.6% of
   synthetic lesions lie more than half outside the brain (T: 0.02%). *Source: brain-review
   `review.txt`, 2000 random samples, 2026-11-01.*
+- **Stage 2 paints a bright dot at mask specks, even far outside the brain.** Of 2,000 random
+  synthetic samples, 120 have background pixels above 0.02 (99.9th percentile of the area
+  outside the brain). 93% of those bright pixels (13,070 of 14,037) lie on or next to a mask
+  pixel, and these samples have noisy masks (median 22.5 mask components vs 2 for the rest).
+  So stage 2 follows the mask channel even where it draws no brain. Relevant to RQ-M1 (is the
+  mask a key into stage 2?) and E8. *Source: read-only check, 2,000 random samples (seed 7),
+  2026-11-02.*
 - **The smaller synthetic brains look like genuine anatomy**, not a brain-mask artefact: compact
   slices resembling the top or bottom of the head, outlined well by every method. Median brain
   area 2,975 px (S) vs 7,765 px (T lesion slices). *Source:
@@ -192,6 +232,26 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
 - **The orientation check is specific to this dataset.** All raw affines are the identity, so
   the independent check cannot detect re-orientation problems here. A new dataset with
   non-identity affines needs its own orientation check. 2026-11-01.
+- **Brain-mask borders are not measured against a ground truth.** No reference brain masks
+  exist. The method was chosen from three things:
+  - lesion containment on T: annotated lesions must lie inside the brain, which detects masks
+    that are too small, at lesion locations only;
+  - the intensity gap of skull-stripped images (see the threshold entry in section 2);
+  - visual inspection.
+
+  Border accuracy away from lesions, and on synthetic images, is not measured. The brain mask is
+  used only for coarse purposes (edge check > 50% outside, speck location, brain box), where
+  1–2 px border errors have little effect. A direct check on real data is possible if needed:
+  the native skull-stripped non-zero region, pushed through the model-space transform, is a
+  reference mask. *Source: brain-review, 2026-11-01/02.*
+- **Some synthetic MRIs show only a small piece of tissue around the lesion.** About 0.2–1% of
+  the pool, depending on the measure, shows a lesion with a thin rim of tissue or a small faint
+  patch on black. At 128×128 it cannot be decided visually whether they imitate top-of-head
+  slices or are failed generations; even lesion and tissue are hard to tell apart beyond
+  trusting the mask. They are kept, not flagged as failed. Analyses that use the brain (edge
+  check, brain-relative positions, E8) should report their sensitivity to brain size, using
+  `brain_px` / `tissue_px` in `brain.csv`. *Source: as the failed-MRI entry in section 2,
+  2026-11-02.*
 
 ## 5. Open questions
 
@@ -207,6 +267,16 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
 **Project decisions** (from the experiment plan)
 - [ ] Informative-lesion bound: decided during E0b/E3 coding, by its effect on the synthetic pool.
 - [ ] E4 go/no-go criteria: fixed before E4 runs.
+- [ ] **Does a failed synthetic MRI exclude its mask from the mask audit?** Decide at the E0b `qc`
+      stage. The mask comes from stage 1 whatever stage 2 does, so a blank or failed MRI does not
+      make its mask invalid for E1–E5, which use masks only. A failed MRI matters where the
+      brain is used: the edge check, brain-relative positions, and E8. Option: `mri_failed` is
+      a flag that excludes a sample from those analyses only, rather than a QC class that
+      removes the mask from S. The experiment plan does not say. The failed images come in at
+      least two kinds: a lesion with a thin rim of tissue painted around it, and a small faint
+      patch away from the lesion, each on an otherwise black image. *Source: `brain` stage
+      outline sheet `results/amibekk_v1/e0b/brain/outlines.png` (row 3) and a read-only check of
+      its 8 samples, 2026-11-02.*
 - [ ] **Position frame for copy detection (E2), a deviation from the plan to decide when E2 is
       planned.** The plan measures lesion position relative to the brain box of the paired MRI.
       But stage 1 generates masks without seeing a brain, so a memorized mask reproduces its

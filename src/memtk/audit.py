@@ -1,7 +1,8 @@
-"""Evidence for the E0b review stages: candidate comparisons, tables, figures and proposals.
+"""Evidence and overview figures for E0b: candidate comparisons, tables, proposals.
 
 Review stages never write production data. They compute candidates on the relevant data and
-propose a config value, which the user sets by hand after viewing the evidence.
+propose a config value, which the user sets by hand after viewing the evidence. Production
+stages use the overview figures here to show what they computed.
 """
 
 from __future__ import annotations
@@ -11,17 +12,19 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from matplotlib.figure import Figure
+from matplotlib.patches import Rectangle
+from scipy import ndimage
 
 from memtk.lesions import BRAIN_METHODS, brain_mask, fraction_outside, label_components
 from memtk.plotting import hide_unused, save, show_slice, tile_figure
 
 # Outline colours used in every E0b figure
-BRAIN_COLOR, LESION_COLOR = "cyan", "red"
+BRAIN_COLOR, LESION_COLOR, BOX_COLOR = "cyan", "red", "yellow"
 
 
 # --- brain-review: candidate brain-mask methods ----------------------------------------------
 
-def evaluate_brain_methods(image: np.ndarray, mask: np.ndarray, min_area: int,
+def evaluate_brain_methods(image: np.ndarray, mask: np.ndarray, min_area: int, low_threshold: float,
                            methods=tuple(BRAIN_METHODS)) -> list[dict]:
     """For one slice and each method: brain area, and how many of the mask's real-sized
     components (>= min_area px) lie partly or mostly outside the brain."""
@@ -30,7 +33,7 @@ def evaluate_brain_methods(image: np.ndarray, mask: np.ndarray, min_area: int,
     lesion_ids = np.flatnonzero(sizes >= min_area) + 1
     rows = []
     for method in methods:
-        brain = brain_mask(image, method)
+        brain = brain_mask(image, method, low_threshold)
         outside = [fraction_outside(labels == i, brain) for i in lesion_ids]
         rows.append({"method": method, "brain_px": int(brain.sum()), "n_lesions": len(lesion_ids),
                      "n_over_half_outside": sum(f > 0.5 for f in outside),
@@ -66,15 +69,54 @@ def propose_brain_method(summary: pd.DataFrame, group: str = "T", target: float 
 
 
 def method_grid(examples: list[tuple[str, np.ndarray, np.ndarray]], path: Path, title: str,
-                methods=tuple(BRAIN_METHODS)) -> Path:
+                low_threshold: float, methods=tuple(BRAIN_METHODS)) -> Path:
     """One row per example slice, one column per method: brain outline (cyan), lesions (red)."""
     fig, axes = tile_figure(len(examples), len(methods), tile=2.4)
     for r, (key, image, mask) in enumerate(examples):
         for c, method in enumerate(methods):
-            brain = brain_mask(image, method)
+            brain = brain_mask(image, method, low_threshold)
             show_slice(axes[r, c], image, [(brain, BRAIN_COLOR), (mask > 0, LESION_COLOR)],
                        f"{key}\n{method}: {int(brain.sum())} px")
     return save(fig, path, title)
+
+
+# --- brain-review: does the low threshold sit in a gap between background and tissue? ---------
+
+# Multiples of brain.low_threshold at which the brain area is recomputed
+THRESHOLD_FACTORS = (0.25, 0.5, 1.0, 2.0, 3.0)
+
+
+def threshold_sensitivity(image: np.ndarray, mask: np.ndarray, low_threshold: float) -> dict:
+    """For one slice: area of the `low_threshold_all` brain at each multiple of the threshold,
+    and the background noise level (99.9th percentile more than 3 px from the brain and more
+    than 1 px from the mask: stage 2 paints a bright dot at every mask speck, which is not
+    noise). If the threshold sits in an empty gap between background and tissue, the area
+    barely changes when it moves."""
+    brain = brain_mask(image, "low_threshold_all", low_threshold)
+    near = ndimage.binary_dilation(brain, iterations=3) | ndimage.binary_dilation(mask > 0, iterations=1)
+    background = image[~near]
+    return {**{f"area_x{f:g}": int(brain_mask(image, "low_threshold_all", low_threshold * f).sum())
+               for f in THRESHOLD_FACTORS},
+            "background_p999": float(np.percentile(background, 99.9)) if background.size else np.nan}
+
+
+def summarize_threshold_sensitivity(per_slice: pd.DataFrame, low_threshold: float,
+                                    min_brain_px: int = 500) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Per group: (1) the median and 95th-percentile absolute change of brain area at each
+    multiple of the threshold, relative to the threshold itself (slices with a brain of at least
+    `min_brain_px`, where a relative change is meaningful); (2) the background noise level of
+    the median slice and of a near-worst slice."""
+    changes, levels = [], []
+    for group, d in per_slice.groupby("group", sort=False):
+        d = d[d["area_x1"] >= min_brain_px]
+        for f in THRESHOLD_FACTORS:
+            rel = (d[f"area_x{f:g}"] - d["area_x1"]) / d["area_x1"]
+            changes.append({"group": group, "threshold": round(low_threshold * f, 6), "slices": len(d),
+                            "median_change": rel.median(), "p95_abs_change": rel.abs().quantile(0.95)})
+        levels.append({"group": group, "background_p999_median": d["background_p999"].median(),
+                       "background_p999_worst1pct": d["background_p999"].quantile(0.99)})
+    return (pd.DataFrame(changes).set_index(["group", "threshold"]),
+            pd.DataFrame(levels).set_index("group"))
 
 
 # --- brain-review: near-blank (failed) synthetic MRIs ----------------------------------------
@@ -94,8 +136,8 @@ def sorted_sheet(items: list[tuple[str, str, np.ndarray, np.ndarray]], path: Pat
 
 
 def tissue_counts(t_tissue: pd.Series, s_tissue: pd.Series, cuts=(20, 50, 100, 150, 200, 300, 400)) -> pd.DataFrame:
-    """For each candidate min_tissue_px: synthetic samples that would count as failed, and real
-    T lesion slices with that little tissue (which must stay rare: small real slices exist)."""
+    """For each candidate cut on a tissue measure: synthetic samples that would count as failed,
+    and real T lesion slices below it (which must stay rare: small real slices exist)."""
     return pd.DataFrame({"cut": cuts,
                          "S_below": [int((s_tissue < c).sum()) for c in cuts],
                          "S_share_below": [float((s_tissue < c).mean()) for c in cuts],
@@ -115,4 +157,35 @@ def tissue_histogram(t_tissue: pd.Series, s_tissue: pd.Series, path: Path, title
     ax.set_xlabel("brain tissue (px; 0 shown as 1)")
     ax.set_ylabel("count (log)")
     ax.legend(fontsize=8)
+    return save(fig, path, title)
+
+
+# --- brain: overview of the production brain masks -------------------------------------------
+
+def summarize_brains(df: pd.DataFrame, by: str) -> pd.DataFrame:
+    """Per group: slices, slices without any brain, brain-area percentiles and median box size.
+
+    Expects the columns of a `brain.csv` (brain_px, box_r0..box_c1 with -1 for no brain)."""
+    has_box = df["box_r0"] >= 0
+    d = df.assign(box_h=(df["box_r1"] - df["box_r0"] + 1).where(has_box),
+                  box_w=(df["box_c1"] - df["box_c0"] + 1).where(has_box))
+    return d.groupby(by, sort=False).agg(
+        slices=("brain_px", "size"), no_brain=("brain_px", lambda x: int((x == 0).sum())),
+        brain_px_p1=("brain_px", lambda x: x.quantile(0.01)), brain_px_p5=("brain_px", lambda x: x.quantile(0.05)),
+        brain_px_median=("brain_px", "median"), box_h_median=("box_h", "median"), box_w_median=("box_w", "median"))
+
+
+def brain_sheet(items: list[tuple[str, np.ndarray, np.ndarray, np.ndarray, tuple | None]], path: Path,
+                title: str, n_cols: int = 8) -> Path:
+    """Tiles of (title, image, mask, brain, box): brain outline (cyan), brain box (dashed yellow),
+    mask (red). The box is inclusive (r0, r1, c0, c1), or None to draw no box."""
+    n_rows = int(np.ceil(len(items) / n_cols))
+    fig, axes = tile_figure(n_rows, n_cols, tile=1.9)
+    for ax, (tile_title, image, mask, brain, box) in zip(axes.ravel(), items):
+        show_slice(ax, image, [(brain, BRAIN_COLOR), (mask > 0, LESION_COLOR)], tile_title)
+        if box is not None:
+            r0, r1, c0, c1 = box
+            ax.add_patch(Rectangle((c0 - 0.5, r0 - 0.5), c1 - c0 + 1, r1 - r0 + 1, fill=False,
+                                   edgecolor=BOX_COLOR, linestyle="--", linewidth=0.6))
+    hide_unused(axes, len(items))
     return save(fig, path, title)

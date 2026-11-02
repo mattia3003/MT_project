@@ -1,0 +1,10 @@
+E0b brain: dataset 'stanford_brainmets', brain method low_threshold_all
+
+Lesion slices per set (156 patients):
+        slices  no_brain  brain_px_p1  brain_px_p5  brain_px_median  box_h_median  box_w_median
+set                                                                                            
+T         3823         0       1188.4       2174.3           7765.0         105.0          97.0
+H-cal      992         0       1214.9       2277.4           8062.0         106.0          99.0
+H-eval    1094         0       1266.9       2276.3           8310.5         108.0          99.0
+
+Lesion slices with tissue < min_tissue_px (20): 0 (the rule applies to synthetic MRIs only; real slices should not fall under it)

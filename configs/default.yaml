@@ -26,6 +26,10 @@ preprocessing:
 
 brain:
   # Decision A (evidence: `e0b_audit.py brain-review`)
+  # brain tissue = pixels above this (low_threshold methods and tissue_px); depends on the data,
+  # so re-check it with brain-review (threshold sensitivity table) whenever new data is used
+  low_threshold: 0.02         # set 2026-11-02: on stanford_brainmets + amibekk_v1 it sits in the gap
+                              # between background (99.9th pct <= ~0.01) and dim tissue (~0.03-0.09)
   # options: otsu | otsu_dilate1 | otsu_dilate2 | otsu_all | low_threshold | low_threshold_all
   method: low_threshold_all   # decided 2026-11-01: 1/6101 T lesions >50% outside the brain
                               # (Otsu: 74), 1.5% partly outside; keeps separate pieces in low slices

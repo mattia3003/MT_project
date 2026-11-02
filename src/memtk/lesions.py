@@ -13,10 +13,8 @@ from skimage.filters import threshold_otsu
 
 EIGHT_CONNECTED = np.ones((3, 3), dtype=bool)
 
-# Fixed foreground cut of the `low_threshold` brain method. Measured 2026-11-01 on 600 T and 600
-# synthetic slices: background lies near 0 (99.9th percentile ~0.001), dim brain tissue near 0.09
-# (2nd percentile of the Otsu brain), so 0.02 separates them in both real and synthetic images.
-LOW_THRESHOLD = 0.02
+# The foreground cut of the `low_threshold` methods (`low_threshold` argument) depends on the data,
+# so it comes from the config (`brain.low_threshold`), checked per dataset by E0b brain-review.
 
 # Smallest foreground region kept by the "all regions" rule. Low slices show the brain as
 # separate pieces (lower lobes, cerebellum), which keeping only the largest region throws away;
@@ -48,13 +46,13 @@ def count_components(mask: np.ndarray) -> int:
     return label_components(mask)[1]
 
 
-def brain_mask(image: np.ndarray, method: str) -> np.ndarray:
+def brain_mask(image: np.ndarray, method: str, low_threshold: float) -> np.ndarray:
     """Brain of one 2D MRI slice as a boolean mask; empty if the image has no foreground.
 
-    Foreground (Otsu threshold, or the fixed LOW_THRESHOLD), then the largest 8-connected
-    region, or every region of at least MIN_BRAIN_REGION px for the "all regions" methods,
-    with holes filled (so dark ventricles count as brain), then grown outward by the method's
-    dilation.
+    Foreground (Otsu threshold, or pixels above `low_threshold` for the low-threshold methods;
+    the Otsu methods ignore it), then the largest 8-connected region, or every region of at
+    least MIN_BRAIN_REGION px for the "all regions" methods, with holes filled (so dark
+    ventricles count as brain), then grown outward by the method's dilation.
     """
     if method not in BRAIN_METHODS:
         raise ValueError(f"Unknown brain method '{method}'; choose from {sorted(BRAIN_METHODS)}")
@@ -64,7 +62,7 @@ def brain_mask(image: np.ndarray, method: str) -> np.ndarray:
             return np.zeros(image.shape, dtype=bool)
         foreground = image > threshold_otsu(image)
     else:
-        foreground = image > LOW_THRESHOLD
+        foreground = image > low_threshold
 
     labels, n = label_components(foreground)
     if n == 0:
@@ -81,13 +79,13 @@ def brain_mask(image: np.ndarray, method: str) -> np.ndarray:
     return brain
 
 
-def tissue_px(image: np.ndarray) -> int:
+def tissue_px(image: np.ndarray, low_threshold: float) -> int:
     """Amount of brain tissue in a slice: pixels of the `low_threshold_all` brain.
 
     One fixed measure for every image, independent of the chosen brain method; a near-blank
     (failed) synthetic MRI has almost none.
     """
-    return int(brain_mask(image, "low_threshold_all").sum())
+    return int(brain_mask(image, "low_threshold_all", low_threshold).sum())
 
 
 def brain_box(brain: np.ndarray) -> tuple[int, int, int, int] | None:

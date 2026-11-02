@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-11-01T21:31:46",
+  "timestamp": "2026-11-02T18:30:14",
   "script": "C:\\Master thesis\\MT_project\\scripts\\e0b_audit.py",
   "argv": [
     "scripts\\e0b_audit.py",
@@ -35,8 +35,9 @@
       "slice_axis": 2
     },
     "brain": {
-      "method": null,
-      "min_tissue_px": null
+      "low_threshold": 0.02,
+      "method": "low_threshold_all",
+      "min_tissue_px": 20
     },
     "lesions": {
       "connectivity": 8,
@@ -76,5 +77,6 @@
   "stage": "brain-review",
   "pool": "amibekk_v1",
   "min_area": 4,
+  "low_threshold": 0.02,
   "n_synthetic": 2000
 }

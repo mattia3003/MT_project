@@ -6,6 +6,8 @@ import pytest
 from memtk.lesions import (BRAIN_METHODS, MIN_BRAIN_REGION, brain_box, brain_mask, count_components,
                            fraction_outside, label_components, tissue_px)
 
+LOW = 0.02   # low threshold used in these tests: between background (0) and the dim rim (0.08)
+
 
 def disk(shape, center, radius):
     rr, cc = np.ogrid[:shape[0], :shape[1]]
@@ -51,49 +53,55 @@ def test_low_threshold_keeps_dim_rim_and_contains_otsu(head):
     # either way are tested: the low threshold keeps all tissue, Otsu never reaches beyond it.
     core = disk(head.shape, (30, 30), 12)
     rim = disk(head.shape, (30, 30), 16)
-    otsu = brain_mask(head, "otsu")
-    low = brain_mask(head, "low_threshold")
+    otsu = brain_mask(head, "otsu", LOW)
+    low = brain_mask(head, "low_threshold", LOW)
     assert np.array_equal(low, rim)          # rim included, hole filled, blob left out
     assert otsu[core].all()                  # the bright core is always brain
     assert not (otsu & ~low).any()           # Otsu brain lies within the low-threshold brain
 
 
+def test_low_threshold_value_is_used(head):
+    # a threshold above the dim rim (0.08) leaves only the bright core, hole filled
+    assert np.array_equal(brain_mask(head, "low_threshold", 0.1), disk(head.shape, (30, 30), 12))
+    assert np.array_equal(brain_mask(head, "otsu", 0.1), brain_mask(head, "otsu", LOW))   # Otsu ignores it
+
+
 def test_dilation_grows_the_otsu_brain(head):
-    sizes = [brain_mask(head, m).sum() for m in ("otsu", "otsu_dilate1", "otsu_dilate2")]
+    sizes = [brain_mask(head, m, LOW).sum() for m in ("otsu", "otsu_dilate1", "otsu_dilate2")]
     assert sizes[0] < sizes[1] < sizes[2]
-    assert brain_mask(head, "otsu_dilate1")[brain_mask(head, "otsu")].all()   # only grows
+    assert brain_mask(head, "otsu_dilate1", LOW)[brain_mask(head, "otsu", LOW)].all()   # only grows
 
 
 def test_holes_are_filled(head):
-    assert brain_mask(head, "otsu")[30, 30]
+    assert brain_mask(head, "otsu", LOW)[30, 30]
 
 
 def test_small_blobs_are_never_brain(head):
     assert 9 < MIN_BRAIN_REGION
     for method in BRAIN_METHODS:
-        assert not brain_mask(head, method)[59, 59]
+        assert not brain_mask(head, method, LOW)[59, 59]
 
 
 def test_only_all_regions_method_keeps_separate_tissue_piece(head):
     for method, (_, _, keep_all) in BRAIN_METHODS.items():
-        assert brain_mask(head, method)[5, 55] == keep_all
+        assert brain_mask(head, method, LOW)[5, 55] == keep_all
 
 
 def test_tissue_px_counts_all_tissue(head):
     rim_area = int(disk(head.shape, (30, 30), 16).sum())
-    assert tissue_px(head) == rim_area + 49
-    assert tissue_px(np.zeros((16, 16))) == 0
+    assert tissue_px(head, LOW) == rim_area + 49
+    assert tissue_px(np.zeros((16, 16)), LOW) == 0
 
 
 @pytest.mark.parametrize("method", sorted(BRAIN_METHODS))
 def test_empty_and_constant_images_give_empty_brain(method):
-    assert not brain_mask(np.zeros((16, 16)), method).any()
-    assert not brain_mask(np.full((16, 16), 0.01), method).any()
+    assert not brain_mask(np.zeros((16, 16)), method, LOW).any()
+    assert not brain_mask(np.full((16, 16), 0.01), method, LOW).any()
 
 
 def test_unknown_method_raises(head):
     with pytest.raises(ValueError):
-        brain_mask(head, "magic")
+        brain_mask(head, "magic", LOW)
 
 
 def test_brain_box_is_inclusive():

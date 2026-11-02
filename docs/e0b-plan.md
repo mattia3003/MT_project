@@ -4,14 +4,14 @@ Working plan for E0b, kept in the repo so work can resume from here. The experim
 specified in `docs/experiment-plan.md` (E0); this file records how it is implemented, stage by
 stage, and what has been decided. Update the status table when a stage is done.
 
-## Status (2026-11-01)
+## Status (2026-11-02)
 
 | # | Stage | Kind | Status |
 | --- | --- | --- | --- |
 | 0 | Drop the null model in the docs | docs | ✅ done, committed |
-| 1 | `brain-review` | review → decision A | ✅ done; **decision A set** |
-| 2 | `brain` | production (needs A) | ⏳ next |
-| 3 | `lesions-review` | review → decisions B, C | ⏳ |
+| 1 | `brain-review` | review → decision A | ✅ done; **decision A set**, confirmed 2026-11-02 |
+| 2 | `brain` | production (needs A) | ✅ done (2026-11-02) |
+| 3 | `lesions-review` | review → decisions B, C | ⏳ next |
 | 4 | `lesions` + `view` | production (needs B, C) | ⏳ |
 | 5 | `qc-review` | review → decision D | ⏳ |
 | 6 | `qc` | production (needs D) | ⏳ |
@@ -73,9 +73,10 @@ Each stage uses only the outputs and decisions of the stages before it.
   anything. Decision D views synthetic masks, which is allowed because no detector has touched
   S yet.
 
-Config (`configs/default.yaml`) as of 2026-11-01:
+Config (`configs/default.yaml`) as of 2026-11-02:
 ```yaml
 brain:
+  low_threshold: 0.02         # set 2026-11-02; re-check with brain-review on new data
   method: low_threshold_all   # decision A, set 2026-11-01
   min_tissue_px: 20           # decision A, set 2026-11-01
 lesions:
@@ -91,7 +92,12 @@ qc:
 ### Decision A (done, 2026-11-01)
 
 **Brain mask.**
-- Method: `low_threshold_all`: pixels > 0.02, keep every 8-connected region ≥ 30 px, fill holes.
+- Method: `low_threshold_all`: pixels > `brain.low_threshold` (0.02), keep every 8-connected
+  region ≥ 30 px, fill holes.
+- The threshold is a config value, not a code constant, because it depends on the data.
+  `brain-review` reports how much the brain area changes at 0.25–3× the threshold, plus the
+  background and darkest-brain intensity levels. On this data it changes about 1%, so 0.02 sits
+  in an empty gap.
 - Six candidates were compared on 6,101 T lesions and 2,000 synthetic samples:
 
   | Method | T lesions >50% outside | T lesions partly outside |
@@ -114,8 +120,13 @@ qc:
   the smallest real T lesion slice has 31 px.
 - A small brain alone is never a failure: synthetic small brains look like genuine slices from
   the top or bottom of the head.
-- Caveat: a bright synthetic lesion ≥ 30 px on an otherwise blank image would count as tissue.
-  The `qc-review` sheets give a second look.
+- Since every kept tissue region has ≥ 30 px, the cut of 20 means "no brain region at all". It
+  needs no tuning for a new pool.
+- Confirmed 2026-11-02 after the `brain` outline sheet showed small images that pass: a lesion
+  with a thin rim of tissue, or a small faint patch, on black. A stricter rule (tissue farther
+  than 5 px from the lesions < 20 px) was tested and rejected; it was removed from the code.
+  Reasons in `docs/report-notes.md` section 2. Such images are kept; later analyses that use
+  the brain decide how to treat small brains, using `brain_px` / `tissue_px` in `brain.csv`.
 
 ## Definitions (fixed in code and docs)
 
@@ -152,7 +163,7 @@ qc:
 **`src/memtk/lesions.py`.**
 - *Exists:*
   - `label_components`, `count_components`;
-  - `brain_mask(image, method)` with the six `BRAIN_METHODS`;
+  - `brain_mask(image, method, low_threshold)` with the six `BRAIN_METHODS`;
   - `tissue_px`, `brain_box`, `fraction_outside`.
 - *To add in stage 4:*
   - `attach_or_drop(mask, min_area, gap)`: returns the label map plus counts (isolated specks,
@@ -202,7 +213,8 @@ E0b stores all three frames. The open question is recorded in `docs/report-notes
    - Tissue area measured on all T lesion slices and all of S.
    - Figures: method grids (real, synthetic), the near-blank sheet, the tissue histogram.
    - Output: `results/<dataset>/e0b/brain_review/`.
-2. **`brain`** (production; needs A; about 6–8 min).
+2. **`brain`** ✅ (production; needs A; about 6–8 min). Mask stacks are read with
+   `memtk.io.MaskStack` (bit-packed `.npz`, `stack[key]`).
    - Brain masks and boxes with the chosen method, for all real lesion slices (T, H-cal,
      H-eval) and all synthetic samples, plus `tissue_px` and the `mri_failed` flag.
    - Reads the pool once and caches the synthetic masks as saved.
@@ -283,3 +295,13 @@ E0b stores all three frames. The open question is recorded in `docs/report-notes
 
 - Decide the position frame when E2 is planned, then update `docs/experiment-plan.md`.
 - Write a pinned `requirements-lock.txt` at the end of E0.
+- **Full re-run of E0a + E0b from scratch** once both are done and accepted: regenerate every
+  output, as an end-to-end check, and to give all figures the fixed titles (2026-11-02:
+  `plotting.save` wraps titles and reserves room for them; existing PNGs still have the old
+  layout).
+- **Per-pool decisions, when a new synthetic pool arrives** (e.g. from the master-thesis models).
+  The `brain:` decisions in the config are global, including `brain.low_threshold` (0.02, which
+  assumes skull-stripped images with a near-zero background). For a new pool, re-run
+  `brain-review` on it; its threshold-sensitivity table shows whether the threshold still sits
+  in a gap. If the evidence differs, add per-pool overrides under `synthetic_pools.<name>`
+  rather than changing the global values.
