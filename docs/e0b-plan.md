@@ -12,8 +12,8 @@ stage, and what has been decided. Update the status table when a stage is done.
 | 1 | `brain-review` | review → decision A | ✅ done; **decision A set**, confirmed 2026-11-02 |
 | 2 | `brain` | production (needs A) | ✅ done (2026-11-02) |
 | 3 | `lesions-review` | review → decisions B, C | ✅ done; **decisions B, C set** (2026-11-02): 4 px, gap 2 |
-| 4 | `lesions` + `view` | production (needs B, C) | `lesions` ✅ (2026-11-02); overview sheets and `view` next |
-| 5 | `qc-review` | review → decision D | ⏳ |
+| 4 | `lesions` + `view` | production (needs B, C) | ✅ done (2026-11-02) |
+| 5 | `qc-review` | review → decision D | ⏳ next |
 | 6 | `qc` | production (needs D) | ⏳ |
 | 7 | `stats` | E0 outputs | ⏳ |
 | 8 | `check` | consistency checks | ⏳ |

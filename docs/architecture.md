@@ -48,7 +48,7 @@ flowchart TD
         BREV["brain-review ✅"]
         BRAIN["brain ✅"]
         LREV["lesions-review ✅"]
-        LES["lesions ✅ · view"]
+        LES["lesions ✅ · view ✅"]
         QREV["qc-review"]:::planned
         QC["qc"]:::planned
         STATS["stats · check"]:::planned
@@ -91,7 +91,7 @@ flowchart TD
 | | `brain` | ✅ | decision A, E0a outputs, synthetic pool | `brain.csv`, `brain_masks.npz` (dataset and pool), `masks_raw.npz` (pool), `results/<dataset\|pool>/e0b/brain/` |
 | | `lesions-review` | ✅ | E0a outputs, `masks_raw.npz` | `results/<dataset>/e0b/lesions_review/` (evidence for decisions B, C) |
 | | `lesions` | ✅ | decisions B, C, `brain` outputs, real `seg` volumes | `lesions.csv`, `slices.csv`, `labels.npz` (dataset and pool), `volumes/<pid>/labels.nii.gz`, `results/<dataset\|pool>/e0b/lesions/` |
-| | `view` | planned | lesion outputs | one slice at full size with its lesion rows |
+| | `view` (helper) | ✅ | lesion outputs | `results/<dataset\|pool>/e0b/views/<key>.png`; with `--nifti`, a synthetic sample's image and labels as NIfTI |
 | | `qc-review`, `qc` | planned | lesion table | evidence for decision D, QC classes |
 | | `stats`, `check` | planned | all E0b outputs | E0 statistics; consistency checks |
 | `e3_calibrate.py` | *tbd* | planned | E0b outputs, H-cal | frozen thresholds |
@@ -148,7 +148,7 @@ flowchart LR
 | `synthetic` | Read synthetic samples in place; sample IDs; index a pool; parse the legacy QC list | `index_pool`, `load_sample`, `sample_id`, `name_scheme`, `read_legacy_exclusions` | — |
 | `lesions` | 8-connected labelling; attach-or-drop (specks below the minimum area become strays of a lesion within the gap, or are dropped; lesions numbered by area); lesion features (centroid in three frames, bbox, shape, fraction outside the brain); brain masks (six candidate methods), tissue area, brain box; distance and growing helpers | `label_components`, `count_components`, `attach_or_drop` (→ `LesionLabels`), `speck_gaps`, `lesion_features`, `brain_mask`, `tissue_px`, `brain_box`, `fraction_outside`, `chessboard_distance`, `grow` | SciPy, scikit-image |
 | `checks` | E0a consistency checks, independent reference transform, sample grid | `CheckReport`, `check_split`, `check_real_volumes`, `check_recompute`, `check_synthetic_index`, `sample_grid` | PyTorch, matplotlib |
-| `audit` | Evidence for the E0b review stages (candidate comparisons, figures, proposals) and overviews of the production stages | `evaluate_brain_methods`, `summarize_brain_methods`, `propose_brain_method`, `method_grid`, `threshold_sensitivity`, `summarize_threshold_sensitivity`, `sorted_sheet`, `tissue_counts`, `tissue_histogram`, `component_table`, `propose_min_area`, `size_counts`, `mask_specks`, `summarize_attach_or_drop`, `gap_counts`, `size_figure`, `crop_sheet`, `summarize_lesions`, `summarize_brains`, `brain_sheet` | pandas, matplotlib |
+| `audit` | Evidence for the E0b review stages (candidate comparisons, figures, proposals) and overviews of the production stages | `evaluate_brain_methods`, `summarize_brain_methods`, `propose_brain_method`, `method_grid`, `threshold_sensitivity`, `summarize_threshold_sensitivity`, `sorted_sheet`, `tissue_counts`, `tissue_histogram`, `component_table`, `propose_min_area`, `size_counts`, `mask_specks`, `summarize_attach_or_drop`, `gap_counts`, `size_figure`, `crop_sheet`, `summarize_lesions`, `draw_lesions`, `lesion_sheet`, `lesion_view`, `summarize_brains`, `brain_sheet`, `draw_box` | pandas, matplotlib |
 | `plotting` | Shared figure helpers (no pyplot, so importing memtk never changes the plotting backend). `save` wraps the figure title to the figure width and uses the constrained layout, so the title never covers tile titles or runs off the image | `tile_figure`, `show_slice`, `hide_unused`, `save` | matplotlib |
 
 Tests (pytest, on small hand-built inputs): `tests/test_lesions.py` covers labelling,
@@ -306,10 +306,20 @@ Run logs: `lesions.run_info.json`.
 
 ### Results: `results/<dataset>/e0b/lesions/` and `results/<pool>/e0b/lesions/`
 
-Written by `lesions`. In git. `summary.txt`: per set (real) or for the pool: slices, lesions,
-slices without a lesion, share with a lesion under 40 px, lesion area percentiles, strays,
-isolated specks (and the share outside the brain), lesions more than half outside the brain.
-`run_info.json`: run log.
+Written by `lesions`. In git.
+
+| File | Content |
+| --- | --- |
+| `summary.txt` | Per set (real) or for the pool: slices, lesions, slices without a lesion, share with a lesion under 40 px, lesion area percentiles, strays, isolated specks (and the share outside the brain), lesions more than half outside the brain |
+| `overview.png` | Lesions drawn on their slices: each lesion in its own colour with its L-number, attached strays lighter, dropped specks as orange ×, brain outline cyan, brain box dashed yellow. Real: random T, T with the most lesions, random H-cal and H-eval. Synthetic: random, the most lesions, masks with both strays and isolated specks |
+| `run_info.json` | Run log |
+
+### Results: `results/<dataset|pool>/e0b/views/`
+
+Written by the `view` helper, one file per request: `<key>.png` (slice key with `/` replaced by
+`_`, e.g. `Mets_120_z40.png`): the slice at full size, drawn as in `overview.png`, with its
+`lesions.csv` rows as a table. With `--nifti`, a synthetic sample also gets `<key>_image.nii.gz`
+and `<key>_labels.nii.gz` for ITK-SNAP (real slices already have `volumes/<pid>/labels.nii.gz`).
 
 ### Results: `results/<dataset>/e0b/lesions_review/`
 

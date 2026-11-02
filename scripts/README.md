@@ -9,9 +9,7 @@ Dataset-specific stages also take `--dataset` (real data) or `--pool` (synthetic
 to `default_real_dataset` / `default_synthetic_pool` in the config. Each stage writes a run log
 (time, command, seed, full config, package versions) next to its outputs.
 
-```powershell
-.venv\Scripts\python.exe scripts\e0a_prepare_data.py split
-```
+All commands, ready to copy, are in [Commands](#commands) below.
 
 Status: ✅ implemented · ⏳ planned
 
@@ -24,8 +22,8 @@ Status: ✅ implemented · ⏳ planned
 | `e0b_audit.py brain-review` | ✅ | E0a outputs (T only), synthetic pool | `results/<dataset>/e0b/brain_review/`: method comparison, example figures, near-blank sheet, tissue counts, proposal (`review.txt`) → **decision A** in the config |
 | `e0b_audit.py brain` | ✅ | decision A, E0a outputs, synthetic pool | `<output_root>/<dataset>/brain.csv` + `brain_masks.npz` (all lesion slices); `<output_root>/<pool>/brain.csv` + `brain_masks.npz` + `masks_raw.npz` (all samples, failed-MRI flag); `results/<dataset\|pool>/e0b/brain/` (summary, outline sheet) |
 | `e0b_audit.py lesions-review` | ✅ | E0a outputs, `masks_raw.npz` from `brain` | `results/<dataset>/e0b/lesions_review/`: component sizes, attach-or-drop counts for nearby settings, specks by gap, crop sheets, proposal (`review.txt`) → **decisions B, C** |
-| `e0b_audit.py lesions` | ✅ | decisions B, C, `brain` outputs | `<output_root>/<dataset\|pool>/lesions.csv` (one row per lesion, ID + features), `slices.csv`, `labels.npz`; `volumes/<pid>/labels.nii.gz` (real); `results/<dataset\|pool>/e0b/lesions/summary.txt` |
-| `e0b_audit.py view` | ⏳ | lesion outputs | one slice at full size with its lesion rows |
+| `e0b_audit.py lesions` | ✅ | decisions B, C, `brain` outputs | `<output_root>/<dataset\|pool>/lesions.csv` (one row per lesion, ID + features), `slices.csv`, `labels.npz`; `volumes/<pid>/labels.nii.gz` (real); `results/<dataset\|pool>/e0b/lesions/summary.txt` + `overview.png` |
+| `e0b_audit.py view` | ✅ | lesion outputs | helper: `view --sample <id>` or `view --patient <id> --z <z>` → `results/<dataset\|pool>/e0b/views/<key>.png` (slice at full size + its lesion rows); `--nifti` also writes a synthetic sample's image and labels for ITK-SNAP |
 | `e0b_audit.py qc-review` / `qc` | ⏳ | lesion table | evidence for **decision D** (speck cut-off), then QC classes |
 | `e0b_audit.py stats` / `check` | ⏳ | all E0b outputs | E0 statistics and figures; consistency checks |
 | `e3_calibrate.py` | ⏳ | E0 outputs, H-cal | frozen thresholds (runs the E1 + E2 detectors from `memtk`) |
@@ -35,11 +33,52 @@ Status: ✅ implemented · ⏳ planned
 | `e7_reports.py` | ⏳ | E5, E6 outputs, planted copies | match reports, deletion test, correctness |
 | `e8_paired_mri.py` | ⏳ (optional) | E5 outputs, paired MRIs | paired-MRI similarity |
 
+## Commands
+
+Copy-paste from the repository root (PowerShell). Run order top to bottom; each stage refuses to
+overwrite its outputs unless `--overwrite` is given. `--help` on any script or stage lists its
+options, e.g. `.venv\Scripts\python.exe scripts\e0b_audit.py view --help`.
+
+**E0a: prepare the data** (`--dataset`, `--pool` default to the config's defaults)
+```powershell
+.venv\Scripts\python.exe scripts\e0a_prepare_data.py split       # patient split (fixed for the project)
+.venv\Scripts\python.exe scripts\e0a_prepare_data.py real        # real volumes -> model space (128x128xD)
+.venv\Scripts\python.exe scripts\e0a_prepare_data.py synthetic   # index the synthetic pool
+.venv\Scripts\python.exe scripts\e0a_prepare_data.py check       # consistency checks (exit code 1 on failure)
+```
+
+**E0b: audit and QC** (review stages give evidence; set the decision in the config, then run
+the production stage)
+```powershell
+.venv\Scripts\python.exe scripts\e0b_audit.py brain-review       # evidence for decision A
+.venv\Scripts\python.exe scripts\e0b_audit.py brain              # needs A: brain masks, boxes, failed-MRI flag
+.venv\Scripts\python.exe scripts\e0b_audit.py lesions-review     # evidence for decisions B, C
+.venv\Scripts\python.exe scripts\e0b_audit.py lesions            # needs B, C: lesion table, label maps, overview
+```
+`brain-review` also takes `--n-synthetic 2000` (samples for the method comparison) and
+`--min-area 4` (provisional lesion size for that comparison).
+
+**Look at one slice** (after `lesions`): full-size picture with its lesion table, written to
+`results/<dataset|pool>/e0b/views/<key>.png`
+```powershell
+.venv\Scripts\python.exe scripts\e0b_audit.py view --sample file_2_1033            # synthetic sample
+.venv\Scripts\python.exe scripts\e0b_audit.py view --sample file_2_1033 --nifti    # + image and labels for ITK-SNAP
+.venv\Scripts\python.exe scripts\e0b_audit.py view --patient Mets_120 --z 40       # real slice (z 0-based)
+```
+For a real slice in ITK-SNAP, open `processed_data/model_space/<dataset>/volumes/<pid>/bravo.nii.gz`
+with `labels.nii.gz` (or `seg.nii.gz`) as segmentation; ITK-SNAP slice = z + 1.
+
+**Tests**
+```powershell
+.venv\Scripts\python.exe -m pytest           # all tests
+.venv\Scripts\python.exe -m pytest -q tests\test_lesions.py   # one file
+```
+
+## Notes
+
 **Review → decision → production.** E0b's review stages only produce evidence and a proposed
 value. You set the value by hand in `configs/default.yaml` (with a dated comment); the production
 stage that needs it refuses to run while it is still `null`.
-
-**Unit tests:** `.venv\Scripts\python.exe -m pytest` (in `tests/`).
 
 The split is fixed for the whole project: `split` refuses to replace an existing split file
 unless `--overwrite` is given (re-running with the same seed gives an identical file).

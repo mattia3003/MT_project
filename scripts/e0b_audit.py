@@ -22,11 +22,16 @@ Stages, run in this order. Each one can be run and checked on its own:
                  frames), one row per slice, label maps; a label volume per real patient
                  -> <output_root>/<dataset|pool>/lesions.csv + slices.csv + labels.npz,
                     <output_root>/<dataset>/volumes/<pid>/labels.nii.gz,
-                    results/<dataset|pool>/e0b/lesions/summary.txt
-  (planned: view, qc-review, qc, stats, check)
+                    results/<dataset|pool>/e0b/lesions/summary.txt + overview.png
+  view           (helper, after lesions) one slice at full size with its lesion rows; optionally
+                 a synthetic sample's image and labels as NIfTI for ITK-SNAP
+                 -> results/<dataset|pool>/e0b/views/<key>.png
+  (planned: qc-review, qc, stats, check)
 
-Example (from the repository root):
+Examples (from the repository root):
   .venv\\Scripts\\python.exe scripts\\e0b_audit.py brain-review
+  .venv\\Scripts\\python.exe scripts\\e0b_audit.py view --sample file_2_1033
+  .venv\\Scripts\\python.exe scripts\\e0b_audit.py view --patient Mets_120 --z 40
 """
 
 import argparse
@@ -37,7 +42,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from memtk import audit, config, ids
-from memtk.io import LabelStackWriter, MaskStack, MaskStackWriter, load_image, read_table, save_nifti
+from memtk.io import LabelStack, LabelStackWriter, MaskStack, MaskStackWriter, load_image, read_table, save_nifti
 from memtk.lesions import (LesionLabels, attach_or_drop, brain_box, brain_mask, fraction_outside, label_components,
                            lesion_features, tissue_px)
 from memtk.synthetic import load_sample
@@ -420,6 +425,33 @@ def boxes_of(brain_csv: pd.DataFrame, key_col: str) -> dict[str, tuple[int, int,
             for k, r0, r1, c0, c1 in brain_csv[[key_col, *BOX_COLUMNS]].itertuples(index=False)}
 
 
+class Slices:
+    """Image, mask as saved, brain mask and brain box of any slice of one source, by slice key.
+    Real data when `pool_cfg` is None (volumes in `out_dir`), else a synthetic pool."""
+
+    def __init__(self, out_dir: Path, pool_cfg: dict | None = None):
+        self.out_dir, self.pool_cfg = out_dir, pool_cfg
+        self.brains = MaskStack(out_dir / "brain_masks.npz")
+        self.boxes = boxes_of(read_table(out_dir / "brain.csv"), "key" if pool_cfg is None else "sample_id")
+        if pool_cfg is not None:
+            self.raw = MaskStack(out_dir / "masks_raw.npz")
+            index = read_table(out_dir / "synthetic_index.csv")
+            self.files = dict(zip(index["sample_id"], index["filename"]))
+            self.pool_dir = config.resolve_path(pool_cfg["dir"])
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.brains
+
+    def __getitem__(self, key: str) -> tuple[np.ndarray, np.ndarray, np.ndarray, tuple | None]:
+        if self.pool_cfg is None:
+            pid, z = ids.parse_slice_key(key)
+            bravo, seg = load_real(self.out_dir, pid)
+            image, mask = bravo[:, :, z], seg[:, :, z] > 0
+        else:
+            image, mask = load_sample(self.pool_dir / self.files[key], self.pool_cfg)[0], self.raw[key]
+        return image, mask, self.brains[key], self.boxes[key]
+
+
 class Labeller:
     """Attach-or-drop with the decided settings, collecting the lesion and slice rows and the
     label maps of one source (a dataset or pool). Real and synthetic data take the same path."""
@@ -465,7 +497,7 @@ def run_lesions(cfg: dict, args: argparse.Namespace) -> None:
     gap = int(decided(cfg, "lesions", "attach_gap", "lesions-review"))
     small_lesion_px = int(cfg["qc"]["small_lesion_px"])
     name, _ = config.real_dataset(cfg, args.dataset)
-    pool_name, _ = config.synthetic_pool(cfg, args.pool)
+    pool_name, pool_cfg = config.synthetic_pool(cfg, args.pool)
     real_dir, syn_dir = config.output_dir(cfg, name), config.output_dir(cfg, pool_name)
     real_res = config.results_dir(cfg, name, "e0b") / "lesions"
     syn_res = config.results_dir(cfg, pool_name, "e0b") / "lesions"
@@ -476,12 +508,13 @@ def run_lesions(cfg: dict, args: argparse.Namespace) -> None:
         if not (d / "brain_masks.npz").exists():
             raise SystemExit(f"{d / 'brain_masks.npz'} not found; run the 'brain' stage first.")
     shape = cfg["preprocessing"]["spatial_size"]
+    rng = np.random.default_rng(cfg["seed"])
     extra = {"stage": "lesions", "dataset": name, "pool": pool_name, "min_lesion_area": min_area,
              "attach_gap": gap, "small_lesion_px": small_lesion_px}
+    real_src, syn_src = Slices(real_dir), Slices(syn_dir, pool_cfg)
 
     # real: every lesion slice of every set; also a label volume per patient for viewers
     real = Labeller(name, min_area, gap, small_lesion_px, shape)
-    brains, boxes = MaskStack(real_dir / "brain_masks.npz"), boxes_of(read_table(real_dir / "brain.csv"), "key")
     slices = read_table(real_dir / "lesion_slices.csv")
     slices = slices[slices["lesion_px_model"] > 0].sort_values(["patient_id", "z"])
     for pid, group in tqdm(slices.groupby("patient_id"), desc=f"{name} lesion slices"):
@@ -490,20 +523,44 @@ def run_lesions(cfg: dict, args: argparse.Namespace) -> None:
         for z, set_name in zip(group["z"], group["set"]):
             key = ids.slice_key(str(pid), int(z))
             res = real.add(key, {"patient_id": pid, "set": set_name, "z": int(z)}, seg[:, :, int(z)] > 0,
-                           brains[key], boxes[key])
+                           real_src.brains[key], real_src.boxes[key])
             volume[:, :, int(z)] = res.labels
         save_nifti(volume, real_dir / "volumes" / str(pid) / "labels.nii.gz")
     real_lesions, real_slices = real.save(real_dir)
 
     # synthetic: every sample, from the masks as saved
     syn = Labeller(pool_name, min_area, gap, small_lesion_px, shape)
-    raw, brains = MaskStack(syn_dir / "masks_raw.npz"), MaskStack(syn_dir / "brain_masks.npz")
-    boxes = boxes_of(read_table(syn_dir / "brain.csv"), "sample_id")
-    for sid in tqdm(raw.keys, desc=pool_name):
-        syn.add(ids.sample_key(sid), {"sample_id": sid}, raw[sid], brains[sid], boxes[sid])
+    for sid in tqdm(syn_src.raw.keys, desc=pool_name):
+        syn.add(ids.sample_key(sid), {"sample_id": sid}, syn_src.raw[sid], syn_src.brains[sid], syn_src.boxes[sid])
     syn_lesions, syn_slices = syn.save(syn_dir)
     for d in (real_dir, syn_dir):
         config.write_run_info(d, cfg, script=__file__, extra=extra, filename="lesions.run_info.json")
+
+    # overview sheets: random slices, slices with many lesions, and (synthetic) masks with both
+    # strays and isolated specks, so every element of the drawing appears
+    def pick(df: pd.DataFrame, n: int) -> pd.DataFrame:
+        return df.iloc[np.sort(rng.choice(len(df), size=min(n, len(df)), replace=False))] if len(df) else df
+
+    def sheet(src: Slices, picks: pd.DataFrame, path: Path, title: str) -> None:
+        items = []
+        for key, n_les, n_specks in picks[["key", "n_lesions", "n_specks"]].itertuples(index=False):
+            image, mask, brain, box = src[str(key)]
+            counts = f"{n_les} lesion{'' if n_les == 1 else 's'}, {n_specks} speck{'' if n_specks == 1 else 's'}"
+            items.append((f"{key}\n{counts}", image, attach_or_drop(mask, min_area, gap), brain, box))
+        audit.lesion_sheet(items, path, title)
+
+    legend = ("each lesion in its own colour with its number (L1 = largest), attached strays lighter, "
+              "dropped specks x (orange), brain cyan, brain box dashed yellow")
+    t = real_slices[real_slices["set"] == "T"]
+    sheet(real_src, pd.concat([pick(t, 16), t.nlargest(8, "n_lesions"),
+                               *(pick(real_slices[real_slices["set"] == s], 8) for s in ("H-cal", "H-eval"))]),
+          real_res / "overview.png",
+          f"{name}: rows 1-2 random T, row 3 T with the most lesions, row 4 H-cal, row 5 H-eval. {legend}")
+    both = syn_slices[(syn_slices["n_strays"] > 0) & (syn_slices["n_specks"] > 0)]
+    sheet(syn_src, pd.concat([pick(syn_slices, 16), syn_slices.nlargest(8, "n_lesions"), pick(both, 8)]),
+          syn_res / "overview.png",
+          f"{pool_name}: rows 1-2 random, row 3 the most lesions, row 4 with both strays and isolated specks. "
+          f"{legend}")
 
     settings = (f"min_lesion_area {min_area} px, attach_gap {gap} px; a lesion counts as small below "
                 f"{small_lesion_px} px")
@@ -522,6 +579,56 @@ def run_lesions(cfg: dict, args: argparse.Namespace) -> None:
         config.write_run_info(res_dir, cfg, script=__file__, extra=extra)
         texts.append(text)
     print("\n" + "\n".join(texts) + f"\nWrote {real_dir}, {syn_dir}, {real_res}, {syn_res}")
+
+
+# lesions.csv columns in the view's table, with short headers
+VIEW_COLUMNS = {"lesion_id": "lesion", "area": "area px", "stray_px": "strays px", "centroid_row": "row",
+                "centroid_col": "col", "centroid_row_brain": "row in brain", "centroid_col_brain": "col in brain",
+                "eccentricity": "eccentr.", "solidity": "solidity", "frac_outside_brain": "outside brain"}
+
+
+def run_view(cfg: dict, args: argparse.Namespace) -> None:
+    min_area = int(decided(cfg, "lesions", "min_lesion_area", "lesions-review"))
+    gap = int(decided(cfg, "lesions", "attach_gap", "lesions-review"))
+    if args.sample is not None:
+        source, pool_cfg = config.synthetic_pool(cfg, args.pool)
+        key = ids.sample_key(args.sample)
+    elif args.patient is not None and args.z is not None:
+        source, pool_cfg = config.real_dataset(cfg, args.dataset)[0], None
+        key = ids.slice_key(args.patient, args.z)
+    else:
+        raise SystemExit("Give --sample <id>, or --patient <id> and --z <0-based slice index>.")
+    out_dir = config.output_dir(cfg, source)
+    if not (out_dir / "lesions.csv").exists():
+        raise SystemExit(f"{out_dir / 'lesions.csv'} not found; run the 'lesions' stage first.")
+    src = Slices(out_dir, pool_cfg)
+    if key not in src:
+        raise SystemExit(f"'{key}' is not a {'sample' if pool_cfg else 'lesion slice'} of '{source}'.")
+    path = config.results_dir(cfg, source, "e0b") / "views" / f"{key.replace('/', '_')}.png"
+    if path.exists() and not args.overwrite:
+        raise SystemExit(f"{path} already exists; pass --overwrite to regenerate.")
+
+    image, mask, brain, box = src[key]
+    res = attach_or_drop(mask, min_area, gap)
+    if not np.array_equal(res.labels, LabelStack(out_dir / "labels.npz")[key]):
+        print("Warning: labels differ from labels.npz; the lesion settings changed since the 'lesions' stage.")
+    lesions = read_table(out_dir / "lesions.csv")
+    table = lesions.loc[lesions["key"] == key, list(VIEW_COLUMNS)].rename(columns=VIEW_COLUMNS)
+    audit.lesion_view(image, res, brain, box, table, path,
+                      f"{source}: {key} | {res.n_lesions} lesions, {res.n_strays} strays ({int(res.attached.sum())} "
+                      f"px), {res.n_specks} isolated specks | L-number per lesion, lighter = attached stray, "
+                      f"orange x = dropped speck, cyan = brain, dashed yellow = brain box")
+    print(f"Wrote {path}")
+    if args.nifti:
+        if pool_cfg is None:
+            pid, _ = ids.parse_slice_key(key)
+            print(f"Real slice: open {out_dir / 'volumes' / pid / 'labels.nii.gz'} next to bravo.nii.gz "
+                  f"(ITK-SNAP slice {args.z + 1}).")
+        else:
+            stem = path.with_suffix("")
+            save_nifti(image[:, :, None].astype(np.float32), f"{stem}_image.nii.gz")
+            save_nifti(res.labels[:, :, None].astype(np.uint16), f"{stem}_labels.nii.gz")
+            print(f"Wrote {stem}_image.nii.gz and {stem}_labels.nii.gz (open the labels as segmentation)")
 
 
 def main() -> None:
@@ -559,6 +666,18 @@ def main() -> None:
     p.add_argument("--pool", help="synthetic pool name in the config (default: default_synthetic_pool)")
     p.add_argument("--overwrite", action="store_true", help="regenerate existing output")
     p.set_defaults(func=run_lesions)
+
+    p = stages.add_parser("view", help="one slice at full size with its lesion rows (helper, after 'lesions')")
+    config.add_config_arg(p)
+    p.add_argument("--sample", help="synthetic sample ID (full file stem, e.g. file_2_1033)")
+    p.add_argument("--patient", help="real patient ID (with --z)")
+    p.add_argument("--z", type=int, help="0-based slice index of a real patient (ITK-SNAP shows z + 1)")
+    p.add_argument("--dataset", help="real dataset name in the config (default: default_real_dataset)")
+    p.add_argument("--pool", help="synthetic pool name in the config (default: default_synthetic_pool)")
+    p.add_argument("--nifti", action="store_true",
+                   help="synthetic: also write the image and its labels as NIfTI for ITK-SNAP")
+    p.add_argument("--overwrite", action="store_true", help="regenerate existing output")
+    p.set_defaults(func=run_view)
 
     args = parser.parse_args()
     args.func(config.load_config(args.config), args)

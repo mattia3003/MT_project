@@ -226,4 +226,5 @@ Not aimed at publication for now. Original weights (Branch A) only as a fallback
   the user to review. Never record a number without saying where it comes from.
 - When a stage or module is added or changed, update `docs/architecture.md` in the same change
   (flow chart, module diagram from the actual imports, data dictionary), together with the
-  status table in `scripts/README.md`. Earlier segmentation work is under the git tag `segmentation-final`.
+  status table and the copy-paste "Commands" section in `scripts/README.md` (every stage and
+  helper with its useful options). Earlier segmentation work is under the git tag `segmentation-final`.

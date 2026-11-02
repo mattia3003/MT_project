@@ -11,15 +11,20 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from matplotlib import patheffects
+from matplotlib.colors import to_rgba
 from matplotlib.figure import Figure
 from matplotlib.patches import Rectangle
 
-from memtk.lesions import (BRAIN_METHODS, brain_mask, chessboard_distance, fraction_outside, grow, label_components,
-                           speck_gaps)
+from memtk.lesions import (BRAIN_METHODS, LesionLabels, brain_mask, chessboard_distance, fraction_outside, grow,
+                           label_components, speck_gaps)
 from memtk.plotting import hide_unused, save, show_slice, tile_figure
 
 # Outline colours used in every E0b figure
 BRAIN_COLOR, LESION_COLOR, BOX_COLOR, HIGHLIGHT_COLOR = "cyan", "red", "yellow", "lime"
+SPECK_COLOR = "orange"
+# One colour per lesion number (L1, L2, ...), avoiding the brain, box and speck colours
+LESION_COLORS = ["red", "lime", "magenta", "royalblue", "white", "mediumpurple", "lightpink", "olive"]
 
 
 # --- brain-review: candidate brain-mask methods ----------------------------------------------
@@ -324,9 +329,68 @@ def brain_sheet(items: list[tuple[str, np.ndarray, np.ndarray, np.ndarray, tuple
     fig, axes = tile_figure(n_rows, n_cols, tile=1.9)
     for ax, (tile_title, image, mask, brain, box) in zip(axes.ravel(), items):
         show_slice(ax, image, [(brain, BRAIN_COLOR), (mask > 0, LESION_COLOR)], tile_title)
-        if box is not None:
-            r0, r1, c0, c1 = box
-            ax.add_patch(Rectangle((c0 - 0.5, r0 - 0.5), c1 - c0 + 1, r1 - r0 + 1, fill=False,
-                                   edgecolor=BOX_COLOR, linestyle="--", linewidth=0.6))
+        draw_box(ax, box)
     hide_unused(axes, len(items))
+    return save(fig, path, title)
+
+
+def draw_box(ax, box: tuple | None) -> None:
+    """The inclusive brain box (r0, r1, c0, c1) as a dashed rectangle; nothing for None."""
+    if box is not None:
+        r0, r1, c0, c1 = box
+        ax.add_patch(Rectangle((c0 - 0.5, r0 - 0.5), c1 - c0 + 1, r1 - r0 + 1, fill=False,
+                               edgecolor=BOX_COLOR, linestyle="--", linewidth=0.6))
+
+
+# --- lesions: overview sheets and single-slice views -----------------------------------------
+
+def draw_lesions(ax, image: np.ndarray, res: LesionLabels, brain: np.ndarray, box: tuple | None, title: str,
+                 fontsize: float = 5) -> None:
+    """One slice after attach-or-drop: each lesion filled in its own colour with its number
+    (L1 = largest) next to it, attached strays in a lighter shade of their lesion's colour,
+    dropped specks marked x, brain outline and box."""
+    show_slice(ax, image, [(brain, BRAIN_COLOR)], title)
+    overlay = np.zeros((*image.shape, 4))
+    for n in range(1, res.n_lesions + 1):
+        lesion = res.labels == n
+        color = to_rgba(LESION_COLORS[(n - 1) % len(LESION_COLORS)])
+        overlay[lesion & ~res.attached] = (*color[:3], 0.65)
+        overlay[lesion & res.attached] = (*color[:3], 0.3)
+        ax.contour(lesion.astype(float), levels=[0.5], colors=[color], linewidths=0.6)
+        rows, cols = np.nonzero(lesion)
+        # lesion-coloured number with a black outline, readable on the lesion and the image alike
+        ax.text(cols.max() + 1.5, rows.min() - 1, f"L{n}", color=color, fontsize=fontsize, fontweight="bold",
+                ha="left", va="bottom", path_effects=[patheffects.withStroke(linewidth=fontsize / 3, foreground="black")])
+    ax.imshow(overlay, interpolation="nearest")
+    specks, n_specks = label_components(res.dropped)
+    if n_specks:
+        centres = np.array([np.argwhere(specks == i).mean(axis=0) for i in range(1, n_specks + 1)])
+        ax.scatter(centres[:, 1], centres[:, 0], marker="x", s=fontsize * 2, c=SPECK_COLOR, linewidths=0.6)
+    draw_box(ax, box)
+
+
+def lesion_sheet(items: list[tuple[str, np.ndarray, LesionLabels, np.ndarray, tuple | None]], path: Path,
+                 title: str, n_cols: int = 8) -> Path:
+    """Tiles of (title, image, attach-or-drop result, brain, box), drawn by `draw_lesions`."""
+    n_rows = int(np.ceil(len(items) / n_cols))
+    fig, axes = tile_figure(n_rows, n_cols, tile=2.2)
+    for ax, (tile_title, image, res, brain, box) in zip(axes.ravel(), items):
+        draw_lesions(ax, image, res, brain, box, tile_title)
+    hide_unused(axes, len(items))
+    return save(fig, path, title)
+
+
+def lesion_view(image: np.ndarray, res: LesionLabels, brain: np.ndarray, box: tuple | None, table: pd.DataFrame,
+                path: Path, title: str) -> Path:
+    """One slice at full size (as `draw_lesions`), with its lesion rows as a table below."""
+    fig = Figure(figsize=(8, 8 + 0.25 * (len(table) + 2)))
+    img_ax, table_ax = fig.subplots(2, 1, height_ratios=[8, 0.25 * (len(table) + 2)])
+    draw_lesions(img_ax, image, res, brain, box, "", fontsize=9)
+    table_ax.axis("off")
+    if len(table):
+        cells = table.round(2).astype(str).to_numpy().tolist()
+        t = table_ax.table(cellText=cells, colLabels=list(table.columns), loc="upper center", cellLoc="center")
+        t.auto_set_font_size(False)
+        t.set_fontsize(7)
+        t.auto_set_column_width(list(range(len(table.columns))))
     return save(fig, path, title)

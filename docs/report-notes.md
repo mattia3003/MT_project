@@ -254,7 +254,37 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
 - **2.0% of synthetic lesions lie more than half outside the brain** (1,213 of 61,635), against
   1 of 6,101 in T (H-cal 0, H-eval 1). Part of this comes from the 152 failed MRIs without any
   brain, where every lesion counts as outside; the `qc` edge check separates the two. 82% of the
-  isolated specks lie outside the brain (T: none). *Source: as above, 2026-11-02.*
+  isolated specks lie outside the brain (T: none). *Source: as above, 2026-11-02.* Broken down
+  by QC group in the next entry.
+- **Most synthetic lesions outside the brain sit in clean masks, not noisy ones.** Lesions more
+  than half outside the synthetic brain, by provisional QC group (cut at 3 isolated specks;
+  decision D pending):
+
+  | Group | Masks | Lesions | Mostly outside | Share | Masks affected |
+  | --- | --- | --- | --- | --- | --- |
+  | Clean (0 specks) | 32,137 | 51,816 | 838 | 1.6% | 829 |
+  | Minor (1–3) | 3,423 | 5,410 | 71 | 1.3% | 70 |
+  | Noisy (> 3) | 1,912 | 4,325 | 220 | 5.1% | 172 |
+  | Failed MRI | 152 | 84 | 84 | 100% | 82 |
+
+  They are small (median 5–7 px in every group). Likely cause: stage 1 places lesions without
+  seeing a brain, and stage 2 draws smaller brains than real ones (median 3,009 vs 7,765 px), so
+  a lesion where a real cortex would be can fall outside the synthetic brain.
+  - *Recommendation for `qc`:* flag rather than exclude. A genuine copy of a training lesion near
+    a real cortex lands at the same pixel position, which can lie outside a smaller synthetic
+    brain; excluding edge-flagged masks could remove real copies.
+  - Most are below the expected informative-lesion bound, so they barely affect lesion-level
+    matching.
+
+  *Source: `lesions.csv`, `slices.csv` and `brain.csv` of `amibekk_v1` (min lesion area 4 px,
+  attach gap 2), read-only breakdown, 2026-11-02.*
+- **In noisy synthetic masks, some "lesions" are noise blobs.** The synthetic masks with the most
+  lesions are all noisy masks (15–444 isolated specks), and several of their lesions of 4 px or
+  more lie in the background outside the brain (e.g. `file_2593`: L6, L7, L9 of 5–7 px;
+  `file_2_5453`: L6, L7, L9 of 4–5 px). Lesion counts per mask are therefore only meaningful
+  after QC, which excludes noisy masks from the main audit. *Source:
+  `results/amibekk_v1/e0b/lesions/overview.png` (row 3), views of `file_2593`, read-only check,
+  2026-11-02.*
 - **Attached strays barely change lesions in clean masks; the distortion sits in noisy masks.**
   At 4 px / gap 2, by provisional QC group (cut at 3 isolated specks; decision D pending):
 
