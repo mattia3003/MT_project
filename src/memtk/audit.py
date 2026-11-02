@@ -13,13 +13,13 @@ import numpy as np
 import pandas as pd
 from matplotlib.figure import Figure
 from matplotlib.patches import Rectangle
-from scipy import ndimage
 
-from memtk.lesions import BRAIN_METHODS, brain_mask, fraction_outside, label_components
+from memtk.lesions import (BRAIN_METHODS, brain_mask, chessboard_distance, fraction_outside, grow, label_components,
+                           speck_gaps)
 from memtk.plotting import hide_unused, save, show_slice, tile_figure
 
 # Outline colours used in every E0b figure
-BRAIN_COLOR, LESION_COLOR, BOX_COLOR = "cyan", "red", "yellow"
+BRAIN_COLOR, LESION_COLOR, BOX_COLOR, HIGHLIGHT_COLOR = "cyan", "red", "yellow", "lime"
 
 
 # --- brain-review: candidate brain-mask methods ----------------------------------------------
@@ -29,8 +29,9 @@ def evaluate_brain_methods(image: np.ndarray, mask: np.ndarray, min_area: int, l
     """For one slice and each method: brain area, and how many of the mask's real-sized
     components (>= min_area px) lie partly or mostly outside the brain."""
     labels, n = label_components(mask)
-    sizes = np.bincount(labels.ravel(), minlength=n + 1)[1:]
-    lesion_ids = np.flatnonzero(sizes >= min_area) + 1
+    sizes = np.bincount(labels.ravel(), minlength=n + 1)
+    sizes[0] = 0                                     # background is not a component
+    lesion_ids = np.flatnonzero(sizes >= min_area)
     rows = []
     for method in methods:
         brain = brain_mask(image, method, low_threshold)
@@ -93,8 +94,7 @@ def threshold_sensitivity(image: np.ndarray, mask: np.ndarray, low_threshold: fl
     noise). If the threshold sits in an empty gap between background and tissue, the area
     barely changes when it moves."""
     brain = brain_mask(image, "low_threshold_all", low_threshold)
-    near = ndimage.binary_dilation(brain, iterations=3) | ndimage.binary_dilation(mask > 0, iterations=1)
-    background = image[~near]
+    background = image[~(grow(brain, 3) | grow(mask > 0, 1))]
     return {**{f"area_x{f:g}": int(brain_mask(image, "low_threshold_all", low_threshold * f).sum())
                for f in THRESHOLD_FACTORS},
             "background_p999": float(np.percentile(background, 99.9)) if background.size else np.nan}
@@ -157,6 +157,130 @@ def tissue_histogram(t_tissue: pd.Series, s_tissue: pd.Series, path: Path, title
     ax.set_xlabel("brain tissue (px; 0 shown as 1)")
     ax.set_ylabel("count (log)")
     ax.legend(fontsize=8)
+    return save(fig, path, title)
+
+
+# --- lesions-review: minimum lesion area and attach gap --------------------------------------
+
+def component_table(mask: np.ndarray) -> list[tuple[int, int, int]]:
+    """Every 8-connected component of a mask as (size, row, col) of its first pixel."""
+    comp, n = label_components(mask)
+    if n == 0:
+        return []
+    sizes = np.bincount(comp.ravel(), minlength=n + 1)
+    labels, first = np.unique(comp.ravel(), return_index=True)
+    width = mask.shape[1]
+    out = []
+    for lab, f in zip(labels, first):
+        if lab > 0:
+            row, col = divmod(int(f), width)
+            out.append((int(sizes[lab]), row, col))
+    return out
+
+
+def gap_to_nearest_lesion(mask: np.ndarray, row: int, col: int, min_area: int) -> int:
+    """Gap (background px, Chebyshev) from the component containing (row, col) to the nearest
+    other component of at least `min_area` px; -1 if there is none."""
+    comp, n = label_components(mask)
+    sizes = np.bincount(comp.ravel(), minlength=n + 1)
+    sizes[0] = 0
+    target = comp == comp[row, col]
+    others = np.isin(comp, np.flatnonzero(sizes >= min_area)) & ~target
+    if not others.any():
+        return -1
+    return int(chessboard_distance(others)[target].min()) - 1
+
+
+def propose_min_area(t_sizes: pd.Series, max_share: float = 0.01) -> tuple[int, str]:
+    """The largest minimum area m such that at most `max_share` of the real T components are
+    smaller than m (they would count as specks)."""
+    m = 1
+    while (t_sizes < m + 1).mean() <= max_share:
+        m += 1
+    return m, (f"largest m with at most {max_share:.0%} of T components smaller than m "
+               f"({(t_sizes < m).mean():.2%} are)")
+
+
+def size_counts(components: pd.DataFrame, max_size: int = 10) -> pd.DataFrame:
+    """Per group: number and share of components of each size 1..max_size, and larger."""
+    sizes = components["size"].clip(upper=max_size + 1)
+    table = pd.crosstab(components["group"], sizes).reindex(columns=range(1, max_size + 2), fill_value=0)
+    table.columns = [*map(str, range(1, max_size + 1)), f">{max_size}"]
+    table.insert(0, "components", table.sum(axis=1))
+    return table
+
+
+def mask_specks(group: str, key: str, mask: np.ndarray, min_area: int) -> list[dict]:
+    """The specks of one mask at one minimum area, with their gap to the nearest lesion."""
+    return [{"group": group, "key": key, "min_area": min_area, "size": s, "gap": g, "row": r, "col": c}
+            for s, g, r, c in speck_gaps(mask, min_area)]
+
+
+def summarize_attach_or_drop(components: pd.DataFrame, specks: pd.DataFrame, min_areas, gaps) -> pd.DataFrame:
+    """Per group, minimum area and attach gap: lesions (which depend on the minimum area only),
+    slices left without a lesion, stray components and pixels attached, isolated specks and the
+    masks that have at least one. Gap 0 is drop-only."""
+    rows = []
+    per_mask = components.groupby(["group", "key"], sort=False)["size"]
+    for m in min_areas:
+        n_lesions = per_mask.agg(lambda s: int((s >= m).sum())).rename("n_lesions").reset_index()
+        for group, nl in n_lesions.groupby("group", sort=False):
+            sp = specks[(specks["group"] == group) & (specks["min_area"] == m)]
+            for g in gaps:
+                stray = (sp["gap"] >= 1) & (sp["gap"] <= g)
+                rows.append({"group": group, "min_area": m, "gap": g, "slices": len(nl),
+                             "lesions": int(nl["n_lesions"].sum()), "no_lesion": int((nl["n_lesions"] == 0).sum()),
+                             "strays": int(stray.sum()), "stray_px": int(sp.loc[stray, "size"].sum()),
+                             "isolated_specks": int((~stray).sum()),
+                             "masks_with_isolated": int(sp.loc[~stray, "key"].nunique())})
+    return pd.DataFrame(rows).set_index(["group", "min_area", "gap"])
+
+
+def gap_counts(specks: pd.DataFrame, bins=((1, 1), (2, 2), (3, 3), (4, 5), (6, 10), (11, 10 ** 6))) -> pd.DataFrame:
+    """Per group: specks by gap to the nearest lesion, and specks in masks without a lesion."""
+    cols = {"no lesion": specks["gap"] < 0}
+    for lo, hi in bins:
+        name = str(lo) if lo == hi else (f"{lo}-{hi}" if hi < 10 ** 6 else f">={lo}")
+        cols[f"gap {name}"] = specks["gap"].between(lo, hi)
+    return pd.DataFrame(cols).groupby(specks["group"], sort=False).sum()
+
+
+def size_figure(components: pd.DataFrame, min_area: int, path: Path, title: str, max_size: int = 30) -> Path:
+    """Share of components by size (1..max_size, then larger) per group, log scale, with the
+    proposed minimum lesion area marked."""
+    fig = Figure(figsize=(9, 3.6))
+    ax = fig.subplots()
+    sizes = np.arange(1, max_size + 2)
+    for k, (group, d) in enumerate(components.groupby("group", sort=False)):
+        share = d["size"].clip(upper=max_size + 1).value_counts(normalize=True).reindex(sizes, fill_value=0)
+        ax.bar(np.add(sizes, (k - 1.5) * 0.2), share.to_numpy(), width=0.2, label=f"{group} ({len(d)})")
+    ax.axvline(min_area - 0.5, color="k", ls="--", lw=1)
+    ax.text(min_area - 0.4, ax.get_ylim()[1] * 0.5, f" lesion >= {min_area} px", fontsize=8)
+    ax.set_yscale("log")
+    ax.set_xticks(sizes, [*map(str, sizes[:-1]), f">{max_size}"], fontsize=7)
+    ax.set_xlabel("component size (px)")
+    ax.set_ylabel("share of components (log)")
+    ax.legend(fontsize=8)
+    return save(fig, path, title)
+
+
+def crop_sheet(items: list[tuple[str, np.ndarray, np.ndarray, int, int]], path: Path, title: str,
+               size: int = 32, n_cols: int = 8) -> Path:
+    """Tiles of (title, image, mask, row, col): a size x size crop centred on (row, col), with the
+    component containing that pixel outlined in lime and the rest of the mask in red."""
+    n_rows = int(np.ceil(len(items) / n_cols))
+    fig, axes = tile_figure(n_rows, n_cols, tile=1.9)
+    h = size // 2
+    for ax, (tile_title, image, mask, r, c) in zip(axes.ravel(), items):
+        comp, _ = label_components(mask)
+        target = comp == comp[r, c]
+
+        def crop(a: np.ndarray) -> np.ndarray:
+            return np.pad(a, h)[r:r + size, c:c + size]
+
+        show_slice(ax, crop(image), [(crop((mask > 0) & ~target), LESION_COLOR), (crop(target), HIGHLIGHT_COLOR)],
+                   tile_title)
+    hide_unused(axes, len(items))
     return save(fig, path, title)
 
 

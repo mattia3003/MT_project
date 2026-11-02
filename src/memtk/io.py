@@ -98,3 +98,64 @@ class MaskStack:
     def __getitem__(self, key: str) -> np.ndarray:
         bits = np.unpackbits(self._packed[self._row[key]], count=self.shape[0] * self.shape[1])
         return bits.reshape(self.shape).astype(bool)
+
+
+# --- label stacks: many 2D integer label maps in one file, looked up by key -------------------
+# Stored sparse: only the non-zero pixels (flat index and label) of each map, concatenated, with
+# per-key offsets. Lesion label maps are almost empty, so a whole pool takes a few MB.
+
+class LabelStackWriter:
+    """Collects 2D integer label maps (0 = background) of one shape under unique keys."""
+
+    def __init__(self, shape: Sequence[int]):
+        self.shape = (int(shape[0]), int(shape[1]))
+        self.keys: list[str] = []
+        self._index: list[np.ndarray] = []
+        self._values: list[np.ndarray] = []
+
+    def add(self, key: str, labels: np.ndarray) -> None:
+        if labels.shape != self.shape:
+            raise ValueError(f"Label map '{key}' has shape {labels.shape}, expected {self.shape}")
+        flat = np.asarray(labels).ravel()
+        index = np.flatnonzero(flat)
+        if index.size and (flat[index].min() < 0 or flat[index].max() > np.iinfo(np.uint16).max):
+            raise ValueError(f"Label map '{key}' has labels outside 0..65535")
+        self.keys.append(key)
+        self._index.append(index.astype(np.uint32))
+        self._values.append(flat[index].astype(np.uint16))
+
+    def save(self, path: str | Path) -> Path:
+        if len(set(self.keys)) != len(self.keys):
+            raise ValueError(f"Duplicate keys in label stack {path}")
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        offsets = np.concatenate([[0], np.cumsum([len(i) for i in self._index])]).astype(np.int64)
+        np.savez_compressed(path, keys=np.array(self.keys, dtype=str), offsets=offsets,
+                            index=np.concatenate(self._index) if self._index else np.zeros(0, np.uint32),
+                            values=np.concatenate(self._values) if self._values else np.zeros(0, np.uint16),
+                            shape=np.array(self.shape))
+        return path
+
+
+class LabelStack:
+    """A saved label stack: `stack[key]` gives one label map as an int32 (H, W) array."""
+
+    def __init__(self, path: str | Path):
+        with np.load(path) as data:
+            self.keys: list[str] = data["keys"].tolist()
+            self._offsets, self._index, self._values = data["offsets"], data["index"], data["values"]
+            self.shape = (int(data["shape"][0]), int(data["shape"][1]))
+        self._row = {k: i for i, k in enumerate(self.keys)}
+
+    def __len__(self) -> int:
+        return len(self.keys)
+
+    def __contains__(self, key: str) -> bool:
+        return key in self._row
+
+    def __getitem__(self, key: str) -> np.ndarray:
+        i = self._row[key]
+        lo, hi = self._offsets[i], self._offsets[i + 1]
+        flat = np.zeros(self.shape[0] * self.shape[1], dtype=np.int32)
+        flat[self._index[lo:hi]] = self._values[lo:hi]
+        return flat.reshape(self.shape)

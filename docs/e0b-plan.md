@@ -11,8 +11,8 @@ stage, and what has been decided. Update the status table when a stage is done.
 | 0 | Drop the null model in the docs | docs | ✅ done, committed |
 | 1 | `brain-review` | review → decision A | ✅ done; **decision A set**, confirmed 2026-11-02 |
 | 2 | `brain` | production (needs A) | ✅ done (2026-11-02) |
-| 3 | `lesions-review` | review → decisions B, C | ⏳ next |
-| 4 | `lesions` + `view` | production (needs B, C) | ⏳ |
+| 3 | `lesions-review` | review → decisions B, C | ✅ done; **decisions B, C set** (2026-11-02): 4 px, gap 2 |
+| 4 | `lesions` + `view` | production (needs B, C) | ⏳ next |
 | 5 | `qc-review` | review → decision D | ⏳ |
 | 6 | `qc` | production (needs D) | ⏳ |
 | 7 | `stats` | E0 outputs | ⏳ |
@@ -81,8 +81,8 @@ brain:
   min_tissue_px: 20           # decision A, set 2026-11-01
 lesions:
   connectivity: 8
-  min_lesion_area: null       # decision B: smaller components are specks (from T component sizes)
-  attach_gap: null            # decision C: max background px between speck and lesion (1 or 2)
+  min_lesion_area: 4          # decision B, set 2026-11-02 (largest m with <= 1% of T components smaller)
+  attach_gap: 2               # decision C, set 2026-11-02 (gap 1-2 specks far above the noise floor)
 qc:
   max_isolated_specks: null   # decision D: minor if 1..N isolated specks, noisy if more (plan suggests 3)
   edge_outside_frac: 0.5      # plan: flag a real-sized lesion if > 50% of it is outside the brain
@@ -295,6 +295,16 @@ E0b stores all three frames. The open question is recorded in `docs/report-notes
 
 - Decide the position frame when E2 is planned, then update `docs/experiment-plan.md`.
 - Write a pinned `requirements-lock.txt` at the end of E0.
+- **Table formats for E2/E5 (2026-11-02):** CSV for tables people read (up to a few hundred
+  thousand rows: lesion and slice tables, summaries, everything in `results/`). Parquet (pandas +
+  `pyarrow`) for the large machine tables, e.g. the E2 slice-pair and lesion-pair tables with
+  all candidate pairs (likely several million rows), stored in `processed_data/`, never in git.
+  They carry both the readable `lesion_id` and the integer `lesion_idx` used in computation.
+- **E6 design point (2026-11-02):** small real components (1–3 px) are mostly the tail or start
+  of a metastasis seen in neighbouring slices (manual check of Mets_120 in ITK-SNAP). Real masks
+  have no speck noise, so 3D lesion linking and slice span for H1 should probably use all
+  components of the real mask as saved, not the cleaned labels; otherwise every lesion loses
+  its thin end slices.
 - **Full re-run of E0a + E0b from scratch** once both are done and accepted: regenerate every
   output, as an end-to-end check, and to give all figures the fixed titles (2026-11-02:
   `plotting.save` wraps titles and reserves room for them; existing PNGs still have the old

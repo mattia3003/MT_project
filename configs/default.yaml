@@ -41,8 +41,12 @@ brain:
 lesions:
   connectivity: 8
   # Decisions B and C (evidence: `e0b_audit.py lesions-review`)
-  min_lesion_area: null   # px; smaller components are specks
-  attach_gap: null        # max background px between a speck and a lesion for the speck to be attached
+  # px; smaller components are specks
+  min_lesion_area: 4      # decided 2026-11-02: largest m with <= 1% of T components smaller (0.99%);
+                          # clear size break in T and S (62% of synthetic components are 1 px)
+  # max background px between a speck and a lesion for the speck to be attached (0 = drop-only)
+  attach_gap: 2           # decided 2026-11-02: synthetic specks at gap 1-2 far above the ~1,150 per
+                          # gap noise floor seen at gaps 4-10; gap 3 near it
 
 qc:
   # Decision D (evidence: `e0b_audit.py qc-review`)

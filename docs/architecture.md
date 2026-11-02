@@ -10,7 +10,7 @@ and open the Markdown preview.
 **Keeping it current:** updating this file is part of finishing each experiment, together with
 the status table in `scripts/README.md` and the entries in `docs/report-notes.md`.
 
-*Status: E0a implemented; E0b in progress, `brain-review` and `brain` implemented (2026-11-02).*
+*Status: E0a implemented; E0b in progress, `brain-review`, `brain` and `lesions-review` implemented (2026-11-02).*
 
 ---
 
@@ -47,7 +47,7 @@ flowchart TD
     subgraph E0B["E0b · e0b_audit.py (in progress)"]
         BREV["brain-review ✅"]
         BRAIN["brain ✅"]
-        LREV["lesions-review"]:::planned
+        LREV["lesions-review ✅"]
         LES["lesions · view"]:::planned
         QREV["qc-review"]:::planned
         QC["qc"]:::planned
@@ -88,7 +88,7 @@ flowchart TD
 | | `check` | ✅ | all of the above, raw data | `check_report_<pool>.txt`, `check_grid_<pool>.png` |
 | `e0b_audit.py` | `brain-review` | ✅ | E0a outputs (T only), synthetic pool | `results/<dataset>/e0b/brain_review/` (evidence for decision A) |
 | | `brain` | ✅ | decision A, E0a outputs, synthetic pool | `brain.csv`, `brain_masks.npz` (dataset and pool), `masks_raw.npz` (pool), `results/<dataset\|pool>/e0b/brain/` |
-| | `lesions-review` | planned | T | evidence for decisions B, C |
+| | `lesions-review` | ✅ | E0a outputs, `masks_raw.npz` | `results/<dataset>/e0b/lesions_review/` (evidence for decisions B, C) |
 | | `lesions`, `view` | planned | decisions B, C | lesion table, label maps, overview sheets |
 | | `qc-review`, `qc` | planned | lesion table | evidence for decision D, QC classes |
 | | `stats`, `check` | planned | all E0b outputs | E0 statistics; consistency checks |
@@ -142,12 +142,13 @@ flowchart LR
 | `transforms` | The original training transform (model space) and slice counts | `model_space_transform`, `convert_volume_pair`, `binarize_mask`, `lesion_px_per_slice` | MONAI, PyTorch |
 | `split` | Seeded matched-pair split into T / H-cal / H-eval | `make_split`, `paired_split`, `summarize_split` | pandas |
 | `synthetic` | Read synthetic samples in place; sample IDs; index a pool; parse the legacy QC list | `index_pool`, `load_sample`, `sample_id`, `name_scheme`, `read_legacy_exclusions` | — |
-| `lesions` | 8-connected labelling; brain masks (six candidate methods), tissue area, brain box. Attach-or-drop and lesion features follow in the E0b `lesions` stage. | `label_components`, `count_components`, `brain_mask`, `tissue_px`, `brain_box`, `fraction_outside` | SciPy, scikit-image |
+| `lesions` | 8-connected labelling; attach-or-drop (specks below the minimum area become strays of a lesion within the gap, or are dropped; lesions numbered by area); brain masks (six candidate methods), tissue area, brain box. Lesion features follow in the E0b `lesions` stage. | `label_components`, `count_components`, `attach_or_drop` (→ `LesionLabels`), `speck_gaps`, `brain_mask`, `tissue_px`, `brain_box`, `fraction_outside` | SciPy, scikit-image |
 | `checks` | E0a consistency checks, independent reference transform, sample grid | `CheckReport`, `check_split`, `check_real_volumes`, `check_recompute`, `check_synthetic_index`, `sample_grid` | PyTorch, matplotlib |
-| `audit` | Evidence for the E0b review stages (candidate comparisons, figures, proposals) and overviews of the production stages | `evaluate_brain_methods`, `summarize_brain_methods`, `propose_brain_method`, `method_grid`, `threshold_sensitivity`, `summarize_threshold_sensitivity`, `sorted_sheet`, `tissue_counts`, `tissue_histogram`, `summarize_brains`, `brain_sheet` | pandas, matplotlib |
+| `audit` | Evidence for the E0b review stages (candidate comparisons, figures, proposals) and overviews of the production stages | `evaluate_brain_methods`, `summarize_brain_methods`, `propose_brain_method`, `method_grid`, `threshold_sensitivity`, `summarize_threshold_sensitivity`, `sorted_sheet`, `tissue_counts`, `tissue_histogram`, `component_table`, `propose_min_area`, `size_counts`, `mask_specks`, `summarize_attach_or_drop`, `gap_counts`, `size_figure`, `crop_sheet`, `summarize_brains`, `brain_sheet` | pandas, matplotlib |
 | `plotting` | Shared figure helpers (no pyplot, so importing memtk never changes the plotting backend). `save` wraps the figure title to the figure width and uses the constrained layout, so the title never covers tile titles or runs off the image | `tile_figure`, `show_slice`, `hide_unused`, `save` | matplotlib |
 
-Tests (pytest, on small hand-built inputs): `tests/test_lesions.py` covers labelling, brain
+Tests (pytest, on small hand-built inputs): `tests/test_lesions.py` covers labelling,
+attach-or-drop (gaps, drop-only, nearest lesion and ties, numbering, nothing moved), brain
 masks, tissue area and the brain box; `tests/test_io.py` covers the mask-stack round trip.
 Run with `.venv\Scripts\python.exe -m pytest`.
 
@@ -254,6 +255,23 @@ file. The files themselves are read in place from the pool folder, never copied.
 | `img_min`, `img_max`, `img_mean` | Intensity range of the synthetic MRI (NaN if unreadable) |
 | `legacy_excluded`, `legacy_reason` | Flag and reason from the old QC list; for comparison only, never a filter |
 | `read_error` | Error message if `read_ok` is False; empty otherwise |
+
+### Results: `results/<dataset>/e0b/lesions_review/`
+
+Written by `lesions-review`. In git. Evidence for decisions B and C; nothing here is used by
+later stages. Covers all real lesion slices (T, H-cal, H-eval; the proposal uses T only) and
+all synthetic masks as saved.
+
+| File | Content |
+| --- | --- |
+| `review.txt` | Component sizes, proposed `lesions.min_lesion_area` with its rule, attach-or-drop counts, specks by gap, what to set next |
+| `component_sizes_<pool>.csv` / `.png` | Per group: components of each size 1–10 px and larger (table); share by size 1–30 px, log scale, with the proposed minimum marked (figure) |
+| `attach_or_drop_<pool>.csv` | Per group, minimum area (proposal ± 1) and gap (0 = drop-only, 1, 2): slices, lesions, slices without lesion, strays and stray px attached, isolated specks, masks with an isolated speck |
+| `speck_gaps_<pool>.csv` | Per group: specks at the proposed minimum area by gap to the nearest lesion (1, 2, 3, 4–5, 6–10, ≥ 11 px; or no lesion in the mask) |
+| `small_components_T.png` | 32×32 crops of the smallest T components, one row per size 1 to proposal + 1 px; tile title gives slice, size and (row, col) |
+| `small_components_T.csv` | Every T component up to proposal + 1 px: `patient_id`, `z`, `key`, `size`, `row`, `col` (model space, first pixel), `gap_to_lesion` (to the nearest other component ≥ proposal; −1 if none), `native_row`, `native_col` (approximate: (index + 0.5) × native size / 128 − 0.5; z is unchanged) |
+| `specks_by_gap_<pool>.png` | 32×32 crops of synthetic specks at gap 1, 2 and 3 from a lesion, and T specks at gap 1–3 |
+| `run_info.json` | Run log |
 
 ### Brain masks: `<output_root>/<dataset>/brain.csv` and `<output_root>/<pool>/brain.csv`
 

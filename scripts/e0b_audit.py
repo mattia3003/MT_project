@@ -13,7 +13,11 @@ Stages, run in this order. Each one can be run and checked on its own:
                  -> <output_root>/<dataset>/brain.csv + brain_masks.npz,
                     <output_root>/<pool>/brain.csv + brain_masks.npz + masks_raw.npz,
                     results/<dataset|pool>/e0b/brain/ (summary and outline sheets)
-  (planned: lesions-review, lesions, view, qc-review, qc, stats, check)
+  lesions-review evidence for decisions B and C (minimum lesion area, attach gap): component
+                 sizes of all real lesion slices and synthetic masks, attach-or-drop counts for
+                 nearby settings, specks by gap; proposal from T only
+                 -> results/<dataset>/e0b/lesions_review/
+  (planned: lesions, view, qc-review, qc, stats, check)
 
 Example (from the repository root):
   .venv\\Scripts\\python.exe scripts\\e0b_audit.py brain-review
@@ -27,7 +31,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from memtk import audit, config
-from memtk.io import MaskStackWriter, load_image
+from memtk.io import MaskStack, MaskStackWriter, load_image
 from memtk.lesions import brain_box, brain_mask, tissue_px
 from memtk.synthetic import load_sample
 
@@ -274,6 +278,132 @@ def run_brain(cfg: dict, args: argparse.Namespace) -> None:
     print(f"\n{real_text}\n{syn_text}\nWrote {real_dir}, {syn_dir}, {real_res}, {syn_res}")
 
 
+def run_lesions_review(cfg: dict, args: argparse.Namespace) -> None:
+    name, _ = config.real_dataset(cfg, args.dataset)
+    pool_name, pool_cfg = config.synthetic_pool(cfg, args.pool)
+    real_dir, syn_dir = config.output_dir(cfg, name), config.output_dir(cfg, pool_name)
+    out = config.results_dir(cfg, name, "e0b") / "lesions_review"
+    if out.exists() and not args.overwrite:
+        raise SystemExit(f"{out} already exists; pass --overwrite to regenerate.")
+    if not (syn_dir / "masks_raw.npz").exists():
+        raise SystemExit(f"{syn_dir / 'masks_raw.npz'} not found; run the 'brain' stage first.")
+    rng = np.random.default_rng(cfg["seed"])
+    pool_dir = config.resolve_path(pool_cfg["dir"])
+
+    # every component of every real lesion slice (all sets) and every synthetic mask as saved
+    slices = pd.read_csv(real_dir / "lesion_slices.csv")
+    slices = slices[slices["lesion_px_model"] > 0]
+    masks: dict[str, tuple[str, np.ndarray]] = {}
+    for pid, group in tqdm(slices.groupby("patient_id"), desc=f"{name} lesion slices"):
+        _, seg = load_real(real_dir, str(pid))
+        for z, set_name in zip(group["z"], group["set"]):
+            masks[f"{pid}/z{z}"] = (str(set_name), seg[:, :, int(z)] > 0)
+    raw = MaskStack(syn_dir / "masks_raw.npz")
+    rows = [{"group": g, "key": k, "size": s, "row": r, "col": c}
+            for k, (g, m) in masks.items() for s, r, c in audit.component_table(m)]
+    for sid in tqdm(raw.keys, desc=f"{pool_name} masks"):
+        rows += [{"group": "S", "key": sid, "size": s, "row": r, "col": c} for s, r, c in audit.component_table(raw[sid])]
+    components = pd.DataFrame(rows)
+
+    # decision B from T only; H-cal, H-eval and S are described with the same settings
+    t_sizes = components.loc[components["group"] == "T", "size"]
+    m, m_reason = audit.propose_min_area(t_sizes)
+    min_areas = [a for a in (m - 1, m, m + 1) if a >= 1]
+    gaps = (0, 1, 2)
+
+    # specks per minimum area, with their gap to the nearest lesion; masks without a component
+    # below the area have no specks and are skipped
+    smallest = components.groupby("key", sort=False)["size"].min()
+    speck_rows = []
+    for a in min_areas:
+        for key in tqdm(smallest.index[smallest < a], desc=f"specks at min area {a}"):
+            group, mask = masks[key] if key in masks else ("S", raw[key])
+            speck_rows += audit.mask_specks(group, key, mask, a)
+    specks = pd.DataFrame(speck_rows, columns=["group", "key", "min_area", "size", "gap", "row", "col"])
+    sizes_table = audit.size_counts(components)
+    sensitivity = audit.summarize_attach_or_drop(components, specks, min_areas, gaps)
+    gap_table = audit.gap_counts(specks[specks["min_area"] == m])
+
+    # figures: size distribution; the smallest real components; specks at gap 1-3 from a lesion
+    def pick(df: pd.DataFrame, n: int) -> pd.DataFrame:
+        return df.iloc[np.sort(rng.choice(len(df), size=min(n, len(df)), replace=False))] if len(df) else df
+
+    index = pd.read_csv(syn_dir / "synthetic_index.csv", keep_default_na=False)
+    files = dict(zip(index["sample_id"], index["filename"]))
+
+    def image_of(group: str, key: str) -> np.ndarray:
+        if group == "S":
+            return load_sample(pool_dir / files[key], pool_cfg)[0]
+        pid, z = key.split("/z")
+        return load_real(real_dir, pid)[0][:, :, int(z)]
+
+    def crops(df: pd.DataFrame, label) -> list:
+        return [(label(rec), image_of(rec.group, rec.key), masks[rec.key][1] if rec.key in masks else raw[rec.key],
+                 int(rec.row), int(rec.col)) for rec in df.itertuples(index=False)]
+
+    audit.size_figure(components, m, out / f"component_sizes_{pool_name}.png",
+                      f"Component sizes (8-connected) of real lesion slices per set and synthetic masks as saved; "
+                      f"dashed: proposed minimum lesion area {m} px")
+    t_comp = components[components["group"] == "T"]
+    items = []
+    for s in range(1, m + 2):
+        items += crops(pick(t_comp[t_comp["size"] == s], 8),
+                       lambda rec: f"{rec.key}\n{rec.size} px at ({rec.row}, {rec.col})")
+    audit.crop_sheet(items, out / "small_components_T.png",
+                     f"T: the smallest real components, one row per size 1-{m + 1} px (8 random each); "
+                     f"32x32 crops of the 128x128 slice centred on the component (lime); other lesions of the "
+                     f"slice inside the crop in red. (row, col) = model-space position of its first pixel")
+    at_m = specks[specks["min_area"] == m]
+    items = []
+    for g in (1, 2, 3):
+        items += crops(pick(at_m[(at_m["group"] == "S") & (at_m["gap"] == g)], 8),
+                       lambda rec: f"{rec.key}\n{rec.size} px, gap {rec.gap} at ({rec.row}, {rec.col})")
+    items += crops(pick(at_m[(at_m["group"] == "T") & at_m["gap"].between(1, 3)], 8),
+                   lambda rec: f"T {rec.key}\n{rec.size} px, gap {rec.gap} at ({rec.row}, {rec.col})")
+    audit.crop_sheet(items, out / f"specks_by_gap_{pool_name}.png",
+                     f"Specks (< {m} px, lime) next to a lesion (red): rows 1-3 synthetic at gap 1, 2, 3 px; "
+                     f"row 4 T at gap 1-3 px. 32x32 crops")
+
+    # every small T component, findable in a viewer: model-space and approximate native position
+    # (native index ~ (model index + 0.5) * native size / 128 - 0.5; z is the same in both)
+    patients = pd.read_csv(real_dir / "patients.csv").set_index("patient_id")
+    h, w = cfg["preprocessing"]["spatial_size"]
+    small = t_comp[t_comp["size"] <= m + 1].sort_values(["size", "key"]).copy()
+    pid_z = small["key"].str.split("/z", expand=True)
+    small.insert(1, "patient_id", pid_z[0])
+    small.insert(2, "z", pid_z[1].astype(int))
+    small["gap_to_lesion"] = [audit.gap_to_nearest_lesion(masks[k][1], r, c, m)
+                              for k, r, c in zip(small["key"], small["row"], small["col"])]
+    dims = patients.loc[small["patient_id"], ["native_dim0", "native_dim1"]].to_numpy()
+    small["native_row"] = np.round((small["row"] + 0.5) * dims[:, 0] / h - 0.5).astype(int)
+    small["native_col"] = np.round((small["col"] + 0.5) * dims[:, 1] / w - 0.5).astype(int)
+    small.drop(columns="group").to_csv(out / "small_components_T.csv", index=False)
+
+    sizes_table.to_csv(out / f"component_sizes_{pool_name}.csv")
+    sensitivity.to_csv(out / f"attach_or_drop_{pool_name}.csv")
+    gap_table.to_csv(out / f"speck_gaps_{pool_name}.csv")
+    q = t_sizes.quantile([0.01, 0.05, 0.5])
+    text = (f"E0b lesions-review: dataset '{name}' (decisions from T only), pool '{pool_name}' (masks as saved), "
+            f"seed {cfg['seed']}\n\n"
+            f"Component sizes (8-connected), all components; per size 1-10 px and larger:\n{sizes_table.to_string()}\n"
+            f"T percentiles: 1st {q[0.01]:.1f}, 5th {q[0.05]:.1f}, median {q[0.5]:.1f} px\n\n"
+            f"Proposed lesions.min_lesion_area: {m}\n  rule: {m_reason}\n"
+            f"  view small_components_T.png: do real components below {m} px look like lesions or like "
+            f"annotation fragments? small_components_T.csv lists every T component up to {m + 1} px with "
+            f"its model-space and approximate native position, to look it up in a viewer.\n\n"
+            f"Attach-or-drop at minimum area {', '.join(map(str, min_areas))} and gap {', '.join(map(str, gaps))} "
+            f"(gap 0 = drop-only). Lesion counts depend on the minimum area only; the gap only decides "
+            f"whether a speck is attached (stray) or dropped (isolated):\n{sensitivity.to_string()}\n\n"
+            f"Specks at minimum area {m} by gap (background px) to the nearest lesion:\n{gap_table.to_string()}\n\n"
+            f"lesions.attach_gap: the plan's default is 2. Choose from specks_by_gap_{pool_name}.png: attach a "
+            f"gap only if specks at that distance look like part of the lesion, not like separate noise.\n\n"
+            f"Then set both values in configs/default.yaml (dated comment) and run the 'lesions' stage.\n")
+    (out / "review.txt").write_text(text, encoding="utf-8")
+    config.write_run_info(out, cfg, script=__file__, extra={"stage": "lesions-review", "pool": pool_name,
+                                                            "proposed_min_area": m})
+    print(f"\n{text}\nWrote {out}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     stages = parser.add_subparsers(dest="stage", required=True)
@@ -295,6 +425,13 @@ def main() -> None:
     p.add_argument("--pool", help="synthetic pool name in the config (default: default_synthetic_pool)")
     p.add_argument("--overwrite", action="store_true", help="regenerate existing output")
     p.set_defaults(func=run_brain)
+
+    p = stages.add_parser("lesions-review", help="evidence for decisions B, C: minimum lesion area, attach gap")
+    config.add_config_arg(p)
+    p.add_argument("--dataset", help="real dataset name in the config (default: default_real_dataset)")
+    p.add_argument("--pool", help="synthetic pool name in the config (default: default_synthetic_pool)")
+    p.add_argument("--overwrite", action="store_true", help="regenerate existing output")
+    p.set_defaults(func=run_lesions_review)
 
     args = parser.parse_args()
     args.func(config.load_config(args.config), args)

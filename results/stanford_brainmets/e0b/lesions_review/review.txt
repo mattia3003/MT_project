@@ -1,0 +1,66 @@
+E0b lesions-review: dataset 'stanford_brainmets' (decisions from T only), pool 'amibekk_v1' (masks as saved), seed 2026
+
+Component sizes (8-connected), all components; per size 1-10 px and larger:
+        components       1     2     3     4     5     6     7     8     9    10    >10
+group                                                                                  
+H-cal         1555       0     3     4    18     9    36    26    54    45    54   1306
+H-eval        2109       1     4     6    27    30    78    56    90    97   123   1597
+S           194716  120756  9427  2898  3561  3912  3838  3646  3661  3245  3010  36762
+T             6162       5    23    33   107   134   188   165   278   222   295   4712
+T percentiles: 1st 4.0, 5th 6.0, median 19.0 px
+
+Proposed lesions.min_lesion_area: 4
+  rule: largest m with at most 1% of T components smaller than m (0.99% are)
+  view small_components_T.png: do real components below 4 px look like lesions or like annotation fragments? small_components_T.csv lists every T component up to 5 px with its model-space and approximate native position, to look it up in a viewer.
+
+Attach-or-drop at minimum area 3, 4, 5 and gap 0, 1, 2 (gap 0 = drop-only). Lesion counts depend on the minimum area only; the gap only decides whether a speck is attached (stray) or dropped (isolated):
+                     slices  lesions  no_lesion  strays  stray_px  isolated_specks  masks_with_isolated
+group  min_area gap                                                                                    
+T      3        0      3823     6134         10       0         0               28                   28
+                1      3823     6134         10       2         4               26                   26
+                2      3823     6134         10       2         4               26                   26
+H-cal  3        0       992     1552          2       0         0                3                    3
+                1       992     1552          2       0         0                3                    3
+                2       992     1552          2       0         0                3                    3
+H-eval 3        0      1094     2104          3       0         0                5                    5
+                1      1094     2104          3       0         0                5                    5
+                2      1094     2104          3       0         0                5                    5
+S      3        0     37624    64533        106       0         0           130183                 6928
+                1     37624    64533        106   11431     13021           118752                 4756
+                2     37624    64533        106   17551     19897           112632                 4242
+T      4        0      3823     6101         19       0         0               61                   60
+                1      3823     6101         19       3         7               58                   57
+                2      3823     6101         19       4        10               57                   56
+H-cal  4        0       992     1548          3       0         0                7                    7
+                1       992     1548          3       0         0                7                    7
+                2       992     1548          3       0         0                7                    7
+H-eval 4        0      1094     2098          5       0         0               11                   11
+                1      1094     2098          5       0         0               11                   11
+                2      1094     2098          5       0         0               11                   11
+S      4        0     37624    61635        463       0         0           133081                 7997
+                1     37624    61635        463   11162     13567           121919                 5914
+                2     37624    61635        463   17101     20649           115980                 5405
+T      5        0      3823     5994         53       0         0              168                  156
+                1      3823     5994         53       4        13              164                  152
+                2      3823     5994         53       9        33              159                  149
+H-cal  5        0       992     1530         10       0         0               25                   23
+                1       992     1530         10       0         0               25                   23
+                2       992     1530         10       1         4               24                   22
+H-eval 5        0      1094     2071         16       0         0               38                   38
+                1      1094     2071         16       1         4               37                   37
+                2      1094     2071         16       3        12               35                   35
+S      5        0     37624    58074       1258       0         0           136642                10532
+                1     37624    58074       1258   10951     13839           125691                 8595
+                2     37624    58074       1258   16854     21228           119788                 8073
+
+Specks at minimum area 4 by gap (background px) to the nearest lesion:
+        no lesion  gap 1  gap 2  gap 3  gap 4-5  gap 6-10  gap >=11
+group                                                              
+T              19      3      1      1        3         5        29
+H-eval          5      0      0      0        1         1         4
+H-cal           3      0      0      0        0         0         4
+S             745  11162   5939   1740     2382      5645    105468
+
+lesions.attach_gap: the plan's default is 2. Choose from specks_by_gap_amibekk_v1.png: attach a gap only if specks at that distance look like part of the lesion, not like separate noise.
+
+Then set both values in configs/default.yaml (dated comment) and run the 'lesions' stage.

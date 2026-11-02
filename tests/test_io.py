@@ -1,9 +1,9 @@
-"""Mask stacks: bit-packed storage of many 2D boolean masks, looked up by key."""
+"""Mask and label stacks: storage of many 2D masks / label maps, looked up by key."""
 
 import numpy as np
 import pytest
 
-from memtk.io import MaskStack, MaskStackWriter
+from memtk.io import LabelStack, LabelStackWriter, MaskStack, MaskStackWriter
 
 
 def test_round_trip_keeps_every_mask_exactly(tmp_path):
@@ -27,6 +27,33 @@ def test_keys_are_strings_not_numbers(tmp_path):
     stack = MaskStack(writer.save(tmp_path / "stack.npz"))
     assert "1033" in stack and "file_1033" in stack
     assert stack["1033"].sum() == 2 and stack["file_1033"].sum() == 0
+
+
+def test_label_stack_round_trip_keeps_every_label(tmp_path):
+    rng = np.random.default_rng(1)
+    maps = {f"Mets_00{i}/z{i}": rng.integers(0, 4, (6, 9)) * (rng.random((6, 9)) > 0.7) for i in range(3)}
+    maps["empty"] = np.zeros((6, 9), dtype=int)
+    maps["many"] = np.arange(54).reshape(6, 9)                         # labels up to 53
+    writer = LabelStackWriter((6, 9))
+    for key, labels in maps.items():
+        writer.add(key, labels)
+    stack = LabelStack(writer.save(tmp_path / "labels.npz"))
+    assert stack.keys == list(maps) and "empty" in stack
+    for key, labels in maps.items():
+        assert stack[key].dtype == np.int32
+        assert np.array_equal(stack[key], labels)
+
+
+def test_label_stack_refuses_bad_input(tmp_path):
+    writer = LabelStackWriter((3, 3))
+    with pytest.raises(ValueError):
+        writer.add("a", np.zeros((3, 4), dtype=int))
+    with pytest.raises(ValueError):
+        writer.add("a", np.full((3, 3), -1))
+    writer.add("a", np.zeros((3, 3), dtype=int))
+    writer.add("a", np.ones((3, 3), dtype=int))
+    with pytest.raises(ValueError):
+        writer.save(tmp_path / "labels.npz")
 
 
 def test_wrong_shape_and_duplicate_keys_are_refused(tmp_path):

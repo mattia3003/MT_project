@@ -153,6 +153,37 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
   Every stage writes a run log (seed, full config, package versions). Stages refuse to overwrite
   existing outputs, and the split is fixed for the whole project. The earlier segmentation work
   is preserved under the git tag `segmentation-final`. 2026-11-01.
+- **Minimum lesion area 4 px** (`lesions.min_lesion_area`, decision B, set 2026-11-02). Smaller
+  8-connected components are specks.
+  - *Rule:* the largest m with at most 1% of T components smaller than m: 61 of 6,162 (0.99%)
+    are under 4 px; a 5 px minimum would make 2.7% of real components specks.
+  - *Clear size break in both T and S:* real components are rare below 4 px, while 62% of all
+    synthetic components are 1 px (120,756 of 194,716), with a sharp drop at 3 px; from 4 px up
+    the size curves are similar.
+  - *Sensitivity (3 / 4 / 5 px):* T lesions 6,134 / 6,101 / 5,994; T slices without a lesion
+    10 / 19 / 53; synthetic masks without a lesion 106 / 463 / 1,258 (1.2% at 4 px).
+
+  *Source: `results/stanford_brainmets/e0b/lesions_review/review.txt`,
+  `component_sizes_amibekk_v1.csv`, `attach_or_drop_amibekk_v1.csv`, 2026-11-02.*
+- **Attach gap 2 px** (`lesions.attach_gap`, decision C, set 2026-11-02). A speck with at most 2
+  background px between it and a lesion is attached as a stray; other specks are dropped.
+  Nothing is moved or deleted (strays keep their pixels; dropped specks are left out of the
+  label map), and two lesions are never merged.
+  - *Evidence:* synthetic specks by gap to the nearest lesion: 11,162 at gap 1, 5,939 at gap 2,
+    1,740 at gap 3, then a flat level of about 1,150 per gap value at gaps 4–10 (random noise
+    near a lesion). Gaps 1–2 are a halo around lesions; gap 3 is close to the noise level.
+  - *Cost:* about 20% of gap-2 attachments are probably chance (noise level / 5,939), adding
+    1 px each, mostly in noisy masks that QC excludes anyway. Only 4 T specks are attached.
+
+  The plan's default (2) was thus confirmed by the data. *Source: `lesions_review/review.txt`,
+  `speck_gaps_amibekk_v1.csv`, `specks_by_gap_amibekk_v1.png`, 2026-11-02.*
+- **The lesion definition and the informative-lesion bound are separate settings.**
+  `min_lesion_area` defines what a lesion is (object vs noise) everywhere: QC speck counts,
+  `no_lesion`, the lesion table and IDs, cleaned masks for E1, lesion counts and rarity. The
+  informative-lesion bound (E3, from chance matches on H-cal) defines which lesions count as
+  evidence in lesion-level matching. One setting cannot do both: a 15 px lesion definition would
+  turn real small metastases into noise; a 4 px matching bound would flood E2 with chance
+  matches between featureless blobs. 2026-11-02.
 
 ## 3. Findings
 
@@ -193,6 +224,47 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
   slices (lowest: 31 px, then 183 px and 236 px; 8 T slices have < 400 px). *Source:
   `results/stanford_brainmets/e0b/brain_review/near_blank_amibekk_v1.png`,
   `tissue_counts_amibekk_v1.csv`, 2026-11-01.*
+- **Below about 40 px, real lesions are near-indistinguishable by shape and size alone.** For
+  random pairs of T lesions from different patients within the same size range, the median of
+  shape overlap (IoU, centroids aligned) × size ratio is:
+
+  | Size | 4–5 px | 6–9 | 10–14 | 15–19 | 20–39 | ≥ 40 |
+  | --- | --- | --- | --- | --- | --- | --- |
+  | Median shape × size | 0.40 | 0.49 | 0.52 | 0.57 | 0.49 | 0.27 |
+  | Pairs ≥ 0.5 | 28% | 49% | 57% | 72% | 47% | 21% |
+
+  Similarity peaks at 15–19 px; 4–5 px blobs differ more because of pixel rounding. Only large
+  lesions have distinctive shapes. Lesion-level matching must therefore rely on position and
+  multi-lesion configurations. The informative-lesion bound (E3) protects against chance
+  matches; it may land at the upper end of the expected 10–20 px, or above. *Source: read-only
+  check, 6,101 T lesions (attach-or-drop 4 px, gap 2), 3,000 pairs per size range, seed 2026,
+  2026-11-02. Alignment on the rounded centroid; E2's exact alignment may shift the numbers
+  slightly.*
+- **Small real components are mostly the tail or start of a metastasis.** Most 1–5 px
+  components in T sit where a larger metastasis appears in neighbouring slices, so they are
+  lesion edges seen in one slice rather than annotation noise. *Source: manual ITK-SNAP
+  inspection of Mets_120 at 128×128 (a patient with many metastases), using
+  `lesions_review/small_components_T.csv`, 2026-11-02; other patients not inspected.*
+- **Attached strays barely change lesions in clean masks; the distortion sits in noisy masks.**
+  At 4 px / gap 2, by provisional QC group (cut at 3 isolated specks; decision D pending):
+
+  | Group | Masks | Lesions with any stray | Median growth, if any | Lesions grown > 25% | Stray px / lesion px |
+  | --- | --- | --- | --- | --- | --- |
+  | Clean (0 isolated) | 32,219 | 5.9% | +7.7% | 0.4% | 0.4% |
+  | Minor (1–3) | 3,038 | 36% | +9.1% | 4.8% | 3.2% |
+  | Noisy (> 3) | 1,904 | 78% | +16% | 23% | 9.3% |
+
+  In clean masks a stray at gap 1–2 is most likely the lesion's own faint fringe, cut off by
+  the 0.01 threshold. Noisy masks, where the halo is partly noise, are excluded from the main
+  audit by QC; E5's drop-only re-run covers the rest. Example: sample `401` has 93 components,
+  2 lesions, 14 attached strays (lesions +29% and +73%) and 77 dropped specks. *Source:
+  read-only check on all 37,624 synthetic masks, 2026-11-02.*
+- **Synthetic masks are dominated by 1–2 px specks.** 62% of all synthetic mask components are
+  1 px and 5% are 2 px (T: 0.08% and 0.4%). They gather in a halo 1–2 px around lesions (17,101
+  specks at gap 1–2) and are spread over the background (105,468 specks at gap ≥ 11). Fits the
+  suspected cause: per-mask min–max scaling and the 0.01 threshold in the sampling script.
+  *Source: `lesions_review/component_sizes_amibekk_v1.csv`, `speck_gaps_amibekk_v1.csv`,
+  2026-11-02.*
 
 ## 4. Limitations and assumptions
 
@@ -251,6 +323,12 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
   trusting the mask. They are kept, not flagged as failed. Analyses that use the brain (edge
   check, brain-relative positions, E8) should report their sensitivity to brain size, using
   `brain_px` / `tissue_px` in `brain.csv`. *Source: as the failed-MRI entry in section 2,
+  2026-11-02.*
+
+- **19 T lesion slices have no lesion of at least 4 px** (only 1–3 px components), from the
+  minimum lesion area. Their cleaned masks are empty, so neither detector can match a synthetic
+  mask to them. If these tiny components are real lesion edges (see section 3), copies of such
+  slices would be missed; they are 0.5% of T slices. *Source: `lesions_review/review.txt`,
   2026-11-02.*
 
 ## 5. Open questions
