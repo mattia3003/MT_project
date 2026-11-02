@@ -4,7 +4,7 @@ Working plan for E0b, kept in the repo so work can resume from here. The experim
 specified in `docs/experiment-plan.md` (E0); this file records how it is implemented, stage by
 stage, and what has been decided. Update the status table when a stage is done.
 
-## Status (2026-11-02)
+## Status (end of 2026-11-02)
 
 | # | Stage | Kind | Status |
 | --- | --- | --- | --- |
@@ -15,8 +15,16 @@ stage, and what has been decided. Update the status table when a stage is done.
 | 4 | `lesions` + `view` | production (needs B, C) | ✅ done (2026-11-02) |
 | 5 | `qc-review` | review → decision D | ✅ done; **decision D set** (2026-11-02): 9 isolated specks |
 | 6 | `qc` | production (needs D) | ✅ done (2026-11-02); mask class and failed-MRI flag kept apart |
-| 7 | `stats` | E0 outputs | ⏳ next |
+| 7a | `stats` | E0 description (no decision) | ⏳ next: planned and approved 2026-11-02, not started |
+| 7b | `filters-review` | review → decision E (filters for H-cal/H-eval) | ⏳ |
 | 8 | `check` | consistency checks | ⏳ |
+| 9 | Full re-run of E0a + E0b from scratch | end-to-end check | ⏳ after 8 |
+
+**Next session: start here.** Stage 7a `stats`, step 1 (items 1, 2 and 6 below, from the
+existing tables), then step 2 (items 3–5, which read volumes), then 7b `filters-review`. The
+plan for both was approved on 2026-11-02, including the four points confirmed in "Stage 7
+details" below. Everything up to `qc-review` is committed; the `qc` stage (`qc.py`, its tests,
+the stage, docs and report notes) was finished on 2026-11-02 and awaits the user's commit.
 
 **Working rules:**
 - Small reviewed steps, one stage at a time.
@@ -62,6 +70,7 @@ Each stage uses only the outputs and decisions of the stages before it.
 | `brain-review` | A: brain method, failed-MRI tissue cut-off | `brain` |
 | `lesions-review` | B, C: minimum lesion area, attach gap | `lesions` |
 | `qc-review` | D: speck cut-off | `qc` |
+| `filters-review` | E: which sampling filters apply to H-cal/H-eval | E3, E4 (no E0b stage) |
 
 - A review stage computes candidates and writes tables, figures and a proposed value
   (`review.txt`). It never writes production data.
@@ -87,7 +96,12 @@ qc:
   max_isolated_specks: 9      # decision D, set 2026-11-02 (end of the falling counts; then a flat noise tail)
   edge_outside_frac: 0.5      # plan: flag a real-sized lesion if > 50% of it is outside the brain
   small_lesion_px: 40         # plan: the sampling filter's "a lesion under 40 px"
+# planned with 7b: filters.real_sets: null   # decision E: sampling filters applied to H-cal/H-eval
 ```
+
+**Decided at the `qc` stage (2026-11-02):** edge flags only flag, never exclude; a failed MRI
+does not exclude its mask (separate `mask_class` and `mri_failed` columns); the main audit
+(E1–E5) uses `mask_class` clean or minor (35,920 masks). Reasons in `docs/report-notes.md`.
 
 ### Decision A (done, 2026-11-01)
 
@@ -160,36 +174,19 @@ qc:
 
 ## Library modules
 
-**`src/memtk/lesions.py`.**
-- *Exists:*
-  - `label_components`, `count_components`;
-  - `brain_mask(image, method, low_threshold)` with the six `BRAIN_METHODS`;
-  - `tissue_px`, `brain_box`, `fraction_outside`.
-- *To add in stage 4:*
-  - `attach_or_drop(mask, min_area, gap)`: returns the label map plus counts (isolated specks,
-    stray components and pixels).
-  - `lesion_features(labels, brain, box)`:
-    - area, equivalent diameter, eccentricity and solidity (`skimage.measure.regionprops`);
-    - bbox and fraction outside the brain;
-    - the centroid in **three frames**: pixels `(row, col)`; the same scaled to [0, 1] by
-      image size; and brain-relative `(x, y)` in the brain box, with the box stored too.
-  - `lesion_crop(labels, lesion_id, size=16)`: a crop centred on the centroid, enlarged if the
-    lesion doesn't fit. Computed on demand, not stored.
-
-**`src/memtk/audit.py`** (exists). Review-stage evidence: method evaluation and summary, the
-proposal rule, method grids, sorted sheets, tissue counts and histogram.
-
-**`src/memtk/plotting.py`** (exists). Shared figure helpers, using `matplotlib.figure.Figure`
-without pyplot.
-
-**`src/memtk/qc.py`** (stage 6). Classifies synthetic samples. Precedence, first match wins:
-1. `mri_failed` (`tissue_px < brain.min_tissue_px`);
-2. `no_lesion` (no real-sized component after cleaning);
-3. `noisy` (> N isolated specks);
-4. `minor` (1..N);
-5. `clean` (0).
-
-The edge check and the < 40 px rule are separate flag columns, not classes.
+All implemented; `docs/architecture.md` lists every function. In short:
+- **`lesions.py`:** labelling; `attach_or_drop` (→ `LesionLabels`), `speck_gaps`;
+  `lesion_features` (centroid in three frames: pixels, image fraction, brain box); brain masks,
+  `tissue_px`, `brain_box`, `fraction_outside`; helpers `chessboard_distance`, `grow`.
+- **`ids.py`:** slice keys and lesion IDs (`<slice key>/L<n>`), building and parsing.
+- **`io.py`:** NIfTI, `read_table` (ID columns kept as text), mask stacks (bit-packed) and label
+  stacks (sparse).
+- **`qc.py`:** `mask_class` (from the mask alone), `qc_class` (failed MRI first, for
+  reporting), `edge_lesions`. The edge check and the < 40 px rule are flag columns, not classes.
+- **`audit.py`:** evidence and overview figures for every E0b stage (`draw_lesions` for the
+  lesion colouring, used by the overview sheets and `view`).
+- **`plotting.py`:** shared figure helpers; `save` wraps titles and reserves room for them.
+- Not built: `lesion_crop` (a crop centred on a lesion), deferred to E2, where it is used.
 
 ## Position frame: open, decided when E2 is planned
 
@@ -256,18 +253,8 @@ E0b stores all three frames. The open question is recorded in `docs/report-notes
      attached.
    - Cross-table against the old QC list (2,243 masks).
    - Adds `memtk/qc.py` and `tests/test_qc.py`.
-7. **`stats`**. E0 outputs into `results/<dataset>/e0b/` and `results/<pool>/e0b/`:
-   - data description table (T / H-cal / H-eval / S clean+minor);
-   - three distribution figures: lesions per slice, lesion area, 2D centroid density;
-   - brain size: synthetic vs real over *all* real slices by height (z), to test whether
-     synthetic slices resemble slices from the top or bottom of the head;
-   - lesion position spread on the full pool;
-   - median adjacent-slice Dice per training patient;
-   - per-lesion native vs model area on single-lesion slices;
-   - filter table: the share of S passing each sampling filter, i.e. which filters to apply to
-     the real sets (decision E, recommended in the output);
-   - bound-impact table: for informative-lesion bounds of 5–40 px, the share of S and T slices
-     left without an informative lesion. This is input for E3, not decided here.
+7. **`stats` and `filters-review`**: see "Stage 7 details" below (planned and approved
+   2026-11-02).
 8. **`check`**. Consistency checks, as in e0a:
    - lesion areas and centroids match the label maps;
    - every non-zero label has exactly one row in `lesions.csv`, and the numbering follows the
@@ -276,6 +263,63 @@ E0b stores all three frames. The open question is recorded in `docs/report-notes
      dropped specks are absent;
    - every synthetic sample has exactly one QC class, and the counts add up;
    - the pytest suite passes.
+
+## Stage 7 details (approved 2026-11-02)
+
+The experiment plan asks E0 for a data description table, three distribution figures, the
+median adjacent-slice Dice and the native-vs-model lesion area, and says to apply to the real
+sets only the sampling filters the pool shows. The description has no decision, so it is one
+stage (`stats`); the filter choice is decision E, so it gets its own review stage, like A–D.
+
+### 7a `stats` (descriptive; no decision)
+
+Outputs: `results/<dataset>/e0b/stats/` and `results/<pool>/e0b/stats/` (tables as CSV,
+figures as PNG). Items 1, 2 and 6 come from existing tables (`lesions.csv`, `slices.csv`,
+`qc.csv`, `brain.csv`); items 3–5 read volumes again. Implement as two reviewed steps:
+step 1 = items 1, 2, 6; step 2 = items 3, 4, 5.
+
+1. **Data description table.** Columns: T, H-cal, H-eval, S main audit (`mask_class` clean or
+   minor), S all. Rows: patients/samples and slices; lesions and lesions per slice; share of
+   single- and multi-lesion slices; lesion area (median, IQR); share of slices with a lesion
+   under 40 px; spread of lesion positions (centroid SD in pixels); native in-plane sizes (real).
+2. **Three distribution figures**, T, H and S side by side: lesions per slice; lesion area (log
+   scale); 2D density of lesion centroids **in two frames, pixels and brain-relative** (the
+   position frame for E2 is still open; seeing both helps decide it).
+3. **Adjacent-slice Dice** (plan E0 step 6): per T patient, Dice between consecutive lesion
+   slices on the **cleaned** masks (`labels > 0`, as E1 uses); per-patient medians and the
+   overall median. Measures how near-duplicate neighbouring slices are (E5 groups copies by
+   ±2 slices because of this).
+4. **Native vs model-space lesion area** (plan E0 step 5): on slices with exactly one lesion in
+   both spaces, model-space area against native area scaled to 128×128, by size bin. Reads
+   the native masks once. E0a measured the enlargement per patient (median 1.5×).
+5. **Brain size by slice height:** real brain area over *all* real slices (about 23,000; brain
+   mask with the decided method) against relative height in the head, with the synthetic
+   brain areas alongside. Tests the report-notes finding that small synthetic brains look like
+   slices near the top or bottom of the head. Not strictly required by the plan: the first
+   item to drop if time is short.
+6. **Bound-impact table (input for E3, not decided here):** for candidate informative-lesion
+   bounds 5, 8, 10, 12, 15, 20, 25, 30, 40 px, per set: share of lesions kept and share of
+   slices left with no informative lesion. The shape and size finding (lesions under ~40 px
+   are hard to tell apart) suggests the E3 bound may land high; this shows the price.
+
+### 7b `filters-review` (evidence for decision E)
+
+The sampling script kept a pair only if (1) the mask has under 2,000 px, (2) at least one
+lesion is under 40 px, (3) every lesion pixel lies inside the generated brain.
+- **Show each filter both ways:** on the masks as saved, and after cleaning. Filter 2 was
+  applied to raw masks, where a speck counts as "a lesion under 40 px"; that is why 15% of the
+  pool has no small lesion after cleaning (their only small "lesion" was a speck).
+- **Per filter:** share of S that passes (does the filter hold?), and share of each real set
+  that would pass (what would applying it cost?).
+- **Filters apply to H-cal and H-eval only** (chance rates, calibration, planted copies), never
+  to T: T is the reference copies are matched against, so it must stay complete.
+- **Decision value:** a config key such as `filters.real_sets: null`, set by the user to a list
+  of filters; E3 and E4 apply it.
+- Early expectation: filter 1 holds in S but removes no real slice (harmless); filter 3 does
+  not hold (2.6% of masks have edge lesions) and should not be applied; filter 2 is the real
+  question.
+
+### 8 `check` (as before), then 9 the full re-run
 
 ## Verification (every stage)
 
