@@ -1,0 +1,7 @@
+qc_class,Excessive noise fragments,Pixels outside brain,not on the old list,total
+mri_failed,0,3,149,152
+no_lesion,1,0,392,393
+noisy,939,302,0,1241
+minor,583,151,2967,3701
+clean,60,204,31873,32137
+total,1583,660,35381,37624

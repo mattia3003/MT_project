@@ -340,6 +340,21 @@ def summarize_speck_strata(slices: pd.DataFrame, lesions: pd.DataFrame) -> pd.Da
     return out
 
 
+# --- qc: overview of the quality classes -----------------------------------------------------
+
+def summarize_qc(table: pd.DataFrame, by: str, order) -> pd.DataFrame:
+    """Per class (column `by`, rows in `order`): masks and share, edge-flagged masks, masks without
+    a lesion under 40 px, attached strays (components, px), masks excluded by the old QC list."""
+    g = table.groupby(by, sort=False)
+    out = pd.DataFrame({
+        "masks": g.size(), "edge_flagged": g["edge"].sum(),
+        "no_lesion_lt40": g["has_lesion_lt40"].agg(lambda x: int((~x.astype(bool)).sum())),
+        "strays": g["n_strays"].sum(), "stray_px": g["stray_px"].sum(), "old_qc_excluded": g["legacy_excluded"].sum(),
+    })
+    out.insert(1, "share", out["masks"] / len(table))
+    return out.reindex([c for c in order if c in out.index])
+
+
 # --- brain: overview of the production brain masks -------------------------------------------
 
 def summarize_brains(df: pd.DataFrame, by: str) -> pd.DataFrame:

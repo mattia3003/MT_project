@@ -197,6 +197,36 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
 
   *Source: `results/amibekk_v1/e0b/qc_review/review.txt`, `speck_counts_amibekk_v1.csv`,
   `speck_strata_amibekk_v1.csv` and `.png`, 2026-11-02.*
+- **QC classes, with the mask kept apart from the MRI** (`qc` stage, 2026-11-02). Every synthetic
+  sample gets a `mask_class` from its mask alone (`no_lesion` / `noisy` / `minor` / `clean`), a
+  separate `mri_failed` flag, and a combined `qc_class` with the plan's precedence (failed MRI
+  first) for reporting:
+
+  | QC class | Masks | Share | Edge-flagged | No lesion < 40 px |
+  | --- | --- | --- | --- | --- |
+  | `mri_failed` | 152 | 0.4% | 82 | 70 |
+  | `no_lesion` | 393 | 1.0% | 0 | 393 |
+  | `noisy` | 1,241 | 3.3% | 153 | 191 |
+  | `minor` | 3,701 | 9.8% | 89 | 488 |
+  | `clean` | 32,137 | 85.4% | 829 | 4,360 |
+
+  - *Why apart:* the mask comes from stage 1 whatever stage 2 does. 82 of the 152 failed MRIs
+    carry a clean mask (70 have no lesion); they stay available to the mask audit and are left
+    out only where the brain is used (edge check, brain-relative positions, E8).
+  - *Main audit (E1–E5): `mask_class` clean or minor*, 35,920 masks. Clean and minor masks have
+    trustworthy lesions (their few isolated specks are dropped; lesions mostly outside the brain
+    stay at 1–2%). Noisy masks are where noise blobs become "lesions" (7.8% outside the brain at
+    20 or more specks) and strays distort shapes; results are also reported with them, as
+    planned. `no_lesion` masks have nothing to match.
+  - *Edge flags only flag.* The rule fires on 2 of 5,909 real slices (T 1, H-eval 1, H-cal 0),
+    so it needs no loosening. Flagged synthetic lesions in clean masks look like real lesions
+    placed where stage 2 drew no brain, and a genuine copy of a lesion near a real cortex can
+    land outside a smaller synthetic brain, so excluding flagged masks could remove real copies.
+  - Matches the estimates from planning (about 86% clean, 1% no lesion); noisy is 3.3% with the
+    cut at 9.
+
+  *Source: `results/amibekk_v1/e0b/qc/summary.txt`, `qc_classes_amibekk_v1.csv`,
+  `edge_check_real_stanford_brainmets.csv`, `qc_classes_amibekk_v1.png`, 2026-11-02.*
 - **The lesion definition and the informative-lesion bound are separate settings.**
   `min_lesion_area` defines what a lesion is (object vs noise) everywhere: QC speck counts,
   `no_lesion`, the lesion table and IDs, cleaned masks for E1, lesion counts and rarity. The
@@ -280,7 +310,21 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
   with 10 or more isolated specks, and fewer below that (79% at 6–9, 49% at 4–5, 29% at 3, 5% at
   1, 0.8% at 0). That explains its count, and it agrees with the break used for decision D.
   *Source: `results/amibekk_v1/e0b/qc_review/speck_strata_amibekk_v1.csv` (column
-  `old_qc_excluded`), 2026-11-02.* The full cross-table follows in the `qc` stage.
+  `old_qc_excluded`), 2026-11-02.* The full cross-table follows in the next entry.
+- **The old QC list is fully explained by two rules.**
+  - *"Excessive noise fragments" (1,583 masks):* the smallest count in its reasons is "11
+    distinct blobs", so the rule was more than 10 components, lesions and strays included. That
+    catches all 1,241 of our noisy masks, plus 583 minor and 60 clean masks with many separate
+    lesions and strays (and 1 no-lesion mask).
+  - *"Pixels outside brain" (660 masks):* fires on a single pixel outside the brain (281 reasons
+    read "Pixels outside brain: 1"). So 204 clean and 151 minor masks were dropped for a pixel;
+    the plan replaced this rule with the edge check (> 50% of a real-sized lesion outside).
+
+  Cross-table, old reason by QC class: noise fragments 939 noisy / 583 minor / 60 clean / 1
+  no-lesion; pixels outside brain 302 noisy / 151 minor / 204 clean / 3 failed MRI. Verified:
+  the earlier count of 2,243 was right, but its rules were too coarse to define S.
+  *Source: `results/amibekk_v1/e0b/qc/old_qc_crosstab_amibekk_v1.csv`, `synthetic_index.csv`
+  (`legacy_reason`), 2026-11-02.*
 - **Most synthetic lesions outside the brain sit in clean masks, not noisy ones.** Lesions more
   than half outside the synthetic brain, by provisional QC group (cut at 3 isolated specks;
   decision D pending):
@@ -410,8 +454,11 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
 **Project decisions** (from the experiment plan)
 - [ ] Informative-lesion bound: decided during E0b/E3 coding, by its effect on the synthetic pool.
 - [ ] E4 go/no-go criteria: fixed before E4 runs.
-- [ ] **Does a failed synthetic MRI exclude its mask from the mask audit?** Decide at the E0b `qc`
-      stage. The mask comes from stage 1 whatever stage 2 does, so a blank or failed MRI does not
+- [x] **Does a failed synthetic MRI exclude its mask from the mask audit?** *Resolved
+      2026-11-02 at the `qc` stage: no.* `qc.csv` keeps `mask_class` and `mri_failed` as separate
+      columns; the main audit uses `mask_class` clean or minor, and `mri_failed` only excludes a
+      sample where the brain is used. See "QC classes" in section 2. Original question: decide
+      at the E0b `qc` stage. The mask comes from stage 1 whatever stage 2 does, so a blank or failed MRI does not
       make its mask invalid for E1–E5, which use masks only. A failed MRI matters where the
       brain is used: the edge check, brain-relative positions, and E8. Option: `mri_failed` is
       a flag that excludes a sample from those analyses only, rather than a QC class that

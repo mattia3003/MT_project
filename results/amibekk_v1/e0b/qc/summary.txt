@@ -1,0 +1,46 @@
+E0b qc: pool 'amibekk_v1'; noisy = more than 9 isolated specks; edge = a lesion more than 0.5 outside the brain; small lesion = under 40 px
+
+QC class per sample (precedence: mri_failed > no_lesion > noisy > minor > clean):
+            masks   share  edge_flagged  no_lesion_lt40  strays  stray_px  old_qc_excluded
+qc_class                                                                                  
+mri_failed    152  0.0040            82              70       1         1                3
+no_lesion     393  0.0104             0             393       0         0                1
+noisy        1241  0.0330           153             191    6977      8979             1241
+minor        3701  0.0984            89             488    6005      7153              734
+clean       32137  0.8542           829            4360    4118      4516              264
+
+Mask class (from the mask alone; failed MRIs keep their mask class):
+            masks   share  edge_flagged  no_lesion_lt40  strays  stray_px  old_qc_excluded
+mask_class                                                                                
+no_lesion     463  0.0123             0             463       0         0                1
+noisy        1241  0.0330           153             191    6977      8979             1241
+minor        3701  0.0984            89             488    6005      7153              734
+clean       32219  0.8563           911            4360    4119      4517              267
+Failed MRIs by mask class:
+mri_failed  False  True 
+mask_class              
+no_lesion     393     70
+noisy        1241      0
+minor        3701      0
+clean       32137     82
+
+Columns: masks, share; masks with an edge-flagged lesion; masks without a lesion under 40 px; attached strays (components, px); masks excluded by the old QC list.
+
+Old QC list (reason) against the QC class:
+legacy_reason  Excessive noise fragments  Pixels outside brain  not on the old list  total
+qc_class                                                                                  
+mri_failed                             0                     3                  149    152
+no_lesion                              1                     0                  392    393
+noisy                                939                   302                    0   1241
+minor                                583                   151                 2967   3701
+clean                                 60                   204                31873  32137
+total                               1583                   660                35381  37624
+
+Edge check on the real sets (stanford_brainmets), same rule:
+        slices  lesions  edge_lesions  edge_slices
+set                                               
+H-cal      992     1548             0            0
+H-eval    1094     2098             1            1
+T         3823     6101             1            1
+
+Flags do not exclude: an edge-flagged or small-lesion-free mask keeps its class. Which classes enter the main audit is set when E5 is planned (recommendation: mask_class clean or minor).

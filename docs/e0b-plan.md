@@ -14,8 +14,8 @@ stage, and what has been decided. Update the status table when a stage is done.
 | 3 | `lesions-review` | review → decisions B, C | ✅ done; **decisions B, C set** (2026-11-02): 4 px, gap 2 |
 | 4 | `lesions` + `view` | production (needs B, C) | ✅ done (2026-11-02) |
 | 5 | `qc-review` | review → decision D | ✅ done; **decision D set** (2026-11-02): 9 isolated specks |
-| 6 | `qc` | production (needs D) | ⏳ next |
-| 7 | `stats` | E0 outputs | ⏳ |
+| 6 | `qc` | production (needs D) | ✅ done (2026-11-02); mask class and failed-MRI flag kept apart |
+| 7 | `stats` | E0 outputs | ⏳ next |
 | 8 | `check` | consistency checks | ⏳ |
 
 **Working rules:**

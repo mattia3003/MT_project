@@ -29,7 +29,11 @@ Stages, run in this order. Each one can be run and checked on its own:
   qc-review      evidence for decision D (isolated-speck cut-off between minor and noisy masks):
                  masks by number of isolated specks, sheets per stratum, clean masks with a
                  lesion outside the brain -> results/<pool>/e0b/qc_review/
-  (planned: qc, stats, check)
+  qc             (needs decision D) one row per synthetic sample: mask class (from the mask alone),
+                 failed-MRI flag, combined QC class, edge and small-lesion flags; summary, old QC
+                 list cross-table, the edge check on the real sets, example sheet
+                 -> <output_root>/<pool>/qc.csv, results/<pool>/e0b/qc/
+  (planned: stats, check)
 
 Examples (from the repository root):
   .venv\\Scripts\\python.exe scripts\\e0b_audit.py brain-review
@@ -44,7 +48,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from memtk import audit, config, ids
+from memtk import audit, config, ids, qc
 from memtk.io import LabelStack, LabelStackWriter, MaskStack, MaskStackWriter, load_image, read_table, save_nifti
 from memtk.lesions import (LesionLabels, attach_or_drop, brain_box, brain_mask, fraction_outside, label_components,
                            lesion_features, tissue_px)
@@ -663,6 +667,98 @@ def run_qc_review(cfg: dict, args: argparse.Namespace) -> None:
     print(f"\n{text}\nWrote {out}")
 
 
+QC_COLUMNS = ["source", "key", "sample_id", "qc_class", "mask_class", "mri_failed", "edge", "n_edge_lesions",
+              "has_lesion_lt40", "n_lesions", "n_specks", "n_strays", "stray_px", "legacy_excluded"]
+
+
+def run_qc(cfg: dict, args: argparse.Namespace) -> None:
+    min_area = int(decided(cfg, "lesions", "min_lesion_area", "lesions-review"))
+    gap = int(decided(cfg, "lesions", "attach_gap", "lesions-review"))
+    max_specks = int(decided(cfg, "qc", "max_isolated_specks", "qc-review"))
+    edge_frac, small_px = float(cfg["qc"]["edge_outside_frac"]), int(cfg["qc"]["small_lesion_px"])
+    name, _ = config.real_dataset(cfg, args.dataset)
+    pool_name, pool_cfg = config.synthetic_pool(cfg, args.pool)
+    real_dir, syn_dir = config.output_dir(cfg, name), config.output_dir(cfg, pool_name)
+    out = config.results_dir(cfg, pool_name, "e0b") / "qc"
+    existing = [p for p in (syn_dir / "qc.csv", out) if p.exists()]
+    if existing and not args.overwrite:
+        raise SystemExit(f"{existing[0]} already exists; pass --overwrite to regenerate.")
+    for d in (real_dir, syn_dir):
+        if not (d / "lesions.csv").exists():
+            raise SystemExit(f"{d / 'lesions.csv'} not found; run the 'lesions' stage first.")
+    rng = np.random.default_rng(cfg["seed"])
+
+    # one row per synthetic sample: mask class, failed MRI and the combined class; flags as columns
+    index = read_table(syn_dir / "synthetic_index.csv")
+    table = (read_table(syn_dir / "slices.csv")
+             .merge(read_table(syn_dir / "brain.csv")[["sample_id", "mri_failed"]], on="sample_id")
+             .merge(index[["sample_id", "legacy_excluded", "legacy_reason"]], on="sample_id"))
+    table["mask_class"] = qc.mask_class(table["n_lesions"], table["n_specks"], max_specks)
+    table["qc_class"] = qc.qc_class(table["mri_failed"], table["mask_class"])
+    edge = qc.edge_lesions(read_table(syn_dir / "lesions.csv"), edge_frac)
+    table["n_edge_lesions"] = table["key"].map(edge).fillna(0).astype(int)
+    table["edge"] = table["n_edge_lesions"] > 0
+    table[QC_COLUMNS].to_csv(syn_dir / "qc.csv", index=False)
+    config.write_run_info(syn_dir, cfg, script=__file__, filename="qc.run_info.json",
+                          extra={"stage": "qc", "pool": pool_name, "max_isolated_specks": max_specks,
+                                 "edge_outside_frac": edge_frac})
+
+    by_qc = audit.summarize_qc(table, "qc_class", qc.QC_CLASSES)
+    by_mask = audit.summarize_qc(table, "mask_class", qc.MASK_CLASSES)
+    failed_by_mask = pd.crosstab(table["mask_class"], table["mri_failed"]).reindex(list(qc.MASK_CLASSES), fill_value=0)
+    # old reasons read e.g. "Excessive noise fragments: 11 distinct blobs"; group by the part before ':'
+    old_reason = table["legacy_reason"].str.split(":").str[0].fillna("not on the old list")
+    old_qc = pd.crosstab(table["qc_class"], old_reason, margins=True,
+                         margins_name="total").reindex([*qc.QC_CLASSES, "total"], fill_value=0)
+
+    # the same edge check on the real sets: if real slices failed it, the rule would be too strict
+    real_lesions, real_slices = read_table(real_dir / "lesions.csv"), read_table(real_dir / "slices.csv")
+    real_edge = qc.edge_lesions(real_lesions, edge_frac)
+    real_check = pd.DataFrame({
+        "slices": real_slices.groupby("set", sort=False).size(),
+        "lesions": real_lesions.groupby("set", sort=False).size(),
+        "edge_lesions": real_lesions[real_lesions["frac_outside_brain"] > edge_frac].groupby("set").size(),
+        "edge_slices": real_slices[real_slices["key"].isin(real_edge.index)].groupby("set").size(),
+    }).fillna(0).astype(int)
+
+    # a sheet with random masks of each class
+    src = Slices(syn_dir, pool_cfg)
+
+    def pick(df: pd.DataFrame, n: int) -> pd.DataFrame:
+        return df.iloc[np.sort(rng.choice(len(df), size=min(n, len(df)), replace=False))] if len(df) else df
+
+    items = []
+    for cls in qc.QC_CLASSES:
+        for key, n_les, n_specks, n_edge in pick(table[table["qc_class"] == cls], 8)[
+                ["key", "n_lesions", "n_specks", "n_edge_lesions"]].itertuples(index=False):
+            image, mask, brain, box = src[str(key)]
+            counts = f"{n_les} lesion{'' if n_les == 1 else 's'}, {n_specks} speck{'' if n_specks == 1 else 's'}"
+            flags = f", {n_edge} at edge" if n_edge else ""
+            items.append((f"{cls}: {key}\n{counts}{flags}", image, attach_or_drop(mask, min_area, gap), brain, box))
+    audit.lesion_sheet(items, out / f"qc_classes_{pool_name}.png",
+                       f"{pool_name}: 8 random samples per QC class (rows: {', '.join(qc.QC_CLASSES)}). Lesions "
+                       f"coloured with their number, strays lighter, isolated specks orange x, brain cyan, brain "
+                       f"box dashed yellow")
+
+    by_qc.to_csv(out / f"qc_classes_{pool_name}.csv")
+    old_qc.to_csv(out / f"old_qc_crosstab_{pool_name}.csv")
+    real_check.to_csv(out / f"edge_check_real_{name}.csv")
+    text = (f"E0b qc: pool '{pool_name}'; noisy = more than {max_specks} isolated specks; edge = a lesion more "
+            f"than {edge_frac} outside the brain; small lesion = under {small_px} px\n\n"
+            f"QC class per sample (precedence: {' > '.join(qc.QC_CLASSES)}):\n{by_qc.round(4).to_string()}\n\n"
+            f"Mask class (from the mask alone; failed MRIs keep their mask class):\n{by_mask.round(4).to_string()}\n"
+            f"Failed MRIs by mask class:\n{failed_by_mask.to_string()}\n\n"
+            f"Columns: masks, share; masks with an edge-flagged lesion; masks without a lesion under {small_px} px; "
+            f"attached strays (components, px); masks excluded by the old QC list.\n\n"
+            f"Old QC list (reason) against the QC class:\n{old_qc.to_string()}\n\n"
+            f"Edge check on the real sets ({name}), same rule:\n{real_check.to_string()}\n\n"
+            f"Flags do not exclude: an edge-flagged or small-lesion-free mask keeps its class. Which classes "
+            f"enter the main audit is set when E5 is planned (recommendation: mask_class clean or minor).\n")
+    (out / "summary.txt").write_text(text, encoding="utf-8")
+    config.write_run_info(out, cfg, script=__file__, extra={"stage": "qc", "pool": pool_name})
+    print(f"\n{text}\nWrote {syn_dir / 'qc.csv'}, {out}")
+
+
 # lesions.csv columns in the view's table, with short headers
 VIEW_COLUMNS = {"lesion_id": "lesion", "area": "area px", "stray_px": "strays px", "centroid_row": "row",
                 "centroid_col": "col", "centroid_row_brain": "row in brain", "centroid_col_brain": "col in brain",
@@ -754,6 +850,13 @@ def main() -> None:
     p.add_argument("--pool", help="synthetic pool name in the config (default: default_synthetic_pool)")
     p.add_argument("--overwrite", action="store_true", help="regenerate existing output")
     p.set_defaults(func=run_qc_review)
+
+    p = stages.add_parser("qc", help="QC class per synthetic sample (needs D)")
+    config.add_config_arg(p)
+    p.add_argument("--dataset", help="real dataset name in the config (default: default_real_dataset)")
+    p.add_argument("--pool", help="synthetic pool name in the config (default: default_synthetic_pool)")
+    p.add_argument("--overwrite", action="store_true", help="regenerate existing output")
+    p.set_defaults(func=run_qc)
 
     p = stages.add_parser("view", help="one slice at full size with its lesion rows (helper, after 'lesions')")
     config.add_config_arg(p)

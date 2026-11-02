@@ -310,7 +310,7 @@ The check never changes C or the copy class. It is supporting evidence for the m
 3. **RQ1, copy rate (first part of H1).**
    - Compute the share of S flagged as full copies, with a 95% bootstrap confidence interval. Synthetic samples are independent, so resample them directly.
    - Compare with the H-eval rate (bootstrap by patient, since its slices are clustered).
-   - Memorization beyond chance means the S rate sits clearly above it. Report rates on the clean and minor masks. Then repeat with the noisy masks included, using the whole-mask detector only, to show that the exclusion doesn't hide copies. Also re-run the lesion-level detector with drop-only (no attaching), to show that the stray-pixel rule doesn't change the conclusions.
+   - Memorization beyond chance means the S rate sits clearly above it. Report rates on the clean and minor masks (`mask_class` in `qc.csv` from E0b: a failed MRI does not exclude its mask, decided 2026-11-02). Then repeat with the noisy masks included, using the whole-mask detector only, to show that the exclusion doesn't hide copies. Also re-run the lesion-level detector with drop-only (no attaching), to show that the stray-pixel rule doesn't change the conclusions.
 4. **Remove adjacent-slice duplicates.** Group flagged synthetic masks by source patient and slice window (±2 slices), and count each group once. Report both the raw count and the grouped count. The gap shows how much near-duplicate adjacent slices inflate the raw number.
 5. **Count near-exact copies separately** (whole-mask Dice > 0.9). These are unambiguous and make strong figure examples.
 6. **RQ2, missed by whole-mask.**

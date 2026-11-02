@@ -1,0 +1,4 @@
+set,slices,lesions,edge_lesions,edge_slices
+H-cal,992,1548,0,0
+H-eval,1094,2098,1,1
+T,3823,6101,1,1

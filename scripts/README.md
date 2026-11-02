@@ -25,7 +25,7 @@ Status: ✅ implemented · ⏳ planned
 | `e0b_audit.py lesions` | ✅ | decisions B, C, `brain` outputs | `<output_root>/<dataset\|pool>/lesions.csv` (one row per lesion, ID + features), `slices.csv`, `labels.npz`; `volumes/<pid>/labels.nii.gz` (real); `results/<dataset\|pool>/e0b/lesions/summary.txt` + `overview.png` |
 | `e0b_audit.py view` | ✅ | lesion outputs | helper: `view --sample <id>` or `view --patient <id> --z <z>` → `results/<dataset\|pool>/e0b/views/<key>.png` (slice at full size + its lesion rows); `--nifti` also writes a synthetic sample's image and labels for ITK-SNAP |
 | `e0b_audit.py qc-review` | ✅ | `lesions` and `brain` outputs, synthetic index | `results/<pool>/e0b/qc_review/`: masks by number of isolated specks, exact counts, sheets per stratum, clean masks with a lesion outside the brain, proposal (`review.txt`) → **decision D** |
-| `e0b_audit.py qc` | ⏳ | decision D | QC class per synthetic sample |
+| `e0b_audit.py qc` | ✅ | decision D, `lesions` and `brain` outputs | `<output_root>/<pool>/qc.csv` (per sample: mask class, failed-MRI flag, combined QC class, edge and small-lesion flags); `results/<pool>/e0b/qc/` (summary, old-QC cross-table, edge check on the real sets, example sheet) |
 | `e0b_audit.py stats` / `check` | ⏳ | all E0b outputs | E0 statistics and figures; consistency checks |
 | `e3_calibrate.py` | ⏳ | E0 outputs, H-cal | frozen thresholds (runs the E1 + E2 detectors from `memtk`) |
 | `e4_validate.py` | ⏳ | thresholds, T, H-eval | planted-copy validation table (gate) |
@@ -56,6 +56,7 @@ the production stage)
 .venv\Scripts\python.exe scripts\e0b_audit.py lesions-review     # evidence for decisions B, C
 .venv\Scripts\python.exe scripts\e0b_audit.py lesions            # needs B, C: lesion table, label maps, overview
 .venv\Scripts\python.exe scripts\e0b_audit.py qc-review          # evidence for decision D (speck cut-off)
+.venv\Scripts\python.exe scripts\e0b_audit.py qc                 # needs D: QC class per synthetic sample
 ```
 `brain-review` also takes `--n-synthetic 2000` (samples for the method comparison) and
 `--min-area 4` (provisional lesion size for that comparison).
