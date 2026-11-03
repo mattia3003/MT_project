@@ -7,6 +7,7 @@ seed: 2026                          # single global seed for every random step
 output_root: processed_data/model_space   # processed data, one subfolder per dataset/pool
 results_root: results                     # experiment outputs (tables, figures)
 splits_dir: splits                        # patient splits (version-controlled)
+frozen_dir: configs/frozen                # frozen E3 thresholds, read by E4 and E5 (version-controlled)
 
 default_real_dataset: stanford_brainmets
 default_synthetic_pool: amibekk_v1

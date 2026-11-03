@@ -1,0 +1,20 @@
+E3 check: dataset 'stanford_brainmets', seed 2026
+
+[PASS] all E1-E3 decisions (F, G, H) are set in the config
+[PASS] 'bound-review' outputs made with the current config values: lesions.min_lesion_area, detectors.whole_mask, detectors.lesion, calibration.percentile
+[PASS] 'calibrate' outputs made with the current config values: lesions.min_lesion_area, detectors.whole_mask, detectors.lesion, calibration.percentile, calibration.informative_bound_px, calibration.bootstrap_draws
+[PASS] 'calibrate' ran after 'bound-review': 2026-11-03T21:31:37 vs 2026-11-03T19:03:09
+[PASS] 'freeze' outputs made with the current config values: lesions.min_lesion_area, detectors.whole_mask, detectors.lesion, calibration.percentile, calibration.informative_bound_px, calibration.bootstrap_draws, calibration.strata
+[PASS] 'freeze' ran after 'calibrate': 2026-11-03T22:01:58 vs 2026-11-03T21:31:37
+[PASS] 'bound-review' read only T and H-cal (S never scored before the freeze): ['T', 'H-cal']
+[PASS] 'calibrate' read only T and H-cal (S never scored before the freeze): ['T', 'H-cal']
+[PASS] 'freeze' read only T and H-cal (S never scored before the freeze): ['T', 'H-cal']
+[PASS] thresholds.csv reproduced from the stored H-cal tables
+[PASS] frozen thresholds == thresholds.csv under decision H: tau_D 0.905/0.729, tau_L 0.739/0.816, tau_C 0.719/0.406
+[PASS] frozen file settings == current config
+[PASS] E2 shortcuts exact at the frozen thresholds (tau_L >= cut and > score at the prefilter; tau_C > 0)
+[PASS] E2 shortcuts == brute force (candidate slices and C): 2428 candidate slice pairs of 20 random H-cal slices
+[PASS] self-match: random T slices find an identical slice (E1 score 1, E2 C 1): 50 slices
+[PASS] unit tests (pytest) pass: 106 passed in 12.84s
+
+16 passed, 0 failed

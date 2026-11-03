@@ -10,7 +10,8 @@ import pandas as pd
 
 from memtk import config
 from memtk.io import LabelStack, read_table
-from memtk.stages import decided
+from memtk.lesionmatch import LesionMatch
+from memtk.stages import decided, require
 
 
 @dataclass
@@ -55,6 +56,19 @@ def decision_e(slices: pd.DataFrame, cfg: dict) -> pd.Series:
             raise SystemExit(f"Decision E filter '{name}' is not implemented in E3 (only max_mask_px); "
                              f"add it to memtk.e3.common.decision_e.")
     return passes
+
+
+def load_hcal_tables(cfg: dict, dataset: str) -> tuple[pd.DataFrame, LesionMatch, dict]:
+    """The H-cal detector tables stored by `calibrate`: the E1 table, the E2 results rebuilt as a
+    `LesionMatch`, and the patient of every H-cal slice."""
+    d = config.output_dir(cfg, dataset) / "e3"
+    require(d / "e1_hcal.csv", "calibrate")
+    e1 = read_table(d / "e1_hcal.csv")
+    e2 = LesionMatch(read_table(d / "e2_hcal_queries.csv"), read_table(d / "e2_hcal_lesions.csv"),
+                     pd.read_parquet(d / "e2_hcal_slice_pairs.parquet"),
+                     pd.read_parquet(d / "e2_hcal_lesion_pairs.parquet"),
+                     float(cfg["detectors"]["lesion"]["candidate_min_s"]))
+    return e1, e2, dict(zip(e1["query"], e1["patient_id"]))
 
 
 def lesion_settings(cfg: dict) -> dict:

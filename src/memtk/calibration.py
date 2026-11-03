@@ -12,9 +12,11 @@ one patient are near-duplicates, so their intervals resample patients, not slice
 from __future__ import annotations
 
 from collections.abc import Sequence
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import yaml
 
 
 def area_bins(area: np.ndarray, edges: Sequence[int]) -> pd.Series:
@@ -69,6 +71,19 @@ def bootstrap_interval(scores: np.ndarray, patients: np.ndarray, percentile: flo
         stats[i] = np.percentile(np.concatenate([groups[j] for j in chosen]), percentile)
     low, high = np.percentile(stats, [50 * (1 - level), 50 * (1 + level)])
     return float(low), float(high)
+
+
+def read_frozen(path: str | Path) -> dict:
+    """The frozen E3 threshold file (written by `e3_calibrate.py freeze`), as a dict."""
+    with open(path, encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
+def frozen_threshold(frozen: dict, detector: str, name: str, n_lesions: np.ndarray) -> np.ndarray:
+    """Each slice's frozen threshold `name` of `detector` (e.g. "lesion", "tau_C"), chosen by its
+    stratum from its lesion count (the count the detector uses)."""
+    values = frozen["thresholds"][detector][name]
+    return np.where(stratum(n_lesions) == "multi", float(values["multi"]), float(values["single"]))
 
 
 def propose_bound(rates: pd.DataFrame, cut: float) -> int | None:

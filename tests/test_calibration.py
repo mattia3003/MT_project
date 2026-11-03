@@ -4,8 +4,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from memtk.calibration import (area_bins, bin_label, bootstrap_interval, chance_rates, percentile_threshold,
-                               propose_bound, stratum)
+from memtk.calibration import (area_bins, bin_label, bootstrap_interval, chance_rates, frozen_threshold,
+                               percentile_threshold, propose_bound, read_frozen, stratum)
 
 EDGES = (4, 10, 20)
 
@@ -31,6 +31,13 @@ def test_percentile_counts_missing_scores_as_zero():
 
 def test_stratum():
     assert stratum(np.array([1, 2, 5])).tolist() == ["single", "multi", "multi"]
+
+
+def test_frozen_thresholds_are_read_back_per_stratum(tmp_path):
+    path = tmp_path / "e3_test.yaml"
+    path.write_text("thresholds:\n  lesion:\n    tau_C: {single: 0.7, multi: 0.4}\n", encoding="utf-8")
+    frozen = read_frozen(path)
+    assert frozen_threshold(frozen, "lesion", "tau_C", np.array([1, 2, 3])).tolist() == [0.7, 0.4, 0.4]
 
 
 def test_bootstrap_is_repeatable_and_collapses_for_constant_scores():

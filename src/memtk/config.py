@@ -81,6 +81,11 @@ def split_file(cfg: dict, dataset_name: str) -> Path:
     return resolve_path(cfg["splits_dir"]) / f"{dataset_name}_seed{cfg['seed']}.csv"
 
 
+def frozen_file(cfg: dict, dataset_name: str) -> Path:
+    """Frozen E3 threshold file for a real dataset: `<frozen_dir>/e3_<dataset>.yaml`."""
+    return resolve_path(cfg["frozen_dir"]) / f"e3_{dataset_name}.yaml"
+
+
 def add_config_arg(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--config", default=str(DEFAULT_CONFIG),
                         help="YAML config (default: configs/default.yaml)")

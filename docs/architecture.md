@@ -9,7 +9,8 @@ data flows between them, and how the code is organised. The details live in two 
   by", external libraries), the tests, and the planned modules.
 
 *Status (2026-11-03): E0 (E0a + E0b) done and closed; environment pinned in
-`requirements-lock.txt`. E1–E3 are next (`docs/e1-e3-plan.md`).*
+`requirements-lock.txt`. E1–E3 done: thresholds frozen in `configs/frozen/` (`docs/e1-e3-plan.md`).
+E4 (the gate) is next.*
 
 The diagrams are [Mermaid](https://mermaid.js.org/): GitHub renders them; in VS Code install
 *Markdown Preview Mermaid Support* (`bierner.markdown-mermaid`) and open the Markdown preview.
@@ -25,10 +26,10 @@ above the freeze never sees S, so nothing can be tuned towards a desired result.
 ```mermaid
 flowchart TD
     E0["E0 · data audit and mask QC ✅<br/>split, model space, lesion tables, QC classes"]
-    E1["E1 · whole-mask detector<br/>(Dice to every training mask)"]
-    E2["E2 · lesion-level detector<br/>(lesion by lesion)"]
-    E3["E3 · calibration on H-cal<br/>informative-lesion bound, thresholds"]
-    FREEZE[["Thresholds frozen<br/>S is never scored before this"]]
+    E1["E1 · whole-mask detector ✅<br/>(Dice to every training mask)"]
+    E2["E2 · lesion-level detector ✅<br/>(lesion by lesion)"]
+    E3["E3 · calibration on H-cal ✅<br/>informative-lesion bound, thresholds"]
+    FREEZE[["Thresholds frozen ✅<br/>S is never scored before this"]]
     E4{"E4 · planted copies<br/>go / no-go gate"}
     E5["E5 · main audit: score S once<br/>RQ1, RQ2"]
     E6["E6 · patient exposure, rarity,<br/>duplication (RQ3a, H1, H3)"]
@@ -45,11 +46,11 @@ flowchart TD
 
     classDef next fill:#fff3cd,stroke:#b8860b
     classDef planned stroke-dasharray: 5 5,color:#666
-    class E1,E2,E3 next
-    class FREEZE,E4,E5,E6,E7,E8 planned
+    class E4 next
+    class E5,E6,E7,E8 planned
 ```
 
-✅ done · yellow: next (`docs/e1-e3-plan.md`) · dashed: planned. The procedures are in
+✅ done · yellow: next · dashed: planned. The procedures are in
 `docs/experiment-plan.md`.
 
 **The data sets** (all lesion-containing slices in the 128×128 model space): T, the 105
@@ -113,7 +114,7 @@ Functions, imports, "used by" and tests: `docs/module-reference.md`.
 
 | Folder | Content | In git |
 | --- | --- | --- |
-| `configs/` | `default.yaml` (datasets, pools, seed, decisions); `frozen/` (E3 thresholds, planned) | yes |
+| `configs/` | `default.yaml` (datasets, pools, seed, decisions); `frozen/` (the frozen E3 thresholds that E4 and E5 read) | yes |
 | `src/memtk/` | the library and stage packages (installed editable: `pip install -e .`) | yes |
 | `scripts/` | one entry script per experiment; `README.md` with run order and commands | yes |
 | `tests/` | pytest on small hand-built inputs | yes |

@@ -274,6 +274,8 @@ The check never changes C or the copy class. It is supporting evidence for the m
 
 **Check before moving on:** The thresholds are frozen, and the share of S excluded by the bound is acceptable. If it is large, weigh it explicitly and record the reason with the decision (parameter choices are the author's; no supervisor sign-off needed, 2026-11-03).
 
+*Status (2026-11-03): done.* Implemented as `scripts/e3_calibrate.py` (stages `bound-review`, `calibrate`, `freeze`, `check`; details and decisions in `docs/e1-e3-plan.md`). Frozen in `configs/frozen/e3_stanford_brainmets.yaml`: informative-lesion bound 12 px (decision G; S main keeps an informative lesion in 72% of slices), thresholds stratified by lesion count (decision H): τ\_D 0.905 / 0.729, τ\_L 0.739 / 0.816, τ\_C 0.719 / 0.406 (single / multi), with bootstrap-by-patient intervals. The E3 check passes (16/16). Deviation: C counts every paired lesion from the candidate cut, not only those passing τ\_L (E2 step 3). The sensitivity table (σ 0.08, 99th percentile, bound 10 and 25 px) is in `results/stanford_brainmets/e3/calibrate/`.
+
 ## E4 – Detector validation with planted copies
 
 **Purpose:** Prove the detectors find copies when copies exist, and stay quiet when they don't. Without this, a result of "no memorization" in E5 could just mean a blind detector. This is the go/no-go gate before the main audit.
@@ -310,6 +312,13 @@ The check never changes C or the copy class. It is supporting evidence for the m
 - False-positive rate on H-eval at most 7% (95% is the calibrated target, so about 5% is expected). *Note 2026-11-03:* state this per class. Each of τ\_D, τ\_L and τ\_C is calibrated at 5%, but the lesion-level classes combine two of them: on H-cal, full copies are 5.1% / 5.2% and full or partial together 7.4% / 8.7% (single / multi).
 
 **If it fails:** Change detector settings (top-k, shift range, σ), re-freeze thresholds on H-cal (E3), and re-run E4. Never adjust anything by looking at S.
+
+**Carried over from E1–E3 (2026-11-03), for planning E4**
+
+- **Tools in place.** The frozen thresholds are in `configs/frozen/e3_stanford_brainmets.yaml`; read them with `memtk.calibration.read_frozen` and give each slice its threshold with `frozen_threshold` (stratum by lesions ≥ 4 px for E1, by informative lesions ≥ 12 px for E2). H-eval with decision E: `memtk.e3.common.load_set(cfg, dataset, "H-eval")`. Both detectors take label maps (`wholemask.match`, `lesionmatch.match`), so planted masks first go through `lesions.attach_or_drop` with decisions B, C (4 px, gap 2), exactly like the real masks.
+- **What "full" means under the frozen class rule, and P6.** Full = C(q, NN) ≥ τ\_C, the configuration closer than chance; it does not require every lesion to be copied (that is the descriptive `all_copied`). Because τ\_C is low for multi-lesion slices (0.406), most P6 variants come out *full*: adding one H-eval lesion to a single-lesion base gives C = 1.0 / 2 = 0.5; removing one lesion from a three-lesion base gives C ≈ 2/3. Decide before the go/no-go criteria are fixed: either P6 counts as caught when flagged (full or partial) and the partial-copy check uses `all_copied` / `n_kept`, or the expected classes per variant are restated in terms of the frozen rule.
+- **P3 sits at the edge by construction.** A single lesion shifted 5 px keeps shape and size but its position factor drops to exp(−25 / (2 · 6.4²)) ≈ 0.737, just under τ\_L (0.739) and above τ\_C (0.719); E1's shift search only reaches 3 px. P3 stays "reported only", as planned.
+- **The false-positive criterion per class** (see the note under the criteria above); H-cal chance rates at the frozen thresholds are in the frozen file (`hcal_chance_rates`).
 
 **Outputs:** The validation table, and the planted copies themselves, which E7 reuses to check whether explanations are correct. It also doubles as the first evidence for RQ2: the cases where whole-mask Dice misses P6 or P7 and the lesion-level detector catches them.
 
@@ -351,6 +360,13 @@ The check never changes C or the copy class. It is supporting evidence for the m
 | S rate clearly above H-eval | Memorization beyond chance; go on to E6 and E7 as planned |
 | S rate near H-eval, but a few near-exact copies | Rare but real memorization; E6 and E7 focus on those cases |
 | S rate at or below chance, no near-exact copies | A validated negative result (E4 shows the detector works); the master thesis centres on RQ-M1 and RQ-M2 |
+
+**Carried over from E1–E3 (2026-11-03), for planning E5**
+
+- **Run time on S main (35,920 masks), measured on T queries:** E1 about 4.4 ms per query (≈ 3 min), E2 about 10 ms per query slice (≈ 6–10 min; S lesions are more concentrated, so more candidate pairs). The E2 tables for S will hold several million lesion pairs: store them as Parquet in `processed_data/`, as for H-cal.
+- **The drop-only re-run (step 3) needs its own label maps and thresholds.** The frozen thresholds were calibrated with attach-or-drop at gap 2. A drop-only re-run needs drop-only label maps (gap 0) for S, T and H-cal, and τ\_L and τ\_C recalibrated on H-cal with them, or it compares unlike scores. Decide when E5 is planned whether to recalibrate or to report the drop-only re-run as descriptive only.
+- **The E3 sensitivity settings** (σ 0.08, 99th percentile, bound 10 and 25 px) have threshold values in `results/stanford_brainmets/e3/calibrate/sensitivity.csv`. Whether S is also scored under them (as sensitivity analyses of the main rates) is decided when E5 is planned.
+- **Noisy masks (step 3) and strata:** the E1-only run on noisy masks uses the same stratified τ\_D, with the stratum counted on the cleaned mask, as for the main audit.
 
 ## E6 – Patient exposure, rarity and duplication (RQ1 H1, RQ3a H3)
 
@@ -470,7 +486,7 @@ The full draft goes to your supervisor by Nov 30, 2026, and the final report is 
 | Complete by | Experiments | Done when | Priority |
 | --- | --- | --- | --- |
 | 31 Oct | E0, including mask quality control | Split confirmed; preprocessing and quality-control rules fixed; lesion table cached | Must (done 3 Nov) |
-| 9 Nov | E1, E2, E3 | Both detectors run on H-cal; informative-lesion bound and thresholds frozen | Must |
+| 9 Nov | E1, E2, E3 | Both detectors run on H-cal; informative-lesion bound and thresholds frozen | Must (done 3 Nov) |
 | — | E3 null model | Dropped (2026-11-01); see E3 step 6 | — |
 | 13 Nov | E4 (gate) | Validation passed | Must |
 | 17 Nov | E5 | Main audit tables for RQ1 and RQ2 | Must |

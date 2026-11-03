@@ -403,6 +403,13 @@ move the old ones, with the reason, to the process log.
   patients), 2,000-draw bootstrap-by-patient intervals. The multi stratum rests on 17 patients
   with intervals tight enough to use. Strata: lesions ≥ 4 px for E1, informative lesions for E2.
   *Source: `results/stanford_brainmets/e3/calibrate/thresholds.csv`, 2026-11-03.*
+- **Thresholds frozen before any detector touched S** (2026-11-03). Every E3 stage read only T
+  and H-cal, and its run log records this. The frozen values (with the class rule, bound, detector
+  settings and their chance rates on H-cal: E1 copies 5.1% / 5.3%, E2 full copies 5.1% / 5.2%,
+  partial 2.3% / 3.5%, single / multi) were verified to be reproducible from the stored H-cal
+  tables, and the E2 shortcuts were verified exact at the frozen thresholds, including against
+  brute force on 20 random H-cal slices (2,428 candidate slice pairs). *Source:
+  `configs/frozen/e3_stanford_brainmets.yaml`, `results/stanford_brainmets/e3/check_report.txt`.*
 
 ## 3. Findings
 
@@ -720,7 +727,12 @@ move the old ones, with the reason, to the process log.
 **Project decisions** (from the experiment plan)
 - [ ] Informative-lesion bound: decided during E0b/E3 coding, by its effect on the synthetic pool.
 - [ ] E4 go/no-go criteria: fixed before E4 runs. The lesion-level false-positive criterion must
-      be stated per class (full copies ~5% at chance; full or partial together 7–9%).
+      be stated per class (full copies ~5% at chance; full or partial together 7–9%). Also
+      decide P6's expected class: under the frozen rule A, "full" means the configuration is
+      closer than chance, not that every lesion is copied, so most P6 variants come out full
+      (one lesion added to a one-lesion base: C = 0.5 ≥ τ_C multi 0.406). Options: count P6 as
+      caught when flagged and check "partial" with `all_copied` / `n_kept`, or restate the
+      expected classes. 2026-11-03.
 - [ ] **3D lesion identity for H1 (E6).** 26-connected 3D linking merges neighbouring metastases
       for 2.7% of T's 3D lesions, holding 10.3% of the 2D lesions (section 3). Options: link 2D
       lesions slice to slice by overlap (one-to-one), or keep 26-connectivity and re-run H1

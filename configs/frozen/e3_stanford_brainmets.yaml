@@ -1,0 +1,84 @@
+# Frozen E3 thresholds for 'stanford_brainmets', written by 'e3_calibrate.py freeze'. Do not edit by hand:
+# E4 and E5 read this file; changing it means re-running E3 on H-cal (never tuning on S).
+dataset: stanford_brainmets
+frozen: '2026-11-03T22:01:57'
+calibration_set:
+  set: H-cal
+  patients: 25
+  slices_e1: 989
+  slices_e2: 837
+percentile: 95.0
+strata:
+  whole_mask: stratified
+  lesion: stratified
+stratum_rule:
+  whole_mask: 'lesions >= lesions.min_lesion_area: 1 = single, >= 2 = multi'
+  lesion: 'informative lesions (>= informative_bound_px): 1 = single, >= 2 = multi'
+thresholds:
+  whole_mask:
+    tau_D:
+      single: 0.9047125074096029
+      multi: 0.7291393985246831
+  lesion:
+    tau_L:
+      single: 0.7393993563963939
+      multi: 0.8157835150964992
+    tau_C:
+      single: 0.7193049930881258
+      multi: 0.406164455871013
+intervals_95:
+  whole_mask:
+    tau_D:
+      single:
+      - 0.8955223880597015
+      - 0.9090909090909092
+      multi:
+      - 0.6964285714285714
+      - 0.7694601139601139
+  lesion:
+    tau_L:
+      single:
+      - 0.7298664912631996
+      - 0.760876618106975
+      multi:
+      - 0.7814979595190683
+      - 0.8389025127628565
+    tau_C:
+      single:
+      - 0.7087703482189366
+      - 0.726265457746401
+      multi:
+      - 0.3905983251066838
+      - 0.4323370831190678
+class_rule:
+  whole_mask: copy if score >= tau_D
+  lesion: full if C(q, NN) >= tau_C; partial if not full but the strongest lesion
+    pair >= tau_L; novel otherwise
+informative_bound_px: 12
+min_lesion_area: 4
+detectors:
+  whole_mask:
+    top_k_dice: 20
+    top_k_centroid: 20
+    max_shift_px: 3
+  lesion:
+    position_frame: pixel
+    sigma: 0.05
+    prefilter: 0.2
+    candidate_min_s: 0.1
+    sigma_px: 6.4
+    prefilter_px: 25.6
+hcal_chance_rates:
+  single:
+    e1_copy: 0.051
+    e2_full: 0.0512
+    e2_partial: 0.0231
+    e2_flagged: 0.0743
+  multi:
+    e1_copy: 0.0528
+    e2_full: 0.0519
+    e2_partial: 0.0346
+    e2_flagged: 0.0866
+source:
+  thresholds: results/stanford_brainmets/e3/calibrate/thresholds.csv
+  tables: processed_data/model_space/stanford_brainmets/e3

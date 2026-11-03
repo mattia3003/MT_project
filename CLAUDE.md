@@ -29,9 +29,12 @@ Reference docs (read the relevant one before starting work):
   E0b plan: status table, "next: start here", decision gates, stages, verification). Read the
   active one before continuing work and update its status table when a stage is done; close it
   when the work is done, moving open items to where they will be used.
-- `docs/e1-e3-plan.md`: ACTIVE working plan (from 2026-11-03) for E1 (whole-mask detector), E2
-  (lesion-level detector) and E3 (calibration, `scripts/e3_calibrate.py`): decisions F (set:
-  pixel coordinates), G (bound), H (strata), steps, stages, tests. Start at its "Next" line.
+- `docs/e1-e3-plan.md`: E1-E3 plan, CLOSED 2026-11-03 (reference only, not updated). The record
+  of how the detectors and E3 were built: decisions F (pixel coordinates), G (bound 12 px), H
+  (stratified), the redefinition of C with tau_C kept (rule A), stages, tests. Its open items
+  moved to `docs/experiment-plan.md` (E4, E5, E6 "Carried over" notes) and report-notes.
+- No active working plan until E4 is planned: the next one is an E4 plan document (planted-copy
+  gate); read `docs/experiment-plan.md` E4 including its "Carried over from E1-E3" notes first.
 This file is a summary. If it disagrees with the docs, the docs win; flag the mismatch.
 
 ## Data
@@ -133,7 +136,7 @@ Roadmap: preliminary audit (no weights) -> master thesis on retrained models (Br
 original weights = Branch A fallback); the preliminary toolkit is reused in the master thesis.
 
 Timeline: full draft to supervisor by 30 Nov 2026, submission 9 Dec 2026. Milestones:
-E0 + mask QC by 31 Oct; E1-E3 (bound + thresholds frozen) by 9 Nov; E4 gate by 13 Nov;
+E0 + mask QC by 31 Oct (done 3 Nov); E1-E3 (bound + thresholds frozen) by 9 Nov (done 3 Nov); E4 gate by 13 Nov;
 E5 by 17 Nov; E6/E7 by 24 Nov; E8 (optional RQ4) last, if time. If behind, cut: E8 (moves to
 the master thesis), then optional small-lesion agreement (E2/E7) (null model already dropped),
 then E7 taxonomy, then the lesion-level part of
@@ -198,7 +201,9 @@ can this be detected and explained using generated outputs alone?
   strongest lesion pair over all candidate slices >= tau_L; novel otherwise. Also stored:
   n_kept (NN lesions passing tau_L) and all_copied, plus the strongest single lesion-pair score
   (and its slice). On H-cal: full ~5%, flagged at all 7-9% per stratum (state E4 FP per class).
-- Thresholds (E3, frozen): tau_D (E1), tau_L and tau_C (E2), each the 95th percentile of H-cal,
+- Thresholds (E3, FROZEN 2026-11-03 in `configs/frozen/e3_stanford_brainmets.yaml`; E4/E5 read
+  them with `memtk.calibration.read_frozen` / `frozen_threshold`, never edit by hand): tau_D (E1),
+  tau_L and tau_C (E2), each the 95th percentile of H-cal,
   STRATIFIED single/multi-lesion (decision H, 2026-11-03); strata by lesions >= 4 px for E1, by
   informative lesions for E2. Values: tau_D 0.905/0.729, tau_L 0.739/0.816, tau_C 0.719/0.406.
 - Outputs (store ALL candidate pairs, apply thresholds at analysis time):

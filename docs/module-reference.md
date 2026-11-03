@@ -27,7 +27,7 @@ updated after `memtk.stages` was added, E1–E3 step 1).
 
 | Module | Purpose | Main functions | Imports from memtk | Used by | External libraries |
 | --- | --- | --- | --- | --- | --- |
-| `config` | Load the YAML config, look up datasets and pools, resolve paths from the repo root, write run logs | `load_config`, `value` (dotted key), `real_dataset`, `synthetic_pool`, `output_dir`, `results_dir`, `split_file`, `write_run_info` | — | `io`, `synthetic`, `checks`, `stages`, every `e0b` module, `e3.common`, `e3.bound`, `e3.calibrate`, every script | PyYAML |
+| `config` | Load the YAML config, look up datasets and pools, resolve paths from the repo root, write run logs | `load_config`, `value` (dotted key), `real_dataset`, `synthetic_pool`, `output_dir`, `results_dir`, `split_file`, `frozen_file` (the frozen E3 thresholds), `write_run_info` | — | `io`, `synthetic`, `checks`, `stages`, every `e0b` module, `e3.common`, `e3.bound`, `e3.calibrate`, every script | PyYAML |
 | `stages` | Helpers every stage package and its script share: the command-line options of a stage, decisions read from the config (stops with the review command to run while a value is `null`), the overwrite and input guards, random picks for example figures | `add_stage`, `decided` (dotted key, e.g. `decided(cfg, "brain.method", "e0b_audit.py brain-review")`), `refuse_overwrite`, `require`, `pick` | `config` | every `e0b` module except `e0b.common`, every `e3` module, `e0b_audit.py`, `e3_calibrate.py` | NumPy, pandas |
 | `io` | Read and write NIfTI; locate patients and their files; mask stacks (many 2D boolean masks in one bit-packed `.npz`) and label stacks (many 2D label maps in one sparse `.npz`), looked up by key | `load_image`, `save_nifti`, `read_table` (pipeline CSVs with ID columns kept as text), `list_patients`, `patient_files`, `MaskStackWriter`, `MaskStack`, `LabelStackWriter`, `LabelStack` | `config` | `split`, `synthetic`, `checks`, every `e0b` module, `e3.common`, `e0a_prepare_data.py` | nibabel, pandas |
 | `ids` | The ID convention shared by every experiment: slice keys (`Mets_005/z127`, sample ID) and lesion IDs (`<slice key>/L<n>`); unique per source, `(source, lesion_id)` globally | `slice_key`, `sample_key`, `parse_slice_key`, `lesion_id`, `parse_lesion_id` | — | `checks`, `lesionmatch`, `e0b.common`, `e0b.brain`, `e0b.lesions`, `e0b.stats`, `e3.bound` | — |
@@ -39,7 +39,7 @@ updated after `memtk.stages` was added, E1–E3 step 1).
 | `plotting` | Shared figure helpers and colours (no pyplot, so importing memtk never changes the plotting backend). `save` wraps the figure title to the figure width and uses the constrained layout, so the title never covers tile titles or runs off the image. `draw_lesions` draws a labelled slice (lesion colours with L-numbers, lighter strays, specks as ×, brain outline and box) | `tile_figure`, `show_slice`, `draw_box`, `hide_unused`, `save`, `draw_lesions`, `lesion_sheet`; colours `BRAIN_COLOR`, `LESION_COLOR`, `BOX_COLOR`, `HIGHLIGHT_COLOR`, `SPECK_COLOR`, `LESION_COLORS`, `SET_COLORS` | `lesions` | `checks`, `e0b.brain`, `e0b.lesions`, `e0b.qc`, `e0b.stats`, `e3.bound`, `e3.calibrate` | matplotlib |
 | `wholemask` | E1, the whole-mask nearest-neighbour detector: plain Dice to every training mask (one sparse matrix product, queries in blocks), candidates (best by plain Dice plus nearest by the centroid of lesion L1), best Dice over shifts of ±`max_shift` px (zero padding, no wrap-around; ties: smallest shift), nearest neighbour, runner-up patient and margin. Refuses masks without a lesion | `match` (one row per query), `dice_matrix`, `shifted_dice`, `shift_order`, `candidate_indices`, `largest_lesion_centroids` | — | `e3.calibrate` (later also E4, E5) | NumPy, SciPy (sparse), pandas |
 | `lesionmatch` | E2, the lesion-level detector: lesion records from label maps (informative lesions only, so E4's planted copies take the same path), lesion score s = shape (IoU of bit-packed crops centred on the rounded centroids) × position (pixel distance, decision F) × size, exact shortcuts (KD-tree prefilter; shape only where position × size reaches the candidate cut, then for every pair of a candidate slice), Hungarian pairing per candidate slice pair (vectorized when one side has one lesion). The configuration score C counts every Hungarian pair from the candidate cut (independent of tau_L); tau_L and tau_C are applied afterwards (one value each, or one per query slice for stratified thresholds); classes: full = C(q, NN) >= tau_C, partial = not full but a lesion pair >= tau_L | `match` (→ `LesionMatch` with `queries`, `lesions`, `slice_pairs`, `lesion_pairs`; methods `slice_scores(tau_L)` (adds `C`, `n_kept`, `all_copied`), `summary(tau_L, tau_C)`), `lesion_records` (→ `Lesions`), `packed_crops`, `position_factor`, `size_factor`, `shape_factor`, `assign_pairs` | `ids` | `e3.bound`, `e3.calibrate` (later also E4, E5) | NumPy, SciPy (KDTree, Hungarian), pandas |
-| `calibration` | E3 building blocks: area bins, the chance-match rate of held-out lesions by area bin and tau_L, percentiles (no match = 0), the bound rule (smallest bin edge from which every larger bin stays below the cut), the single/multi stratum of a slice, and the bootstrap-by-patient interval of a percentile | `area_bins`, `bin_label`, `chance_rates`, `percentile_threshold`, `propose_bound`, `stratum`, `bootstrap_interval` | — | `e3.bound`, `e3.calibrate` | NumPy, pandas |
+| `calibration` | E3 building blocks: area bins, the chance-match rate of held-out lesions by area bin and tau_L, percentiles (no match = 0), the bound rule (smallest bin edge from which every larger bin stays below the cut), the single/multi stratum of a slice, the bootstrap-by-patient interval of a percentile, and reading the frozen threshold file (each slice's threshold by its stratum; for E4 and E5) | `area_bins`, `bin_label`, `chance_rates`, `percentile_threshold`, `propose_bound`, `stratum`, `bootstrap_interval`, `read_frozen`, `frozen_threshold` | — | `e3.bound`, `e3.calibrate`, `e3.freeze`, `e3.check` | NumPy, pandas, PyYAML |
 | `checks` | E0 consistency checks. E0a: split, volumes, independent reference transform, synthetic index, sample grid. E0b: lesion tables vs label maps, label maps vs masks as saved, label volumes, QC table, stack keys, run logs vs the current config | `CheckReport`, `check_split`, `check_real_volumes`, `check_recompute`, `check_synthetic_index`, `sample_grid`, `check_lesion_tables`, `check_labels_vs_masks`, `check_label_volumes`, `check_qc_table`, `check_stack_keys`, `check_run_logs` | `config`, `ids`, `io`, `lesions`, `plotting`, `qc`, `synthetic`, `transforms` | `e0b.check`, `e0a_prepare_data.py` | PyTorch, matplotlib, tqdm |
 
 ## Stage package `e0b` (`src/memtk/e0b/`)
@@ -65,9 +65,11 @@ S comes from the E0 bound-impact table).
 
 | Module | Stages (command) | Also contains | Imports from memtk |
 | --- | --- | --- | --- |
-| `e3.common` | — | `SliceSet`, `load_set` (a real set's lesion slices and label maps; held-out sets after decision E; slices without a lesion left out and counted), `decision_e` (`max_mask_px` from `slices.csv`; other filters stop with a message), `lesion_settings` (E2 settings in pixels; checks decision F) | `config`, `io`, `stages` |
+| `e3.common` | — | `SliceSet`, `load_set` (a real set's lesion slices and label maps; held-out sets after decision E; slices without a lesion left out and counted), `decision_e` (`max_mask_px` from `slices.csv`; other filters stop with a message), `load_hcal_tables` (the stored H-cal E1 table and E2 `LesionMatch`), `lesion_settings` (E2 settings in pixels; checks decision F) | `config`, `io`, `lesionmatch`, `stages` |
 | `e3.bound` | `run_bound_review` (`bound-review`, decision G) | `EDGES`, `TAU_GRID`, `PROVISIONAL_MIN_AREA`, `CUTS`, `review_text`, `left_out_text`, `rates_figure`, `lesion_crop`, `example_sheet` | `e3.common`, `calibration`, `config`, `ids`, `lesionmatch`, `plotting`, `stages` |
 | `e3.calibrate` | `run_calibrate` (`calibrate`, evidence for decision H) | `STRICT_BOUND`, `SIGMA_ALT`, `PERCENTILE_ALT`, `FLAG_RANGE`, `MIN_MULTI_PATIENTS`, `lesion_slices`, `threshold_rows`, `thresholds`, `stratum_threshold`, `class_rates`, `propose_strata`, `exclusion_counts`, `review_text`, `score_figure` | `e3.bound` (`EDGES`), `e3.common`, `calibration`, `config`, `lesionmatch`, `plotting`, `stages`, `wholemask` |
+| `e3.freeze` | `run_freeze` (`freeze`, needs decision H) | `DETECTORS`, `repo_relative`, `compare_tables`, `frozen_thresholds`, `shortcut_problems`, `chance_rates_at` | `e3.calibrate`, `e3.common`, `calibration`, `config`, `io`, `stages` |
+| `e3.check` | `run_check` (`check`) | `DECISION_KEYS`, `DETECTOR_KEYS`, `CALIBRATE_KEYS`, `FREEZE_KEYS`, `brute_force_differences`, `self_match` | `e3.calibrate`, `e3.common`, `e3.freeze`, `calibration`, `checks`, `config`, `io`, `lesionmatch`, `stages`, `wholemask` |
 
 ## Scripts (`scripts/`)
 
@@ -75,7 +77,7 @@ S comes from the E0 bound-impact table).
 | --- | --- | --- |
 | `e0a_prepare_data.py` | `split`, `real`, `synthetic`, `check` (small, call library modules directly) | `checks`, `config`, `io`, `split`, `synthetic`, `transforms` |
 | `e0b_audit.py` | the E0b stages; only the command line (`stages.add_stage` adds the shared options) | `config`, `stages`, the `e0b` modules |
-| `e3_calibrate.py` | the E3 stages (so far `bound-review`, `calibrate`); only the command line | `config`, `stages`, the `e3` modules |
+| `e3_calibrate.py` | the E3 stages `bound-review`, `calibrate`, `freeze`, `check`; only the command line | `config`, `stages`, the `e3` modules |
 
 ## Tests (`tests/`)
 
@@ -101,20 +103,16 @@ force on random label maps); `tests/test_calibration.py` covers area bins and la
 rates (lesions, patients, missing scores never match), the percentile with missing scores as 0,
 the bound rule (including a later bin above the cut and no bound at all), the stratum, and the
 bootstrap interval (repeatable with a seed, collapsing for constant scores, resampling patients
-rather than slices); `tests/test_checks.py` runs the E0b consistency checks on consistent
+rather than slices), and reading frozen thresholds back per stratum; `tests/test_e3_freeze.py`
+covers the freeze helpers (a changed threshold is found, decision H picks stratum or pooled
+values, thresholds that would break the E2 shortcuts are refused); `tests/test_checks.py` runs the E0b consistency checks on consistent
 outputs (pass) and on damaged copies (fail: wrong areas, centroids, IDs, counts, numbering,
 labels outside the mask, wrong QC class, stale or out-of-order run logs).
 Run with `.venv\Scripts\python.exe -m pytest`.
 
 ## Planned modules
 
-E1–E3 (specified in `docs/e1-e3-plan.md`):
-
-| Module | For | Purpose |
-| --- | --- | --- |
-| `e3` stages | E3 | `freeze`, `check` (step 6) |
-
-Later (names may change when each experiment is planned):
+E1–E3 are complete (2026-11-03). Later (names may change when each experiment is planned):
 
 | Module | For | Purpose |
 | --- | --- | --- |

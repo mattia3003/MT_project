@@ -261,3 +261,23 @@ in full, with what replaced them.
   the experiment plan: the reason in E2 step 3, a new E5 step 7 (report `n_kept`, strongest
   pair and the copied-area share per flagged slice; optional area-weighted C as a sensitivity)
   and the copied-area share in E7 Panel B; reasons in report-notes section 2. No code change.
+- **E1–E3 step 6: `freeze` and `check`; E1–E3 done** (milestone of 9 Nov met on 3 Nov). `freeze`
+  recomputes the thresholds from the stored H-cal tables, requires them to equal
+  `thresholds.csv` (else `calibrate` must run again), applies decision H, confirms the shortcut
+  conditions (τ_L ≥ 0.1 and above the largest score at the prefilter distance, exp(−8); τ_C > 0)
+  and writes `configs/frozen/e3_stanford_brainmets.yaml` with intervals, class rule, bound,
+  detector settings and H-cal chance rates. `check` passes 16/16: decisions, run logs (in order,
+  only T and H-cal read), the frozen file reproduced, shortcuts = brute force on 20 random H-cal
+  slices (2,428 candidate slice pairs), self-match on 50 T slices, unit tests. New:
+  `config.frozen_file` and the `frozen_dir` config key, `calibration.read_frozen` /
+  `frozen_threshold`, `e3.common.load_hcal_tables`, `tests/test_e3_freeze.py` (3 tests, one
+  first failed on float rounding in the test) and a read-back test; 106 tests pass. *Source:
+  `results/stanford_brainmets/e3/check_report.txt`, pytest.*
+- **E1–E3 plan closed.** `docs/e1-e3-plan.md` is marked reference only, with a "Carried forward"
+  table. Moved to `docs/experiment-plan.md`: E4 notes (tools in place; what "full" means under
+  rule A, with the finding that most P6 variants come out full, since adding one lesion to a
+  one-lesion base gives C = 0.5 ≥ τ_C multi 0.406, to decide before the E4 criteria; P3 at the
+  edge, s ≈ 0.737 vs τ_L 0.739; false-positive criterion per class) and E5 notes (run time on S,
+  drop-only re-run needs drop-only label maps and recalibrated thresholds, S under the E3
+  sensitivity settings, strata for the noisy-mask E1 run). CLAUDE.md: the plan listed as
+  closed; no active plan until E4 is planned. *Source: `docs/e1-e3-plan.md` ("Carried forward").*

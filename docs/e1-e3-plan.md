@@ -1,5 +1,11 @@
 # E1–E3 plan: both detectors and chance calibration (`scripts/e3_calibrate.py`)
 
+> **Closed 2026-11-03. Reference only, no longer updated.** E1–E3 are done: thresholds frozen in
+> `configs/frozen/e3_stanford_brainmets.yaml`, E3 check 16/16. This file stays as the record of
+> how E1–E3 were built: decisions F–H and the redefinition of C, the definitions, the library
+> modules and stages. Open items were carried forward on 2026-11-03 (see "Carried forward" at
+> the end); the next work is planned in a new plan document for E4.
+
 Working plan for E1, E2 and E3, kept in the repo so work can resume from here. The experiments
 are specified in `docs/experiment-plan.md` (E1, E2, E3); this file records how they are
 implemented, stage by stage, and what has been decided. Update the status table when a step is
@@ -16,14 +22,14 @@ E4 on planted copies and E5 on S.
 | 3 | E2 library `memtk/lesionmatch.py` + tests | library | ✅ 2026-11-03: 14 tests (shortcuts = brute force on random maps); on real T: self-match C = 1 for 300/300, shortcuts = brute force on 30 real slices (5,608 candidate slice pairs, 0 differences); 10 ms per query slice |
 | 4 | `bound-review` | review → decision G | ✅ 2026-11-03 (`memtk/calibration.py`, `memtk/e3/`, `scripts/e3_calibrate.py`, 7 tests); **decision G set** by the user: provisional tau_L 0.77, cut 10%, bound 12 px (the 5% cut gives 25 px) |
 | 5 | `calibrate` | production (needs G) → evidence for decision H | ✅ 2026-11-03. First run: the planned τ_C was degenerate (≈ 0.02) because C counted only pairs ≥ τ_L. Fixed (user, 2026-11-03): **C counts every paired lesion from the candidate cut 0.1; classes as planned** (full = C ≥ τ_C, partial = a pair ≥ τ_L). **Decision H set**: stratified for both detectors. τ_D 0.905 / 0.729, τ_L 0.739 / 0.816, τ_C 0.719 / 0.406 (single / multi) |
-| 6 | `freeze` + `check` | production (needs H) + consistency checks | ⏳ |
+| 6 | `freeze` + `check` | production (needs H) + consistency checks | ✅ 2026-11-03: `configs/frozen/e3_stanford_brainmets.yaml` written; E3 check 16/16 (shortcuts = brute force on 20 random H-cal slices, 2,428 candidate slice pairs; self-match on 50 T slices); 3 freeze tests; pytest 106 |
 
-**Next: start here.** Step 6, `freeze` (writes `configs/frozen/e3_<dataset>.yaml` from the stored
-H-cal tables with decision H) and `check`. (The architecture docs were reworked first,
-2026-11-03: new modules and files go into `docs/module-reference.md` and `docs/data-dictionary.md`.)
+**E1–E3 done (2026-11-03), ahead of the 9 Nov milestone; plan closed the same day.** Next: plan
+E4, the planted-copy gate, in its own plan document (`docs/experiment-plan.md`, E4, including its
+"Carried over from E1–E3" notes).
 
 **Milestone:** 9 Nov 2026, both detectors run on H-cal; informative-lesion bound and thresholds
-frozen. E4 (gate) by 13 Nov. Indicative schedule: step 1–2 on 4 Nov, step 3 on 5 Nov, step 4 and
+frozen (met 3 Nov). E4 (gate) by 13 Nov. Indicative schedule: step 1–2 on 4 Nov, step 3 on 5 Nov, step 4 and
 decision G on 6 Nov, step 5 and decision H on 7 Nov, step 6 on 8 Nov, 9 Nov as buffer.
 
 **Working rules** (as in CLAUDE.md):
@@ -244,3 +250,23 @@ module per topic (`bound`, `calibrate`, `check`, plus `common` for loading T and
 - **Later, not in E1–E3:** E4 planted copies (P1–P6) use the same detector code on masks built
   from T; the go/no-go criteria must be fixed before E4 runs (open decision in the experiment
   plan).
+
+## Carried forward (2026-11-03)
+
+The open items of this plan moved to the documents where they will be used:
+
+| Item (first noted) | Moved to |
+| --- | --- |
+| E4 tools: frozen-file reader, H-eval with decision E, planted masks through attach-or-drop | `docs/experiment-plan.md`, E4, "Carried over from E1–E3" |
+| What "full" means under rule A, and P6's expected class (most P6 variants come out full) | the same E4 notes; to decide before the go/no-go criteria are fixed |
+| P3 at the edge (5 px shift: s ≈ 0.737 vs τ_L 0.739) | the same E4 notes |
+| E4 false-positive criterion per class (H-cal: full ~5%, flagged 7–9%) | `docs/experiment-plan.md`, E4 criteria note; `docs/report-notes.md` section 5 |
+| Run time on S, Parquet for the S tables | `docs/experiment-plan.md`, E5, "Carried over from E1–E3" |
+| Drop-only re-run needs its own label maps and recalibrated thresholds | the same E5 notes |
+| S under the E3 sensitivity settings (σ 0.08, 99th percentile, bound 10 / 25 px) | the same E5 notes |
+| Copied-area share; optional area-weighted C (2026-11-03) | `docs/experiment-plan.md`, E5 step 7 and E7 Panel B |
+| 3D lesion identity for H1 (neighbouring metastases merge) | `docs/experiment-plan.md`, E6 duplication test step 1; `docs/report-notes.md` section 5 |
+
+Done before closing: decisions F, G, H set; C redefined with τ_C kept (rule A); thresholds frozen;
+the E3 check passes; the docs (architecture overview, data dictionary, module reference, scripts
+README) describe every E3 stage and file.

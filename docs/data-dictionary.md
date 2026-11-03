@@ -32,7 +32,8 @@ ID columns as text.
 | | `check` | ✅ | all E0b outputs, synthetic pool | `results/<dataset>/e0b/check_report_<pool>.txt` |
 | `e3_calibrate.py` | `bound-review` | ✅ | E0b lesion tables (T, H-cal only), decision F, E0 `bound_impact_<pool>.csv` | `results/<dataset>/e3/bound_review/` (evidence for decision G) |
 | | `calibrate` | ✅ | decision G, E0b lesion tables (T, H-cal), E0 `bound_impact_<pool>.csv` | `<output_root>/<dataset>/e3/` (E1 and E2 tables of H-cal), `results/<dataset>/e3/calibrate/` (evidence for decision H) |
-| | `freeze`, `check` | planned (`docs/e1-e3-plan.md`) | decision H, the `calibrate` tables | `configs/frozen/e3_<dataset>.yaml`, check report |
+| | `freeze` | ✅ | decision H, the `calibrate` tables and `thresholds.csv` | `configs/frozen/e3_<dataset>.yaml` + `e3_<dataset>.run_info.json` |
+| | `check` | ✅ | all E3 outputs, T and H-cal label maps | `results/<dataset>/e3/check_report.txt`, `check.run_info.json` |
 | `e4_validate.py` | *tbd* | planned | frozen thresholds, T, H-eval | validation table, planted copies |
 | `e5_audit.py` | — | planned | frozen thresholds, S | main audit tables |
 | `e6_exposure.py` | *tbd* | planned | E5 outputs | exposure, rarity, duplication |
@@ -50,7 +51,7 @@ modules, run inside E3 (on H-cal), E4 (on planted copies) and E5 (on S).
 
 Hand-edited, read by every stage. In git.
 
-Keys: `seed`; `output_root`, `results_root`, `splits_dir`; `default_real_dataset`,
+Keys: `seed`; `output_root`, `results_root`, `splits_dir`, `frozen_dir`; `default_real_dataset`,
 `default_synthetic_pool`; `preprocessing` (`spatial_size`, `interpolation`, `mask_threshold`,
 `slice_axis`); `brain.low_threshold` (data-dependent, checked by `brain-review`); E0b
 decisions, `null` until decided: `brain` (`method`, `min_tissue_px`),
@@ -447,8 +448,31 @@ Written by `calibrate`. In git. Evidence for decision H (`calibration.strata.who
 | `score_histograms.png` | H-cal score histograms by stratum for tau_D (E1 score), tau_L (strongest lesion pair) and tau_C (configuration score C of the nearest neighbour), with the pooled and stratum thresholds |
 | `run_info.json` | Run log |
 
-## Planned files (E1–E3)
+### Frozen thresholds: `configs/frozen/e3_<dataset>.yaml`
 
-Specified in `docs/e1-e3-plan.md`; entries are added here as each stage is built: the frozen
-thresholds `configs/frozen/e3_<dataset>.yaml` (in git, written by `freeze`) and the E3 check
-report.
+Written by `freeze`, read by E4 and E5 (with `memtk.calibration.read_frozen` and
+`frozen_threshold`) and by the E3 `check`. In git; do not edit by hand (changing it means
+re-running E3 on H-cal, never tuning on S). Run log next to it: `e3_<dataset>.run_info.json`.
+
+| Key | Content |
+| --- | --- |
+| `dataset`, `frozen` | Dataset name and the time of freezing |
+| `calibration_set` | `H-cal`, its patients, slices scored by E1 and slices with an informative lesion (E2) |
+| `percentile`, `strata` | The percentile (95) and decision H per detector (`stratified` or `pooled`) |
+| `stratum_rule` | How a slice's stratum is counted per detector (lesions ≥ the minimum area for E1, informative lesions for E2; 1 = single, ≥ 2 = multi) |
+| `thresholds` | `whole_mask.tau_D`, `lesion.tau_L`, `lesion.tau_C`, each with `single` and `multi` (the same value twice when pooled) |
+| `intervals_95` | The bootstrap-by-patient 95% interval of each threshold, same layout |
+| `class_rule` | E1: copy if score ≥ tau_D; E2: full if C(q, NN) ≥ tau_C, partial if not full but the strongest lesion pair ≥ tau_L, novel otherwise |
+| `informative_bound_px`, `min_lesion_area` | Decision G's bound and the E0b minimum lesion area |
+| `detectors` | The E1 and E2 settings (as in the config, plus `sigma_px`, `prefilter_px`) |
+| `hcal_chance_rates` | Per stratum, the share of H-cal slices flagged at these thresholds: `e1_copy`, `e2_full`, `e2_partial`, `e2_flagged` (all chance) |
+| `source` | Where the values came from (`thresholds.csv`, the H-cal tables) |
+
+### `results/<dataset>/e3/check_report.txt`
+
+Written by `check`. In git. One PASS/FAIL line per check: decisions F, G, H set; each E3 run log
+made with today's settings, in order, reading only T and H-cal; `thresholds.csv` reproduced from
+the stored H-cal tables; the frozen file equal to it under decision H and to the current settings;
+the E2 shortcut conditions at the frozen thresholds; the shortcuts against brute force on random
+H-cal slices; a self-match of random T slices (E1 score 1, E2 C 1); the unit tests. Exit code 1 on
+any failure. Run log: `check.run_info.json`.

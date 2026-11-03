@@ -34,7 +34,8 @@ Status: ✅ implemented · ⏳ planned
 | `e0b_audit.py check` | ✅ | all E0b outputs, synthetic pool | `results/<dataset>/e0b/check_report_<pool>.txt` (PASS/FAIL per check: decisions set and outputs made with them, lesion tables vs label maps, label maps vs masks as saved, caches vs source files, QC classes, unit tests; exit code 1 on any failure), `check_<pool>.run_info.json` |
 | `e3_calibrate.py bound-review` | ✅ | E0b lesion tables (T, H-cal only), decision F, E0 `bound_impact_<pool>.csv` | `results/<dataset>/e3/bound_review/`: every H-cal lesion's best E2 match in T, chance-match rate by lesion area and tau_L, proposal (`review.txt`), cost of each bound, example matches → **decision G** |
 | `e3_calibrate.py calibrate` | ✅ | decision G, E0b lesion tables (T, H-cal), E0 `bound_impact_<pool>.csv` | `<output_root>/<dataset>/e3/` (E1 and E2 tables of H-cal); `results/<dataset>/e3/calibrate/`: tau_D, tau_L, tau_C pooled and per stratum with bootstrap-by-patient intervals, E2 classes on H-cal, sensitivity, exclusions, histograms → **decision H** |
-| `e3_calibrate.py freeze`, `check` | ⏳ | decision H, the `calibrate` tables | frozen threshold file, check report (`docs/e1-e3-plan.md`) |
+| `e3_calibrate.py freeze` | ✅ | decision H, the `calibrate` tables and `thresholds.csv` | `configs/frozen/e3_<dataset>.yaml`: tau_D, tau_L, tau_C per stratum with intervals, class rule, bound, detector settings, H-cal chance rates (read by E4 and E5); refuses if the stored tables and `thresholds.csv` disagree or the E2 shortcuts would not be exact |
+| `e3_calibrate.py check` | ✅ | all E3 outputs, T and H-cal | `results/<dataset>/e3/check_report.txt` (PASS/FAIL: decisions, run logs reading only T and H-cal, frozen file reproduced, shortcuts against brute force, self-match on T, unit tests; exit code 1 on any failure) |
 | `e4_validate.py` | ⏳ | thresholds, T, H-eval | planted-copy validation table (gate) |
 | `e5_audit.py` | ⏳ | validated config, S | main audit tables |
 | `e6_exposure.py` | ⏳ | E5 outputs | patient exposure, rarity, duplication |
@@ -84,7 +85,11 @@ the production stage)
 ```powershell
 .venv\Scripts\python.exe scripts\e3_calibrate.py bound-review     # evidence for decision G (provisional tau_L, cut, bound)
 .venv\Scripts\python.exe scripts\e3_calibrate.py calibrate        # needs G: E1 + E2 on H-cal, thresholds -> evidence for decision H
+.venv\Scripts\python.exe scripts\e3_calibrate.py freeze           # needs H: write configs\frozen\e3_<dataset>.yaml for E4/E5
+.venv\Scripts\python.exe scripts\e3_calibrate.py check            # consistency checks of all E3 outputs (exit code 1 on failure)
 ```
+`check` also takes `--n-brute 20` (random H-cal slices compared with brute force) and `--n-self 50`
+(random T slices for the self-match).
 
 **Look at one slice** (after `lesions`): full-size picture with its lesion table, written to
 `results/<dataset|pool>/e0b/views/<key>.png`
