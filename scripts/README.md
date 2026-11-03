@@ -45,6 +45,14 @@ Copy-paste from the repository root (PowerShell). Run order top to bottom; each 
 overwrite its outputs unless `--overwrite` is given. `--help` on any script or stage lists its
 options, e.g. `.venv\Scripts\python.exe scripts\e0b_audit.py view --help`.
 
+**Setup** (once; a fresh venv with the pinned versions that produced E0, see the header of
+`requirements-lock.txt` for why `--no-deps`)
+```powershell
+py -3.11 -m venv .venv
+.venv\Scripts\python.exe -m pip install --no-deps -r requirements-lock.txt
+.venv\Scripts\python.exe -m pip install --no-deps -e .
+```
+
 **E0a: prepare the data** (`--dataset`, `--pool` default to the config's defaults)
 ```powershell
 .venv\Scripts\python.exe scripts\e0a_prepare_data.py split       # patient split (fixed for the project)

@@ -116,3 +116,21 @@ in full, with what replaced them.
   "Synthetic masks: smaller lesions, more two-lesion masks, no large lesions" (S main). It added
   the 5th percentile (4 vs 6 px) and the share with a lesion under 40 px, now given for S main
   (86.5%) in the table and for all of S (85.4%) in the text.
+- **E0 closed; minimal lock file.** `requirements-lock.txt` pins the 39 packages the project
+  needs (the direct dependencies from `pyproject.toml` plus their requirements, from the
+  installed package metadata, no optional extras) at the versions that produced E0.
+  - Packages from the earlier segmentation work (mlflow, clearml, transformers, itk, Flask, ...;
+    183 in the project venv) were left out, and the old `docs/requirements.txt` was removed.
+    `tqdm`, used in seven modules, was added to `pyproject.toml`.
+  - `pip check` reports that monai 1.6.0 declares torch>=2.8 while torch is 2.6.0+cu124, so the
+    lock is installed with `--no-deps`.
+  - MONAI's `LoadImage` tries nibabel before ITK for `.nii` files (readers are tried from the
+    last registered), so dropping itk cannot change loading.
+  - Verified: a fresh Python 3.11 venv built from the lock with the documented commands re-ran
+    all 13 E0 stages into a scratch folder (checks 32/32 and 43/43, pytest 60); all 692 outputs
+    (volumes, tables, caches, figures, split) were byte-identical to the repo's; the E0b check
+    report differed only in timestamps.
+  - E0 marked done in `docs/experiment-plan.md` with its deviations; the CLAUDE.md E0 summary
+    updated to the decided values.
+
+  *Source: `requirements-lock.txt`, `pip check`, fresh-venv run.*

@@ -20,6 +20,7 @@ stage, and what has been decided. Update the status table when a stage is done.
 | 8 | `check` | consistency checks | ✅ implemented (2026-11-03) |
 | 8b | Code restructuring | readability | ✅ 2026-11-03: stages moved to `src/memtk/e0b/`, `audit.py` dissolved, conventions in CLAUDE.md; verified by step 9 |
 | 9 | Full re-run of E0a + E0b from scratch | end-to-end check | ✅ 2026-11-03: all 13 stages exit 0; outputs identical (below) |
+| 10 | Close E0 | requirements lock, docs | ✅ 2026-11-03: minimal `requirements-lock.txt` (39 packages), verified by a full E0 re-run in a fresh venv; E0 marked done in the experiment plan; CLAUDE.md E0 summary updated |
 
 **Step 9 result (2026-11-03).** Every E0a and E0b stage was re-run in order with `--overwrite`
 (about 20 min in total). The E0a check passes 32/32 and the E0b check 43/43, with pytest at 60 passed.
@@ -36,8 +37,18 @@ stage, and what has been decided. Update the status table when a stage is done.
 - Docs split the same day: process entries moved from `docs/report-notes.md` into the new
   `docs/process-log.md`.
 
-**Next: start here.** Close E0 (requirements lock, docs), then plan E1/E2. The plan for both
-was approved on 2026-11-02, including the four points confirmed in "Stage 7 details" below.
+**E0 closed (2026-11-03).** `requirements-lock.txt` at the repository root pins only what this
+project needs: the direct dependencies (`pyproject.toml`, now including `tqdm`) and everything
+they require, at the versions that produced E0 (39 packages; the project venv also holds
+packages from the earlier segmentation work, left out). Install with `--no-deps`, because
+monai 1.6.0 declares torch>=2.8 while torch is 2.6.0+cu124; see the file header. Verified: a
+fresh venv built from the lock re-ran all of E0 (13 stages, checks 32/32 and 43/43, pytest 60)
+with all 692 outputs byte-identical to the repo's. The old `docs/requirements.txt` (from the
+segmentation work) was removed. E0 is marked done in `docs/experiment-plan.md`, with its
+deviations from the plan.
+
+**Next: start here.** Plan E1/E2 (with E3 in view: bound and thresholds frozen by 9 Nov). Open
+point to decide in that plan: the position frame (below). The lesion crop is built in E2.
 
 **Working rules:**
 - Small reviewed steps, one stage at a time.
@@ -359,7 +370,7 @@ lesion is under 40 px, (3) every lesion pixel lies inside the generated brain.
 ## Later (outside E0b)
 
 - Decide the position frame when E2 is planned, then update `docs/experiment-plan.md`.
-- Write a pinned `requirements-lock.txt` at the end of E0.
+- ~~Write a pinned `requirements-lock.txt` at the end of E0.~~ Done 2026-11-03.
 - **Table formats for E2/E5 (2026-11-02):** CSV for tables people read (up to a few hundred
   thousand rows: lesion and slice tables, summaries, everything in `results/`). Parquet (pandas +
   `pyarrow`) for the large machine tables, e.g. the E2 slice-pair and lesion-pair tables with

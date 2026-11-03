@@ -39,7 +39,7 @@ This file is a summary. If it disagrees with the docs, the docs win; flag the mi
   "model space": real data must go through exactly the same transform before comparison.
 - Real masks are binary (0/1) at native resolution; area-resize + 0.01 threshold enlarges them
   in model space (see above; strongest for small lesions). No lesion slice is lost or gained.
-  Learn the minimum real lesion size from converted real masks.
+  Minimum lesion area learned from converted real T masks: 4 px (E0b decision B).
 - Split (E0a, fixed): `splits/stanford_brainmets_seed2026.csv`. T = 105 train patients (3,823
   lesion slices); test patients split by matched pairs on lesion-slice count, seed 2026:
   H-cal 25 (992 slices), H-eval 26 (1,094 slices).
@@ -51,14 +51,16 @@ This file is a summary. If it disagrees with the docs, the docs win; flag the mi
   The sample ID is the full file stem, never a parsed number (`1033` and `file_1033` differ).
   Generated in several rounds with a script very close to the repo version (repo shows 15,000 attempts per run). Repo filters: mask min-max scaled then
   thresholded at 0.01; kept only if pixel sum < 2000, at least one lesion < 40 px, all lesion
-  pixels inside synthetic brain. An earlier check flagged ~2,243 poor masks; RE-RUN quality
-  control fresh in E0 to verify that count. Verify which filters actually hold on the data and
-  apply only those to real comparison sets.
-- Mask quality control (E0): many noisy masks have scattered 1-2 px specks (likely from the
-  per-mask min-max + 0.01 threshold). Classify masks clean / minor (<= ~3 specks, keep, specks
-  removed) / noisy (exclude); edge check only for real-sized lesions (>50% outside brain);
-  re-apply the <40 px rule after cleaning to all sets; report results with and without noisy
-  masks.
+  pixels inside synthetic brain. On the data (E0b decision E) only the pixel-sum filter holds;
+  it is the only one applied to H-cal/H-eval (removes no real slice), never to T. The < 40 px
+  rule is a flag column (`has_lesion_lt40`); fails for 10.7% of masks as saved.
+- Mask quality control (E0, done): many noisy masks have scattered 1-2 px specks (likely from
+  the per-mask min-max + 0.01 threshold). `qc.csv` gives each sample a `mask_class`: clean (0
+  isolated specks), minor (1-9, kept, specks dropped; decision D), noisy (> 9), no_lesion; and a
+  separate `mri_failed` flag (a failed MRI does not exclude its mask). Main audit (E1-E5) =
+  `mask_class` clean or minor (35,920 masks); report with and without noisy masks. Edge check
+  (> 50% of a real-sized lesion outside the brain) only flags, never excludes. The old QC list
+  (2,243 masks) is fully explained by two coarse rules and does not define S.
 - Lesion labelling: 8-connected components, then "attach-or-drop" for components below the
   learned minimum lesion area: attach to a real-sized lesion if within 2 px (stray pixel),
   otherwise drop (speck). Never merge two real-sized lesions. Apply identically to real and
@@ -78,9 +80,15 @@ This file is a summary. If it disagrees with the docs, the docs win; flag the mi
   patients in training).
 - Data use is authorized: all results, including match reports showing real masks, may go in
   the written report (use pseudonymous patient IDs).
-- Decided during the work (not yet fixed): the informative-lesion bound (choose while coding,
-  by checking how candidate bounds affect the synthetic pool, alongside the QC re-run), and the
-  E4 go/no-go criteria (must be fixed before E4 runs; never tune on S).
+- Decided during the work (not yet fixed): the informative-lesion bound (set in E3 from H-cal;
+  E0b `stats` gives what each candidate bound costs each set in `bound_impact_<pool>.csv`), the
+  position frame for copy detection (decide when E2 is planned; recommendation: pixel
+  coordinates), and the E4 go/no-go criteria (must be fixed before E4 runs; never tune on S).
+- Environment: `requirements-lock.txt` pins only what the project needs (direct dependencies
+  in `pyproject.toml` plus what they require; Python 3.11.9, Windows), at the versions that
+  produced E0; install with `pip install --no-deps -r requirements-lock.txt` (monai 1.6.0
+  declares torch>=2.8 but runs fine here on torch 2.6.0+cu124). A new direct dependency goes in
+  `pyproject.toml` and, with its requirements, in the lock.
 
 ## Models (MONAI `DiffusionModelUNet`, same architecture for both stages)
 ```

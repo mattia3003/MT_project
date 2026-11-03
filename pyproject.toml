@@ -17,6 +17,7 @@ dependencies = [
     "pandas",
     "pyyaml",
     "matplotlib",
+    "tqdm",
 ]
 
 [project.optional-dependencies]

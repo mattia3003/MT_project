@@ -162,6 +162,10 @@ move the old ones, with the reason, to the process log.
   existing outputs, and the split is fixed for the whole project. 2026-11-01.
   **The pipeline is deterministic:** re-running E0a and E0b from scratch gives byte-identical
   tables, caches and model-space volumes. *Source: full re-run, process log 2026-11-03.*
+- **Software:** Python 3.11.9, MONAI 1.6.0, PyTorch 2.6.0, NumPy 2.4.6, SciPy 1.17.1,
+  scikit-image 0.26.0, nibabel 5.4.2, pandas 2.3.3, matplotlib 3.11.1. The environment is pinned
+  in `requirements-lock.txt`, and a fresh install from it reproduces E0 byte for byte.
+  *Source: `requirements-lock.txt`; fresh-venv run, process log 2026-11-03.*
 - **Minimum lesion area 4 px** (`lesions.min_lesion_area`, decision B, set 2026-11-02). Smaller
   8-connected components are specks.
   - *Rule:* the largest m with at most 1% of T components smaller than m: 61 of 6,162 (0.99%)

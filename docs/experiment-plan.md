@@ -144,6 +144,14 @@ Also keep the masks exactly as saved: stage 2 was conditioned on them, specks in
 
 **Check before moving on:** The split is confirmed clean. Every synthetic mask has a quality class (clean, minor or noisy), the counts are recorded, and the cut-off was fixed before any detector touched S.
 
+*Status (2026-11-03): done.* Implemented as `scripts/e0a_prepare_data.py` and `scripts/e0b_audit.py` (stages, decisions and status in `docs/e0b-plan.md`); the check passes (E0a 32/32, E0b 43/43), and a full re-run from scratch gave byte-identical outputs. Fixed parameters are in `configs/default.yaml` (minimum lesion area 4 px, attach gap 2 px, noisy above 9 isolated specks, brain mask `low_threshold_all` at 0.02); the environment is pinned in `requirements-lock.txt`. Outputs: data description table, distribution figures, adjacent-slice Dice and native-vs-model areas in `results/stanford_brainmets/e0b/stats/`; the lesion table in `processed_data/model_space/<dataset|pool>/lesions.csv`. Deviations from the procedure above, with reasons in `docs/report-notes.md`:
+- Minor masks have up to 9 isolated specks, not 3: the counts show a break at 9 (decision D).
+- A failed synthetic MRI does not exclude its mask (separate `mask_class` and `mri_failed` columns); edge flags only flag.
+- The "lesion under 40 pixels" rule is a flag column, not a filter: on the data it fails for 10.7% of the masks as saved, so it is not applied to the real sets (decision E; only the pixel-sum filter is).
+- The lesion table stores the centroid in three frames (pixels, image fraction, brain-relative); which frame E2 uses for position is decided when E2 is planned.
+- The 16×16 lesion crop (step 3) is not cached; it is built in E2, where it is used.
+- Besides the plan's items, E0 adds a bound-impact table (input for the informative-lesion bound in E3) and brain size by slice height.
+
 ## E1 – Whole-mask nearest-neighbour detector
 
 **Purpose:** Build the standard detector: for every mask, find the most similar training mask by overlap. It is the baseline that RQ2 compares against, and it mirrors what existing medical memorization studies do.
@@ -450,7 +458,7 @@ The full draft goes to your supervisor by Nov 30, 2026, and the final report is 
 
 | Complete by | Experiments | Done when | Priority |
 | --- | --- | --- | --- |
-| 31 Oct | E0, including mask quality control | Split confirmed; preprocessing and quality-control rules fixed; lesion table cached | Must |
+| 31 Oct | E0, including mask quality control | Split confirmed; preprocessing and quality-control rules fixed; lesion table cached | Must (done 3 Nov) |
 | 9 Nov | E1, E2, E3 | Both detectors run on H-cal; informative-lesion bound and thresholds frozen | Must |
 | — | E3 null model | Dropped (2026-11-01); see E3 step 6 | — |
 | 13 Nov | E4 (gate) | Validation passed | Must |

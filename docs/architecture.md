@@ -11,8 +11,9 @@ and open the Markdown preview.
 the status table in `scripts/README.md` and the entries in `docs/report-notes.md` and
 `docs/process-log.md`.
 
-*Status: E0a and E0b implemented; E0b code restructured into `src/memtk/e0b/` and verified by
-a full re-run with identical outputs (2026-11-03).*
+*Status: E0 (E0a + E0b) done and closed 2026-11-03: code restructured into `src/memtk/e0b/`,
+verified by a full re-run with identical outputs, environment pinned in `requirements-lock.txt`.
+E1/E2 are planned next.*
 
 ---
 
