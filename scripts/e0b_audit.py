@@ -33,7 +33,11 @@ Stages, run in this order. Each one can be run and checked on its own:
                  failed-MRI flag, combined QC class, edge and small-lesion flags; summary, old QC
                  list cross-table, the edge check on the real sets, example sheet
                  -> <output_root>/<pool>/qc.csv, results/<pool>/e0b/qc/
-  (planned: stats, check)
+  stats          (after qc) E0 description of real sets and the synthetic main audit: description
+                 table, lesions per slice, lesion area, centroid density in pixels and brain-
+                 relative, impact of candidate informative-lesion bounds (input for E3)
+                 -> results/<dataset>/e0b/stats/
+  (planned: filters-review, check)
 
 Examples (from the repository root):
   .venv\\Scripts\\python.exe scripts\\e0b_audit.py brain-review
@@ -759,6 +763,66 @@ def run_qc(cfg: dict, args: argparse.Namespace) -> None:
     print(f"\n{text}\nWrote {syn_dir / 'qc.csv'}, {out}")
 
 
+# Candidate informative-lesion bounds (px) for the bound-impact table; the bound itself is set in E3
+CANDIDATE_BOUNDS = (5, 8, 10, 12, 15, 20, 25, 30, 40)
+
+
+def run_stats(cfg: dict, args: argparse.Namespace) -> None:
+    small_px = int(cfg["qc"]["small_lesion_px"])
+    name, _ = config.real_dataset(cfg, args.dataset)
+    pool_name, _ = config.synthetic_pool(cfg, args.pool)
+    real_dir, syn_dir = config.output_dir(cfg, name), config.output_dir(cfg, pool_name)
+    out = config.results_dir(cfg, name, "e0b") / "stats"
+    if out.exists() and not args.overwrite:
+        raise SystemExit(f"{out} already exists; pass --overwrite to regenerate.")
+    if not (syn_dir / "qc.csv").exists():
+        raise SystemExit(f"{syn_dir / 'qc.csv'} not found; run the 'qc' stage first.")
+
+    # the sets: real lesion slices per set, the main audit (mask_class clean or minor) and all of S
+    real_sl, real_les = read_table(real_dir / "slices.csv"), read_table(real_dir / "lesions.csv")
+    syn_sl = read_table(syn_dir / "slices.csv").merge(read_table(syn_dir / "qc.csv")[["key", "mask_class"]], on="key")
+    syn_les = read_table(syn_dir / "lesions.csv")
+    main_sl = syn_sl[syn_sl["mask_class"].isin(["clean", "minor"])]
+    sets = {s: (real_sl[real_sl["set"] == s], real_les[real_les["set"] == s]) for s in ("T", "H-cal", "H-eval")}
+    sets["S main"] = (main_sl, syn_les[syn_les["key"].isin(main_sl["key"])])
+    sets["S all"] = (syn_sl, syn_les)
+
+    describe = audit.describe_sets(sets, small_px)
+    patients = read_table(real_dir / "patients.csv")
+    native = pd.crosstab(patients["native_dim0"].astype(str) + "x" + patients["native_dim1"].astype(str),
+                         patients["set"]).rename_axis("native size")
+    bounds = audit.bound_impact(sets, CANDIDATE_BOUNDS)
+    without = bounds.pivot(index="bound", columns="set", values="share_slices_without")[list(sets)]
+    kept = bounds.pivot(index="bound", columns="set", values="share_lesions_kept")[list(sets)]
+
+    # figures compare the real sets with the main audit; the density pools H-cal and H-eval
+    shown = ["T", "H-cal", "H-eval", "S main"]
+    audit.lesions_per_slice_figure({s: sets[s][0]["n_lesions"] for s in shown}, out / f"lesions_per_slice_{pool_name}.png",
+                                   f"Lesions per slice: real lesion slices per set and the synthetic main audit "
+                                   f"({pool_name}, mask class clean or minor)")
+    audit.area_figure({s: sets[s][1]["area"] for s in shown}, out / f"lesion_area_{pool_name}.png",
+                      "Lesion area: cumulative share of lesions (lesions >= the minimum lesion area)")
+    h_les = pd.concat([sets["H-cal"][1], sets["H-eval"][1]])
+    audit.centroid_density_figure({"T": sets["T"][1], "H": h_les, "S main": sets["S main"][1]},
+                                  out / f"centroid_density_{pool_name}.png",
+                                  "Lesion centroids: T, H (H-cal + H-eval) and the synthetic main audit; top row in "
+                                  "pixels, bottom row relative to the brain box (0 = first, 1 = last row/column)")
+
+    describe.round(3).to_csv(out / f"description_{pool_name}.csv")
+    native.to_csv(out / f"native_sizes_{name}.csv")
+    bounds.round(4).to_csv(out / f"bound_impact_{pool_name}.csv", index=False)
+    text = (f"E0b stats: dataset '{name}', pool '{pool_name}' (S main = mask class clean or minor)\n\n"
+            f"Data description:\n{describe.round(3).to_string()}\n\n"
+            f"Native in-plane sizes (patients per set):\n{native.to_string()}\n\n"
+            f"Bound impact (input for E3, not decided here), by candidate informative-lesion bound:\n"
+            f"Share of slices left without an informative lesion:\n{without.round(3).to_string()}\n"
+            f"Share of lesions kept:\n{kept.round(3).to_string()}\n"
+            f"Patients with at least one informative slice, per bound: see bound_impact_{pool_name}.csv.\n")
+    (out / "summary.txt").write_text(text, encoding="utf-8")
+    config.write_run_info(out, cfg, script=__file__, extra={"stage": "stats", "pool": pool_name})
+    print(f"\n{text}\nWrote {out}")
+
+
 # lesions.csv columns in the view's table, with short headers
 VIEW_COLUMNS = {"lesion_id": "lesion", "area": "area px", "stray_px": "strays px", "centroid_row": "row",
                 "centroid_col": "col", "centroid_row_brain": "row in brain", "centroid_col_brain": "col in brain",
@@ -857,6 +921,13 @@ def main() -> None:
     p.add_argument("--pool", help="synthetic pool name in the config (default: default_synthetic_pool)")
     p.add_argument("--overwrite", action="store_true", help="regenerate existing output")
     p.set_defaults(func=run_qc)
+
+    p = stages.add_parser("stats", help="E0 description: tables, distribution figures, bound impact (after 'qc')")
+    config.add_config_arg(p)
+    p.add_argument("--dataset", help="real dataset name in the config (default: default_real_dataset)")
+    p.add_argument("--pool", help="synthetic pool name in the config (default: default_synthetic_pool)")
+    p.add_argument("--overwrite", action="store_true", help="regenerate existing output")
+    p.set_defaults(func=run_stats)
 
     p = stages.add_parser("view", help="one slice at full size with its lesion rows (helper, after 'lesions')")
     config.add_config_arg(p)

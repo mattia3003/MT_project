@@ -15,13 +15,13 @@ stage, and what has been decided. Update the status table when a stage is done.
 | 4 | `lesions` + `view` | production (needs B, C) | ✅ done (2026-11-02) |
 | 5 | `qc-review` | review → decision D | ✅ done; **decision D set** (2026-11-02): 9 isolated specks |
 | 6 | `qc` | production (needs D) | ✅ done (2026-11-02); mask class and failed-MRI flag kept apart |
-| 7a | `stats` | E0 description (no decision) | ⏳ next: planned and approved 2026-11-02, not started |
+| 7a | `stats` | E0 description (no decision) | step 1 ✅ (2026-11-03: items 1, 2, 6); step 2 (items 3–5) next |
 | 7b | `filters-review` | review → decision E (filters for H-cal/H-eval) | ⏳ |
 | 8 | `check` | consistency checks | ⏳ |
 | 9 | Full re-run of E0a + E0b from scratch | end-to-end check | ⏳ after 8 |
 
-**Next session: start here.** Stage 7a `stats`, step 1 (items 1, 2 and 6 below, from the
-existing tables), then step 2 (items 3–5, which read volumes), then 7b `filters-review`. The
+**Next: start here.** Stage 7a `stats` step 2 (items 3–5 below, which read volumes), then 7b
+`filters-review`. Step 1 (items 1, 2, 6) was done on 2026-11-03. The
 plan for both was approved on 2026-11-02, including the four points confirmed in "Stage 7
 details" below. Everything up to `qc-review` is committed; the `qc` stage (`qc.py`, its tests,
 the stage, docs and report notes) was finished on 2026-11-02 and awaits the user's commit.
@@ -273,8 +273,8 @@ stage (`stats`); the filter choice is decision E, so it gets its own review stag
 
 ### 7a `stats` (descriptive; no decision)
 
-Outputs: `results/<dataset>/e0b/stats/` and `results/<pool>/e0b/stats/` (tables as CSV,
-figures as PNG). Items 1, 2 and 6 come from existing tables (`lesions.csv`, `slices.csv`,
+Outputs: `results/<dataset>/e0b/stats/`, with the pool name in the file names (the stage
+compares the real sets with a pool, like `brain-review`); tables as CSV, figures as PNG. Items 1, 2 and 6 come from existing tables (`lesions.csv`, `slices.csv`,
 `qc.csv`, `brain.csv`); items 3–5 read volumes again. Implement as two reviewed steps:
 step 1 = items 1, 2, 6; step 2 = items 3, 4, 5.
 

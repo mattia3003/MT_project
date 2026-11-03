@@ -51,7 +51,9 @@ flowchart TD
         LES["lesions ✅ · view ✅"]
         QREV["qc-review ✅"]
         QC["qc ✅"]
-        STATS["stats · check"]:::planned
+        STATS["stats ✅ (step 1)"]
+        FREV["filters-review"]:::planned
+        ECHECK["check"]:::planned
     end
     BREV -.->|"decision A"| BRAIN
     BRAINOUT[("brain.csv · brain_masks.npz<br/>masks_raw.npz (synthetic)")]
@@ -61,7 +63,7 @@ flowchart TD
     LES --> LESOUT --> QREV
     QREV -.->|"decision D"| QC
     QCOUT[("qc.csv (synthetic)")]
-    QC --> QCOUT --> STATS
+    QC --> QCOUT --> STATS --> FREV --> ECHECK
 
     E3["E3 · e3_calibrate.py<br/>E1 + E2 detectors on H-cal"]:::planned
     FROZEN[("FREEZE: thresholds + bound<br/>S is never scored before here")]:::planned
@@ -72,7 +74,8 @@ flowchart TD
     E8["E8 · e8_paired_mri.py<br/>optional"]:::planned
 
     VOLS & INDEX --> BREV
-    STATS --> E3 --> FROZEN --> E4
+    ECHECK --> E3 --> FROZEN --> E4
+    FREV -.->|"decision E"| E3
     E4 -->|pass| E5
     E4 -.->|"fail: adjust on H-cal, re-freeze"| E3
     E5 --> E6 & E7
@@ -95,7 +98,9 @@ flowchart TD
 | | `view` (helper) | ✅ | lesion outputs | `results/<dataset\|pool>/e0b/views/<key>.png`; with `--nifti`, a synthetic sample's image and labels as NIfTI |
 | | `qc-review` | ✅ | `lesions` and `brain` outputs, synthetic index | `results/<pool>/e0b/qc_review/` (evidence for decision D) |
 | | `qc` | ✅ | decision D, `lesions` and `brain` outputs | `qc.csv` (pool), `results/<pool>/e0b/qc/` |
-| | `stats`, `check` | planned | all E0b outputs | E0 statistics; consistency checks |
+| | `stats` | ✅ step 1 of 2 | `lesions`, `qc` outputs, `patients.csv` | `results/<dataset>/e0b/stats/` |
+| | `filters-review` | planned | E0b outputs | evidence for decision E |
+| | `check` | planned | all E0b outputs | consistency checks |
 | `e3_calibrate.py` | *tbd* | planned | E0b outputs, H-cal | frozen thresholds |
 | `e4_validate.py` | *tbd* | planned | frozen thresholds, T, H-eval | validation table, planted copies |
 | `e5_audit.py` | — | planned | frozen thresholds, S | main audit tables |
@@ -152,7 +157,7 @@ flowchart LR
 | `lesions` | 8-connected labelling; attach-or-drop (specks below the minimum area become strays of a lesion within the gap, or are dropped; lesions numbered by area); lesion features (centroid in three frames, bbox, shape, fraction outside the brain); brain masks (six candidate methods), tissue area, brain box; distance and growing helpers | `label_components`, `count_components`, `attach_or_drop` (→ `LesionLabels`), `speck_gaps`, `lesion_features`, `brain_mask`, `tissue_px`, `brain_box`, `fraction_outside`, `chessboard_distance`, `grow` | SciPy, scikit-image |
 | `qc` | Quality classes of synthetic samples: mask class from the mask alone (`no_lesion`, `noisy`, `minor`, `clean`), the combined class with a failed MRI first, the edge count per slice | `mask_class`, `qc_class`, `edge_lesions`, `MASK_CLASSES`, `QC_CLASSES` | pandas |
 | `checks` | E0a consistency checks, independent reference transform, sample grid | `CheckReport`, `check_split`, `check_real_volumes`, `check_recompute`, `check_synthetic_index`, `sample_grid` | PyTorch, matplotlib |
-| `audit` | Evidence for the E0b review stages (candidate comparisons, figures, proposals) and overviews of the production stages | `evaluate_brain_methods`, `summarize_brain_methods`, `propose_brain_method`, `method_grid`, `threshold_sensitivity`, `summarize_threshold_sensitivity`, `sorted_sheet`, `tissue_counts`, `tissue_histogram`, `component_table`, `propose_min_area`, `size_counts`, `mask_specks`, `summarize_attach_or_drop`, `gap_counts`, `size_figure`, `crop_sheet`, `summarize_lesions`, `speck_stratum`, `summarize_speck_strata`, `summarize_qc`, `draw_lesions`, `lesion_sheet`, `lesion_view`, `summarize_brains`, `brain_sheet`, `draw_box` | pandas, matplotlib |
+| `audit` | Evidence for the E0b review stages (candidate comparisons, figures, proposals) and overviews of the production stages | `evaluate_brain_methods`, `summarize_brain_methods`, `propose_brain_method`, `method_grid`, `threshold_sensitivity`, `summarize_threshold_sensitivity`, `sorted_sheet`, `tissue_counts`, `tissue_histogram`, `component_table`, `propose_min_area`, `size_counts`, `mask_specks`, `summarize_attach_or_drop`, `gap_counts`, `size_figure`, `crop_sheet`, `summarize_lesions`, `speck_stratum`, `summarize_speck_strata`, `summarize_qc`, `describe_sets`, `bound_impact`, `lesions_per_slice_figure`, `area_figure`, `centroid_density_figure`, `draw_lesions`, `lesion_sheet`, `lesion_view`, `summarize_brains`, `brain_sheet`, `draw_box` | pandas, matplotlib |
 | `plotting` | Shared figure helpers (no pyplot, so importing memtk never changes the plotting backend). `save` wraps the figure title to the figure width and uses the constrained layout, so the title never covers tile titles or runs off the image | `tile_figure`, `show_slice`, `hide_unused`, `save` | matplotlib |
 
 Tests (pytest, on small hand-built inputs): `tests/test_lesions.py` covers labelling,
@@ -355,6 +360,23 @@ Written by `qc`. In git.
 | `old_qc_crosstab_<pool>.csv` | QC class against the old list's reason (noise fragments, pixels outside brain, not on the list) |
 | `edge_check_real_<dataset>.csv` | The same edge rule on T, H-cal and H-eval: slices, lesions, edge lesions, edge slices |
 | `qc_classes_<pool>.png` | 8 random samples per QC class, drawn as in the lesion overview |
+| `run_info.json` | Run log |
+
+### Results: `results/<dataset>/e0b/stats/`
+
+Written by `stats`. In git. Compares the real sets with a pool, so it lives under the dataset
+with the pool name in the file names. Sets: T, H-cal, H-eval, S main (`mask_class` clean or
+minor, the main audit) and S all.
+
+| File | Content |
+| --- | --- |
+| `summary.txt` | The tables below in readable form |
+| `description_<pool>.csv` | One column per set: patients, slices, lesions (per slice, max), share of slices with no / one / several lesions, lesion area (quartiles), share with a lesion under 40 px, centroid mean and SD in pixels and brain-relative, slices per patient (real) |
+| `native_sizes_<dataset>.csv` | Patients per native in-plane size and set |
+| `bound_impact_<pool>.csv` | Per set and candidate informative-lesion bound (5–40 px): lesions kept and their share, slices left without an informative lesion and their share, patients with an informative slice (real). Input for E3 |
+| `lesions_per_slice_<pool>.png` | Share of slices by number of lesions, T, H-cal, H-eval, S main |
+| `lesion_area_<pool>.png` | Cumulative share of lesions by area (log scale), with medians |
+| `centroid_density_<pool>.png` | 2D density of lesion centroids for T, H (H-cal + H-eval) and S main; top row in pixels, bottom row relative to the brain box |
 | `run_info.json` | Run log |
 
 ### Results: `results/<pool>/e0b/qc_review/`

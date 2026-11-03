@@ -1,0 +1,24 @@
+,T,H-cal,H-eval,S main,S all
+patients,105.0,25.0,26.0,,
+slices,3823.0,992.0,1094.0,35920.0,37624.0
+lesions,6101.0,1548.0,2098.0,58657.0,61635.0
+lesions_per_slice,1.596,1.56,1.918,1.633,1.638
+max_lesions_per_slice,13.0,7.0,13.0,7.0,9.0
+share_no_lesion,0.005,0.003,0.005,0.0,0.012
+share_single_lesion,0.676,0.692,0.636,0.532,0.518
+share_multi_lesion,0.319,0.305,0.359,0.468,0.47
+area_p25,11.0,13.0,11.0,8.0,8.0
+area_median,19.0,23.0,17.0,13.0,13.0
+area_p75,45.0,45.0,28.0,26.0,27.0
+share_with_lesion_lt40,0.739,0.746,0.76,0.865,0.854
+centroid_row_mean_px,64.34,65.037,63.087,63.376,63.398
+centroid_row_sd_px,24.065,24.993,24.869,14.993,15.204
+centroid_col_mean_px,74.002,72.718,71.796,74.764,74.716
+centroid_col_sd_px,25.284,23.925,26.379,18.769,18.9
+centroid_row_mean_brain,0.506,0.516,0.49,0.484,0.484
+centroid_row_sd_brain,0.243,0.25,0.243,0.244,0.248
+centroid_col_mean_brain,0.571,0.56,0.558,0.501,0.5
+centroid_col_sd_brain,0.245,0.242,0.259,0.267,0.271
+slices_per_patient_min,2.0,3.0,3.0,,
+slices_per_patient_median,27.0,35.0,36.0,,
+slices_per_patient_max,128.0,110.0,119.0,,

@@ -1,0 +1,67 @@
+E0b stats: dataset 'stanford_brainmets', pool 'amibekk_v1' (S main = mask class clean or minor)
+
+Data description:
+                                  T     H-cal    H-eval     S main      S all
+patients                    105.000    25.000    26.000        NaN        NaN
+slices                     3823.000   992.000  1094.000  35920.000  37624.000
+lesions                    6101.000  1548.000  2098.000  58657.000  61635.000
+lesions_per_slice             1.596     1.560     1.918      1.633      1.638
+max_lesions_per_slice        13.000     7.000    13.000      7.000      9.000
+share_no_lesion               0.005     0.003     0.005      0.000      0.012
+share_single_lesion           0.676     0.692     0.636      0.532      0.518
+share_multi_lesion            0.319     0.305     0.359      0.468      0.470
+area_p25                     11.000    13.000    11.000      8.000      8.000
+area_median                  19.000    23.000    17.000     13.000     13.000
+area_p75                     45.000    45.000    28.000     26.000     27.000
+share_with_lesion_lt40        0.739     0.746     0.760      0.865      0.854
+centroid_row_mean_px         64.340    65.037    63.087     63.376     63.398
+centroid_row_sd_px           24.065    24.993    24.869     14.993     15.204
+centroid_col_mean_px         74.002    72.718    71.796     74.764     74.716
+centroid_col_sd_px           25.284    23.925    26.379     18.769     18.900
+centroid_row_mean_brain       0.506     0.516     0.490      0.484      0.484
+centroid_row_sd_brain         0.243     0.250     0.243      0.244      0.248
+centroid_col_mean_brain       0.571     0.560     0.558      0.501      0.500
+centroid_col_sd_brain         0.245     0.242     0.259      0.267      0.271
+slices_per_patient_min        2.000     3.000     3.000        NaN        NaN
+slices_per_patient_median    27.000    35.000    36.000        NaN        NaN
+slices_per_patient_max      128.000   110.000   119.000        NaN        NaN
+
+Native in-plane sizes (patients per set):
+set          H-cal  H-eval   T
+native size                   
+144x160          0       0   1
+144x176          7       7  31
+144x192          5       6  18
+160x160          0       0   4
+160x176         10       6  30
+160x192          3       4  19
+160x208          0       1   1
+176x176          0       0   1
+176x192          0       2   0
+
+Bound impact (input for E3, not decided here), by candidate informative-lesion bound:
+Share of slices left without an informative lesion:
+set        T  H-cal  H-eval  S main  S all
+bound                                     
+5      0.014  0.010   0.015   0.021  0.033
+8      0.059  0.051   0.056   0.120  0.127
+10     0.109  0.103   0.110   0.201  0.205
+12     0.170  0.156   0.172   0.278  0.280
+15     0.274  0.242   0.247   0.374  0.374
+20     0.390  0.349   0.363   0.501  0.498
+25     0.481  0.445   0.484   0.592  0.589
+30     0.539  0.512   0.572   0.665  0.662
+40     0.631  0.634   0.691   0.769  0.766
+Share of lesions kept:
+set        T  H-cal  H-eval  S main  S all
+bound                                     
+5      0.983  0.988   0.987   0.948  0.948
+8      0.903  0.943   0.909   0.766  0.768
+10     0.821  0.879   0.820   0.653  0.657
+12     0.733  0.804   0.716   0.559  0.565
+15     0.610  0.696   0.578   0.458  0.464
+20     0.483  0.570   0.413   0.345  0.350
+25     0.401  0.470   0.305   0.273  0.276
+30     0.348  0.398   0.237   0.219  0.222
+40     0.274  0.291   0.168   0.147  0.149
+Patients with at least one informative slice, per bound: see bound_impact_amibekk_v1.csv.

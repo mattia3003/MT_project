@@ -12,7 +12,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from matplotlib import patheffects
-from matplotlib.colors import to_rgba
+from matplotlib.cm import ScalarMappable
+from matplotlib.colors import Normalize, to_rgba
 from matplotlib.figure import Figure
 from matplotlib.patches import Rectangle
 
@@ -353,6 +354,115 @@ def summarize_qc(table: pd.DataFrame, by: str, order) -> pd.DataFrame:
     })
     out.insert(1, "share", out["masks"] / len(table))
     return out.reindex([c for c in order if c in out.index])
+
+
+# --- stats: E0 description of real and synthetic lesions ---------------------------------------
+
+# One colour per set in the stats figures
+SET_COLORS = {"T": "tab:blue", "H-cal": "tab:green", "H-eval": "tab:olive", "H": "tab:green",
+              "S main": "tab:red", "S all": "tab:gray"}
+
+
+def describe_sets(sets: dict[str, tuple[pd.DataFrame, pd.DataFrame]], small_lesion_px: int) -> pd.DataFrame:
+    """Data description, one column per set, from its (slices, lesions) tables: patients and
+    slices, lesions per slice, single/multi-lesion shares, lesion area, the share of slices with
+    a small lesion, and the spread of lesion centroids in pixels and brain-relative."""
+    cols = {}
+    for name, (sl, les) in sets.items():
+        n = sl["n_lesions"]
+        col = {"patients": sl["patient_id"].nunique() if "patient_id" in sl else np.nan,
+               "slices": len(sl), "lesions": int(n.sum()), "lesions_per_slice": n.mean(),
+               "max_lesions_per_slice": int(n.max()), "share_no_lesion": (n == 0).mean(),
+               "share_single_lesion": (n == 1).mean(), "share_multi_lesion": (n >= 2).mean(),
+               "area_p25": les["area"].quantile(0.25), "area_median": les["area"].median(),
+               "area_p75": les["area"].quantile(0.75),
+               f"share_with_lesion_lt{small_lesion_px}": sl["has_lesion_lt40"].astype(bool).mean()}
+        for frame, suffix in (("", "px"), ("_brain", "brain")):
+            for axis in ("row", "col"):
+                values = les[f"centroid_{axis}{frame}"]
+                col[f"centroid_{axis}_mean_{suffix}"] = values.mean()
+                col[f"centroid_{axis}_sd_{suffix}"] = values.std()
+        if "patient_id" in sl:
+            per_patient = sl.groupby("patient_id").size()
+            col.update(slices_per_patient_min=per_patient.min(), slices_per_patient_median=per_patient.median(),
+                       slices_per_patient_max=per_patient.max())
+        cols[name] = col
+    return pd.DataFrame(cols)
+
+
+def bound_impact(sets: dict[str, tuple[pd.DataFrame, pd.DataFrame]], bounds) -> pd.DataFrame:
+    """For each candidate informative-lesion bound and set: lesions kept (area >= bound) and
+    their share, slices left with no informative lesion and their share, and (real sets)
+    patients that keep at least one informative slice."""
+    rows = []
+    for name, (sl, les) in sets.items():
+        for b in bounds:
+            kept = les[les["area"] >= b]
+            with_informative = sl["key"].isin(kept["key"])
+            row = {"set": name, "bound": b, "lesions_kept": len(kept), "share_lesions_kept": len(kept) / len(les),
+                   "slices_without": int((~with_informative).sum()),
+                   "share_slices_without": float((~with_informative).mean())}
+            if "patient_id" in sl:
+                row["patients_with_informative"] = sl.loc[with_informative, "patient_id"].nunique()
+                row["patients"] = sl["patient_id"].nunique()
+            rows.append(row)
+    return pd.DataFrame(rows)
+
+
+def lesions_per_slice_figure(counts: dict[str, pd.Series], path: Path, title: str, max_count: int = 8) -> Path:
+    """Share of slices by number of lesions (0..max_count, then more), one bar group per set."""
+    fig = Figure(figsize=(8, 3.6))
+    ax = fig.subplots()
+    xs = np.arange(max_count + 2)
+    width = 0.8 / len(counts)
+    for k, (name, n) in enumerate(counts.items()):
+        share = n.clip(upper=max_count + 1).value_counts(normalize=True).reindex(xs, fill_value=0)
+        offset = xs + (k - (len(counts) - 1) / 2) * width  # pyright: ignore[reportOperatorIssue]  # numpy stubs: array + float is valid
+        ax.bar(offset, share.to_numpy(), width=width, color=SET_COLORS.get(name), label=f"{name} ({len(n)})")
+    ax.set_xticks(xs, [*map(str, xs[:-1]), f">{max_count}"])
+    ax.set_xlabel("lesions per slice")
+    ax.set_ylabel("share of slices")
+    ax.legend(fontsize=8)
+    return save(fig, path, title)
+
+
+def area_figure(areas: dict[str, pd.Series], path: Path, title: str) -> Path:
+    """Cumulative distribution of lesion area per set: the share of lesions with at most each
+    area (no binning, so integer areas give no artefacts; medians read off at 0.5)."""
+    fig = Figure(figsize=(8, 3.6))
+    ax = fig.subplots()
+    for name, a in areas.items():
+        values = np.sort(a.to_numpy())
+        ax.step(values, np.arange(1, len(values) + 1) / len(values), where="post", color=SET_COLORS.get(name),
+                label=f"{name} ({len(values)}; median {np.median(values):g} px)")
+    ax.axhline(0.5, color="0.6", lw=0.6, ls=":")
+    ax.set_xscale("log")
+    ax.set_xlabel("lesion area (px, log scale)")
+    ax.set_ylabel("share of lesions with at most this area")
+    ax.legend(fontsize=8)
+    return save(fig, path, title)
+
+
+def centroid_density_figure(lesions: dict[str, pd.DataFrame], path: Path, title: str) -> Path:
+    """2D density of lesion centroids per set, in two frames: pixels of the 128x128 grid (top
+    row) and brain-relative, as a fraction of the brain box (bottom row; lesions of slices
+    without a brain left out). Shares per bin; one colour scale per row."""
+    frames = [("", (0, 128), 32, "pixels (row, col)"), ("_brain", (-0.2, 1.2), 28, "fraction of brain box")]
+    fig, axes = tile_figure(len(frames), len(lesions), tile=3.0)
+    for r, (frame, lim, n_bins, label) in enumerate(frames):
+        hists = {}
+        for name, les in lesions.items():
+            d = les[[f"centroid_row{frame}", f"centroid_col{frame}"]].dropna()
+            h, _, _ = np.histogram2d(d.iloc[:, 0], d.iloc[:, 1], bins=n_bins, range=[lim, lim])
+            hists[name] = h / max(len(d), 1)
+        scale = ScalarMappable(norm=Normalize(0, max(float(h.max()) for h in hists.values())), cmap="magma")
+        for c, (name, h) in enumerate(hists.items()):
+            ax = axes[r, c]
+            ax.imshow(h, cmap=scale.cmap, norm=scale.norm, extent=(lim[0], lim[1], lim[1], lim[0]))
+            ax.set_title(f"{name}: {label}", fontsize=8)
+            ax.tick_params(labelsize=6)
+        fig.colorbar(scale, ax=axes[r, :].tolist(), shrink=0.8, label="share of lesions")
+    return save(fig, path, title)
 
 
 # --- brain: overview of the production brain masks -------------------------------------------

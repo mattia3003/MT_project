@@ -227,6 +227,47 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
 
   *Source: `results/amibekk_v1/e0b/qc/summary.txt`, `qc_classes_amibekk_v1.csv`,
   `edge_check_real_stanford_brainmets.csv`, `qc_classes_amibekk_v1.png`, 2026-11-02.*
+- **Two frames for lesion positions, and why they differ (explanation for the report).** Every
+  lesion's centre is stored in three frames (`lesions.csv`); two matter for interpretation:
+  - *Pixels:* the position on the shared 128×128 grid, the same for every image. Answers
+    "where in the image is the lesion?"
+  - *Relative to the brain box:* the position inside the bounding box of the slice's own brain,
+    0 at its first row/column and 1 at its last; every brain box is in effect stretched to the
+    same square. Answers "where inside its own brain is the lesion?"
+
+  The same pixel can mean different brain-relative positions, because brains differ in size. A
+  lesion at pixel row 85 lies at (85 − 15) / 98 ≈ 0.71 in a real brain spanning rows 15–113,
+  but at (85 − 40) / 50 = 0.90, near the bottom edge, in a small synthetic brain spanning rows
+  40–90. Analogy: a GPS position on one shared map against "how far across its own town" a
+  point lies; a small and a big town can both have a point halfway across, at very different
+  GPS positions.
+
+  *Why it matters:* stage 1 makes the mask without seeing a brain, so a memorized copy of a
+  training mask reproduces its pixel positions. A synthetic lesion's brain-relative position
+  also depends on how large stage 2 drew the brain afterwards, which says nothing about copying.
+  Hence the recommendation of pixel coordinates for copy detection (open question in section 5)
+  and brain-relative coordinates for anatomical questions. The centroid-density figure shows
+  both frames: compact synthetic positions in pixels, a real-like spread relative to the brain
+  (section 3). *Source: the explanation and the figure
+  `results/stanford_brainmets/e0b/stats/centroid_density_amibekk_v1.png`, 2026-11-03.*
+- **Input for the informative-lesion bound (E3): what each candidate bound costs.** Share of
+  slices left without an informative lesion, and H-cal patients that keep at least one
+  informative slice:
+
+  | Bound | T | H-cal | H-eval | S main | H-cal patients (of 25) |
+  | --- | --- | --- | --- | --- | --- |
+  | 10 px | 11% | 10% | 11% | 20% | 24 |
+  | 15 px | 27% | 24% | 25% | 37% | 24 |
+  | 20 px | 39% | 35% | 36% | 50% | 23 |
+  | 30 px | 54% | 51% | 57% | 67% | 23 |
+  | 40 px | 63% | 63% | 69% | 77% | 18 |
+
+  Because synthetic lesions are smaller, every bound costs S more than T. At 20 px half the main
+  audit leaves the lesion-level analysis (those masks are still scored by whole-mask Dice).
+  Above 30 px H-cal starts losing patients, weakening calibration. Expected E3 range 10–20 px,
+  unless the chance-match rates force it higher (see the shape-and-size finding in section 3:
+  lesions under about 40 px are hard to tell apart by shape and size). Not decided here.
+  *Source: `results/stanford_brainmets/e0b/stats/bound_impact_amibekk_v1.csv`, 2026-11-03.*
 - **The lesion definition and the informative-lesion bound are separate settings.**
   `min_lesion_area` defines what a lesion is (object vs noise) everywhere: QC speck counts,
   `no_lesion`, the lesion table and IDs, cleaned masks for E1, lesion counts and rarity. The
@@ -295,6 +336,39 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
   lesion edges seen in one slice rather than annotation noise. *Source: manual ITK-SNAP
   inspection of Mets_120 at 128×128 (a patient with many metastases), using
   `lesions_review/small_components_T.csv`, 2026-11-02; other patients not inspected.*
+- **Synthetic masks: smaller lesions, more two-lesion masks, no large lesions.** Real lesion
+  slices against the main audit (S main = `mask_class` clean or minor, 35,920 masks):
+
+  | | T | H-cal | H-eval | S main |
+  | --- | --- | --- | --- | --- |
+  | Lesion area, median (IQR), px | 19 (11–45) | 23 (13–45) | 17 (11–28) | 13 (8–26) |
+  | Single-lesion slices | 68% | 69% | 64% | 53% |
+  | Two-lesion slices | 18% | 18% | 17% | 34% |
+  | Most lesions in one slice | 13 | 7 | 13 | 7 |
+
+  The synthetic area distribution lies below every real one over the whole range, and the
+  largest synthetic lesions stop near 330 px (T: about 700). Lesions per slice are similar on
+  average (1.63 against 1.60), but synthetic masks have two lesions about twice as often and
+  four or more rarely. So S does not have fewer multi-lesion slices than T (a concern raised in
+  the experiment plan); it has more two-lesion slices and a shorter tail. *Source:
+  `results/stanford_brainmets/e0b/stats/description_amibekk_v1.csv`, `lesion_area_amibekk_v1.png`,
+  `lesions_per_slice_amibekk_v1.png`, 2026-11-03.*
+- **Synthetic lesion positions: compact in pixels, real-like relative to the brain box.**
+  - *In pixels:* synthetic lesion centroids fill a compact central rectangle (roughly rows
+    40–85, columns 55–105) with fairly sharp edges; real centroids spread over the whole round
+    brain region. Centroid SD row/column 15.0/18.8 px in S main against 24.1/25.3 in T
+    (H-cal 25.0/23.9, H-eval 24.9/26.4).
+  - *Relative to the brain box:* the spread is the same as in real data (SD 0.24/0.27 against
+    0.24/0.25 in T), smoother and more box-like; real lesions follow the round brain shape and
+    sit slightly right of centre (column mean 0.57 against 0.50).
+  - *Reading:* stage 1 places lesions in a narrow central pixel area, and stage 2 draws a brain
+    fitted around them, so brain-relative positions of synthetic lesions mostly reflect stage
+    2's brain drawing, not stage 1's placement. Pixel-exact copies of real lesions far from the
+    centre are therefore unlikely to exist in S.
+
+  Confirms and quantifies the earlier read-only sample (section 3, 2026-11-01) on the full
+  pool. *Source: `results/stanford_brainmets/e0b/stats/centroid_density_amibekk_v1.png`,
+  `description_amibekk_v1.csv`, 2026-11-03.*
 - **Synthetic lesions are smaller than real ones.** Median lesion area 13 px in S against 19 px
   in T (H-cal 23, H-eval 17); 5th percentile 4 px against 6 px. 85% of synthetic masks have a
   lesion under 40 px (T 74%, H-cal 75%, H-eval 76%), so the sampling script's "at least one lesion
@@ -477,6 +551,12 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
       detection (consistent with E1's pixel-wise Dice); brain-relative coordinates for
       anatomical questions (density figure, E6 rarity). E0b stores all three frames, so nothing
       is lost either way. 2026-11-01.
+      *Further evidence for pixel coordinates (2026-11-03):* synthetic lesions are compact in
+      pixels but have a real-like spread relative to the brain box, which suggests stage 2 fits
+      the brain around the lesions. Brain-relative positions of synthetic lesions would then
+      measure stage 2's drawing rather than stage 1's placement, while a copy is something stage
+      1 produces. See "Synthetic lesion positions" in section 3. *Source:
+      `results/stanford_brainmets/e0b/stats/centroid_density_amibekk_v1.png`.*
 
 ## 6. Figure and table candidates
 
