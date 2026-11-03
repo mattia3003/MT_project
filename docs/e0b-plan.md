@@ -18,10 +18,14 @@ stage, and what has been decided. Update the status table when a stage is done.
 | 7a | `stats` | E0 description (no decision) | ✅ done (2026-11-03: items 1–6) |
 | 7b | `filters-review` | review → decision E (filters for H-cal/H-eval) | ✅ done; **decision E set** (2026-11-03): `[max_mask_px]` |
 | 8 | `check` | consistency checks | ✅ implemented (2026-11-03) |
-| 9 | Full re-run of E0a + E0b from scratch | end-to-end check | ⏳ after 8 |
+| 8b | Code restructuring | readability | ✅ 2026-11-03: stages moved to `src/memtk/e0b/`, `audit.py` dissolved, conventions in CLAUDE.md; verified by step 9 |
+| 9 | Full re-run of E0a + E0b from scratch | end-to-end check | ⏳ next (also verifies 8b) |
 
-**Next: start here.** Stage 8 `check`, then 9 the full re-run. Stages 7a `stats` and 7b
-`filters-review` (decision E) were finished on 2026-11-03. The
+**Next: start here.** Step 9, the full re-run of E0a and E0b from scratch (every stage in run
+order with `--overwrite`, commands in `scripts/README.md`), then `git diff results/`: tables
+must be identical; figures may differ only where their layout or example order changed
+(titles, label outlines, plurals, `pick` order in brain-review). It also verifies the code
+restructuring (8b). After that, close E0 (requirements lock, docs) and plan E1/E2. The
 plan for both was approved on 2026-11-02, including the four points confirmed in "Stage 7
 details" below. Everything up to `qc-review` is committed; the `qc` stage (`qc.py`, its tests,
 the stage, docs and report notes) was finished on 2026-11-02 and awaits the user's commit.
@@ -185,9 +189,14 @@ All implemented; `docs/architecture.md` lists every function. In short:
   stacks (sparse).
 - **`qc.py`:** `mask_class` (from the mask alone), `qc_class` (failed MRI first, for
   reporting), `edge_lesions`. The edge check and the < 40 px rule are flag columns, not classes.
-- **`audit.py`:** evidence and overview figures for every E0b stage (`draw_lesions` for the
-  lesion colouring, used by the overview sheets and `view`).
-- **`plotting.py`:** shared figure helpers; `save` wraps titles and reserves room for them.
+- **`plotting.py`:** shared figure helpers and colours; `save` wraps titles and reserves room for
+  them; `draw_lesions` / `lesion_sheet` draw labelled slices (used by the overview sheets, QC
+  sheets and `view`).
+- **`checks.py`:** the E0a and E0b consistency checks.
+- **`e0b/` (stage package, restructured 2026-11-03):** one module per topic with its stages,
+  then the computations, tables and figures they use: `common`, `brain`, `lesions` (incl.
+  `view`), `qc`, `stats`, `filters`, `check`. `scripts/e0b_audit.py` is only the command line.
+  The former `audit.py` was split into these modules and removed.
 - Not built: `lesion_crop` (a crop centred on a lesion), deferred to E2, where it is used.
 
 ## Position frame: open, decided when E2 is planned

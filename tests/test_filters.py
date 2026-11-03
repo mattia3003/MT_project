@@ -1,8 +1,8 @@
-"""The sampling script's filters, as checked by memtk.audit.filter_checks, on hand-built masks."""
+"""The sampling script's filters, as checked by memtk.e0b.filters.filter_checks, on hand-built masks."""
 
 import numpy as np
 
-from memtk.audit import filter_checks
+from memtk.e0b.filters import filter_checks
 from memtk.lesions import attach_or_drop
 
 

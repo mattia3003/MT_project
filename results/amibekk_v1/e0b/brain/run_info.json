@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-11-02T18:25:54",
-  "script": "C:\\Master thesis\\MT_project\\scripts\\e0b_audit.py",
+  "timestamp": "2026-11-03T11:44:18",
+  "script": "C:\\Master thesis\\MT_project\\src\\memtk\\e0b\\brain.py",
   "argv": [
     "scripts\\e0b_audit.py",
     "brain",
@@ -41,13 +41,19 @@
     },
     "lesions": {
       "connectivity": 8,
-      "min_lesion_area": null,
-      "attach_gap": null
+      "min_lesion_area": 4,
+      "attach_gap": 2
     },
     "qc": {
-      "max_isolated_specks": null,
+      "max_isolated_specks": 9,
       "edge_outside_frac": 0.5,
       "small_lesion_px": 40
+    },
+    "filters": {
+      "max_mask_px": 2000,
+      "real_sets": [
+        "max_mask_px"
+      ]
     },
     "real_datasets": {
       "stanford_brainmets": {

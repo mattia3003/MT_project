@@ -19,8 +19,8 @@ S     0.005        1936         0.0165          0.0381
 Background noise (99.9th percentile, > 3 px from the brain and > 1 px from the mask), for the median slice and a near-worst slice (99th percentile):
        background_p999_median  background_p999_worst1pct
 group                                                   
-T                       0.000                     0.0058
-S                       0.001                     0.0212
+T                      0.0000                     0.0004
+S                      0.0009                     0.0134
 Read: area changes of a few percent and background levels well below the threshold mean it separates background from tissue. Large changes, or background near the threshold, mean it must be revisited for this data (set brain.low_threshold).
 
 Candidate brain-mask methods:

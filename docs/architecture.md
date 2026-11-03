@@ -10,7 +10,8 @@ and open the Markdown preview.
 **Keeping it current:** updating this file is part of finishing each experiment, together with
 the status table in `scripts/README.md` and the entries in `docs/report-notes.md`.
 
-*Status: E0a and E0b implemented (2026-11-03); the full re-run of E0 is next.*
+*Status: E0a and E0b implemented; E0b code restructured into `src/memtk/e0b/` (2026-11-03);
+the full re-run of E0 is next.*
 
 ---
 
@@ -115,8 +116,13 @@ modules, run inside E3 (on H-cal), E4 (on planted copies) and E5 (on S).
 
 ## 2. Code modules
 
-Arrows mean "imports". `config` sits at the bottom: it is the only module that knows about the
-YAML config and the repository root.
+Arrows mean "imports" (taken from the actual imports, 2026-11-03). Two layers:
+- **Library modules** (`src/memtk/*.py`): reusable building blocks with no knowledge of stages
+  or experiments (labelling, IDs, IO, QC rules, checks, plotting). `config` sits at the bottom:
+  it is the only module that knows about the YAML config and the repository root.
+- **Stage packages** (`src/memtk/e0b/`, later one per experiment): the stages of one experiment,
+  one module per topic; they combine library modules, read and write files. The script in
+  `scripts/` is only the command line.
 
 ```mermaid
 flowchart LR
@@ -124,8 +130,16 @@ flowchart LR
     S_E0B["scripts/e0b_audit.py"]
 
     subgraph MEMTK["src/memtk"]
+        subgraph E0B_PKG["e0b (stages, one module per topic)"]
+            M_E0B_BRAIN["brain"]
+            M_E0B_LESIONS["lesions"]
+            M_E0B_QC["qc"]
+            M_E0B_STATS["stats"]
+            M_E0B_FILTERS["filters"]
+            M_E0B_CHECK["check"]
+            M_E0B_COMMON["common"]
+        end
         M_CHECKS["checks"]
-        M_AUDIT["audit"]
         M_SPLIT["split"]
         M_SYN["synthetic"]
         M_PLOT["plotting"]
@@ -138,9 +152,16 @@ flowchart LR
     end
 
     S_E0A --> M_CHECKS & M_SPLIT & M_SYN & M_TRANSFORMS & M_IO & M_CONFIG
-    S_E0B --> M_AUDIT & M_CHECKS & M_LESIONS & M_IDS & M_QC & M_SYN & M_IO & M_CONFIG
+    S_E0B --> E0B_PKG & M_CONFIG
+    M_E0B_BRAIN --> M_E0B_COMMON & M_LESIONS & M_PLOT & M_IDS & M_SYN & M_IO & M_CONFIG
+    M_E0B_LESIONS --> M_E0B_COMMON & M_LESIONS & M_PLOT & M_IDS & M_SYN & M_IO & M_CONFIG
+    M_E0B_QC --> M_E0B_COMMON & M_QC & M_LESIONS & M_PLOT & M_IO & M_CONFIG
+    M_E0B_STATS --> M_E0B_COMMON & M_LESIONS & M_PLOT & M_IDS & M_IO & M_CONFIG
+    M_E0B_FILTERS --> M_E0B_COMMON & M_LESIONS & M_IO & M_CONFIG
+    M_E0B_CHECK --> M_E0B_COMMON & M_CHECKS & M_LESIONS & M_SYN & M_IO & M_CONFIG
+    M_E0B_COMMON --> M_IDS & M_SYN & M_IO & M_CONFIG
     M_CHECKS --> M_QC & M_IDS & M_LESIONS & M_PLOT & M_SYN & M_TRANSFORMS & M_IO & M_CONFIG
-    M_AUDIT --> M_LESIONS & M_PLOT
+    M_PLOT --> M_LESIONS
     M_SPLIT --> M_TRANSFORMS & M_IO
     M_SYN --> M_LESIONS & M_IO & M_CONFIG
     M_IO --> M_CONFIG
@@ -157,8 +178,21 @@ flowchart LR
 | `lesions` | 8-connected labelling; attach-or-drop (specks below the minimum area become strays of a lesion within the gap, or are dropped; lesions numbered by area); lesion features (centroid in three frames, bbox, shape, fraction outside the brain); brain masks (six candidate methods), tissue area, brain box; distance and growing helpers | `label_components`, `count_components`, `attach_or_drop` (→ `LesionLabels`), `speck_gaps`, `lesion_features`, `brain_mask`, `tissue_px`, `brain_box`, `fraction_outside`, `chessboard_distance`, `grow` | SciPy, scikit-image |
 | `qc` | Quality classes of synthetic samples: mask class from the mask alone (`no_lesion`, `noisy`, `minor`, `clean`), the combined class with a failed MRI first, the edge count per slice | `mask_class`, `qc_class`, `edge_lesions`, `MASK_CLASSES`, `QC_CLASSES` | pandas |
 | `checks` | E0 consistency checks. E0a: split, volumes, independent reference transform, synthetic index, sample grid. E0b: lesion tables vs label maps, label maps vs masks as saved, label volumes, QC table, stack keys, run logs vs the current config | `CheckReport`, `check_split`, `check_real_volumes`, `check_recompute`, `check_synthetic_index`, `sample_grid`, `check_lesion_tables`, `check_labels_vs_masks`, `check_label_volumes`, `check_qc_table`, `check_stack_keys`, `check_run_logs` | PyTorch, matplotlib |
-| `audit` | Evidence for the E0b review stages (candidate comparisons, figures, proposals) and overviews of the production stages | `evaluate_brain_methods`, `summarize_brain_methods`, `propose_brain_method`, `method_grid`, `threshold_sensitivity`, `summarize_threshold_sensitivity`, `sorted_sheet`, `tissue_counts`, `tissue_histogram`, `component_table`, `propose_min_area`, `size_counts`, `mask_specks`, `summarize_attach_or_drop`, `gap_counts`, `size_figure`, `crop_sheet`, `summarize_lesions`, `speck_stratum`, `summarize_speck_strata`, `summarize_qc`, `describe_sets`, `bound_impact`, `lesions_per_slice_figure`, `area_figure`, `centroid_density_figure`, `FILTERS`, `filter_checks`, `summarize_filters`, `filter_cost`, `cumulative_lines`, `mask_dice`, `adjacency_figure`, `area_ratio_figure`, `brain_by_height`, `brain_height_figure`, `draw_lesions`, `lesion_sheet`, `lesion_view`, `summarize_brains`, `brain_sheet`, `draw_box` | pandas, matplotlib |
-| `plotting` | Shared figure helpers (no pyplot, so importing memtk never changes the plotting backend). `save` wraps the figure title to the figure width and uses the constrained layout, so the title never covers tile titles or runs off the image | `tile_figure`, `show_slice`, `hide_unused`, `save` | matplotlib |
+| `plotting` | Shared figure helpers and colours (no pyplot, so importing memtk never changes the plotting backend). `save` wraps the figure title to the figure width and uses the constrained layout, so the title never covers tile titles or runs off the image. `draw_lesions` draws a labelled slice (lesion colours with L-numbers, lighter strays, specks as ×, brain outline and box) | `tile_figure`, `show_slice`, `draw_box`, `hide_unused`, `save`, `draw_lesions`, `lesion_sheet`; colours `BRAIN_COLOR`, `LESION_COLOR`, `BOX_COLOR`, `HIGHLIGHT_COLOR`, `SPECK_COLOR`, `LESION_COLORS`, `SET_COLORS` | matplotlib |
+
+**E0b stage package** (`src/memtk/e0b/`). Every stage function is `run_<stage>(cfg, **options)`,
+with the options named like the command-line options; each module has its stages first, then
+the computations, tables and figures they use, under section headers.
+
+| Module | Stages (command) | Also contains | 
+| --- | --- | --- |
+| `e0b.common` | — | `load_real`, `decided`, `refuse_overwrite`, `require`, `pick`, `boxes_of`, `Slices`, `BOX_COLUMNS` |
+| `e0b.brain` | `run_brain_review` (`brain-review`, decision A), `run_brain` (`brain`) | `brain_row`, `evaluate_brain_methods`, `threshold_sensitivity`, `summarize_brain_methods`, `propose_brain_method`, `summarize_threshold_sensitivity`, `tissue_counts`, `summarize_brains`, `method_grid`, `sorted_sheet`, `tissue_histogram`, `brain_sheet` |
+| `e0b.lesions` | `run_lesions_review` (`lesions-review`, decisions B, C), `run_lesions` (`lesions`), `run_view` (`view`) | `Labeller`, `component_table`, `gap_to_nearest_lesion`, `propose_min_area`, `size_counts`, `mask_specks`, `summarize_attach_or_drop`, `gap_counts`, `summarize_lesions`, `size_figure`, `crop_sheet`, `lesion_view` |
+| `e0b.qc` | `run_qc_review` (`qc-review`, decision D), `run_qc` (`qc`) | `SPECK_STRATA`, `speck_stratum`, `summarize_speck_strata`, `summarize_qc` |
+| `e0b.stats` | `run_stats` (`stats`) | `adjacency_pairs`, `native_vs_model`, `real_brain_heights`, `describe_sets`, `bound_impact`, `mask_dice`, `brain_by_height`, `cumulative_lines`, the figure functions |
+| `e0b.filters` | `run_filters_review` (`filters-review`, decision E) | `FILTERS`, `filter_checks` (also used by E3/E4 to apply decision E), `summarize_filters`, `filter_cost` |
+| `e0b.check` | `run_check` (`check`) | `STAGE_KEYS`, `DECISION_KEYS` (the checks themselves are in `memtk.checks`) |
 
 Tests (pytest, on small hand-built inputs): `tests/test_lesions.py` covers labelling,
 attach-or-drop (gaps, drop-only, nearest lesion and ties, numbering, nothing moved), lesion

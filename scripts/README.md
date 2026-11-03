@@ -3,6 +3,9 @@
 One entry script per experiment, named by experiment ID, so alphabetical order is run order.
 Building blocks (transforms, detectors, IO) live in `src/memtk/` and have no scripts of their own.
 A script with several steps has stages (subcommands) that can be run and checked one at a time.
+The script itself is only the command line: the stages live in a package per experiment
+(`src/memtk/e0b/`, one module per topic; e.g. `e0b_audit.py qc` runs `memtk.e0b.qc.run_qc`), so
+they can also be called from a notebook: `run_qc(load_config(), overwrite=True)`.
 
 Run from the repository root. Every stage takes `--config` (default `configs/default.yaml`).
 Dataset-specific stages also take `--dataset` (real data) or `--pool` (synthetic data), defaulting

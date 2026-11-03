@@ -107,13 +107,17 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
   background), so it is set in the config, and `brain-review` reports whether it sits in an
   empty gap between background and tissue. On this data, moving it to 0.01 / 0.04 changes the
   brain area by a median of +0.6% / −1.1% on T (95th percentile 1.7% / 3.1%) and +0.9% / −1.3% on
-  S (2.0% / 3.2%). Background noise (99.9th percentile per slice, away from brain and mask) is
-  0.000 / 0.001 for the median slice, and 0.006 (T) / 0.021 (S) for the near-worst 1%. The
-  synthetic near-worst is at the threshold, but such bright background pixels are isolated and
-  fall below the 30 px region minimum, which the small area changes confirm.
-  *Source: `results/stanford_brainmets/e0b/brain_review/review.txt` and
-  `threshold_sensitivity_amibekk_v1.csv` (all 3,823 T lesion slices, 2,000 random synthetic
-  samples), 2026-11-02.*
+  S (2.0% / 3.2%). Background noise (99.9th percentile per slice, more than 3 px from the brain
+  and more than 1 px from the mask, in Chebyshev distance) is 0.000 / 0.001 for the median
+  slice, and 0.0004 (T) / 0.013 (S) for the near-worst 1%, well below the threshold; isolated
+  bright background pixels would in any case fall below the 30 px region minimum, which the
+  small area changes confirm. *Source: `results/stanford_brainmets/e0b/brain_review/review.txt`
+  and `threshold_sensitivity_amibekk_v1.csv` (all 3,823 T lesion slices, 2,000 random synthetic
+  samples), re-run 2026-11-03.*
+  *Superseded numbers (2026-11-02):* 0.006 (T) / 0.021 (S) near-worst. They came from measuring
+  "3 px from the brain" in the four straight directions only; the measure now grows diagonally
+  too, like every other distance in the project (gaps, specks). The area changes and the
+  conclusion are unchanged.
 - **A failed synthetic MRI is judged by its brain tissue area, not its maximum intensity**
   (`brain.min_tissue_px` = 20 px, decision A, set 2026-11-01: below 20 px every viewed sample has
   no brain at all, and the smallest real T lesion slice has 31 px). Tissue = pixels of the brain
