@@ -1,8 +1,13 @@
 # E0b plan: data audit and mask quality control (`scripts/e0b_audit.py`)
 
-Working plan for E0b, kept in the repo so work can resume from here. The experiment itself is
-specified in `docs/experiment-plan.md` (E0); this file records how it is implemented, stage by
-stage, and what has been decided. Update the status table when a stage is done.
+> **Closed 2026-11-03. Reference only, no longer updated.** E0 is done (see the status table and
+> "E0 closed" below). This file stays as the record of how E0b was built: the decision gates
+> A–E, the definitions (gap, speck, stray, lesion IDs and numbering) and the stage details.
+> Open items were carried forward on 2026-11-03 (see "Carried forward" at the end); the next
+> work is planned in a new plan document for E1–E3.
+
+The experiment itself is specified in `docs/experiment-plan.md` (E0); this file records how it
+was implemented, stage by stage, and what was decided.
 
 ## Status (2026-11-03)
 
@@ -47,10 +52,7 @@ with all 692 outputs byte-identical to the repo's. The old `docs/requirements.tx
 segmentation work) was removed. E0 is marked done in `docs/experiment-plan.md`, with its
 deviations from the plan.
 
-**Next: start here.** Plan E1/E2 (with E3 in view: bound and thresholds frozen by 9 Nov). Open
-point to decide in that plan: the position frame (below). The lesion crop is built in E2.
-
-**Working rules:**
+**Working rules (as followed for E0b; now in CLAUDE.md):**
 - Small reviewed steps, one stage at a time.
 - The user does all git operations.
 - Decision values are set only after the user agrees to that specific value.
@@ -201,7 +203,8 @@ does not exclude its mask (separate `mask_class` and `mri_failed` columns); the 
 
 ## Library modules
 
-All implemented; `docs/architecture.md` lists every function. In short:
+All implemented; `docs/module-reference.md` lists every function (until 2026-11-03 this was in
+`docs/architecture.md`). In short:
 - **`lesions.py`:** labelling; `attach_or_drop` (→ `LesionLabels`), `speck_gaps`;
   `lesion_features` (centroid in three frames: pixels, image fraction, brain box); brain masks,
   `tissue_px`, `brain_box`, `fraction_outside`; helpers `chessboard_distance`, `grow`.
@@ -222,18 +225,11 @@ All implemented; `docs/architecture.md` lists every function. In short:
 
 ## Position frame: open, decided when E2 is planned
 
-The plan measures lesion position relative to the brain box of the paired MRI. But stage 1
-generates masks without seeing a brain, so a memorized mask reproduces its training mask at the
-same *pixel* positions. The synthetic brain box comes from stage 2, and synthetic brains are
-smaller, so even a pixel-perfect copy can get shifted brain-relative coordinates. E4 cannot
-reveal this, because planted copies are real masks with their own real MRI.
-
-Recommendation:
-- **Copy detection (E2/E4/E5):** absolute model-space coordinates (e.g. σ = 0.05 × 128 ≈ 6.4 px),
-  consistent with E1's pixel-wise Dice.
-- **Anatomical questions** (density figure, E6 rarity): brain-relative coordinates.
-
-E0b stores all three frames. The open question is recorded in `docs/report-notes.md` section 5.
+E0b stores the lesion centroid in three frames (pixels, image fraction, brain-relative). Which
+frame E2 uses for the position factor is open; the question, the reasoning and the
+recommendation (pixel coordinates for copy detection) moved on 2026-11-03 to
+`docs/experiment-plan.md`, E2, "Carried over from E0". The evidence is in `docs/report-notes.md`
+(section 3, "Synthetic lesion positions"; section 5, open question).
 
 ## Stages
 
@@ -367,25 +363,17 @@ lesion is under 40 px, (3) every lesion pixel lies inside the generated brain.
 - Counts are cross-checked against the exploration above: about 86% clean, about 1% no_lesion,
   and a noisy group near 4%.
 
-## Later (outside E0b)
+## Carried forward (2026-11-03)
 
-- Decide the position frame when E2 is planned, then update `docs/experiment-plan.md`.
-- ~~Write a pinned `requirements-lock.txt` at the end of E0.~~ Done 2026-11-03.
-- **Table formats for E2/E5 (2026-11-02):** CSV for tables people read (up to a few hundred
-  thousand rows: lesion and slice tables, summaries, everything in `results/`). Parquet (pandas +
-  `pyarrow`) for the large machine tables, e.g. the E2 slice-pair and lesion-pair tables with
-  all candidate pairs (likely several million rows), stored in `processed_data/`, never in git.
-  They carry both the readable `lesion_id` and the integer `lesion_idx` used in computation.
-- **E6 design point (2026-11-02):** small real components (1–3 px) are mostly the tail or start
-  of a metastasis seen in neighbouring slices (manual check of Mets_120 in ITK-SNAP). Real masks
-  have no speck noise, so 3D lesion linking and slice span for H1 should probably use all
-  components of the real mask as saved, not the cleaned labels; otherwise every lesion loses
-  its thin end slices.
-- ~~**Full re-run of E0a + E0b from scratch**~~ done 2026-11-03 (step 9): outputs identical,
-  all figures now have the fixed titles.
-- **Per-pool decisions, when a new synthetic pool arrives** (e.g. from the master-thesis models).
-  The `brain:` decisions in the config are global, including `brain.low_threshold` (0.02, which
-  assumes skull-stripped images with a near-zero background). For a new pool, re-run
-  `brain-review` on it; its threshold-sensitivity table shows whether the threshold still sits
-  in a gap. If the evidence differs, add per-pool overrides under `synthetic_pools.<name>`
-  rather than changing the global values.
+The open items of this plan moved to the documents where they will be used:
+
+| Item (first noted) | Moved to |
+| --- | --- |
+| Position frame for copy detection (2026-11-01) | `docs/experiment-plan.md`, E2, "Carried over from E0" |
+| Lesion crop (`lesion_crop`), not built in E0 | the same E2 notes |
+| Table formats: CSV for readable tables, Parquet for the large E2/E5 pair tables (2026-11-02) | the same E2 notes |
+| 3D lesion linking for H1 from the real masks as saved, not the cleaned labels (2026-11-02) | `docs/experiment-plan.md`, E6, duplication test step 1 |
+| Per-pool decisions when a new synthetic pool arrives (re-run `brain-review`, per-pool overrides) | `scripts/README.md`, Notes |
+
+Done before closing: the pinned `requirements-lock.txt` and the full re-run of E0a + E0b
+(steps 9 and 10 above).

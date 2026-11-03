@@ -211,7 +211,7 @@ The two earlier blockers are resolved. The previous author confirmed the standar
 | Risk | Effect | Fallback |
 | --- | --- | --- |
 | Few lesion slices, and many near-duplicate adjacent slices | Chance matches and inflated slice-level counts | Count matches per patient and per lesion, not per slice; rely on the held-out calibration |
-| Slices are not registered to a common space | Lesion positions can't be compared across patients | Use brain-relative coordinates from the paired MRI's bounding box |
+| Slices are not registered to a common space | Lesion positions can't be compared across patients | Copy detection compares positions in the 128×128 model space the mask generator worked in, since a copy keeps its training mask's pixel positions (decision F, 2026-11-03); brain-relative coordinates from the paired MRI's bounding box are used for anatomical questions |
 | No mask memorization found | RQ1 gives a negative result | Report it as an audited negative with measured detector recall; the master thesis centres on RQ-M1 and M2 |
 | Retraining takes longer than planned (Branch B) | Phase 1 overruns | Compute is available, so the limit is time: estimate training time early; if needed, train at lower resolution or on fewer patients, and keep the positive-control model small |
 

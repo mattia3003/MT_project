@@ -134,3 +134,45 @@ in full, with what replaced them.
     updated to the decided values.
 
   *Source: `requirements-lock.txt`, `pip check`, fresh-venv run.*
+- **E0b plan closed.** `docs/e0b-plan.md` is marked reference only (no longer updated): the
+  record of how E0b was built (decision gates A–E, definitions, stage details). Its open items
+  moved to where they will be used:
+  - position frame for copy detection, lesion crop and table formats (CSV / Parquet) →
+    `docs/experiment-plan.md`, E2, "Carried over from E0"; the position frame also added to
+    the experiment plan's open decisions;
+  - 3D lesion linking from the real masks as saved, not the cleaned labels →
+    `docs/experiment-plan.md`, E6, duplication test step 1;
+  - per-pool decisions for a new synthetic pool (re-run `brain-review` and `qc-review`, per-pool
+    overrides) → `scripts/README.md`, Notes.
+
+  `CLAUDE.md` gets a working-plans rule: one plan document per experiment group, in the E0b
+  form, closed when done with its open items moved on. Found while moving the per-pool item:
+  the code reads only the global E0b decision values, so per-pool overrides need a small code
+  change first (noted in `scripts/README.md`). Noted for when E6 is planned: its step 5 counts
+  only training slices that pass the "< 40 px" sampling filter, which E0 found does not hold
+  for 10.7% of the pool (decision E). *Source: `docs/e0b-plan.md` ("Carried forward"),
+  `src/memtk/e0b/` (`decided(...)` calls).*
+- **E1–E3 plan written** (`docs/e1-e3-plan.md`, the active working plan): decisions F (set by
+  the user: pixel coordinates), G (bound) and H (threshold strata); library modules `stages`
+  (helpers moved from E0b), `wholemask` (E1), `lesionmatch` (E2), `calibration` (E3); E3
+  stages `bound-review`, `calibrate`, `freeze`, `check`; tests; schedule to the 9 Nov freeze.
+  Decision F recorded in `docs/experiment-plan.md` (E2 position factor and prefilter in pixels,
+  E3 step 3, E0 status, preprocessing text, open decisions), `CLAUDE.md`, and the
+  `docs/thesis-plan.md` risk table, which still named brain-relative coordinates as the fix for
+  unregistered slices. Choices made in the plan and accepted by the user: provisional τ_L from
+  H-cal lesions ≥ 10 px; chance-match rate per lesion (for the bound) but τ_L as a per-slice
+  statistic (for the thresholds); strata counted by the lesions each detector sees (≥ 4 px for
+  E1, informative for E2); area bins, 2,000 bootstrap draws, frozen file in `configs/frozen/`.
+  The architecture rework is scheduled before the code of step 1. *Source: `docs/e1-e3-plan.md`.*
+- **Architecture docs reworked for readability.** `docs/architecture.md` (550 lines; its
+  module diagram drew every import as an arrow and was hard to read) became a short overview
+  for people (146 lines): the experiment flow E0–E8 with the freeze and the gate, the data flow
+  between experiments, the code in four layers, folders and conventions. The detail moved,
+  complete, to `docs/data-dictionary.md` (every file and column, in pipeline order, with an
+  index of which stage reads and writes what) and `docs/module-reference.md` (every module with
+  its functions, imports from memtk and "used by" as tables, taken from the code; they match the
+  old diagram exactly). A script confirmed that every name in the old document appears in the
+  new ones, except the two old placeholder module names the E1–E3 plan replaced (`wholemask`,
+  `lesionmatch`) and two doc links whose rule is in CLAUDE.md. The CLAUDE.md update rule now
+  says which document to change for which kind of change; the E0b and E1–E3 plans point to the
+  new files. *Source: `git show HEAD:docs/architecture.md` against the three new documents.*

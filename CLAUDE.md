@@ -14,10 +14,24 @@ Reference docs (read the relevant one before starting work):
   organized by report section. Raw material for the written report; only what the report may use.
 - `docs/process-log.md`: dated log of how the work was done (stages built, re-runs and
   verifications, refactors, bugs fixed, replaced numbers, things tried and removed).
-- `docs/architecture.md`: pipeline flow chart, module diagram (Mermaid) and data dictionary
-  (every file the pipeline reads or writes, with its columns).
-- `docs/e0b-plan.md`: E0b implementation plan, stage status and decisions made so far.
-  Read it before continuing E0b work; update its status table when a stage is done.
+- `docs/architecture.md`: short overview for people: the experiment flow (E0-E8), how data
+  flows between experiments, the code layers, folders and conventions.
+- `docs/data-dictionary.md`: every file the pipeline reads or writes (path, written by, read
+  by, in git, columns), in pipeline order, with an index of which stage reads and writes what.
+- `docs/module-reference.md`: every code module (purpose, main functions, imports from memtk
+  and "used by", external libraries), the tests, and the planned modules. Use it (and the
+  data dictionary) to trace the effect of a code change.
+- `docs/e0b-plan.md`: E0b implementation plan, CLOSED 2026-11-03 (reference only, not updated).
+  The record of how E0b was built: decision gates A-E, definitions (gap, speck, stray, lesion
+  IDs and numbering), stage details. Its open items moved to `docs/experiment-plan.md` (E2, E6)
+  and `scripts/README.md`.
+- Working plans: each experiment group gets its own plan document in `docs/` (same form as the
+  E0b plan: status table, "next: start here", decision gates, stages, verification). Read the
+  active one before continuing work and update its status table when a stage is done; close it
+  when the work is done, moving open items to where they will be used.
+- `docs/e1-e3-plan.md`: ACTIVE working plan (from 2026-11-03) for E1 (whole-mask detector), E2
+  (lesion-level detector) and E3 (calibration, `scripts/e3_calibrate.py`): decisions F (set:
+  pixel coordinates), G (bound), H (strata), steps, stages, tests. Start at its "Next" line.
 This file is a summary. If it disagrees with the docs, the docs win; flag the mismatch.
 
 ## Data
@@ -81,9 +95,9 @@ This file is a summary. If it disagrees with the docs, the docs win; flag the mi
 - Data use is authorized: all results, including match reports showing real masks, may go in
   the written report (use pseudonymous patient IDs).
 - Decided during the work (not yet fixed): the informative-lesion bound (set in E3 from H-cal;
-  E0b `stats` gives what each candidate bound costs each set in `bound_impact_<pool>.csv`), the
-  position frame for copy detection (decide when E2 is planned; recommendation: pixel
-  coordinates), and the E4 go/no-go criteria (must be fixed before E4 runs; never tune on S).
+  E0b `stats` gives what each candidate bound costs each set in `bound_impact_<pool>.csv`;
+  decision G in `docs/e1-e3-plan.md`), the threshold strata (decision H), and the E4 go/no-go
+  criteria (must be fixed before E4 runs; never tune on S).
 - Environment: `requirements-lock.txt` pins only what the project needs (direct dependencies
   in `pyproject.toml` plus what they require; Python 3.11.9, Windows), at the versions that
   produced E0; install with `pip install --no-deps -r requirements-lock.txt` (monai 1.6.0
@@ -165,12 +179,16 @@ can this be detected and explained using generated outputs alone?
   candidate slice pair, count small lesions in q with a small lesion in t within ~3 px (centroid
   distance only); store as extra slice-pair columns; chance baseline from the same check on H-cal.
   Used only as supporting evidence in E7 match reports (Panel C + verdict line).
-- Lesion score s(a, b) = shape (IoU of centred crops) x position exp(-d^2/2 sigma^2), sigma =
-  0.05 brain box) x size (smaller/larger area). Store all three factors.
+- Lesion score s(a, b) = shape (IoU of centred crops) x position exp(-d^2/2 sigma^2), d in
+  pixels) x size (smaller/larger area). Store all three factors. Position frame DECIDED
+  2026-11-03 (decision F): pixel coordinates, sigma = 0.05 x 128 = 6.4 px, prefilter 0.2 x 128 =
+  25.6 px (stage 1 copies keep the training mask's pixel positions; synthetic brains are smaller).
+  Brain-relative coordinates only for anatomical questions. Crops are built in E2 from the E0
+  label maps.
 - Slice-pair score C(q, t): Hungarian one-to-one pairing on cost 1 - s, keep pairs with
   s >= tau_L, C = sum(kept s) / max(n_lesions_q, n_lesions_t). NN = training slice with max C.
-- Exact shortcuts (no approximation): position prefilter (skip lesion pairs > 0.2 brain box
-  apart; confirm s < tau_L there) and candidate slices (only compute C for training slices
+- Exact shortcuts (no approximation): position prefilter (skip lesion pairs > 25.6 px apart;
+  confirm s < tau_L there) and candidate slices (only compute C for training slices
   sharing a lesion pair with s >= 0.1; all others have C = 0).
 - Classes: full copy C(q, NN) >= tau_C; partial copy C < tau_C but >= 1 lesion pair in NN slice
   passes tau_L; novel otherwise. Also record the strongest single lesion-pair score across all
@@ -260,7 +278,10 @@ Not aimed at publication for now. Original weights (Branch A) only as a fallback
   fixed, replaced numbers with the reason, things tried and removed). A step can need both,
   e.g. a short claim in report-notes pointing to the details in the log. Never record a number
   without saying where it comes from.
-- When a stage or module is added or changed, update `docs/architecture.md` in the same change
-  (flow chart, module diagram from the actual imports, data dictionary), together with the
-  status table and the copy-paste "Commands" section in `scripts/README.md` (every stage and
-  helper with its useful options). Earlier segmentation work is under the git tag `segmentation-final`.
+- When a stage or module is added or changed, update the docs in the same change:
+  `docs/data-dictionary.md` for every new or changed file or column (index row and entry);
+  `docs/module-reference.md` for every new or changed module, function list or import (imports
+  and "used by" taken from the actual code); `docs/architecture.md` only when an experiment, a
+  layer, a folder or the data flow changes (keep it short and readable for people: no
+  per-import diagrams or column lists there); and the status table and copy-paste "Commands"
+  section in `scripts/README.md` (every stage and helper with its useful options). Earlier segmentation work is under the git tag `segmentation-final`.

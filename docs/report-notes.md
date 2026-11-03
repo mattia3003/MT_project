@@ -310,6 +310,18 @@ move the old ones, with the reason, to the process log.
   evidence in lesion-level matching. One setting cannot do both: a 15 px lesion definition would
   turn real small metastases into noise; a 4 px matching bound would flood E2 with chance
   matches between featureless blobs. 2026-11-02.
+- **Position frame for copy detection: pixel coordinates** (decision F, set 2026-11-03; a
+  deviation from the experiment plan, which first measured position relative to the brain box of
+  the paired MRI). Stage 1 generates masks without seeing a brain, so a copy keeps its training
+  mask's pixel positions. Synthetic brains are smaller (median 3,009 vs 7,765 px), and synthetic
+  lesions are compact in pixels but have a real-like spread relative to the brain box, so
+  brain-relative positions would mostly measure how stage 2 drew the brain, not what stage 1
+  copied. Pixel coordinates are also consistent with E1's pixel-wise Dice. Settings: σ = 0.05 ×
+  128 = 6.4 px; prefilter 0.2 × 128 = 25.6 px. Brain-relative coordinates are kept for anatomical
+  questions (density figures, E6 rarity). Not testable by E4, whose planted copies are real masks
+  with their own real MRI. *Source: `results/stanford_brainmets/e0b/stats/centroid_density_amibekk_v1.png`,
+  `description_amibekk_v1.csv`, `brain_by_height_amibekk_v1.png`; `docs/experiment-plan.md` E2;
+  `docs/e1-e3-plan.md`, 2026-11-03.*
 
 ## 3. Findings
 
@@ -601,8 +613,9 @@ move the old ones, with the reason, to the process log.
       columns; the main audit uses `mask_class` clean or minor, and `mri_failed` only excludes a
       sample where the brain is used. See "QC classes" in section 2; the question as first
       recorded is in the process log (2026-11-02).
-- [ ] **Position frame for copy detection (E2), a deviation from the plan to decide when E2 is
-      planned.** The plan measures lesion position relative to the brain box of the paired MRI.
+- [x] **Position frame for copy detection (E2), a deviation from the plan to decide when E2 is
+      planned.** *Resolved 2026-11-03: pixel coordinates (decision F); see "Position frame for
+      copy detection" in section 2.* The question as recorded: The plan measures lesion position relative to the brain box of the paired MRI.
       But stage 1 generates masks without seeing a brain, so a memorized mask reproduces its
       training mask at the same *pixel* positions. The synthetic brain box comes from stage 2,
       and synthetic brains are clearly smaller (section 3), so even a pixel-perfect copy can get

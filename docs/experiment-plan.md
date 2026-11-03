@@ -52,12 +52,12 @@ Split the test patients into H-cal and H-eval by patient, with a fixed seed, and
 1. Bring real data into model space with the repo's own transform. For each volume, apply ScaleIntensity (min–max to \[0, 1\]), then MONAI Resize((128, 128, −1)), whose default interpolation is area averaging. Then binarize the masks at 0.01. The original masks are binary (check that they hold only 0 and 1), but area averaging makes edge pixels fractional, so re-binarizing enlarges each lesion slightly. Put the BRAVO volumes through the same transform. Compare everything in this space, because it is what the models saw and could memorize.
 2. Synthetic masks are already binary in the saved files: the sampling script min–max scaled each mask and thresholded it at 0.01. Use them as saved.
 3. Label lesions as connected components (8-connectivity). Then apply attach-or-drop to every component smaller than a minimum area. If it lies within 2 pixels of a real-sized lesion, attach it to that lesion as a stray pixel; otherwise drop it as a speck. Two real-sized lesions are never merged. The minimum is learned in E0 from the smallest component sizes that occur in converted real masks, because at 128×128 a genuinely small metastasis covers only a few pixels.
-4. Compute brain-relative coordinates. Take the brain bounding box from the paired MRI (decided in E0b, 2026-11-01: pixels above a low threshold, every region ≥ 30 px, holes filled; plain Otsu with the largest component trimmed dim tissue and lost separate brain pieces) and express each lesion's centroid as (x, y) in \[0, 1\] inside that box. Real masks use the real BRAVO slice; synthetic masks use their paired synthetic MRI.
+4. Compute brain-relative coordinates (used for anatomical questions such as E6 rarity; copy detection in E2 uses pixel coordinates, decision F, 2026-11-03). Take the brain bounding box from the paired MRI (decided in E0b, 2026-11-01: pixels above a low threshold, every region ≥ 30 px, holes filled; plain Otsu with the largest component trimmed dim tissue and lost separate brain pieces) and express each lesion's centroid as (x, y) in \[0, 1\] inside that box. Real masks use the real BRAVO slice; synthetic masks use their paired synthetic MRI.
 5. Stage 1 was trained without augmentation, so the detectors need no flip or rotation tolerance. A small shift tolerance stays, to absorb sampling noise.
 
 **What the repo confirms** ([amibekk/Thesis](https://github.com/amibekk/Thesis), `Generation/`):
 
-- **Aspect ratio is not kept.** `Resize((128, 128, -1))` scales each in-plane axis independently, so a 160×176 slice is squeezed by factors of 0.80 and 0.73. The distortion differs per patient, which is why positions use brain-relative coordinates and all comparisons happen in model space.
+- **Aspect ratio is not kept.** `Resize((128, 128, -1))` scales each in-plane axis independently, so a 160×176 slice is squeezed by factors of 0.80 and 0.73. The distortion differs per patient, which is why all comparisons happen in model space (and why brain-relative coordinates were first planned for positions; E2 uses pixel coordinates, decision F, because stage 1 copies would keep the pixel positions of the training mask in this same space).
 - **Depth is not resampled** (the −1), so slice indices and adjacency are preserved.
 - **Masks are area-averaged, then thresholded at 0.01.** Any pixel with more than 1% lesion coverage becomes lesion, which enlarges lesions by about one pixel at the edge. For small lesions that is a large share of their area. Measured in E0a, per patient, the lesion area after conversion is a median of 1.5 times what plain downscaling would give (range 1.08–2.70). E0 step 5 measures it per lesion. No lesion slice is lost or gained by the conversion. Synthetic masks were also thresholded at 0.01.
 - **The stage-1 slice selection is not fully known.** The repo's training loop computes an empty-slice filter (`np.sum(image) > 1.0`) but never applies it, and as written it could not train the mask-only model, since it passes the two-channel batch to a one-channel network. The mask channel is binarized at 0.01 in every case, matching our conversion. If the filter actually used dropped slices with at most 1 or 2 lesion pixels, T contains 2 or 10 of its 3,823 slices that stage 1 never saw. That bound is small enough to state as a limitation rather than act on.
@@ -148,7 +148,7 @@ Also keep the masks exactly as saved: stage 2 was conditioned on them, specks in
 - Minor masks have up to 9 isolated specks, not 3: the counts show a break at 9 (decision D).
 - A failed synthetic MRI does not exclude its mask (separate `mask_class` and `mri_failed` columns); edge flags only flag.
 - The "lesion under 40 pixels" rule is a flag column, not a filter: on the data it fails for 10.7% of the masks as saved, so it is not applied to the real sets (decision E; only the pixel-sum filter is).
-- The lesion table stores the centroid in three frames (pixels, image fraction, brain-relative); which frame E2 uses for position is decided when E2 is planned.
+- The lesion table stores the centroid in three frames (pixels, image fraction, brain-relative); E2 uses pixel coordinates for position (decision F, 2026-11-03), brain-relative coordinates stay for anatomical questions.
 - The 16×16 lesion crop (step 3) is not cached; it is built in E2, where it is used.
 - Besides the plan's items, E0 adds a bound-impact table (input for the informative-lesion bound in E3) and brain size by slice height.
 
@@ -188,7 +188,7 @@ Also keep the masks exactly as saved: stage 2 was conditioned on them, specks in
 1. **Keep informative lesions only.** Lesions below the size bound set in E3 are neither matched nor counted. A blob of a few pixels has almost no shape, so its matches are mostly chance. Slices with no informative lesion leave the lesion-level analysis, but the whole-mask detector (E1) still scores them.
 2. **Score two lesions.** For a lesion a (synthetic) and a lesion b (training), multiply three terms, each between 0 and 1:
    - **Shape:** IoU of the two lesion crops from E0, centred on their centroids.
-   - **Position:** exp(−d² / 2σ²), where d is the distance between brain-relative centroids. Start with σ = 0.05, i.e. 5% of the brain box.
+   - **Position:** exp(−d² / 2σ²), where d is the distance between the centroids in pixel (model-space) coordinates. Start with σ = 0.05 of the 128-pixel field, i.e. 6.4 px. *(Decision F, 2026-11-03: pixel coordinates instead of the brain-relative coordinates first planned; reasons under "Carried over from E0" below.)*
    - **Size:** smaller area divided by larger area.
 
    The lesion score s(a, b) is the product. Store all three factors, not just the product: they are the explanation.
@@ -199,7 +199,7 @@ Also keep the masks exactly as saved: stage 2 was conditioned on them, specks in
 
    Example: q has lesions A and B, t has X, Y and Z, and the best pairing is A–X (0.9) and B–Z (0.2). Only A–X passes τ\_L, so C = 0.9 / 3 = 0.30, a partial copy.
 4. **Compute only the pairs that can score above zero.** About 35,000 × 3,800 slice pairs is too many to check one by one. Two shortcuts give exactly the same result:
-   - **Position prefilter:** skip lesion pairs whose centroids are more than 0.2 of the brain box apart. With σ = 0.05, their position factor is exp(−8), about 0.0003, so s can never reach τ\_L. Confirm this once τ\_L is fixed (E3).
+   - **Position prefilter:** skip lesion pairs whose centroids are more than 0.2 of the field apart (25.6 px). With σ = 0.05 (6.4 px), their position factor is exp(−8), about 0.0003, so s can never reach τ\_L. Confirm this once τ\_L is fixed (E3).
    - **Candidate slices:** compute C(q, t) only for training slices that share at least one lesion pair with q scoring s ≥ 0.1. For every other training slice, C is zero by definition.
 5. **Classify each synthetic slice** from its nearest neighbour (NN), the training slice with the highest C:
    - **Full copy:** C(q, NN) ≥ τ\_C.
@@ -217,6 +217,12 @@ Also keep the masks exactly as saved: stage 2 was conditioned on them, specks in
 | Synthetic summary | Synthetic slice | NN slice and C, class, strongest single lesion match and its slice | Rates (E5), report selection (E7) |
 
 Store every candidate pair, not only those above the thresholds. Thresholds are then applied at analysis time, so sensitivity analyses need no recomputation. It also means a lesion copied across several adjacent training slices credits all of them, which E6 needs for H1.
+
+**Carried over from E0 (2026-11-03); E2 is planned in `docs/e1-e3-plan.md`**
+
+- **Position frame: decided 2026-11-03 (decision F): pixel coordinates.** The reasoning, as first recorded: step 2 originally measured position relative to the brain box of the paired MRI. But stage 1 generates masks without seeing a brain, so a memorized mask reproduces its training mask at the same *pixel* positions. The synthetic brain box comes from stage 2, and synthetic brains are smaller (E0: median brain area 3,009 vs 7,765 px), so even a pixel-perfect copy can get shifted brain-relative coordinates. E0 also found synthetic lesions compact in pixels but with a real-like spread relative to the brain box, which suggests stage 2 fits the brain around the lesions. E4 cannot reveal the problem, because planted copies are real masks with their own real MRI. Chosen: pixel (model-space) coordinates for copy detection in E2/E4/E5 (σ = 0.05 × 128 ≈ 6.4 px; the prefilter's 0.2 becomes ≈ 26 px), consistent with E1's pixel-wise Dice; brain-relative coordinates for anatomical questions (density figure, E6 rarity). The E0 lesion table stores all three frames (pixels, image fraction, brain-relative), so nothing needs recomputing either way. Evidence: `docs/report-notes.md`, section 3 ("Synthetic lesion positions") and section 5.
+- **Lesion crop.** E0 did not cache the crops of step 2 (16×16 pixels centred on the centroid, larger for lesions that don't fit); E2 builds them from the E0 label maps (`labels.npz`) where they are used.
+- **Table formats.** CSV for tables people read (up to a few hundred thousand rows: lesion and slice tables, summaries, everything in `results/`). Parquet (pandas + `pyarrow`, to be added to `pyproject.toml` and the lock file) for the large machine tables, i.e. the slice-pair and lesion-pair tables with all candidate pairs (likely several million rows), stored in `processed_data/`, never in git. They carry both the readable `lesion_id` and the integer `lesion_idx` used in computation.
 
 **Optional: small-lesion agreement.** Lesions below the informative-lesion bound stay out of C, but they can support a match that has already been found. Two small blobs coinciding somewhere is likely by chance. Once the informative lesions of q match t, it is much less likely that the small lesions also sit in the same places.
 
@@ -250,7 +256,7 @@ The check never changes C or the copy class. It is supporting evidence for the m
    - Set each threshold at the 95th percentile of H-cal: τ\_D for whole-mask Dice, τ\_C for the configuration score, and τ\_L for the best lesion-pair score.
    - Compute them separately for single-lesion and multi-lesion slices.
    - Steps 1 and 2 depend on each other through τ\_L: set a provisional τ\_L, then the bound, then the final τ\_L. One round is enough.
-3. **Confirm the prefilter is exact.** Check that at the prefilter distance (0.2 of the brain box), s stays below τ\_L for every lesion size.
+3. **Confirm the prefilter is exact.** Check that at the prefilter distance (0.2 of the field, 25.6 px), s stays below τ\_L for every lesion size.
 4. **Check sensitivity with one alternative per setting:** σ of 0.08 instead of 0.05, the 99th percentile instead of the 95th, and a bound one step lower.
 5. **Freeze.** Write all thresholds and settings to a config file under version control, before E4 and well before E5.
 6. **Null model: dropped (decision 2026-11-01).** It was planned as an optional set of fake masks built from H-cal lesions at independent positions, to give stable chance rates for partial copies. Its main use was the recombination question, which is out of scope, and held-out real patients are the more credible baseline. The cost: chance rates for multi-lesion slices rest on H-cal alone, which has 303 multi-lesion slices from 17 patients (≥2 lesions of ≥4 px), or 192 from 12 patients (≥2 lesions of ≥15 px). To handle this, report a bootstrap-by-patient confidence interval for every threshold, and pool the single- and multi-lesion thresholds if the multi-lesion one is unstable.
@@ -370,7 +376,7 @@ The check never changes C or the copy class. It is supporting evidence for the m
 
 **Duplication test (H1), run alongside step 5**
 
-1. **Label lesions in 3D.** In each training volume, after the same 128×128 conversion, label lesions with 26-connectivity, so a lesion touching across slices counts as one.
+1. **Label lesions in 3D.** In each training volume, after the same 128×128 conversion, label lesions with 26-connectivity, so a lesion touching across slices counts as one. *Carried over from E0 (2026-11-02):* small real components (1–3 px) are mostly the tail or start of a metastasis seen in neighbouring slices (manual check of Mets_120 in ITK-SNAP), and real masks have no speck noise. So the 3D linking and slice span should probably use all components of the real mask as saved (`seg.nii.gz`), not the cleaned 2D labels; otherwise every lesion loses its thin end slices. The 2D lesion IDs stay unchanged; the 3D linking adds a `lesion3d_id` column.
 2. **Record each 3D lesion's slice span:** how many 2D training slices contain it.
 3. **Count copies per 3D lesion.** Map each 2D training lesion to its 3D lesion. Using all stored slice pairs above threshold, count how many synthetic copies (full or partial) matched one of its slices.
 4. **Test whether copies rise with slice span** with a Spearman correlation between slice span and copy count across 3D lesions. Because bigger lesions span more slices, repeat it within lesion-size bins, so size alone doesn't drive the result.
@@ -489,4 +495,5 @@ Never cut E4: without validation, a negative result means nothing.
 **Decisions still open**
 
 - [ ] Go/no-go criteria for E4: decided during the work, but fixed before E4 runs.
+- [x] Position frame for copy detection in E2: pixel coordinates (decision F, 2026-11-03); see "Carried over from E0" in E2.
 - [ ] The informative-lesion bound: decided during coding, by looking at how candidate bounds affect the synthetic pool, together with the quality-control re-run in E0.

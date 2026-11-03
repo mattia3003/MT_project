@@ -103,6 +103,16 @@ stage that needs it refuses to run while it is still `null`.
 The split is fixed for the whole project: `split` refuses to replace an existing split file
 unless `--overwrite` is given (re-running with the same seed gives an identical file).
 
+**A new synthetic pool** (e.g. from the master-thesis models) is a new entry under
+`synthetic_pools` in the config, run with `--pool <name>`. The E0b decisions in the config are
+global, and some depend on the data: `brain.low_threshold` (0.02) assumes skull-stripped images
+with a near-zero background, and `qc.max_isolated_specks` (9) was read from this pool's speck
+counts. For a new pool, re-run the review stages on it (`brain-review`, `qc-review`) before the
+production stages. `brain-review`'s threshold-sensitivity table shows whether the threshold
+still sits in a gap. If the evidence differs, add per-pool overrides under
+`synthetic_pools.<name>` rather than changing the global values; the code reads only the global
+values today, so that needs a small change where the stages call `decided(...)`.
+
 Conventions:
 - Slice index `z` is always the 0-based array index along the slice axis. ITK-SNAP numbers
   slices from 1: its slice 83 is our `z82`.
