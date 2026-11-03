@@ -12,13 +12,13 @@ E4 on planted copies and E5 on S.
 | --- | --- | --- | --- |
 | 0 | This plan; decision F recorded in the docs | docs | ✅ 2026-11-03, reviewed by the user (choices accepted) |
 | 1 | Shared stage helpers → `memtk/stages.py`; config sections `detectors:`, `calibration:` | refactor + config | ✅ 2026-11-03: `decided` takes a dotted key and the full review command; F set in the config, G and H `null`; pytest 66 passed, E0b check 43/43 |
-| 2 | E1 library `memtk/wholemask.py` + tests | library | ⏳ |
+| 2 | E1 library `memtk/wholemask.py` + tests | library | ✅ 2026-11-03: 10 tests; self-match sanity on 300 random T slices: all score 1 at no shift (4 matched an identical neighbouring slice); 4.4 ms per query (S main ≈ 3 min) |
 | 3 | E2 library `memtk/lesionmatch.py` + tests | library | ⏳ |
 | 4 | `bound-review` | review → decision G | ⏳ |
 | 5 | `calibrate` | production (needs G) → evidence for decision H | ⏳ |
 | 6 | `freeze` + `check` | production (needs H) + consistency checks | ⏳ |
 
-**Next: start here.** Step 2, the E1 library `memtk/wholemask.py` and its tests. (The architecture docs were reworked first, 2026-11-03: new
+**Next: start here.** Step 3, the E2 library `memtk/lesionmatch.py` and its tests. (The architecture docs were reworked first, 2026-11-03: new
 modules and files go into `docs/module-reference.md` and `docs/data-dictionary.md`.)
 
 **Milestone:** 9 Nov 2026, both detectors run on H-cal; informative-lesion bound and thresholds
@@ -92,8 +92,11 @@ production stage refuses to run while its value is `null` and names the review s
   **Reference set**: T. Masks are compared as cleaned masks (`labels > 0`); the masks as saved
   are only used where the plan says so (E5's noisy-mask check, E8).
 - **E1 score:** the highest Dice between the query mask and a candidate training mask over shifts
-  of up to ±3 px in rows and columns (49 positions). **Margin:** best score minus the best score
-  of any slice from another patient.
+  of up to ±3 px in rows and columns (49 positions). The query is moved; pixels moved off the
+  image are lost (no wrap-around), and Dice keeps the query's full area in its denominator.
+  Ties: the smallest shift, then the higher plain Dice, then the first training slice.
+  **Margin:** best score minus the best score of any slice from another patient (shift-searched
+  for candidates, plain Dice for the rest).
 - **Lesion score** s(a, b) = shape × position × size, each in [0, 1]:
   - *shape:* IoU of the two lesions' pixel sets with their centroids aligned (rounded to whole
     pixels); the same as IoU of centred crops large enough for both;

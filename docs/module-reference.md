@@ -37,6 +37,7 @@ updated after `memtk.stages` was added, E1–E3 step 1).
 | `lesions` | 8-connected labelling; attach-or-drop (specks below the minimum area become strays of a lesion within the gap, or are dropped; lesions numbered by area); lesion features (centroid in three frames, bbox, shape, fraction outside the brain); brain masks (six candidate methods), tissue area, brain box; distance and growing helpers | `label_components`, `count_components`, `attach_or_drop` (→ `LesionLabels`), `speck_gaps`, `lesion_features`, `brain_mask`, `tissue_px`, `brain_box`, `fraction_outside`, `chessboard_distance`, `grow` | — | `plotting`, `synthetic`, `checks`, `e0b.brain`, `e0b.check`, `e0b.filters`, `e0b.lesions`, `e0b.qc`, `e0b.stats` | SciPy, scikit-image |
 | `qc` | Quality classes of synthetic samples: mask class from the mask alone (`no_lesion`, `noisy`, `minor`, `clean`), the combined class with a failed MRI first, the edge count per slice | `mask_class`, `qc_class`, `edge_lesions`, `MASK_CLASSES`, `QC_CLASSES` | — | `checks`, `e0b.qc` | pandas |
 | `plotting` | Shared figure helpers and colours (no pyplot, so importing memtk never changes the plotting backend). `save` wraps the figure title to the figure width and uses the constrained layout, so the title never covers tile titles or runs off the image. `draw_lesions` draws a labelled slice (lesion colours with L-numbers, lighter strays, specks as ×, brain outline and box) | `tile_figure`, `show_slice`, `draw_box`, `hide_unused`, `save`, `draw_lesions`, `lesion_sheet`; colours `BRAIN_COLOR`, `LESION_COLOR`, `BOX_COLOR`, `HIGHLIGHT_COLOR`, `SPECK_COLOR`, `LESION_COLORS`, `SET_COLORS` | `lesions` | `checks`, `e0b.brain`, `e0b.lesions`, `e0b.qc`, `e0b.stats` | matplotlib |
+| `wholemask` | E1, the whole-mask nearest-neighbour detector: plain Dice to every training mask (one sparse matrix product, queries in blocks), candidates (best by plain Dice plus nearest by the centroid of lesion L1), best Dice over shifts of ±`max_shift` px (zero padding, no wrap-around; ties: smallest shift), nearest neighbour, runner-up patient and margin. Refuses masks without a lesion | `match` (one row per query), `dice_matrix`, `shifted_dice`, `shift_order`, `candidate_indices`, `largest_lesion_centroids` | — | (E3, E4, E5 stages, planned) | NumPy, SciPy (sparse), pandas |
 | `checks` | E0 consistency checks. E0a: split, volumes, independent reference transform, synthetic index, sample grid. E0b: lesion tables vs label maps, label maps vs masks as saved, label volumes, QC table, stack keys, run logs vs the current config | `CheckReport`, `check_split`, `check_real_volumes`, `check_recompute`, `check_synthetic_index`, `sample_grid`, `check_lesion_tables`, `check_labels_vs_masks`, `check_label_volumes`, `check_qc_table`, `check_stack_keys`, `check_run_logs` | `config`, `ids`, `io`, `lesions`, `plotting`, `qc`, `synthetic`, `transforms` | `e0b.check`, `e0a_prepare_data.py` | PyTorch, matplotlib, tqdm |
 
 ## Stage package `e0b` (`src/memtk/e0b/`)
@@ -72,7 +73,10 @@ box; `tests/test_io.py` covers the mask- and label-stack round trips and `read_t
 the shared stage helpers (dotted-key decisions and their stop message, the overwrite and input
 guards, seeded picks, the shared command-line options); `tests/test_qc.py` covers the
 class precedence, the speck cut-off and the edge count; `tests/test_filters.py` covers the
-sampling-filter checks; `tests/test_checks.py` runs the E0b consistency checks on consistent
+sampling-filter checks; `tests/test_wholemask.py` covers E1 (known Dice values, the L1 centroid,
+a shifted exact copy found with its shift, no wrap-around at the border, shifts beyond the range
+not found, centroid candidates catching a copy with no plain overlap, the margin against another
+patient, the smallest shift among ties, masks without a lesion refused); `tests/test_checks.py` runs the E0b consistency checks on consistent
 outputs (pass) and on damaged copies (fail: wrong areas, centroids, IDs, counts, numbering,
 labels outside the mask, wrong QC class, stale or out-of-order run logs).
 Run with `.venv\Scripts\python.exe -m pytest`.
@@ -83,7 +87,6 @@ E1–E3 (specified in `docs/e1-e3-plan.md`):
 
 | Module | For | Purpose |
 | --- | --- | --- |
-| `wholemask` | E1 | Dice matrix, top-k candidates (Dice and largest-lesion centroid), ±3 px shift search, NN and margin |
 | `lesionmatch` | E2 | Lesion records from label maps, lesion score s(a, b) with its three factors, exact shortcuts, Hungarian C(q, t), classes, the three output tables |
 | `calibration` | E3 | Percentile thresholds per stratum and pooled, bootstrap by patient, chance-match rate by area bin, the bound rule |
 | `e3` package | E3 | Stages `bound-review`, `calibrate`, `freeze`, `check` (modules `bound`, `calibrate`, `check`, `common`) |

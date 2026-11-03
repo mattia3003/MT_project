@@ -188,3 +188,14 @@ in full, with what replaced them.
   (percentile 95, 2,000 bootstrap draws; decisions G and H `null`). Verified: pytest 66 passed
   (6 new in `tests/test_stages.py`), E0b check 43/43 (report changed only in the pytest line),
   no Pylance problems. *Source: `git diff`, pytest, `e0b_audit.py check`.*
+- **E1–E3 step 2: E1 library `memtk/wholemask.py`.** Plain Dice to every training mask by one
+  sparse matrix product (queries in blocks of 512); shortlist of the 20 best by plain Dice plus
+  the 20 nearest by the centroid of lesion L1; best Dice over ±3 px shifts of the query (zero
+  padding, no wrap-around; the query's full area stays in the denominator); ties to the smallest
+  shift, then the higher plain Dice, then the first training slice; runner-up patient and margin;
+  masks without a lesion refused (the stages leave them out and report them). 10 tests (76 in
+  total); one test first failed because its hand-built map did not number the largest lesion
+  L1, fixed in the test. Self-match sanity on 300 random T slices against T: all scored 1 at no
+  shift; 296 found themselves, 4 an identical neighbouring slice of the same patient. 4.4 ms per
+  query (S main about 3 min). One Pylance issue (NumPy index type) fixed with an explicit
+  `int(...)`. *Source: pytest; sanity script (scratch, not in the repo).*

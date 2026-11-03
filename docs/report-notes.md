@@ -366,6 +366,12 @@ move the old ones, with the reason, to the process log.
   and count per patient and per lesion, not per slice. *Source:
   `results/stanford_brainmets/e0b/stats/adjacency_dice_stanford_brainmets.csv` and `.png`,
   `summary.txt`, 2026-11-03.*
+- **Some T patients have identical cleaned masks on neighbouring slices** (e.g. Mets_323 z73/z74
+  and z104/z105, Mets_314 z45/z48). Found by E1's self-match check: 4 of 300 random T slices
+  had an exact duplicate in the same patient. They add to the near-duplicate neighbouring slices
+  above and support counting copies per patient and slice window, not per slice. *Source: E1
+  self-match sanity check (`memtk.wholemask.match`, 300 random T slices against T, seed 2026),
+  2026-11-03.*
 - **Some synthetic MRIs contain no brain at all.** 152 of 37,624 samples have < 20 px of brain
   tissue; the 32 lowest have 0 px (a black image with only a lesion or a faint smudge). Between
   ~50 and ~400 px the images show small brain fragments, similar to the smallest real T lesion

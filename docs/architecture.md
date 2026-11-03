@@ -103,7 +103,8 @@ as from its script, e.g. `run_qc(load_config(), overwrite=True)`.
 | `plotting` | shared figure helpers and colours |
 | `checks` | the E0 consistency checks |
 | `stages` | shared helpers for stage packages: command-line options, decisions, overwrite guard |
-| `wholemask`, `lesionmatch`, `calibration` (planned) | the E1 and E2 detectors and E3 calibration |
+| `wholemask` | E1: the whole-mask detector (Dice with a small shift search) |
+| `lesionmatch`, `calibration` (planned) | E2: the lesion-level detector; E3: calibration |
 
 Functions, imports, "used by" and tests: `docs/module-reference.md`.
 
