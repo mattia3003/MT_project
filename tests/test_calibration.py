@@ -4,7 +4,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from memtk.calibration import area_bins, bin_label, chance_rates, percentile_threshold, propose_bound
+from memtk.calibration import (area_bins, bin_label, bootstrap_interval, chance_rates, percentile_threshold,
+                               propose_bound, stratum)
 
 EDGES = (4, 10, 20)
 
@@ -26,6 +27,27 @@ def test_chance_rates_count_lesions_patients_and_missing_scores():
 
 def test_percentile_counts_missing_scores_as_zero():
     assert percentile_threshold(np.array([np.nan, np.nan, 1.0, 1.0]), 50) == pytest.approx(0.5)
+
+
+def test_stratum():
+    assert stratum(np.array([1, 2, 5])).tolist() == ["single", "multi", "multi"]
+
+
+def test_bootstrap_is_repeatable_and_collapses_for_constant_scores():
+    scores, patients = np.full(30, 0.4), np.repeat(["A", "B", "C"], 10)
+    assert bootstrap_interval(scores, patients, 95, 200, np.random.default_rng(0)) == (0.4, 0.4)
+    vary = np.random.default_rng(1).random(30)
+    first = bootstrap_interval(vary, patients, 95, 200, np.random.default_rng(7))
+    assert first == bootstrap_interval(vary, patients, 95, 200, np.random.default_rng(7))
+
+
+def test_bootstrap_resamples_patients_not_slices():
+    # patient B has one high slice among 100 low ones; a draw holding only B (and its copies)
+    # has a 95th percentile of 1, which resampling single slices would almost never produce
+    scores = np.r_[np.zeros(100), 1.0]
+    patients = np.array(["A"] * 100 + ["B"])
+    low, high = bootstrap_interval(scores, patients, 95, 400, np.random.default_rng(0))
+    assert (low, high) == (0.0, 1.0)
 
 
 @pytest.mark.parametrize("rates, cut, expected", [

@@ -225,3 +225,39 @@ in full, with what replaced them.
   key); output identical after the fixes. The user confirmed (2026-11-03) that parameter
   choices are theirs; no supervisor sign-off is needed for them. *Source:
   `results/stanford_brainmets/e3/bound_review/`, pytest.*
+- **E1–E3 step 5: `calibrate`, decision H, and the configuration score.**
+  - Built `memtk/e3/calibrate.py` (E1 and E2 on H-cal against T, thresholds pooled and per
+    stratum with 2,000-draw bootstrap-by-patient intervals, classes on H-cal, sensitivity table,
+    exclusions, histograms) and added `stratum` and `bootstrap_interval` to
+    `memtk/calibration.py` (3 tests; one first failed because `np.r_` reads the string "B" as a
+    directive, fixed in the test). First Parquet tables: `pyarrow` 25.0.1 added to
+    `pyproject.toml` and `requirements-lock.txt` (no further requirements).
+  - *First run (planned C, pairs ≥ τ_L only):* τ_C was degenerate: 0.020 pooled [0.000, 0.202],
+    0.064 single [0.000, 0.373], 0.062 multi [0.000, 0.208]; C was 0 for ~95% of H-cal slices,
+    and τ_C flagged exactly the τ_L slices. τ_D and τ_L as now.
+  - *Detour:* the user first chose a structural rule (full = every lesion of both slices paired
+    with s ≥ τ_L; `summary` without τ_C; NN preferring full copies); one run gave flagged
+    5.1% / 5.2%, full 2.5% / 0% (single / multi).
+  - *Final, after discussion with the user:* C counts every Hungarian pair with s ≥ 0.1; τ_C back
+    as its 95th percentile; classes by the plan's rule A (full = C ≥ τ_C, partial = a pair ≥ τ_L);
+    `n_kept` and `all_copied` descriptive. A read-only check on the stored H-cal tables first
+    showed the new C to be non-degenerate (τ_C 0.719 / 0.406). Decision H set by the user:
+    stratified for both detectors. `lesionmatch.summary(tau_L, tau_C)` takes one value or a
+    Series per query for each threshold; τ_C ≤ 0 is refused; tests updated (worked example now
+    C = 0.37) and added; brute-force test now checks the new C. 102 tests pass.
+  - Pylance: `wholemask.match` accepts an array of patients; an unused argument removed; a
+    pandas fill warning removed with `.eq(True)`.
+
+  *Source: `results/stanford_brainmets/e3/calibrate/`, pytest, scratch check scripts.*
+- **Lesion groupings across slices checked (for E6).** Prompted by the user's observation in the
+  T overview sheet (Mets_266: neighbouring metastases merge and split between slices). A
+  read-only check labelled each T patient's mask as saved in 3D (26-connectivity) and counted
+  3D lesions holding two or more separate 2D lesions in a slice: 38 of 1,428 (2.7%), with 630 of
+  6,101 2D lesions (10.3%), 19 of 105 patients. Recorded in `docs/experiment-plan.md` (E6
+  duplication test step 1, with options), `report-notes.md` (section 3 finding, section 5 open
+  question) and the CLAUDE.md H1 line. No code change; E1–E5 are slice-wise and unaffected.
+  *Source: scratch script (not in the repo).*
+- **Lesion weighting in C discussed; equal weights kept** (user decision, 2026-11-03). Added to
+  the experiment plan: the reason in E2 step 3, a new E5 step 7 (report `n_kept`, strongest
+  pair and the copied-area share per flagged slice; optional area-weighted C as a sensitivity)
+  and the copied-area share in E7 Panel B; reasons in report-notes section 2. No code change.

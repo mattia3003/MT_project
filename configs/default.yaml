@@ -84,6 +84,11 @@ detectors:
     candidate_min_s: 0.1      # C is computed only for training slices sharing a lesion pair with s >= this
 
 calibration:                  # E3
+  # Thresholds at the percentile below of H-cal: tau_D (E1 score), tau_L (strongest lesion pair),
+  # tau_C (configuration score C of the nearest neighbour). Decided 2026-11-03: C counts every
+  # Hungarian-paired lesion with s >= detectors.lesion.candidate_min_s (first planned with only the
+  # pairs reaching tau_L, which made C 0 for ~95% of H-cal slices and tau_C about 0); classes: full
+  # copy = C(q, NN) >= tau_C, partial = not full but a lesion pair >= tau_L (the plan's rule)
   percentile: 95              # thresholds at this percentile of H-cal
   bootstrap_draws: 2000       # bootstrap by patient for the interval of every threshold
   # Decision G (evidence: `e3_calibrate.py bound-review`)
@@ -95,8 +100,11 @@ calibration:                  # E3
   # Decision H (evidence: `e3_calibrate.py calibrate`): per detector, "stratified" (separate
   # thresholds for single- and multi-lesion slices) or "pooled"
   strata:
-    whole_mask: null
-    lesion: null
+    whole_mask: stratified    # decided 2026-11-03: chance best Dice 0.905 single vs 0.729 multi; a pooled 0.898
+                              # would flag 7.3% of single- and 0% of multi-lesion H-cal slices
+    lesion: stratified        # decided 2026-11-03 (tau_L and tau_C): tau_L 0.739 single vs 0.816 multi (a pooled
+                              # 0.771 flags 2.1% / 12.6%); tau_C 0.719 vs 0.406 (a pooled 0.710 flags 6.9% / 0%);
+                              # the multi stratum rests on 17 patients with tight intervals
 
 real_datasets:
   stanford_brainmets:

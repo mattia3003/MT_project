@@ -335,11 +335,74 @@ move the old ones, with the reason, to the process log.
   (about ±1.7 points each, from 196 and 155 lesions), so where that cut lands is decided by noise.
   A 25 px bound would also leave 59% of S main without an informative lesion (E1 still scores
   them), against 28% at 12 px; H-cal keeps 24 of 25 patients at 12 px. The bound only decides
-  which lesions may count as evidence: the false-positive rate is set afterwards by τ_L and τ_C
+  which lesions may count as evidence: the false-positive rate is set afterwards by τ_D, τ_L and τ_C
   at the H-cal 95th percentile, per slice. 12 px lies in the experiment plan's expected 10–20 px.
   25 px is kept as a sensitivity in `calibrate`. *Source:
   `results/stanford_brainmets/e3/bound_review/review.txt`, `chance_rates.csv`;
   `results/stanford_brainmets/e0b/stats/bound_impact_amibekk_v1.csv`, 2026-11-03.*
+- **The configuration score C was redefined, because the planned τ_C could not be calibrated on
+  H-cal** (2026-11-03, deviation from the experiment plan; the class rule itself is the plan's).
+  - *Planned:* C(q, t) kept only the Hungarian lesion pairs with s ≥ τ_L, summed their s and
+    divided by max(lesions in q, lesions in t); τ_C was the 95th percentile of C(q, NN) on H-cal.
+  - *Why that failed, from the data:* τ_L is itself the 95th percentile of each H-cal slice's
+    strongest lesion pair, so by construction only ~5% of H-cal slices have any pair reaching
+    τ_L. For the other ~95%, C was exactly 0. The 95th percentile of a score that is 0 for 95% of
+    the slices sits at the edge of that zero mass: τ_C came out at 0.020 (bootstrap interval
+    [0.000, 0.202]; 0.064 / 0.062 per stratum). A full copy (C ≥ 0.02) then meant the same as "any
+    pair reaches τ_L"; τ_C and τ_L flagged exactly the same H-cal slices (5.0% pooled; 2.1% /
+    12.6% per stratum). No usable τ_C could be found from H-cal with that C: the zero mass is a
+    consequence of the definitions, not of sample size, so more H-cal data would not help.
+  - *Redefined:* C counts every Hungarian pair with s ≥ 0.1 (the candidate cut, so the shortcuts
+    stay exact), independent of τ_L. It then measures how alike the whole lesion configuration
+    is: on H-cal its median is 0.54 (single-lesion slices) and 0.29 (multi), and its 95th
+    percentile gives τ_C = 0.719 [0.709, 0.726] and 0.406 [0.391, 0.432].
+  - *Classes (the plan's rule):* full copy = C(q, NN) ≥ τ_C (the configuration is closer than
+    chance, even when no single lesion passes τ_L: of the 12 multi-lesion H-cal slices above τ_C,
+    8 have no pair ≥ τ_L); partial = not full but the strongest lesion pair ≥ τ_L; novel
+    otherwise. Stored as well: how many lesions pass τ_L, and whether all do. On H-cal (chance),
+    stratified: full 5.1% / 5.2%, partial 2.3% / 3.5%, flagged at all 7.4% / 8.7% (single /
+    multi); false-positive criteria must therefore be stated per class.
+  - *Considered and set aside:* a structural rule (full copy = every lesion of both slices
+    paired with s ≥ τ_L; chance 2.5% / 0%) was used for one run; it gives no calibrated
+    configuration score and is kept only as the descriptive "all lesions copied". A nested rule
+    (full also needs a pair ≥ τ_L) would keep the overall false-positive rate at 5% but never
+    flag a configuration of moderately similar lesions.
+
+  *Source: `results/stanford_brainmets/e3/calibrate/review.txt`, `thresholds.csv`,
+  `classes_hcal.csv`, `score_histograms.png`; first run's numbers in the process log, 2026-11-03.*
+- **C weights every lesion equally, not by size** (2026-11-03, after discussion). Considered:
+  weighting each lesion pair by area (or by how rarely lesions of that size match by chance), so
+  that a copied large lesion next to unmatched small ones would count as a full copy. Kept equal
+  because:
+  - such a slice is not missed: whole-mask Dice flags it (e.g. 0.93 for one 200 px lesion
+    copied with two extra 15 px lesions), E2 calls it a partial copy with its copied lesion
+    and score, and E5 counts near-exact whole-mask copies separately;
+  - "partial" is the honest label: a memorized slice would be reproduced with all its lesions,
+    and E4's planted variant P6 (one lesion added or removed) expects exactly that class, which
+    an area-weighted C would miss for small added lesions;
+  - area weighting turns the lesion-level score into a variant of whole-mask Dice and blurs the
+    contrast RQ2 tests;
+  - weak small-lesion evidence is already handled by the informative-lesion bound and the
+    calibrated τ_L; chance-based weights would add a tuned component that is harder to explain
+    in a match report.
+
+  What is reported instead: the copied-area share per flagged slice (E5, E7); an area-weighted C
+  with its own τ_C is an optional E5 sensitivity. *Source: `docs/experiment-plan.md` E2 step 3,
+  E5 step 7; E3 chance rates by size (`bound_review/chance_rates.csv`), 2026-11-03.*
+- **Thresholds stratified by lesion count, for both detectors** (decision H, 2026-11-03). Single-
+  and multi-lesion slices reach very different chance scores, so one pooled threshold would flag
+  the strata unequally:
+
+  | Threshold | Single | Multi | Pooled | Pooled flags (single / multi) |
+  | --- | --- | --- | --- | --- |
+  | τ_D (E1) | 0.905 [0.896, 0.909] | 0.729 [0.696, 0.769] | 0.898 | 7.3% / 0% |
+  | τ_L (E2) | 0.739 [0.730, 0.761] | 0.816 [0.781, 0.839] | 0.771 | 2.1% / 12.6% |
+  | τ_C (E2) | 0.719 [0.709, 0.726] | 0.406 [0.391, 0.432] | 0.710 | 6.9% / 0% |
+
+  95th percentiles of H-cal (989 slices for E1, 837 with an informative lesion for E2; 25 / 24
+  patients), 2,000-draw bootstrap-by-patient intervals. The multi stratum rests on 17 patients
+  with intervals tight enough to use. Strata: lesions ≥ 4 px for E1, informative lesions for E2.
+  *Source: `results/stanford_brainmets/e3/calibrate/thresholds.csv`, 2026-11-03.*
 
 ## 3. Findings
 
@@ -399,6 +462,12 @@ move the old ones, with the reason, to the process log.
   to come from larger lesions and multi-lesion configurations, consistent with the E0 finding
   that lesions under about 40 px are hard to tell apart by shape and size. *Source:
   `results/stanford_brainmets/e3/bound_review/chance_rates.csv`, `examples.png`, 2026-11-03.*
+- **Chance whole-mask matches are close for single-lesion slices.** 5% of held-out
+  single-lesion slices have a training mask with Dice ≥ 0.905 after a shift of up to ±3 px; a
+  single small lesion easily finds a near-identical training mask. Multi-lesion slices reach only
+  0.729, since a whole layout of several lesions rarely overlaps by chance. Whole-mask Dice
+  therefore needs a very high bar for single-lesion slices. *Source:
+  `results/stanford_brainmets/e3/calibrate/thresholds.csv`, `score_histograms.png`, 2026-11-03.*
 - **Some synthetic MRIs contain no brain at all.** 152 of 37,624 samples have < 20 px of brain
   tissue; the 32 lowest have 0 px (a black image with only a lesion or a faint smudge). Between
   ~50 and ~400 px the images show small brain fragments, similar to the smallest real T lesion
@@ -426,6 +495,16 @@ move the old ones, with the reason, to the process log.
   lesion edges seen in one slice rather than annotation noise. *Source: manual ITK-SNAP
   inspection of Mets_120 at 128×128 (a patient with many metastases), using
   `lesions_review/small_components_T.csv`, 2026-11-02; other patients not inspected.*
+- **Neighbouring metastases merge when lesions are linked in 3D.** 2D lesions are labelled per
+  slice and numbered by size within each slice, so lesion identities are not stable across
+  slices: two metastases that touch in one slice are one lesion there and two in the next (seen
+  in the overview sheet for Mets_266). Linking the masks as saved in 3D with 26-connectivity,
+  38 of T's 1,428 3D lesions (2.7%) hold two or more separate 2D lesions in some slice; being
+  large and long, they contain 630 of the 6,101 2D lesions (10.3%), in 19 of 105 patients
+  (Mets_120: 11; Mets_024: 4; Mets_266: 3). Irrelevant for the slice-wise detectors (E1–E5); it
+  affects the slice span of H1 and any 3D-level explanation (E6, E7). *Source: read-only check,
+  T label maps and `volumes/<pid>/seg.nii.gz`, scipy 26-connected labelling, 2026-11-03;
+  `results/stanford_brainmets/e0b/lesions/overview.png`.*
 - **Synthetic masks: smaller lesions, more two-lesion masks, no large lesions.** Real lesion
   slices against the main audit (S main = `mask_class` clean or minor, 35,920 masks):
 
@@ -640,7 +719,13 @@ move the old ones, with the reason, to the process log.
 
 **Project decisions** (from the experiment plan)
 - [ ] Informative-lesion bound: decided during E0b/E3 coding, by its effect on the synthetic pool.
-- [ ] E4 go/no-go criteria: fixed before E4 runs.
+- [ ] E4 go/no-go criteria: fixed before E4 runs. The lesion-level false-positive criterion must
+      be stated per class (full copies ~5% at chance; full or partial together 7–9%).
+- [ ] **3D lesion identity for H1 (E6).** 26-connected 3D linking merges neighbouring metastases
+      for 2.7% of T's 3D lesions, holding 10.3% of the 2D lesions (section 3). Options: link 2D
+      lesions slice to slice by overlap (one-to-one), or keep 26-connectivity and re-run H1
+      without the merged 3D lesions as a sensitivity. Decide when E6 is planned; noted in
+      `docs/experiment-plan.md`, E6 duplication test step 1. 2026-11-03.
 - [x] **Does a failed synthetic MRI exclude its mask from the mask audit?** *Resolved
       2026-11-02 at the `qc` stage: no.* `qc.csv` keeps `mask_class` and `mri_failed` as separate
       columns; the main audit uses `mask_class` clean or minor, and `mri_failed` only excludes a

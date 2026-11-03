@@ -32,7 +32,7 @@ def test_identical_lesion_scores_1_and_is_a_full_copy():
     res = run([lab], [lab])
     assert res.lesion_pairs["s"].tolist() == pytest.approx([1.0, 1.0])
     row = res.summary(tau_L=0.5, tau_C=0.5).iloc[0]
-    assert (row["nn"], row["C"], row["class"]) == ("t0", pytest.approx(1.0), "full")
+    assert (row["nn"], row["C"], row["class"], row["all_copied"]) == ("t0", pytest.approx(1.0), "full", True)
 
 
 def test_factors_at_known_distance_and_size():
@@ -76,29 +76,53 @@ def hand_made(slice_rows, pair_rows, queries):
 
 
 def test_worked_example_of_the_experiment_plan():
-    # q has lesions A, B; t has X, Y, Z; best pairing A-X 0.9, B-Z 0.2; only A-X passes tau_L
+    # q has lesions A, B; t has X, Y, Z; best pairing A-X 0.9, B-Z 0.2; only A-X passes tau_L.
+    # C counts every paired lesion reaching the candidate cut: (0.9 + 0.2) / 3
     res = hand_made([("q", "t", 0, 2, 3, 2, 0.9)], [("q", "t", 0.9), ("q", "t", 0.2)], [("q", 2)])
     scored = res.slice_scores(tau_L=0.5).iloc[0]
-    assert (scored["C"], scored["n_kept"]) == (pytest.approx(0.30), 1)
+    assert (scored["C"], scored["n_kept"], scored["all_copied"]) == (pytest.approx(1.1 / 3), 1, False)
     assert res.summary(tau_L=0.5, tau_C=0.5).iloc[0]["class"] == "partial"
+
+
+def test_C_counts_pairs_from_the_candidate_cut_and_ignores_tau_L():
+    # two pairs: 0.9 and 0.05 (below the cut of 0.1, not counted); C is the same for any tau_L
+    res = hand_made([("q", "t", 0, 2, 2, 2, 0.9)], [("q", "t", 0.9), ("q", "t", 0.05)], [("q", 2)])
+    assert res.slice_scores(tau_L=0.2)["C"].iloc[0] == pytest.approx(0.45)
+    assert res.slice_scores(tau_L=0.95)["C"].iloc[0] == pytest.approx(0.45)
 
 
 def test_classes_and_nearest_neighbour():
     res = hand_made(
-        [("q1", "t0", 0, 1, 1, 1, 0.6), ("q1", "t1", 1, 1, 1, 1, 0.8),   # q1: NN t1, full copy
-         ("q2", "t0", 0, 2, 1, 1, 0.7),                                   # q2: C 0.35, partial
-         ("q3", "t0", 0, 1, 1, 1, 0.2)],                                  # q3: no pair reaches tau_L
-        [("q1", "t0", 0.6), ("q1", "t1", 0.8), ("q2", "t0", 0.7), ("q3", "t0", 0.2)],
-        [("q1", 1), ("q2", 2), ("q3", 1), ("q4", 1), ("q5", 0)])          # q4: no candidate; q5: none informative
-    out = res.summary(tau_L=0.5, tau_C=0.5).set_index("query")
-    assert out["class"].to_dict() == {"q1": "full", "q2": "partial", "q3": "novel", "q4": "novel"}
+        [("q1", "t0", 0, 1, 1, 1, 0.6), ("q1", "t1", 1, 1, 1, 1, 0.8),   # q1: NN t1, C 0.8: full
+         ("q2", "t0", 0, 2, 1, 1, 0.7),                                   # q2: C 0.35, a pair >= tau_L: partial
+         ("q3", "t0", 0, 1, 1, 1, 0.2),                                   # q3: C 0.2, no pair >= tau_L: novel
+         ("q6", "t0", 0, 3, 3, 3, 0.45)],                                 # q6: three pairs at 0.45: C 0.45
+        [("q1", "t0", 0.6), ("q1", "t1", 0.8), ("q2", "t0", 0.7), ("q3", "t0", 0.2)] + [("q6", "t0", 0.45)] * 3,
+        [("q1", 1), ("q2", 2), ("q3", 1), ("q4", 1), ("q5", 0), ("q6", 3)])  # q4: no candidate; q5: none informative
+    out = res.summary(tau_L=0.5, tau_C=0.4).set_index("query")
+    # q6: a configuration copy (C >= tau_C) although no single lesion reaches tau_L
+    assert out["class"].to_dict() == {"q1": "full", "q2": "partial", "q3": "novel", "q4": "novel", "q6": "full"}
     assert (out.loc["q1", "nn"], out.loc["q1", "C"]) == ("t1", pytest.approx(0.8))
+    assert (out.loc["q2", "C"], out.loc["q2", "n_kept"]) == (pytest.approx(0.35), 1)
+    assert (out.loc["q6", "n_kept"], out.loc["q6", "strongest_s"]) == (0, pytest.approx(0.45))
     assert (out.loc["q3", "strongest_train"], out.loc["q4", "nn"]) == ("t0", "")
 
 
-def test_tau_L_below_the_candidate_cut_is_refused():
+def test_thresholds_per_query_slice():
+    res = hand_made([("q1", "t0", 0, 1, 1, 1, 0.7), ("q2", "t0", 0, 1, 1, 1, 0.7), ("q3", "t0", 0, 1, 1, 1, 0.7)],
+                    [("q1", "t0", 0.7), ("q2", "t0", 0.7), ("q3", "t0", 0.7)], [("q1", 1), ("q2", 1), ("q3", 1)])
+    out = res.summary(tau_L=pd.Series({"q1": 0.6, "q2": 0.6, "q3": 0.8}),
+                      tau_C=pd.Series({"q1": 0.6, "q2": 0.8, "q3": 0.8})).set_index("query")
+    assert out["class"].to_dict() == {"q1": "full", "q2": "partial", "q3": "novel"}
+
+
+def test_thresholds_that_would_break_the_shortcut_or_the_classes_are_refused():
     with pytest.raises(ValueError, match="candidate_min_s"):
         hand_made([], [], [("q", 1)]).slice_scores(tau_L=0.05)
+    with pytest.raises(ValueError, match="candidate_min_s"):
+        hand_made([], [], [("q", 1)]).slice_scores(tau_L=pd.Series({"q": 0.05, "r": 0.5}))
+    with pytest.raises(ValueError, match="tau_C"):
+        hand_made([], [], [("q", 1)]).summary(tau_L=0.5, tau_C=0.0)
 
 
 # --- informative lesions and the prefilter ---
@@ -136,8 +160,9 @@ def random_maps(rng, n):
     return np.stack(maps)
 
 
-def brute_force(queries, refs, min_area, tau_L):
-    """C of every slice pair from all lesion pairs, no prefilter and no candidate cut."""
+def brute_force(queries, refs, min_area):
+    """C of every slice pair from all lesion pairs (Hungarian over all of them, paired s from
+    the candidate cut counted), no prefilter and no candidate shortcut."""
     q, t = lesion_records(queries, [f"q{i}" for i in range(len(queries))], min_area), \
         lesion_records(refs, [f"t{i}" for i in range(len(refs))], min_area)
     half = max(q.half_size(), t.half_size())
@@ -155,8 +180,8 @@ def brute_force(queries, refs, min_area, tau_L):
                 continue
             best[(f"q{a}", f"t{b}")] = sub.max()
             rows, cols = assign_pairs(sub)
-            kept = sub[rows, cols][sub[rows, cols] >= tau_L]
-            C[(f"q{a}", f"t{b}")] = kept.sum() / max(sub.shape)
+            paired = sub[rows, cols][sub[rows, cols] >= MIN_S]
+            C[(f"q{a}", f"t{b}")] = paired.sum() / max(sub.shape)
     return best, C
 
 
@@ -165,7 +190,7 @@ def test_shortcuts_equal_brute_force(seed):
     rng = np.random.default_rng(seed)
     queries, refs = random_maps(rng, 12), random_maps(rng, 30)
     res = run(list(queries), list(refs))
-    best, C = brute_force(queries, refs, min_area=4, tau_L=0.3)
+    best, C = brute_force(queries, refs, min_area=4)
     candidates = {k for k, v in best.items() if v >= MIN_S}
     found = set(zip(res.slice_pairs["query"], res.slice_pairs["train"]))
     assert found == candidates and len(found) > 0

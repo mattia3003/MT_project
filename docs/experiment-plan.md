@@ -194,17 +194,21 @@ Also keep the masks exactly as saved: stage 2 was conditioned on them, specks in
    The lesion score s(a, b) is the product. Store all three factors, not just the product: they are the explanation.
 3. **Score a slice pair.** For a synthetic slice q and a training slice t:
    - Pair their lesions one-to-one with the Hungarian algorithm (`linear_sum_assignment` on cost 1 − s).
-   - Keep the pairs with s ≥ τ\_L.
-   - C(q, t) = (sum of kept pair scores) / max(lesions in q, lesions in t). Extra or missing lesions lower the score, and C = 1 means the same lesions in the same places with the same shapes.
+   - Keep the pairs with s ≥ 0.1 (the candidate cut of step 4).
+   - C(q, t) = (sum of kept pair scores) / max(lesions in q, lesions in t). Extra or missing lesions lower the score, and C = 1 means the same lesions in the same places with the same shapes. C measures how alike the whole configuration is; it does not depend on τ\_L. Every lesion counts equally, whatever its size (kept after a discussion on 2026-11-03: size weighting would make C behave like whole-mask Dice and blur the contrast RQ2 tests, and an added small lesion, as in E4's P6, would barely lower C; how much lesion area is copied is reported separately, E5 step 7).
 
-   Example: q has lesions A and B, t has X, Y and Z, and the best pairing is A–X (0.9) and B–Z (0.2). Only A–X passes τ\_L, so C = 0.9 / 3 = 0.30, a partial copy.
+   Example: q has lesions A and B, t has X, Y and Z, and the best pairing is A–X (0.9) and B–Z (0.2). C = (0.9 + 0.2) / 3 = 0.37. Only A–X passes τ\_L; if 0.37 stays below τ\_C, q is a partial copy.
+
+   *Changed 2026-11-03 (E3):* C first kept only the pairs with s ≥ τ\_L. Since τ\_L is set so that only about 5% of held-out slices have such a pair, C was 0 for about 95% of H-cal slices and τ\_C (its 95th percentile) came out at about 0, so full and partial copies could not be told apart. Counting every pair from the candidate cut makes C a real configuration score (H-cal median 0.54 for single-, 0.29 for multi-lesion slices); the shortcuts stay exact.
 4. **Compute only the pairs that can score above zero.** About 35,000 × 3,800 slice pairs is too many to check one by one. Two shortcuts give exactly the same result:
    - **Position prefilter:** skip lesion pairs whose centroids are more than 0.2 of the field apart (25.6 px). With σ = 0.05 (6.4 px), their position factor is exp(−8), about 0.0003, so s can never reach τ\_L. Confirm this once τ\_L is fixed (E3).
    - **Candidate slices:** compute C(q, t) only for training slices that share at least one lesion pair with q scoring s ≥ 0.1. For every other training slice, C is zero by definition.
 5. **Classify each synthetic slice** from its nearest neighbour (NN), the training slice with the highest C:
-   - **Full copy:** C(q, NN) ≥ τ\_C.
-   - **Partial copy:** C(q, NN) < τ\_C, but at least one lesion pair in the NN slice passes τ\_L.
-   - **Novel:** no candidate slice has a lesion pair that passes τ\_L.
+   - **Full copy:** C(q, NN) ≥ τ\_C. The configuration as a whole is closer than chance, even if no single lesion passes τ\_L (several moderately similar lesions in the same places).
+   - **Partial copy:** C(q, NN) < τ\_C, but at least one lesion pair over all candidate slices passes τ\_L (the strongest single pair, as τ\_L is calibrated).
+   - **Novel:** neither.
+
+   Also stored for every slice: how many lesions of the NN slice pass τ\_L (`n_kept`) and whether all of them do (`all_copied`), which separate one copied lesion from several in the reports. On H-cal (all chance, stratified thresholds) the rule gives full 5.1% / 5.2%, partial 2.3% / 3.5% (single / multi), so 7–9% of held-out slices are flagged at all; E5 compares S with H-eval per class. (Between the τ\_C problem and this fix, a structural rule, "every lesion paired above τ\_L", was used for one run on 2026-11-03; it is now only the descriptive `all_copied`.)
 
    Also record the strongest single lesion-pair score across all candidate slices, and the slice it is in. This shows whether a stronger single-lesion match ever sits outside the NN slice.
 
@@ -253,7 +257,7 @@ The check never changes C or the copy class. It is supporting evidence for the m
    - This bound is separate from, and higher than, the speck threshold used in quality control. Decide it during coding, together with the E0 quality-control re-run, by checking how each candidate bound affects the synthetic pool.
 2. **Set the held-out thresholds.**
    - Run E1 and E2 with H-cal as the query set, using only informative lesions.
-   - Set each threshold at the 95th percentile of H-cal: τ\_D for whole-mask Dice, τ\_C for the configuration score, and τ\_L for the best lesion-pair score.
+   - Set each threshold at the 95th percentile of H-cal: τ\_D for whole-mask Dice, τ\_C for the configuration score C(q, NN) (C as redefined in E2 step 3), and τ\_L for the best lesion-pair score.
    - Compute them separately for single-lesion and multi-lesion slices.
    - Steps 1 and 2 depend on each other through τ\_L: set a provisional τ\_L, then the bound, then the final τ\_L. One round is enough.
 3. **Confirm the prefilter is exact.** Check that at the prefilter distance (0.2 of the field, 25.6 px), s stays below τ\_L for every lesion size.
@@ -263,7 +267,7 @@ The check never changes C or the copy class. It is supporting evidence for the m
 
 **Outputs:**
 
-- A frozen threshold file: τ\_D, τ\_C and τ\_L (stratified by lesion count), the informative-lesion bound, and the prefilter distance.
+- A frozen threshold file: τ\_D, τ\_C and τ\_L (stratified by lesion count, decision H), the informative-lesion bound, and the prefilter distance.
 - Chance rates from H-cal, with bootstrap-by-patient confidence intervals for each threshold.
 - How many lesions and slices the bound excludes.
 - A short sensitivity table.
@@ -303,7 +307,7 @@ The check never changes C or the copy class. It is supporting evidence for the m
 - P1 recall about 100%.
 - P2, P4 and P5 recall at least 90% for at least one detector.
 - The lesion-level detector catches P6 in at least 80% of cases.
-- False-positive rate on H-eval at most 7% (95% is the calibrated target, so about 5% is expected).
+- False-positive rate on H-eval at most 7% (95% is the calibrated target, so about 5% is expected). *Note 2026-11-03:* state this per class. Each of τ\_D, τ\_L and τ\_C is calibrated at 5%, but the lesion-level classes combine two of them: on H-cal, full copies are 5.1% / 5.2% and full or partial together 7.4% / 8.7% (single / multi).
 
 **If it fails:** Change detector settings (top-k, shift range, σ), re-freeze thresholds on H-cal (E3), and re-run E4. Never adjust anything by looking at S.
 
@@ -331,6 +335,7 @@ The check never changes C or the copy class. It is supporting evidence for the m
    - Cross-tabulate the whole-mask flag (yes or no) against the lesion-level class (full, partial, novel). Use only slices with at least one informative lesion, so both detectors are compared on the same subset.
    - The headline number: the share of lesion-level flags that whole-mask Dice does not flag. To test H2, compare the two detectors at the same false-positive rate on H-eval.
    - Compare the partial-copy rate in S with the H-eval rate. Partial copies only matter if S produces them more often than chance.
+7. **Describe how much of each flagged slice is copied** (added 2026-11-03). C weights every lesion equally, so one copied large lesion next to unmatched small ones gives a partial copy even when it dominates the lesion area. For every flagged slice, report alongside the class: `n_kept` of the informative lesions (pairs ≥ τ\_L), the strongest pair, and the **copied-area share** (area of the paired lesions with s ≥ τ\_L divided by the total informative lesion area of the two slices). Optional sensitivity: an area-weighted C with its own τ\_C, calibrated on H-cal in the same way, to show whether any conclusion depends on the weighting. The main definition stays equal-weighted (see E2 step 3).
 
 **Outputs:**
 
@@ -376,7 +381,7 @@ The check never changes C or the copy class. It is supporting evidence for the m
 
 **Duplication test (H1), run alongside step 5**
 
-1. **Label lesions in 3D.** In each training volume, after the same 128×128 conversion, label lesions with 26-connectivity, so a lesion touching across slices counts as one. *Carried over from E0 (2026-11-02):* small real components (1–3 px) are mostly the tail or start of a metastasis seen in neighbouring slices (manual check of Mets_120 in ITK-SNAP), and real masks have no speck noise. So the 3D linking and slice span should probably use all components of the real mask as saved (`seg.nii.gz`), not the cleaned 2D labels; otherwise every lesion loses its thin end slices. The 2D lesion IDs stay unchanged; the 3D linking adds a `lesion3d_id` column.
+1. **Label lesions in 3D.** In each training volume, after the same 128×128 conversion, label lesions with 26-connectivity, so a lesion touching across slices counts as one. *Carried over from E0 (2026-11-02):* small real components (1–3 px) are mostly the tail or start of a metastasis seen in neighbouring slices (manual check of Mets_120 in ITK-SNAP), and real masks have no speck noise. So the 3D linking and slice span should probably use all components of the real mask as saved (`seg.nii.gz`), not the cleaned 2D labels; otherwise every lesion loses its thin end slices. The 2D lesion IDs stay unchanged; the 3D linking adds a `lesion3d_id` column. *Carried over from E3 (2026-11-03): neighbouring metastases merge in 3D.* 2D lesions are labelled per slice, and their L-numbers follow size within each slice, so L1 in one slice need not be L1 in the next; two metastases that touch in one slice are one 2D lesion there and two in the next (e.g. Mets_266, Mets_120). With 26-connectivity on the masks as saved, 38 of the 1,428 3D lesions of T (2.7%) hold two or more separate 2D lesions in some slice; they are large and long and contain 630 of the 6,101 2D lesions (10.3%), in 19 of 105 patients (most: Mets_120 11, Mets_024 4, Mets_266 3). Such a 3D lesion joins separate metastases: its slice span is too long, and copies of different metastases are credited to it, which biases H1 (copies against slice span). Decide when E6 is planned: (a) link 2D lesions slice to slice by overlap, one-to-one (Hungarian on the overlap between consecutive slices), so a merge or split keeps separate identities; or (b) keep 26-connectivity and run H1 again without the merged 3D lesions as a sensitivity; at least report the share affected. Not an issue for E1–E5, which compare single slices.
 2. **Record each 3D lesion's slice span:** how many 2D training slices contain it.
 3. **Count copies per 3D lesion.** Map each 2D training lesion to its 3D lesion. Using all stored slice pairs above threshold, count how many synthetic copies (full or partial) matched one of its slices.
 4. **Test whether copies rise with slice span** with a Spearman correlation between slice span and copy count across 3D lesions. Because bigger lesions span more slices, repeat it within lesion-size bins, so size alone doesn't drive the result.
@@ -400,7 +405,7 @@ The check never changes C or the copy class. It is supporting evidence for the m
 
 1. **Generate a match report** for each flagged synthetic mask, or for the top 50 by score if there are many. Each report has four parts:
    - **Panel A:** the synthetic mask and its NN training mask side by side, plus an overlay coloured by overlap, synthetic-only and training-only.
-   - **Panel B:** lines connecting matched lesion pairs, and a small table with each lesion's shape, position and size factors and its contribution to C.
+   - **Panel B:** lines connecting matched lesion pairs, and a small table with each lesion's shape, position and size factors and its contribution to C. Also the copied-area share (E5 step 7), so a report shows when one large copied lesion carries most of the lesion area although C counts it as one lesion among several.
    - **Panel C:** context. Source-patient pseudonym and slice index, adjacent slices that also match, the margin to the second-best patient, the patient's exposure ratio from E6, and the chance rate for this lesion count from E3.
    - **Verdict line:** generated from rules, for example: "2 of 3 lesions match patient P017, slice 84; the third lesion is novel → partial copy."
 

@@ -79,7 +79,7 @@ def candidate_indices(plain: np.ndarray, query_centroid: np.ndarray, reference_c
 
 # --- the detector ---
 
-def match(query_labels: np.ndarray, reference_labels: np.ndarray, reference_patients: Sequence[str],
+def match(query_labels: np.ndarray, reference_labels: np.ndarray, reference_patients: np.ndarray | Sequence[str],
           query_keys: Sequence[str], reference_keys: Sequence[str], top_k_dice: int,
           top_k_centroid: int, max_shift: int) -> pd.DataFrame:
     """E1 for a stack of query label maps against the reference (training) label maps. Masks are

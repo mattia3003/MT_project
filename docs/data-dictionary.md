@@ -31,7 +31,8 @@ ID columns as text.
 | | `filters-review` | ✅ | `lesions`, `brain`, `qc` outputs, real `seg` volumes | `results/<dataset>/e0b/filters_review/` (evidence for decision E) |
 | | `check` | ✅ | all E0b outputs, synthetic pool | `results/<dataset>/e0b/check_report_<pool>.txt` |
 | `e3_calibrate.py` | `bound-review` | ✅ | E0b lesion tables (T, H-cal only), decision F, E0 `bound_impact_<pool>.csv` | `results/<dataset>/e3/bound_review/` (evidence for decision G) |
-| | `calibrate`, `freeze`, `check` | planned (`docs/e1-e3-plan.md`) | decisions G, H; T, H-cal | `results/<dataset>/e3/`, `<output_root>/<dataset>/e3/`, `configs/frozen/e3_<dataset>.yaml` |
+| | `calibrate` | ✅ | decision G, E0b lesion tables (T, H-cal), E0 `bound_impact_<pool>.csv` | `<output_root>/<dataset>/e3/` (E1 and E2 tables of H-cal), `results/<dataset>/e3/calibrate/` (evidence for decision H) |
+| | `freeze`, `check` | planned (`docs/e1-e3-plan.md`) | decision H, the `calibrate` tables | `configs/frozen/e3_<dataset>.yaml`, check report |
 | `e4_validate.py` | *tbd* | planned | frozen thresholds, T, H-eval | validation table, planted copies |
 | `e5_audit.py` | — | planned | frozen thresholds, S | main audit tables |
 | `e6_exposure.py` | *tbd* | planned | E5 outputs | exposure, rarity, duplication |
@@ -59,7 +60,8 @@ pixel-sum limit; `real_sets`, decision E); E1–E3 (`docs/e1-e3-plan.md`): `dete
 (`top_k_dice`, `top_k_centroid`, `max_shift_px`), `detectors.lesion` (`position_frame`,
 decision F; `sigma`, `prefilter` as fractions of the 128-px field; `candidate_min_s`),
 `calibration` (`percentile`, `bootstrap_draws`; decision G: `provisional_tau_L`,
-`chance_rate_max`, `informative_bound_px`; decision H: `strata.whole_mask`, `strata.lesion`);
+`chance_rate_max`, `informative_bound_px`; decision H: `strata.whole_mask`, `strata.lesion`, the
+latter for tau_L and tau_C);
 `real_datasets.<name>` (`root`, `image_file`, `mask_file`, `train_split`,
 `heldout_split`, `heldout_sets`); `synthetic_pools.<name>` (`dir`, `glob`, `image_channel`,
 `mask_channel`, `trained_on`, `legacy_exclusion_file`).
@@ -415,9 +417,38 @@ cost comes from the E0 bound-impact table).
 | `examples.png` | Per area bin, 3 random matched H-cal lesions (red) next to their best T lesion (green), 32×32 crops of the cleaned masks, with s and its factors |
 | `run_info.json` | Run log (with `inputs`: T, H-cal, and the E2 settings in pixels) |
 
+### Detector tables of H-cal: `<output_root>/<dataset>/e3/`
+
+Written by `calibrate`, read by `freeze` and `check`. Not in git. H-cal slices against T, with
+the decided bound. Read the CSVs with `memtk.io.read_table`, the Parquet files with
+`pandas.read_parquet`; together the four E2 files rebuild a `memtk.lesionmatch.LesionMatch`.
+
+| File | Content |
+| --- | --- |
+| `e1_hcal.csv` | E1, one row per H-cal slice: `query`, `nn`, `nn_patient`, `score`, `shift_row`, `shift_col`, `plain_dice`, `runner_up_patient`, `runner_up_score`, `margin`, `n_candidates` (see `memtk.wholemask.match`), plus `patient_id`, `n_lesions` (≥ min area) and `stratum` |
+| `e2_hcal_queries.csv` | E2, one row per H-cal slice: `query`, `n_informative` (lesions ≥ the bound; 0 = left out of E2) |
+| `e2_hcal_lesions.csv` | E2, one row per informative H-cal lesion: `query`, `query_lesion`, `area`, `best_train_lesion`, `best_s`, `best_shape`, `best_position`, `best_size` (NaN when no pair reaches the candidate cut) |
+| `e2_hcal_slice_pairs.parquet` | E2, one row per candidate slice pair: `query`, `train`, `train_idx`, `n_query`, `n_train` (informative lesions), `n_matched` (Hungarian pairs with s > 0), `best_pair_s` |
+| `e2_hcal_lesion_pairs.parquet` | E2, the Hungarian pairs of every candidate slice pair: `query`, `train`, `query_lesion`, `train_lesion`, `distance` (px), `shape`, `position`, `size`, `s` |
+| `calibrate.run_info.json` | Run log (inputs T and H-cal, E2 settings in pixels, the bound) |
+
+### `results/<dataset>/e3/calibrate/`
+
+Written by `calibrate`. In git. Evidence for decision H (`calibration.strata.whole_mask`,
+`calibration.strata.lesion`).
+
+| File | Content |
+| --- | --- |
+| `review.txt` | Sets and slices left out, settings, the thresholds with intervals, the E2 classes on H-cal, the sensitivity table, exclusions by the bound, the proposal for decision H |
+| `thresholds.csv` | One row per detector (`whole_mask`, `lesion`), threshold (`tau_D`, `tau_L`, `tau_C`) and stratum (`all` = pooled, `single`, `multi`): `value` (the percentile of H-cal), `ci_low`, `ci_high` (bootstrap by patient), `slices`, `patients`, `flagged_at_pooled` (share of the stratum's slices at or above the pooled threshold) |
+| `classes_hcal.csv` | E2 classes of the H-cal slices under the `pooled` and the `stratified` thresholds (`thresholds` column; tau_L and tau_C), per stratum: `slices`, and the shares `flagged` (full or partial), `full` (C ≥ tau_C), `partial`, `all_lesions_copied` (every informative lesion paired with s ≥ tau_L; descriptive); all chance |
+| `sensitivity.csv` | Threshold values per detector, threshold and stratum for the main setting and one alternative per setting: the 99th percentile, sigma 0.08, the bound one bin lower, the 5% cut's bound (25 px) |
+| `exclusions.csv` | Per candidate bound: T and H-cal lesions kept and slices left without an informative lesion; S main share without (from the E0 table) |
+| `score_histograms.png` | H-cal score histograms by stratum for tau_D (E1 score), tau_L (strongest lesion pair) and tau_C (configuration score C of the nearest neighbour), with the pooled and stratum thresholds |
+| `run_info.json` | Run log |
+
 ## Planned files (E1–E3)
 
-Specified in `docs/e1-e3-plan.md`; entries are added here as each stage is built:
-`results/<dataset>/e3/calibrate/`, the E1 and E2 tables
-for H-cal in `<output_root>/<dataset>/e3/` (E1 as CSV; E2 slice pairs, lesion pairs and summary
-as Parquet), and the frozen thresholds `configs/frozen/e3_<dataset>.yaml` (in git).
+Specified in `docs/e1-e3-plan.md`; entries are added here as each stage is built: the frozen
+thresholds `configs/frozen/e3_<dataset>.yaml` (in git, written by `freeze`) and the E3 check
+report.

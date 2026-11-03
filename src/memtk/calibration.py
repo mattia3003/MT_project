@@ -1,10 +1,12 @@
 """E3 building blocks: chance-match rates of held-out lesions by size and the informative-lesion
-bound (`docs/experiment-plan.md`, E3 step 1; `docs/e1-e3-plan.md`, decision G).
+bound (`docs/experiment-plan.md`, E3 step 1; `docs/e1-e3-plan.md`, decision G), and percentile
+thresholds with bootstrap-by-patient intervals (E3 step 2; decision H).
 
 A held-out (H-cal) lesion was never trained on, so its best match against the training lesions
 is chance. The chance-match rate of an area bin is the share of its lesions whose best lesion
 score reaches tau_L. The bound is the smallest bin edge from which the rate stays below a cut
-(5% or 10%) for every larger bin.
+(5% or 10%) for every larger bin. Thresholds are percentiles of H-cal slice scores; slices of
+one patient are near-duplicates, so their intervals resample patients, not slices.
 """
 
 from __future__ import annotations
@@ -47,6 +49,26 @@ def chance_rates(best_s: np.ndarray, area: np.ndarray, patients: np.ndarray | Se
 def percentile_threshold(scores: np.ndarray, percentile: float) -> float:
     """The `percentile` of scores, a missing score (no match) counting as 0."""
     return float(np.percentile(np.nan_to_num(np.asarray(scores, dtype=float), nan=0.0), percentile))
+
+
+def stratum(n_lesions: np.ndarray) -> np.ndarray:
+    """"single" for slices with one lesion, "multi" for slices with two or more."""
+    return np.where(np.asarray(n_lesions) >= 2, "multi", "single")
+
+
+def bootstrap_interval(scores: np.ndarray, patients: np.ndarray, percentile: float, draws: int,
+                       rng: np.random.Generator, level: float = 0.95) -> tuple[float, float]:
+    """Interval of the `percentile` of slice scores when patients (all slices of each) are
+    resampled with replacement `draws` times; a missing score counts as 0."""
+    scores = np.nan_to_num(np.asarray(scores, dtype=float), nan=0.0)
+    patients = np.asarray(patients)
+    groups = [scores[patients == p] for p in np.unique(patients)]
+    stats = np.empty(draws)
+    for i in range(draws):
+        chosen = rng.integers(0, len(groups), size=len(groups))
+        stats[i] = np.percentile(np.concatenate([groups[j] for j in chosen]), percentile)
+    low, high = np.percentile(stats, [50 * (1 - level), 50 * (1 + level)])
+    return float(low), float(high)
 
 
 def propose_bound(rates: pd.DataFrame, cut: float) -> int | None:

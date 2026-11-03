@@ -105,7 +105,7 @@ as from its script, e.g. `run_qc(load_config(), overwrite=True)`.
 | `stages` | shared helpers for stage packages: command-line options, decisions, overwrite guard |
 | `wholemask` | E1: the whole-mask detector (Dice with a small shift search) |
 | `lesionmatch` | E2: the lesion-level detector (lesion by lesion, Hungarian pairing) |
-| `calibration` | E3: chance-match rates, the informative-lesion bound (thresholds follow in step 5) |
+| `calibration` | E3: chance-match rates, the informative-lesion bound, thresholds with bootstrap-by-patient intervals |
 
 Functions, imports, "used by" and tests: `docs/module-reference.md`.
 

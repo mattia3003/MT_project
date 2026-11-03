@@ -15,12 +15,12 @@ E4 on planted copies and E5 on S.
 | 2 | E1 library `memtk/wholemask.py` + tests | library | ✅ 2026-11-03: 10 tests; self-match sanity on 300 random T slices: all score 1 at no shift (4 matched an identical neighbouring slice); 4.4 ms per query (S main ≈ 3 min) |
 | 3 | E2 library `memtk/lesionmatch.py` + tests | library | ✅ 2026-11-03: 14 tests (shortcuts = brute force on random maps); on real T: self-match C = 1 for 300/300, shortcuts = brute force on 30 real slices (5,608 candidate slice pairs, 0 differences); 10 ms per query slice |
 | 4 | `bound-review` | review → decision G | ✅ 2026-11-03 (`memtk/calibration.py`, `memtk/e3/`, `scripts/e3_calibrate.py`, 7 tests); **decision G set** by the user: provisional tau_L 0.77, cut 10%, bound 12 px (the 5% cut gives 25 px) |
-| 5 | `calibrate` | production (needs G) → evidence for decision H | ⏳ |
+| 5 | `calibrate` | production (needs G) → evidence for decision H | ✅ 2026-11-03. First run: the planned τ_C was degenerate (≈ 0.02) because C counted only pairs ≥ τ_L. Fixed (user, 2026-11-03): **C counts every paired lesion from the candidate cut 0.1; classes as planned** (full = C ≥ τ_C, partial = a pair ≥ τ_L). **Decision H set**: stratified for both detectors. τ_D 0.905 / 0.729, τ_L 0.739 / 0.816, τ_C 0.719 / 0.406 (single / multi) |
 | 6 | `freeze` + `check` | production (needs H) + consistency checks | ⏳ |
 
-**Next: start here.** Step 5, `calibrate` (needs decision G, set 2026-11-03: bound 12 px).
-Its sensitivity table adds the 5% cut's bound (25 px) next to the planned one-bin-lower bound. (The architecture docs were reworked first, 2026-11-03: new
-modules and files go into `docs/module-reference.md` and `docs/data-dictionary.md`.)
+**Next: start here.** Step 6, `freeze` (writes `configs/frozen/e3_<dataset>.yaml` from the stored
+H-cal tables with decision H) and `check`. (The architecture docs were reworked first,
+2026-11-03: new modules and files go into `docs/module-reference.md` and `docs/data-dictionary.md`.)
 
 **Milestone:** 9 Nov 2026, both detectors run on H-cal; informative-lesion bound and thresholds
 frozen. E4 (gate) by 13 Nov. Indicative schedule: step 1–2 on 4 Nov, step 3 on 5 Nov, step 4 and
@@ -73,7 +73,8 @@ Lettering continues from E0b (A–E).
 | --- | --- | --- | --- |
 | F | Position frame for the E2 position factor | E0b `stats` centroid density | all E2 code |
 | G | Provisional τ_L, chance-rate cut (5% or 10%), informative-lesion bound | `bound-review` | `calibrate` |
-| H | Thresholds per stratum (single / multi-lesion) or pooled, per detector | `calibrate` | `freeze` |
+| H | Thresholds per stratum (single / multi-lesion) or pooled, per detector: **stratified for both, set 2026-11-03** | `calibrate` | `freeze` |
+| — | Configuration score and classes: **C counts every Hungarian pair with s ≥ 0.1** (not only ≥ τ_L); **full = C(q, NN) ≥ τ_C, partial = not full but a pair ≥ τ_L** (rule A, the plan's own), set 2026-11-03 after a one-run detour via a structural rule | `calibrate` (τ_C degenerate with the old C) | `lesionmatch`, E4, E5 |
 
 **Decision F (set 2026-11-03 by the user): pixel coordinates.** Stage 1 generates masks without
 seeing a brain, so a memorized mask reproduces its training mask at the same pixel positions;
@@ -104,19 +105,24 @@ production stage refuses to run while its value is `null` and names the review s
   - *position:* exp(−d² / 2σ²), d = pixel distance between centroids, σ = 6.4 px;
   - *size:* smaller area / larger area.
 - **Informative lesion:** area ≥ the bound (decision G). Only informative lesions enter E2.
-- **Slice-pair score** C(q, t): Hungarian one-to-one pairing of the informative lesions on cost
-  1 − s; pairs with s ≥ τ_L are kept; C = sum of kept s / max(informative lesions in q, in t).
+- **Slice-pair (configuration) score** C(q, t): Hungarian one-to-one pairing of the informative
+  lesions on cost 1 − s; pairs with s ≥ 0.1 (the candidate cut) are kept; C = sum of kept s /
+  max(informative lesions in q, in t). C does not depend on τ_L (changed 2026-11-03).
 - **NN:** the training slice with the highest score (E1: Dice; E2: C).
-- **E2 classes:** full copy C(q, NN) ≥ τ_C; partial copy C < τ_C but ≥ 1 lesion pair in the NN
-  slice passes τ_L; novel otherwise. Also recorded: the strongest single lesion-pair score over
-  all candidate slices, and its slice.
+- **E2 classes (the plan's rule A, confirmed 2026-11-03):** full copy = C(q, NN) ≥ τ_C; partial
+  = not full, but the strongest lesion pair over all candidate slices ≥ τ_L; novel otherwise. NN =
+  the slice with the highest C (ties: higher strongest pair, then the first training slice). Also
+  recorded: `n_kept` (NN lesions passing τ_L), `all_copied` (all of them do), the strongest single
+  lesion pair and its slice. (With C counting only pairs ≥ τ_L, τ_C came out at about 0; a
+  structural "all lesions ≥ τ_L" rule was used for one run before C was redefined.)
 - **Strata:** single- or multi-lesion slice, by the number of lesions ≥ 4 px for E1 and by the
   number of informative lesions for E2 (the lesions each detector actually sees).
 - **Chance-match rate** (for the bound): the share of H-cal lesions in an area bin whose best
   lesion score against any T lesion is ≥ τ_L. H-cal patients were never trained on, so every such
   match is chance.
 - **Thresholds** at the 95th percentile of H-cal (each one an H-cal slice statistic): τ_D of the
-  E1 score, τ_C of C(q, NN), τ_L of the strongest single lesion-pair score.
+  E1 score, τ_L of the strongest single lesion-pair score, τ_C of C(q, NN) (no match counts as
+  0); stratified single / multi (decision H, set 2026-11-03).
 
 ## Library modules (building blocks, no knowledge of stages)
 
@@ -183,8 +189,10 @@ module per topic (`bound`, `calibrate`, `check`, plus `common` for loading T and
      lesion reported and left out.
    - E1 on H-cal against T: one row per H-cal slice (NN, patient, score, shift, margin).
    - E2 on H-cal against T with the bound: the three tables.
-   - τ_D, τ_C, τ_L at the 95th percentile, per stratum and pooled, each with its
-     bootstrap-by-patient interval and the number of slices and patients behind it.
+   - τ_D, τ_L and τ_C at the 95th percentile, per stratum and pooled, each with its
+     bootstrap-by-patient interval, the number of slices and patients behind it, and the share
+     of each stratum the pooled threshold flags; the E2 classes on H-cal (flagged, full,
+     partial, all lesions copied) under the pooled and the stratified thresholds.
    - Sensitivity, one alternative per setting: σ = 0.08 × 128 ≈ 10.2 px; the 99th percentile;
      the bound one bin lower (10 px); and, added with decision G, the 5% cut's bound (25 px).
    - Exclusion counts: lesions and slices the bound removes from T and H-cal (and S main from
@@ -194,8 +202,8 @@ module per topic (`bound`, `calibrate`, `check`, plus `common` for loading T and
      thresholds, intervals, sensitivity table and figures in `results/<dataset>/e3/calibrate/`
      with a proposal for decision H (pool a stratum when its interval is wide or rests on few
      patients).
-3. **`freeze`** (needs H; step 6). Writes `configs/frozen/e3_<dataset>.yaml`: τ_D, τ_C, τ_L
-   (per stratum or pooled, as decided), the bound, the position frame, σ, the prefilter
+3. **`freeze`** (needs H; step 6). Writes `configs/frozen/e3_<dataset>.yaml`: τ_D, τ_L and τ_C
+   (per stratum or pooled, as decided), the class rule, the bound, the position frame, σ, the prefilter
    distance, top-k, the shift range, the percentile, and the run log reference. In git; refuses
    to overwrite. Before writing it confirms the shortcuts' conditions (τ_L ≥ 0.1; s < τ_L at the
    prefilter distance for every lesion size). E4 and E5 read only this file.
@@ -214,7 +222,7 @@ module per topic (`bound`, `calibrate`, `check`, plus `common` for loading T and
   score 1 and the right shift; no wrap-around at the border; the margin uses another patient.
 - `tests/test_lesionmatch.py`: an identical lesion scores 1; position and size factors at known
   distances and areas; the experiment plan's worked example (A–X 0.9, B–Z 0.2, three lesions in
-  t → C = 0.30, a partial copy); the shortcuts equal brute force on random toy sets; classes.
+  t → C = (0.9 + 0.2) / 3 = 0.37, a partial copy below τ_C); the shortcuts equal brute force on random toy sets; classes.
 - `tests/test_calibration.py`: percentiles per stratum; the bootstrap is repeatable with a seed
   and resamples patients, not slices; the bound rule on a constructed rate table.
 

@@ -10,7 +10,11 @@ Stages, run in this order (see docs/e1-e3-plan.md):
                  bound): every H-cal lesion's best E2 match in T, chance-match rate by lesion area,
                  the proposal, the cost of each bound (E0), example matches
                  -> results/<dataset>/e3/bound_review/
-  (planned: calibrate, freeze, check)
+  calibrate      (needs decision G) E1 and E2 on H-cal against T; tau_D, tau_L, tau_C at the
+                 percentile of H-cal, pooled and per stratum, with bootstrap-by-patient intervals;
+                 sensitivity table; exclusion counts -> evidence for decision H
+                 -> <output_root>/<dataset>/e3/ (H-cal detector tables), results/<dataset>/e3/calibrate/
+  (planned: freeze, check)
 
 Examples (from the repository root):
   .venv\\Scripts\\python.exe scripts\\e3_calibrate.py bound-review
@@ -19,7 +23,7 @@ Examples (from the repository root):
 import argparse
 
 from memtk import config
-from memtk.e3 import bound
+from memtk.e3 import bound, calibrate
 from memtk.stages import add_stage
 
 
@@ -29,6 +33,8 @@ def main() -> None:
 
     add_stage(stages, "bound-review", "evidence for decision G: chance-match rates by lesion size, bound proposal",
               bound.run_bound_review)
+    add_stage(stages, "calibrate", "E1 + E2 on H-cal, thresholds with bootstrap intervals (needs G; evidence for H)",
+              calibrate.run_calibrate)
 
     args = parser.parse_args()
     options = {k: v for k, v in vars(args).items() if k not in ("stage", "run", "config")}

@@ -5,7 +5,11 @@ lesions (area >= the bound) take part. Two lesions a, b score s = shape x positi
 shape = IoU of their pixel sets with the rounded centroids aligned (centred crops), position =
 exp(-d^2 / 2 sigma^2) with d the centroid distance in pixels (decision F), size = smaller area /
 larger area. A slice pair (q, t) pairs its lesions one-to-one (Hungarian, maximising the summed
-s) and scores C = sum of the paired s that reach tau_L / max(lesions in q, lesions in t).
+s) and scores the configuration C = sum of the paired s that reach candidate_min_s / max(lesions in
+q, lesions in t): how alike the whole layout is, independent of tau_L (decided 2026-11-03; first
+planned with only the pairs reaching tau_L, which made C 0 for most held-out slices). Classes:
+full copy when C of the nearest neighbour reaches tau_C, partial when it does not but a lesion
+pair over all candidate slices reaches tau_L, novel otherwise.
 
 Two shortcuts give exactly the same result as comparing everything: lesion pairs farther apart
 than the prefilter distance are skipped (their position factor is below exp(-8), so s stays
@@ -13,7 +17,8 @@ below any tau_L >= candidate_min_s), and C is computed only for candidate slices
 a lesion pair with s >= candidate_min_s (every other slice has C = 0 for tau_L >= that value).
 
 All candidate pairs are stored; tau_L and tau_C are applied afterwards (`LesionMatch.slice_scores`,
-`LesionMatch.summary`), so thresholds and sensitivity analyses need no recomputation. Used by E3
+`LesionMatch.summary`; one value each, or one per query slice for stratified thresholds), so
+thresholds and sensitivity analyses need no recomputation. Used by E3
 (H-cal), E4 (planted copies) and E5 (S); the stages pass the settings from `detectors.lesion`
 and `calibration`, converted to pixels.
 """
@@ -142,39 +147,53 @@ class LesionMatch:
     lesion_pairs: pd.DataFrame
     candidate_min_s: float
 
-    def slice_scores(self, tau_L: float) -> pd.DataFrame:
-        """`slice_pairs` with `n_kept` (paired lesions with s >= tau_L) and C = their summed s /
-        max(n_query, n_train). Exact only for tau_L >= candidate_min_s, which is enforced."""
-        if tau_L < self.candidate_min_s:
-            raise ValueError(f"tau_L {tau_L} is below candidate_min_s {self.candidate_min_s}: the "
+    def slice_scores(self, tau_L: float | pd.Series) -> pd.DataFrame:
+        """`slice_pairs` with the configuration score C (paired s reaching candidate_min_s, summed,
+        / max(n_query, n_train); independent of tau_L), `n_kept` (paired lesions with s >= tau_L)
+        and `all_copied` (every informative lesion of both slices kept). `tau_L` is one value or a
+        Series by query slice (stratified thresholds). Exact only for tau_L >= candidate_min_s,
+        which is enforced."""
+        lowest = float(tau_L.min()) if isinstance(tau_L, pd.Series) else float(tau_L)
+        if lowest < self.candidate_min_s:
+            raise ValueError(f"tau_L {lowest} is below candidate_min_s {self.candidate_min_s}: the "
                              f"candidate shortcut would no longer be exact")
-        kept = self.lesion_pairs[self.lesion_pairs["s"] >= tau_L]
-        sums = kept.groupby(["query", "train"])["s"].agg(["sum", "size"]).rename(
-            columns={"sum": "kept_s", "size": "n_kept"})
-        out = self.slice_pairs.join(sums, on=["query", "train"])
-        out[["kept_s", "n_kept"]] = out[["kept_s", "n_kept"]].fillna(0)
+        pairs = self.lesion_pairs
+        threshold = pairs["query"].map(tau_L) if isinstance(tau_L, pd.Series) else tau_L
+        paired = pairs[pairs["s"] >= self.candidate_min_s].groupby(["query", "train"])["s"].sum().rename("paired_s")
+        n_kept = pairs[pairs["s"] >= threshold].groupby(["query", "train"]).size().rename("n_kept")
+        out = self.slice_pairs.join(paired, on=["query", "train"]).join(n_kept, on=["query", "train"])
+        out[["paired_s", "n_kept"]] = out[["paired_s", "n_kept"]].fillna(0)
         out["n_kept"] = out["n_kept"].astype(int)
-        out["C"] = out["kept_s"] / np.maximum(out["n_query"], out["n_train"])
-        return out.drop(columns="kept_s")
+        out["C"] = out["paired_s"] / np.maximum(out["n_query"], out["n_train"])
+        out["all_copied"] = (out["n_kept"] == out["n_query"]) & (out["n_kept"] == out["n_train"])
+        return out.drop(columns="paired_s")
 
-    def summary(self, tau_L: float, tau_C: float) -> pd.DataFrame:
-        """One row per query slice with an informative lesion: nearest neighbour `nn` (highest
-        C; ties: higher `best_pair_s`, then the first training slice) and its `C`, the class
-        (`full` if C >= tau_C; `partial` if C < tau_C but a lesion pair of the NN slice reaches
-        tau_L; `novel` otherwise), and the strongest single lesion pair over all candidate
-        slices (`strongest_s`, `strongest_train`)."""
+    def summary(self, tau_L: float | pd.Series, tau_C: float | pd.Series) -> pd.DataFrame:
+        """One row per query slice with an informative lesion: nearest neighbour `nn` (highest C;
+        ties: higher `best_pair_s`, then the first training slice) with its `C`, `n_kept` and
+        `all_copied`; the strongest single lesion pair over all candidate slices (`strongest_s`,
+        `strongest_train`); and the class: `full` if C(q, NN) >= tau_C, `partial` if not but
+        `strongest_s` >= tau_L, `novel` otherwise. Each threshold is one value or a Series by
+        query slice; tau_C must be above 0 (every slice has C >= 0)."""
+        lowest_c = float(tau_C.min()) if isinstance(tau_C, pd.Series) else float(tau_C)
+        if lowest_c <= 0:
+            raise ValueError(f"tau_C {lowest_c} must be above 0: C >= 0 would make every slice a full copy")
         scored = self.slice_scores(tau_L).sort_values(
             ["query", "C", "best_pair_s", "train_idx"], ascending=[True, False, False, True])
         nn = scored.drop_duplicates("query").set_index("query")
-        strongest = (self.slice_pairs.sort_values(["query", "best_pair_s", "train_idx"], ascending=[True, False, True])
-                     .drop_duplicates("query").set_index("query"))
         out = self.queries[self.queries["n_informative"] > 0][["query", "n_informative"]].copy()
         out["nn"] = out["query"].map(nn["train"]).fillna("")
         out["C"] = out["query"].map(nn["C"]).fillna(0.0)
-        n_kept = out["query"].map(nn["n_kept"]).fillna(0)
-        out["class"] = np.where(out["C"] >= tau_C, "full", np.where(n_kept > 0, "partial", "novel"))
-        out["strongest_s"] = out["query"].map(strongest["best_pair_s"])
+        out["n_kept"] = out["query"].map(nn["n_kept"]).fillna(0).astype(int)
+        out["all_copied"] = out["query"].map(nn["all_copied"]).eq(True)  # no candidate maps to NaN: False
+        out["strongest_s"] = out["query"].map(self.slice_pairs.groupby("query")["best_pair_s"].max())
+        strongest = (self.slice_pairs.sort_values(["query", "best_pair_s", "train_idx"], ascending=[True, False, True])
+                     .drop_duplicates("query").set_index("query"))
         out["strongest_train"] = out["query"].map(strongest["train"]).fillna("")
+        c_cut = out["query"].map(tau_C) if isinstance(tau_C, pd.Series) else tau_C
+        l_cut = out["query"].map(tau_L) if isinstance(tau_L, pd.Series) else tau_L
+        out["class"] = np.where(out["C"] >= c_cut, "full",
+                                np.where(out["strongest_s"].fillna(0.0) >= l_cut, "partial", "novel"))
         return out.reset_index(drop=True)
 
 

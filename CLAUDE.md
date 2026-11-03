@@ -161,7 +161,9 @@ can this be detected and explained using generated outputs alone?
   correct lesions for >= 80% of planted partial copies (P6). No human rater (master thesis).
 - Hypotheses: H1 (RQ1) copy rate exceeds the held-out rate, and copies concentrate on lesions
   spanning many adjacent training slices (3D lesion labelling, 26-connectivity; Spearman of
-  copies vs slice span, also within lesion-size bins). H2 (RQ2) at equal false-positive rate
+  copies vs slice span, also within lesion-size bins; caution: 26-connected linking merges
+  neighbouring metastases for 2.7% of T's 3D lesions = 10.3% of 2D lesions, decide slice-to-slice
+  tracking or a sensitivity when E6 is planned, see experiment-plan E6). H2 (RQ2) at equal false-positive rate
   on held-out masks, lesion-level matching flags more than whole-mask Dice. H3 (RQ3a)
   memorization concentrates in rare configurations (Spearman of exposure vs rarity).
 - RQ4 (optional, exploratory, E8, only if >= ~20 flagged masks and time remains): is the paired
@@ -185,14 +187,20 @@ can this be detected and explained using generated outputs alone?
   25.6 px (stage 1 copies keep the training mask's pixel positions; synthetic brains are smaller).
   Brain-relative coordinates only for anatomical questions. Crops are built in E2 from the E0
   label maps.
-- Slice-pair score C(q, t): Hungarian one-to-one pairing on cost 1 - s, keep pairs with
-  s >= tau_L, C = sum(kept s) / max(n_lesions_q, n_lesions_t). NN = training slice with max C.
+- Slice-pair (configuration) score C(q, t): Hungarian one-to-one pairing on cost 1 - s, keep
+  pairs with s >= 0.1 (the candidate cut; NOT tau_L, decided 2026-11-03), C = sum(kept s) /
+  max(n_lesions_q, n_lesions_t). C does not depend on tau_L. NN = training slice with max C.
 - Exact shortcuts (no approximation): position prefilter (skip lesion pairs > 25.6 px apart;
   confirm s < tau_L there) and candidate slices (only compute C for training slices
   sharing a lesion pair with s >= 0.1; all others have C = 0).
-- Classes: full copy C(q, NN) >= tau_C; partial copy C < tau_C but >= 1 lesion pair in NN slice
-  passes tau_L; novel otherwise. Also record the strongest single lesion-pair score across all
-  candidate slices (and its slice).
+- Classes (the plan's rule, confirmed 2026-11-03): full copy = C(q, NN) >= tau_C (configuration
+  closer than chance, even without a single lesion >= tau_L); partial = not full, but the
+  strongest lesion pair over all candidate slices >= tau_L; novel otherwise. Also stored:
+  n_kept (NN lesions passing tau_L) and all_copied, plus the strongest single lesion-pair score
+  (and its slice). On H-cal: full ~5%, flagged at all 7-9% per stratum (state E4 FP per class).
+- Thresholds (E3, frozen): tau_D (E1), tau_L and tau_C (E2), each the 95th percentile of H-cal,
+  STRATIFIED single/multi-lesion (decision H, 2026-11-03); strata by lesions >= 4 px for E1, by
+  informative lesions for E2. Values: tau_D 0.905/0.729, tau_L 0.739/0.816, tau_C 0.719/0.406.
 - Outputs (store ALL candidate pairs, apply thresholds at analysis time):
   1. slice-pair table (synthetic id, train slice, patient, slice index, C, lesion counts,
      n matched, strongest single lesion score),
