@@ -10,7 +10,7 @@ and open the Markdown preview.
 **Keeping it current:** updating this file is part of finishing each experiment, together with
 the status table in `scripts/README.md` and the entries in `docs/report-notes.md`.
 
-*Status: E0a implemented; E0b in progress: all stages up to `qc` implemented, `stats` and `check` planned (2026-11-02).*
+*Status: E0a and E0b implemented (2026-11-03); the full re-run of E0 is next.*
 
 ---
 
@@ -53,7 +53,7 @@ flowchart TD
         QC["qc ✅"]
         STATS["stats ✅"]
         FREV["filters-review ✅"]
-        ECHECK["check"]:::planned
+        ECHECK["check ✅"]
     end
     BREV -.->|"decision A"| BRAIN
     BRAINOUT[("brain.csv · brain_masks.npz<br/>masks_raw.npz (synthetic)")]
@@ -100,7 +100,7 @@ flowchart TD
 | | `qc` | ✅ | decision D, `lesions` and `brain` outputs | `qc.csv` (pool), `results/<pool>/e0b/qc/` |
 | | `stats` | ✅ | `lesions`, `qc`, `brain` outputs, `patients.csv`, real volumes (model space and native masks) | `results/<dataset>/e0b/stats/` |
 | | `filters-review` | ✅ | `lesions`, `brain`, `qc` outputs, real `seg` volumes | `results/<dataset>/e0b/filters_review/` (evidence for decision E) |
-| | `check` | planned | all E0b outputs | consistency checks |
+| | `check` | ✅ | all E0b outputs, synthetic pool | `results/<dataset>/e0b/check_report_<pool>.txt` |
 | `e3_calibrate.py` | *tbd* | planned | E0b outputs, H-cal | frozen thresholds |
 | `e4_validate.py` | *tbd* | planned | frozen thresholds, T, H-eval | validation table, planted copies |
 | `e5_audit.py` | — | planned | frozen thresholds, S | main audit tables |
@@ -138,8 +138,8 @@ flowchart LR
     end
 
     S_E0A --> M_CHECKS & M_SPLIT & M_SYN & M_TRANSFORMS & M_IO & M_CONFIG
-    S_E0B --> M_AUDIT & M_LESIONS & M_IDS & M_QC & M_SYN & M_IO & M_CONFIG
-    M_CHECKS --> M_LESIONS & M_PLOT & M_SYN & M_TRANSFORMS & M_IO & M_CONFIG
+    S_E0B --> M_AUDIT & M_CHECKS & M_LESIONS & M_IDS & M_QC & M_SYN & M_IO & M_CONFIG
+    M_CHECKS --> M_QC & M_IDS & M_LESIONS & M_PLOT & M_SYN & M_TRANSFORMS & M_IO & M_CONFIG
     M_AUDIT --> M_LESIONS & M_PLOT
     M_SPLIT --> M_TRANSFORMS & M_IO
     M_SYN --> M_LESIONS & M_IO & M_CONFIG
@@ -148,7 +148,7 @@ flowchart LR
 
 | Module | Purpose | Main functions | External libraries |
 | --- | --- | --- | --- |
-| `config` | Load the YAML config, look up datasets and pools, resolve paths from the repo root, write run logs | `load_config`, `real_dataset`, `synthetic_pool`, `output_dir`, `results_dir`, `split_file`, `write_run_info` | PyYAML |
+| `config` | Load the YAML config, look up datasets and pools, resolve paths from the repo root, write run logs | `load_config`, `value` (dotted key), `real_dataset`, `synthetic_pool`, `output_dir`, `results_dir`, `split_file`, `write_run_info` | PyYAML |
 | `io` | Read and write NIfTI; locate patients and their files; mask stacks (many 2D boolean masks in one bit-packed `.npz`) and label stacks (many 2D label maps in one sparse `.npz`), looked up by key | `load_image`, `save_nifti`, `read_table` (pipeline CSVs with ID columns kept as text), `list_patients`, `patient_files`, `MaskStackWriter`, `MaskStack`, `LabelStackWriter`, `LabelStack` | nibabel, pandas |
 | `ids` | The ID convention shared by every experiment: slice keys (`Mets_005/z127`, sample ID) and lesion IDs (`<slice key>/L<n>`); unique per source, `(source, lesion_id)` globally | `slice_key`, `sample_key`, `parse_slice_key`, `lesion_id`, `parse_lesion_id` | — |
 | `transforms` | The original training transform (model space) and slice counts | `model_space_transform`, `convert_volume_pair`, `binarize_mask`, `lesion_px_per_slice` | MONAI, PyTorch |
@@ -156,7 +156,7 @@ flowchart LR
 | `synthetic` | Read synthetic samples in place; sample IDs; index a pool; parse the legacy QC list | `index_pool`, `load_sample`, `sample_id`, `name_scheme`, `read_legacy_exclusions` | — |
 | `lesions` | 8-connected labelling; attach-or-drop (specks below the minimum area become strays of a lesion within the gap, or are dropped; lesions numbered by area); lesion features (centroid in three frames, bbox, shape, fraction outside the brain); brain masks (six candidate methods), tissue area, brain box; distance and growing helpers | `label_components`, `count_components`, `attach_or_drop` (→ `LesionLabels`), `speck_gaps`, `lesion_features`, `brain_mask`, `tissue_px`, `brain_box`, `fraction_outside`, `chessboard_distance`, `grow` | SciPy, scikit-image |
 | `qc` | Quality classes of synthetic samples: mask class from the mask alone (`no_lesion`, `noisy`, `minor`, `clean`), the combined class with a failed MRI first, the edge count per slice | `mask_class`, `qc_class`, `edge_lesions`, `MASK_CLASSES`, `QC_CLASSES` | pandas |
-| `checks` | E0a consistency checks, independent reference transform, sample grid | `CheckReport`, `check_split`, `check_real_volumes`, `check_recompute`, `check_synthetic_index`, `sample_grid` | PyTorch, matplotlib |
+| `checks` | E0 consistency checks. E0a: split, volumes, independent reference transform, synthetic index, sample grid. E0b: lesion tables vs label maps, label maps vs masks as saved, label volumes, QC table, stack keys, run logs vs the current config | `CheckReport`, `check_split`, `check_real_volumes`, `check_recompute`, `check_synthetic_index`, `sample_grid`, `check_lesion_tables`, `check_labels_vs_masks`, `check_label_volumes`, `check_qc_table`, `check_stack_keys`, `check_run_logs` | PyTorch, matplotlib |
 | `audit` | Evidence for the E0b review stages (candidate comparisons, figures, proposals) and overviews of the production stages | `evaluate_brain_methods`, `summarize_brain_methods`, `propose_brain_method`, `method_grid`, `threshold_sensitivity`, `summarize_threshold_sensitivity`, `sorted_sheet`, `tissue_counts`, `tissue_histogram`, `component_table`, `propose_min_area`, `size_counts`, `mask_specks`, `summarize_attach_or_drop`, `gap_counts`, `size_figure`, `crop_sheet`, `summarize_lesions`, `speck_stratum`, `summarize_speck_strata`, `summarize_qc`, `describe_sets`, `bound_impact`, `lesions_per_slice_figure`, `area_figure`, `centroid_density_figure`, `FILTERS`, `filter_checks`, `summarize_filters`, `filter_cost`, `cumulative_lines`, `mask_dice`, `adjacency_figure`, `area_ratio_figure`, `brain_by_height`, `brain_height_figure`, `draw_lesions`, `lesion_sheet`, `lesion_view`, `summarize_brains`, `brain_sheet`, `draw_box` | pandas, matplotlib |
 | `plotting` | Shared figure helpers (no pyplot, so importing memtk never changes the plotting backend). `save` wraps the figure title to the figure width and uses the constrained layout, so the title never covers tile titles or runs off the image | `tile_figure`, `show_slice`, `hide_unused`, `save` | matplotlib |
 
@@ -165,7 +165,10 @@ attach-or-drop (gaps, drop-only, nearest lesion and ties, numbering, nothing mov
 features (all three frames, no brain, partly outside), brain masks, tissue area and the brain
 box; `tests/test_io.py` covers the mask- and label-stack round trips and `read_table`;
 `tests/test_ids.py` covers building, parsing and refusing IDs; `tests/test_qc.py` covers the
-class precedence, the speck cut-off and the edge count.
+class precedence, the speck cut-off and the edge count; `tests/test_filters.py` covers the
+sampling-filter checks; `tests/test_checks.py` runs the E0b consistency checks on consistent
+outputs (pass) and on damaged copies (fail: wrong areas, centroids, IDs, counts, numbering,
+labels outside the mask, wrong QC class, stale or out-of-order run logs).
 Run with `.venv\Scripts\python.exe -m pytest`.
 
 **Planned modules** (from the experiment plan; names may change when each experiment is planned):
@@ -383,6 +386,17 @@ minor, the main audit) and S all.
 | `brain_by_height_<dataset>.csv` | Brain area quartiles (`p25`, `median`, `p75`) of all real slices (decided brain method) per relative slice position (20 bins, indexed by bin centre; 0 = first, 1 = last slice with brain), with slices and lesion slices per bin |
 | `brain_by_height_<pool>.png` | Left: real brain area by relative position (median, middle 50%) with the synthetic median as a red line. Right: brain-area distributions of real lesion slices and synthetic samples (main audit, failed MRIs left out) |
 | `run_info.json` | Run log |
+
+### Results: `results/<dataset>/e0b/check_report_<pool>.txt`
+
+Written by `check`. In git. One PASS/FAIL line per check, with counts and failing examples:
+every decision set; each production stage's run log has today's values of the settings it
+depends on and ran after the stage before it; per source, lesion IDs unique and parseable,
+lesion rows per slice, label maps holding labels 1..n with matching areas, centroids and
+numbering, label maps reproduced by attach-or-drop from the masks as saved, real
+`labels.nii.gz` volumes, stack keys, cached synthetic masks and brain masks recomputed from the
+files (random sample), QC classes reproduced and counted; the unit tests. Exit code 1 on any
+failure. Run log: `check_<pool>.run_info.json`.
 
 ### Results: `results/<dataset>/e0b/filters_review/`
 

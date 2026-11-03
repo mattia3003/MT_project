@@ -1,12 +1,18 @@
-"""Consistency checks for the E0a outputs: patient split, model-space volumes, synthetic index.
+"""Consistency checks for the E0 outputs.
+
+E0a: patient split, model-space volumes, synthetic index. E0b: lesion tables against label maps,
+label maps against the masks as saved, QC classes, cached stacks, and the run logs of the
+production stages against the current config.
 
 Every check is recorded in a CheckReport instead of stopping at the first failure, so one run
 shows everything that is wrong. Checks are generic (no hardcoded patient or sample counts);
-the counts are printed in the report for manual comparison.
+the counts are printed in the report for manual comparison. The E0b checks take the stacks as
+anything indexable by key, so tests can run them on small hand-built data.
 """
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -19,9 +25,11 @@ import torch.nn.functional as F
 from matplotlib.figure import Figure
 from tqdm import tqdm
 
-from memtk.config import resolve_path
+from memtk import qc
+from memtk.config import resolve_path, value
+from memtk.ids import parse_lesion_id
 from memtk.io import list_patients, load_image, patient_files
-from memtk.lesions import count_components
+from memtk.lesions import attach_or_drop, count_components, label_components
 from memtk.plotting import save
 from memtk.synthetic import list_pool_files, load_sample, read_legacy_exclusions
 from memtk.transforms import convert_volume_pair, lesion_px_per_slice
@@ -288,3 +296,142 @@ def _show(ax, image: np.ndarray, mask: np.ndarray, title: str) -> None:
         ax.contour(mask > 0, levels=[0.5], colors="r", linewidths=0.6)
     ax.set_title(title, fontsize=7)
     ax.axis("off")
+
+
+# --- E0b: lesion tables and label maps -------------------------------------------------------
+
+def check_lesion_tables(report: CheckReport, source: str, lesions: pd.DataFrame, slices: pd.DataFrame,
+                        labels) -> None:
+    """lesions.csv and slices.csv of one source against its label maps (`labels[key]`): IDs,
+    lesion counts, labels 1..n per slice, areas, centroids and the numbering rule (larger area
+    first; equal areas: the lesion whose first pixel comes first in row-major order)."""
+    report.add(f"{source}: lesion IDs unique", lesions["lesion_id"].is_unique,
+               _examples(lesions.loc[lesions["lesion_id"].duplicated(), "lesion_id"].tolist()))
+    bad_ids = []
+    for lid, key, label in zip(lesions["lesion_id"], lesions["key"], lesions["label"]):
+        try:
+            if parse_lesion_id(lid) != (key, int(label)):
+                bad_ids.append(lid)
+        except ValueError:
+            bad_ids.append(lid)
+    report.add(f"{source}: every lesion ID parses to its slice key and lesion number", not bad_ids, _examples(bad_ids))
+    report.add(f"{source}: one label map per slice", set(labels.keys) == set(slices["key"]) and len(labels) == len(slices),
+               f"{len(labels)} maps, {len(slices)} slices")
+    per_slice = lesions.groupby("key").size().reindex(slices["key"], fill_value=0).to_numpy()
+    wrong_count = slices.loc[per_slice != slices["n_lesions"].to_numpy(), "key"].tolist()
+    report.add(f"{source}: lesion rows per slice == n_lesions in slices.csv", not wrong_count, _examples(wrong_count))
+
+    by_key = {key: g.sort_values("label") for key, g in lesions.groupby("key")}
+    bad = {"labels": [], "areas": [], "centroids": [], "numbering": []}
+    grid = None
+    for key in slices["key"]:
+        flat = labels[key].ravel()
+        if grid is None:
+            grid = np.indices(labels[key].shape).reshape(2, -1).astype(float)
+        n = int(flat.max())
+        g = by_key.get(key)
+        rows = g["label"].tolist() if g is not None else []
+        if sorted(np.unique(flat[flat > 0]).tolist()) != list(range(1, n + 1)) or rows != list(range(1, n + 1)):
+            bad["labels"].append(key)
+            continue
+        if g is None:
+            continue
+        areas = np.bincount(flat, minlength=n + 1)[1:]
+        centroid_row = np.bincount(flat, weights=grid[0], minlength=n + 1)[1:] / areas
+        centroid_col = np.bincount(flat, weights=grid[1], minlength=n + 1)[1:] / areas
+        if not np.array_equal(areas, g["area"].to_numpy()):
+            bad["areas"].append(key)
+        if not (np.allclose(centroid_row, g["centroid_row"]) and np.allclose(centroid_col, g["centroid_col"])):
+            bad["centroids"].append(key)
+        values, first = np.unique(flat, return_index=True)
+        first = first[values > 0]                         # first pixel of labels 1..n, in label order
+        if any(areas[i] < areas[i + 1] or (areas[i] == areas[i + 1] and first[i] > first[i + 1])
+               for i in range(n - 1)):
+            bad["numbering"].append(key)
+    report.add(f"{source}: label maps hold labels 1..n_lesions, one row each", not bad["labels"], _examples(bad["labels"]))
+    report.add(f"{source}: lesion areas == label map", not bad["areas"], _examples(bad["areas"]))
+    report.add(f"{source}: lesion centroids == label map", not bad["centroids"], _examples(bad["centroids"]))
+    report.add(f"{source}: numbering: larger area first, ties top-left first", not bad["numbering"],
+               _examples(bad["numbering"]))
+
+
+def check_labels_vs_masks(report: CheckReport, source: str, masks, labels, keys, min_area: int, gap: int) -> None:
+    """Label maps against the masks as saved (`masks[key]`): lesion pixels lie inside the mask,
+    every mask pixel left unlabelled belongs to a speck (< min_area), and attach-or-drop with the
+    current settings reproduces the stored map exactly."""
+    outside, big_unlabelled, differs = [], [], []
+    for key in keys:
+        mask, lab = masks[key] > 0, labels[key]
+        if ((lab > 0) & ~mask).any():
+            outside.append(key)
+        comp, n = label_components(mask & ~(lab > 0))
+        if n and (np.bincount(comp.ravel())[1:] >= min_area).any():
+            big_unlabelled.append(key)
+        if not np.array_equal(attach_or_drop(mask, min_area, gap).labels, lab):
+            differs.append(key)
+    report.add(f"{source}: lesion pixels lie inside the mask as saved", not outside, _examples(outside))
+    report.add(f"{source}: unlabelled mask pixels are specks only (< {min_area} px)", not big_unlabelled,
+               _examples(big_unlabelled))
+    report.add(f"{source}: attach-or-drop ({min_area} px, gap {gap}) reproduces every label map", not differs,
+               _examples(differs))
+
+
+# --- E0b: QC classes, cached stacks, run logs ------------------------------------------------
+
+def check_qc_table(report: CheckReport, table: pd.DataFrame, sample_ids, max_specks: int) -> None:
+    """qc.csv: one row per sample, known classes, classes reproduced from the counts, counts add up."""
+    report.add("qc: one row per synthetic sample", table["sample_id"].is_unique and set(table["sample_id"]) == set(sample_ids),
+               f"{len(table)} rows, {len(sample_ids)} samples")
+    report.add("qc: every class is known", table["qc_class"].isin(qc.QC_CLASSES).all()
+               and table["mask_class"].isin(qc.MASK_CLASSES).all())
+    masks = qc.mask_class(table["n_lesions"], table["n_specks"], max_specks)
+    combined = qc.qc_class(table["mri_failed"].astype(bool), masks)
+    wrong = table.loc[(masks != table["mask_class"]) | (combined != table["qc_class"]), "sample_id"].tolist()
+    report.add(f"qc: classes reproduced from lesion and speck counts (cut-off {max_specks})", not wrong, _examples(wrong))
+    counts = table["qc_class"].value_counts()
+    report.add("qc: class counts add up to the pool", int(counts.sum()) == len(sample_ids),
+               ", ".join(f"{c} {int(counts.get(c, 0))}" for c in qc.QC_CLASSES))
+
+
+def check_label_volumes(report: CheckReport, out_dir: Path, slices: pd.DataFrame, labels) -> None:
+    """Every real `volumes/<pid>/labels.nii.gz` equals the label stack on its lesion slices and
+    is zero on all other slices."""
+    bad = []
+    for pid, group in slices.groupby("patient_id"):
+        volume = np.asanyarray(load_image(out_dir / "volumes" / str(pid) / "labels.nii.gz").dataobj)
+        expected = np.zeros(volume.shape, dtype=np.int64)
+        for key, z in zip(group["key"], group["z"]):
+            expected[:, :, int(z)] = labels[key]
+        if not np.array_equal(volume, expected):
+            bad.append(str(pid))
+    report.add("real: labels.nii.gz == label stack (lesion slices) and 0 elsewhere", not bad, _examples(bad))
+
+
+def check_stack_keys(report: CheckReport, name: str, stack, expected) -> None:
+    """A cached stack holds exactly the expected keys."""
+    missing, extra = set(expected) - set(stack.keys), set(stack.keys) - set(expected)
+    report.add(f"{name}: keys == expected slices/samples", not missing and not extra,
+               f"{len(stack)} keys" + (f"; missing {sorted(missing)[:5]}" if missing else "")
+               + (f"; extra {sorted(extra)[:5]}" if extra else ""))
+
+
+def check_run_logs(report: CheckReport, cfg: dict, logs: dict[str, tuple[Path, list[str]]]) -> None:
+    """Production run logs against the current config. `logs` maps a stage name to (its run log,
+    the config keys its outputs depend on), in run order: every key must equal the current value
+    (outputs from older settings are stale), and each stage must have run after the one before."""
+    previous = None
+    for stage, (path, keys) in logs.items():
+        if not path.exists():
+            report.add(f"run log of '{stage}' exists", False, str(path))
+            previous = None
+            continue
+        info = json.loads(path.read_text(encoding="utf-8"))
+        logged = info["config"]
+        stale = [f"{k}: run {value(logged, k)!r}, now {value(cfg, k)!r}" for k in keys
+                 if value(logged, k) != value(cfg, k)]
+        report.add(f"'{stage}' outputs made with the current config values", not stale,
+                   "; ".join(stale) if stale else ", ".join(keys))
+        if previous is not None:
+            report.add(f"'{stage}' ran after '{previous[0]}'", str(info["timestamp"]) >= previous[1],
+                       f"{info['timestamp']} vs {previous[1]}")
+        previous = (stage, str(info["timestamp"]))

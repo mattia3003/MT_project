@@ -47,6 +47,14 @@ def _lookup(cfg: dict, section: str, default_key: str, name: str | None) -> tupl
     return name, entries[name]
 
 
+def value(cfg: dict, key: str):
+    """A config value by dotted key, e.g. value(cfg, "lesions.min_lesion_area"); None if absent."""
+    v = cfg
+    for part in key.split("."):
+        v = v.get(part) if isinstance(v, dict) else None
+    return v
+
+
 def real_dataset(cfg: dict, name: str | None = None) -> tuple[str, dict]:
     """Return (name, settings) of a real dataset; `None` selects `default_real_dataset`."""
     return _lookup(cfg, "real_datasets", "default_real_dataset", name)

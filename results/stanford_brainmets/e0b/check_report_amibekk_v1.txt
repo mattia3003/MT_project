@@ -1,0 +1,47 @@
+E0b check: dataset 'stanford_brainmets', pool 'amibekk_v1', seed 2026
+
+[PASS] all E0b decisions are set in the config
+[PASS] 'brain (stanford_brainmets)' outputs made with the current config values: brain.method, brain.low_threshold, brain.min_tissue_px
+[PASS] 'lesions (stanford_brainmets)' outputs made with the current config values: lesions.connectivity, lesions.min_lesion_area, lesions.attach_gap, qc.small_lesion_px
+[PASS] 'lesions (stanford_brainmets)' ran after 'brain (stanford_brainmets)': 2026-11-02T22:03:16 vs 2026-11-02T18:25:50
+[PASS] 'brain (amibekk_v1)' outputs made with the current config values: brain.method, brain.low_threshold, brain.min_tissue_px
+[PASS] 'lesions (amibekk_v1)' outputs made with the current config values: lesions.connectivity, lesions.min_lesion_area, lesions.attach_gap, qc.small_lesion_px
+[PASS] 'lesions (amibekk_v1)' ran after 'brain (amibekk_v1)': 2026-11-02T22:03:16 vs 2026-11-02T18:25:50
+[PASS] 'qc (amibekk_v1)' outputs made with the current config values: qc.max_isolated_specks, qc.edge_outside_frac
+[PASS] 'qc (amibekk_v1)' ran after 'lesions (amibekk_v1)': 2026-11-02T22:48:52 vs 2026-11-02T22:03:16
+[PASS] stanford_brainmets brain_masks.npz: keys == expected slices/samples: 5909 keys
+[PASS] stanford_brainmets: brain.csv rows == lesion slices
+[PASS] stanford_brainmets: lesion IDs unique
+[PASS] stanford_brainmets: every lesion ID parses to its slice key and lesion number
+[PASS] stanford_brainmets: one label map per slice: 5909 maps, 5909 slices
+[PASS] stanford_brainmets: lesion rows per slice == n_lesions in slices.csv
+[PASS] stanford_brainmets: label maps hold labels 1..n_lesions, one row each
+[PASS] stanford_brainmets: lesion areas == label map
+[PASS] stanford_brainmets: lesion centroids == label map
+[PASS] stanford_brainmets: numbering: larger area first, ties top-left first
+[PASS] stanford_brainmets: lesion pixels lie inside the mask as saved
+[PASS] stanford_brainmets: unlabelled mask pixels are specks only (< 4 px)
+[PASS] stanford_brainmets: attach-or-drop (4 px, gap 2) reproduces every label map
+[PASS] real: labels.nii.gz == label stack (lesion slices) and 0 elsewhere
+[PASS] amibekk_v1 masks_raw.npz: keys == expected slices/samples: 37624 keys
+[PASS] amibekk_v1 brain_masks.npz: keys == expected slices/samples: 37624 keys
+[PASS] amibekk_v1: slices.csv and brain.csv rows == readable samples
+[PASS] amibekk_v1: lesion IDs unique
+[PASS] amibekk_v1: every lesion ID parses to its slice key and lesion number
+[PASS] amibekk_v1: one label map per slice: 37624 maps, 37624 slices
+[PASS] amibekk_v1: lesion rows per slice == n_lesions in slices.csv
+[PASS] amibekk_v1: label maps hold labels 1..n_lesions, one row each
+[PASS] amibekk_v1: lesion areas == label map
+[PASS] amibekk_v1: lesion centroids == label map
+[PASS] amibekk_v1: numbering: larger area first, ties top-left first
+[PASS] amibekk_v1: lesion pixels lie inside the mask as saved
+[PASS] amibekk_v1: unlabelled mask pixels are specks only (< 4 px)
+[PASS] amibekk_v1: attach-or-drop (4 px, gap 2) reproduces every label map
+[PASS] amibekk_v1: cached masks and brain masks == recomputed from the files: 300 random samples
+[PASS] qc: one row per synthetic sample: 37624 rows, 37624 samples
+[PASS] qc: every class is known
+[PASS] qc: classes reproduced from lesion and speck counts (cut-off 9)
+[PASS] qc: class counts add up to the pool: mri_failed 152, no_lesion 393, noisy 1241, minor 3701, clean 32137
+[PASS] unit tests (pytest) pass: 60 passed in 11.75s
+
+43 passed, 0 failed

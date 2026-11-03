@@ -17,7 +17,7 @@ stage, and what has been decided. Update the status table when a stage is done.
 | 6 | `qc` | production (needs D) | ✅ done (2026-11-02); mask class and failed-MRI flag kept apart |
 | 7a | `stats` | E0 description (no decision) | ✅ done (2026-11-03: items 1–6) |
 | 7b | `filters-review` | review → decision E (filters for H-cal/H-eval) | ✅ done; **decision E set** (2026-11-03): `[max_mask_px]` |
-| 8 | `check` | consistency checks | ⏳ |
+| 8 | `check` | consistency checks | ✅ implemented (2026-11-03) |
 | 9 | Full re-run of E0a + E0b from scratch | end-to-end check | ⏳ after 8 |
 
 **Next: start here.** Stage 8 `check`, then 9 the full re-run. Stages 7a `stats` and 7b
