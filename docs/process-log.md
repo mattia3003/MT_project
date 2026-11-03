@@ -199,3 +199,17 @@ in full, with what replaced them.
   shift; 296 found themselves, 4 an identical neighbouring slice of the same patient. 4.4 ms per
   query (S main about 3 min). One Pylance issue (NumPy index type) fixed with an explicit
   `int(...)`. *Source: pytest; sanity script (scratch, not in the repo).*
+- **E1–E3 step 3: E2 library `memtk/lesionmatch.py`.** Lesion records from label maps
+  (informative lesions only, so E4's planted copies take the same path); s = shape × position ×
+  size (IoU of bit-packed crops centred on the rounded centroids, pixel distance with σ = 6.4 px,
+  area ratio); KD-tree prefilter at 25.6 px; shape computed only where position × size ≥ 0.1,
+  then for every pair of a candidate slice pair; Hungarian pairing per candidate slice pair
+  (vectorized when one side has one lesion); τ_L and τ_C applied afterwards from the stored
+  tables (τ_L below 0.1 refused, where the shortcut would stop being exact). 14 tests (90 in
+  total), including the shortcuts against brute force on random maps. On real T (no
+  calibration): self-match C = 1 for 300/300 random slices (296 themselves, 4 the identical
+  neighbouring slices also found by E1); shortcuts = brute force on 30 real slices against all of
+  T (5,608 candidate slice pairs, 0 differences in C); 10 ms per query slice. `cKDTree` replaced
+  by `KDTree` (same implementation since SciPy 1.6; the old name is missing from the type
+  stubs). `pyarrow` deferred to step 5, where tables are first written. *Source: pytest; sanity
+  script (scratch, not in the repo).*

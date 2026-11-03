@@ -322,6 +322,12 @@ move the old ones, with the reason, to the process log.
   with their own real MRI. *Source: `results/stanford_brainmets/e0b/stats/centroid_density_amibekk_v1.png`,
   `description_amibekk_v1.csv`, `brain_by_height_amibekk_v1.png`; `docs/experiment-plan.md` E2;
   `docs/e1-e3-plan.md`, 2026-11-03.*
+- **E2's speed-ups are exact.** The position prefilter (lesion pairs more than 25.6 px apart are
+  skipped) and the candidate-slice cut (C computed only for training slices sharing a lesion
+  pair with s ≥ 0.1) give identical results to scoring every lesion pair. Checked on random toy
+  label maps and on 30 real T slices against all of T: 5,608 candidate slice pairs, 0
+  differences in C. Exact for any τ_L ≥ 0.1, which the code enforces. *Source:
+  `tests/test_lesionmatch.py` (brute-force test); sanity check on real T, 2026-11-03.*
 
 ## 3. Findings
 

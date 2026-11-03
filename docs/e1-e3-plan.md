@@ -13,12 +13,14 @@ E4 on planted copies and E5 on S.
 | 0 | This plan; decision F recorded in the docs | docs | ✅ 2026-11-03, reviewed by the user (choices accepted) |
 | 1 | Shared stage helpers → `memtk/stages.py`; config sections `detectors:`, `calibration:` | refactor + config | ✅ 2026-11-03: `decided` takes a dotted key and the full review command; F set in the config, G and H `null`; pytest 66 passed, E0b check 43/43 |
 | 2 | E1 library `memtk/wholemask.py` + tests | library | ✅ 2026-11-03: 10 tests; self-match sanity on 300 random T slices: all score 1 at no shift (4 matched an identical neighbouring slice); 4.4 ms per query (S main ≈ 3 min) |
-| 3 | E2 library `memtk/lesionmatch.py` + tests | library | ⏳ |
+| 3 | E2 library `memtk/lesionmatch.py` + tests | library | ✅ 2026-11-03: 14 tests (shortcuts = brute force on random maps); on real T: self-match C = 1 for 300/300, shortcuts = brute force on 30 real slices (5,608 candidate slice pairs, 0 differences); 10 ms per query slice |
 | 4 | `bound-review` | review → decision G | ⏳ |
 | 5 | `calibrate` | production (needs G) → evidence for decision H | ⏳ |
 | 6 | `freeze` + `check` | production (needs H) + consistency checks | ⏳ |
 
-**Next: start here.** Step 3, the E2 library `memtk/lesionmatch.py` and its tests. (The architecture docs were reworked first, 2026-11-03: new
+**Next: start here.** Step 4, `bound-review` (the first E3 stage, `scripts/e3_calibrate.py` and
+`src/memtk/e3/`), then decision G. Needs `memtk/calibration.py` (chance-match rate by area
+bin, the bound rule). (The architecture docs were reworked first, 2026-11-03: new
 modules and files go into `docs/module-reference.md` and `docs/data-dictionary.md`.)
 
 **Milestone:** 9 Nov 2026, both detectors run on H-cal; informative-lesion bound and thresholds
@@ -145,8 +147,12 @@ production stage refuses to run while its value is `null` and names the review s
     experiment plan: slice pairs, lesion pairs (both lesion IDs, the three factors, s, passed
     τ_L) and synthetic summary. Every candidate pair is stored; thresholds are applied at
     analysis time.
-  - Tables: Parquet (pairs, many rows) with both `lesion_id` and the integer `lesion_idx`;
-    `pyarrow` is added to `pyproject.toml` and `requirements-lock.txt` (with its requirements).
+  - Tables: Parquet (pairs, many rows) with the readable lesion IDs; `pyarrow` is added to
+    `pyproject.toml` and `requirements-lock.txt` (with its requirements) in step 5, where the
+    tables are first written (the library returns DataFrames and writes nothing).
+  - As built (step 3): crops are centred on the centroid rounded with `np.rint` (half to even,
+    so s(a, b) = s(b, a)); a query lesion's best single match counts only pairs with
+    s >= 0.1 (NaN otherwise); pairs beyond the prefilter enter the Hungarian pairing as s = 0.
 - **`memtk/calibration.py` (E3, steps 4–5):** percentile thresholds per stratum and pooled;
   bootstrap by patient (resample H-cal patients with replacement, seed 2026, 2,000 draws) for a
   confidence interval of every threshold; chance-match rate by area bin; the bound rule.
