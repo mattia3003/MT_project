@@ -27,18 +27,19 @@ updated after `memtk.stages` was added, E1–E3 step 1).
 
 | Module | Purpose | Main functions | Imports from memtk | Used by | External libraries |
 | --- | --- | --- | --- | --- | --- |
-| `config` | Load the YAML config, look up datasets and pools, resolve paths from the repo root, write run logs | `load_config`, `value` (dotted key), `real_dataset`, `synthetic_pool`, `output_dir`, `results_dir`, `split_file`, `write_run_info` | — | `io`, `synthetic`, `checks`, `stages`, every `e0b` module, both scripts | PyYAML |
-| `stages` | Helpers every stage package and its script share: the command-line options of a stage, decisions read from the config (stops with the review command to run while a value is `null`), the overwrite and input guards, random picks for example figures | `add_stage`, `decided` (dotted key, e.g. `decided(cfg, "brain.method", "e0b_audit.py brain-review")`), `refuse_overwrite`, `require`, `pick` | `config` | every `e0b` module except `e0b.common`, `e0b_audit.py` | NumPy, pandas |
-| `io` | Read and write NIfTI; locate patients and their files; mask stacks (many 2D boolean masks in one bit-packed `.npz`) and label stacks (many 2D label maps in one sparse `.npz`), looked up by key | `load_image`, `save_nifti`, `read_table` (pipeline CSVs with ID columns kept as text), `list_patients`, `patient_files`, `MaskStackWriter`, `MaskStack`, `LabelStackWriter`, `LabelStack` | `config` | `split`, `synthetic`, `checks`, every `e0b` module, `e0a_prepare_data.py` | nibabel, pandas |
-| `ids` | The ID convention shared by every experiment: slice keys (`Mets_005/z127`, sample ID) and lesion IDs (`<slice key>/L<n>`); unique per source, `(source, lesion_id)` globally | `slice_key`, `sample_key`, `parse_slice_key`, `lesion_id`, `parse_lesion_id` | — | `checks`, `lesionmatch`, `e0b.common`, `e0b.brain`, `e0b.lesions`, `e0b.stats` | — |
+| `config` | Load the YAML config, look up datasets and pools, resolve paths from the repo root, write run logs | `load_config`, `value` (dotted key), `real_dataset`, `synthetic_pool`, `output_dir`, `results_dir`, `split_file`, `write_run_info` | — | `io`, `synthetic`, `checks`, `stages`, every `e0b` module, `e3.common`, `e3.bound`, every script | PyYAML |
+| `stages` | Helpers every stage package and its script share: the command-line options of a stage, decisions read from the config (stops with the review command to run while a value is `null`), the overwrite and input guards, random picks for example figures | `add_stage`, `decided` (dotted key, e.g. `decided(cfg, "brain.method", "e0b_audit.py brain-review")`), `refuse_overwrite`, `require`, `pick` | `config` | every `e0b` module except `e0b.common`, `e3.common`, `e3.bound`, `e0b_audit.py`, `e3_calibrate.py` | NumPy, pandas |
+| `io` | Read and write NIfTI; locate patients and their files; mask stacks (many 2D boolean masks in one bit-packed `.npz`) and label stacks (many 2D label maps in one sparse `.npz`), looked up by key | `load_image`, `save_nifti`, `read_table` (pipeline CSVs with ID columns kept as text), `list_patients`, `patient_files`, `MaskStackWriter`, `MaskStack`, `LabelStackWriter`, `LabelStack` | `config` | `split`, `synthetic`, `checks`, every `e0b` module, `e3.common`, `e0a_prepare_data.py` | nibabel, pandas |
+| `ids` | The ID convention shared by every experiment: slice keys (`Mets_005/z127`, sample ID) and lesion IDs (`<slice key>/L<n>`); unique per source, `(source, lesion_id)` globally | `slice_key`, `sample_key`, `parse_slice_key`, `lesion_id`, `parse_lesion_id` | — | `checks`, `lesionmatch`, `e0b.common`, `e0b.brain`, `e0b.lesions`, `e0b.stats`, `e3.bound` | — |
 | `transforms` | The original training transform (model space) and slice counts | `model_space_transform`, `convert_volume_pair`, `binarize_mask`, `lesion_px_per_slice` | — | `split`, `checks`, `e0a_prepare_data.py` | MONAI, PyTorch |
 | `split` | Seeded matched-pair split into T / H-cal / H-eval | `make_split`, `paired_split`, `summarize_split` | `io`, `transforms` | `e0a_prepare_data.py` | pandas |
 | `synthetic` | Read synthetic samples in place; sample IDs; index a pool; parse the legacy QC list | `index_pool`, `load_sample`, `sample_id`, `name_scheme`, `read_legacy_exclusions` | `config`, `io`, `lesions` | `checks`, `e0b.common`, `e0b.brain`, `e0b.check`, `e0b.lesions`, `e0a_prepare_data.py` | pandas, tqdm |
 | `lesions` | 8-connected labelling; attach-or-drop (specks below the minimum area become strays of a lesion within the gap, or are dropped; lesions numbered by area); lesion features (centroid in three frames, bbox, shape, fraction outside the brain); brain masks (six candidate methods), tissue area, brain box; distance and growing helpers | `label_components`, `count_components`, `attach_or_drop` (→ `LesionLabels`), `speck_gaps`, `lesion_features`, `brain_mask`, `tissue_px`, `brain_box`, `fraction_outside`, `chessboard_distance`, `grow` | — | `plotting`, `synthetic`, `checks`, `e0b.brain`, `e0b.check`, `e0b.filters`, `e0b.lesions`, `e0b.qc`, `e0b.stats` | SciPy, scikit-image |
 | `qc` | Quality classes of synthetic samples: mask class from the mask alone (`no_lesion`, `noisy`, `minor`, `clean`), the combined class with a failed MRI first, the edge count per slice | `mask_class`, `qc_class`, `edge_lesions`, `MASK_CLASSES`, `QC_CLASSES` | — | `checks`, `e0b.qc` | pandas |
-| `plotting` | Shared figure helpers and colours (no pyplot, so importing memtk never changes the plotting backend). `save` wraps the figure title to the figure width and uses the constrained layout, so the title never covers tile titles or runs off the image. `draw_lesions` draws a labelled slice (lesion colours with L-numbers, lighter strays, specks as ×, brain outline and box) | `tile_figure`, `show_slice`, `draw_box`, `hide_unused`, `save`, `draw_lesions`, `lesion_sheet`; colours `BRAIN_COLOR`, `LESION_COLOR`, `BOX_COLOR`, `HIGHLIGHT_COLOR`, `SPECK_COLOR`, `LESION_COLORS`, `SET_COLORS` | `lesions` | `checks`, `e0b.brain`, `e0b.lesions`, `e0b.qc`, `e0b.stats` | matplotlib |
+| `plotting` | Shared figure helpers and colours (no pyplot, so importing memtk never changes the plotting backend). `save` wraps the figure title to the figure width and uses the constrained layout, so the title never covers tile titles or runs off the image. `draw_lesions` draws a labelled slice (lesion colours with L-numbers, lighter strays, specks as ×, brain outline and box) | `tile_figure`, `show_slice`, `draw_box`, `hide_unused`, `save`, `draw_lesions`, `lesion_sheet`; colours `BRAIN_COLOR`, `LESION_COLOR`, `BOX_COLOR`, `HIGHLIGHT_COLOR`, `SPECK_COLOR`, `LESION_COLORS`, `SET_COLORS` | `lesions` | `checks`, `e0b.brain`, `e0b.lesions`, `e0b.qc`, `e0b.stats`, `e3.bound` | matplotlib |
 | `wholemask` | E1, the whole-mask nearest-neighbour detector: plain Dice to every training mask (one sparse matrix product, queries in blocks), candidates (best by plain Dice plus nearest by the centroid of lesion L1), best Dice over shifts of ±`max_shift` px (zero padding, no wrap-around; ties: smallest shift), nearest neighbour, runner-up patient and margin. Refuses masks without a lesion | `match` (one row per query), `dice_matrix`, `shifted_dice`, `shift_order`, `candidate_indices`, `largest_lesion_centroids` | — | (E3, E4, E5 stages, planned) | NumPy, SciPy (sparse), pandas |
-| `lesionmatch` | E2, the lesion-level detector: lesion records from label maps (informative lesions only, so E4's planted copies take the same path), lesion score s = shape (IoU of bit-packed crops centred on the rounded centroids) × position (pixel distance, decision F) × size, exact shortcuts (KD-tree prefilter; shape only where position × size reaches the candidate cut, then for every pair of a candidate slice), Hungarian pairing per candidate slice pair (vectorized when one side has one lesion). Thresholds are applied afterwards | `match` (→ `LesionMatch` with `queries`, `lesions`, `slice_pairs`, `lesion_pairs`; methods `slice_scores(tau_L)`, `summary(tau_L, tau_C)`), `lesion_records` (→ `Lesions`), `packed_crops`, `position_factor`, `size_factor`, `shape_factor`, `assign_pairs` | `ids` | (E3, E4, E5 stages, planned) | NumPy, SciPy (KDTree, Hungarian), pandas |
+| `lesionmatch` | E2, the lesion-level detector: lesion records from label maps (informative lesions only, so E4's planted copies take the same path), lesion score s = shape (IoU of bit-packed crops centred on the rounded centroids) × position (pixel distance, decision F) × size, exact shortcuts (KD-tree prefilter; shape only where position × size reaches the candidate cut, then for every pair of a candidate slice), Hungarian pairing per candidate slice pair (vectorized when one side has one lesion). Thresholds are applied afterwards | `match` (→ `LesionMatch` with `queries`, `lesions`, `slice_pairs`, `lesion_pairs`; methods `slice_scores(tau_L)`, `summary(tau_L, tau_C)`), `lesion_records` (→ `Lesions`), `packed_crops`, `position_factor`, `size_factor`, `shape_factor`, `assign_pairs` | `ids` | `e3.bound` (later also E4, E5) | NumPy, SciPy (KDTree, Hungarian), pandas |
+| `calibration` | E3 building blocks: area bins, the chance-match rate of held-out lesions by area bin and tau_L, percentiles (no match = 0), the bound rule (smallest bin edge from which every larger bin stays below the cut). Step 5 adds percentile thresholds per stratum and the bootstrap by patient | `area_bins`, `bin_label`, `chance_rates`, `percentile_threshold`, `propose_bound` | — | `e3.bound` | NumPy, pandas |
 | `checks` | E0 consistency checks. E0a: split, volumes, independent reference transform, synthetic index, sample grid. E0b: lesion tables vs label maps, label maps vs masks as saved, label volumes, QC table, stack keys, run logs vs the current config | `CheckReport`, `check_split`, `check_real_volumes`, `check_recompute`, `check_synthetic_index`, `sample_grid`, `check_lesion_tables`, `check_labels_vs_masks`, `check_label_volumes`, `check_qc_table`, `check_stack_keys`, `check_run_logs` | `config`, `ids`, `io`, `lesions`, `plotting`, `qc`, `synthetic`, `transforms` | `e0b.check`, `e0a_prepare_data.py` | PyTorch, matplotlib, tqdm |
 
 ## Stage package `e0b` (`src/memtk/e0b/`)
@@ -57,12 +58,23 @@ figures they use, under section headers.
 | `e0b.filters` | `run_filters_review` (`filters-review`, decision E) | `FILTERS`, `filter_checks` (also used by E3/E4 to apply decision E), `summarize_filters`, `filter_cost` | `e0b.common`, `config`, `io`, `lesions`, `stages` |
 | `e0b.check` | `run_check` (`check`) | `STAGE_KEYS`, `DECISION_KEYS` (the checks themselves are in `memtk.checks`) | `e0b.common`, `checks`, `config`, `io`, `lesions`, `stages`, `synthetic` |
 
+## Stage package `e3` (`src/memtk/e3/`)
+
+Same conventions as `e0b`. E3 reads T and H-cal only; S is never loaded (the cost of a bound for
+S comes from the E0 bound-impact table).
+
+| Module | Stages (command) | Also contains | Imports from memtk |
+| --- | --- | --- | --- |
+| `e3.common` | — | `SliceSet`, `load_set` (a real set's lesion slices and label maps; held-out sets after decision E; slices without a lesion left out and counted), `decision_e` (`max_mask_px` from `slices.csv`; other filters stop with a message), `lesion_settings` (E2 settings in pixels; checks decision F) | `config`, `io`, `stages` |
+| `e3.bound` | `run_bound_review` (`bound-review`, decision G) | `EDGES`, `TAU_GRID`, `PROVISIONAL_MIN_AREA`, `CUTS`, `review_text`, `left_out_text`, `rates_figure`, `lesion_crop`, `example_sheet` | `e3.common`, `calibration`, `config`, `ids`, `lesionmatch`, `plotting`, `stages` |
+
 ## Scripts (`scripts/`)
 
 | Script | Stages | Imports from memtk |
 | --- | --- | --- |
 | `e0a_prepare_data.py` | `split`, `real`, `synthetic`, `check` (small, call library modules directly) | `checks`, `config`, `io`, `split`, `synthetic`, `transforms` |
 | `e0b_audit.py` | the E0b stages; only the command line (`stages.add_stage` adds the shared options) | `config`, `stages`, the `e0b` modules |
+| `e3_calibrate.py` | the E3 stages (so far `bound-review`); only the command line | `config`, `stages`, the `e3` modules |
 
 ## Tests (`tests/`)
 
@@ -82,7 +94,9 @@ covers E2 (an identical lesion scores 1, the factors at known distances and size
 lesion keeps its shape, the centred-crop IoU, symmetry, Hungarian beating greedy pairing, the
 experiment plan's worked example C = 0.30, the classes and the nearest neighbour, tau_L below the
 candidate cut refused, lesions below the bound, the prefilter, and the shortcuts against brute
-force on random label maps); `tests/test_checks.py` runs the E0b consistency checks on consistent
+force on random label maps); `tests/test_calibration.py` covers area bins and labels, chance-match
+rates (lesions, patients, missing scores never match), the percentile with missing scores as 0,
+and the bound rule (including a later bin above the cut and no bound at all); `tests/test_checks.py` runs the E0b consistency checks on consistent
 outputs (pass) and on damaged copies (fail: wrong areas, centroids, IDs, counts, numbering,
 labels outside the mask, wrong QC class, stale or out-of-order run logs).
 Run with `.venv\Scripts\python.exe -m pytest`.
@@ -93,8 +107,8 @@ E1–E3 (specified in `docs/e1-e3-plan.md`):
 
 | Module | For | Purpose |
 | --- | --- | --- |
-| `calibration` | E3 | Percentile thresholds per stratum and pooled, bootstrap by patient, chance-match rate by area bin, the bound rule |
-| `e3` package | E3 | Stages `bound-review`, `calibrate`, `freeze`, `check` (modules `bound`, `calibrate`, `check`, `common`) |
+| `calibration` (step 5 additions) | E3 | Percentile thresholds per stratum and pooled, bootstrap by patient |
+| `e3` stages | E3 | `calibrate`, `freeze`, `check` (modules `calibrate`, `check`) |
 
 Later (names may change when each experiment is planned):
 

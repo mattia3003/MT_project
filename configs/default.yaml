@@ -87,9 +87,11 @@ calibration:                  # E3
   percentile: 95              # thresholds at this percentile of H-cal
   bootstrap_draws: 2000       # bootstrap by patient for the interval of every threshold
   # Decision G (evidence: `e3_calibrate.py bound-review`)
-  provisional_tau_L: null     # lesion-score threshold used to find the bound
-  chance_rate_max: null       # highest chance-match rate (0.05 or 0.10) at which a lesion size counts
-  informative_bound_px: null  # informative-lesion bound: only lesions of at least this area enter E2
+  provisional_tau_L: 0.77     # decided 2026-11-03: 95th percentile of the best scores of H-cal lesions >= 10 px
+  chance_rate_max: 0.10       # decided 2026-11-03: the 5% cut falls within noise (15-24 px bins at 5.1-5.8%)
+                              # and would remove 59% of S main from the lesion-level analysis
+  informative_bound_px: 12    # decided 2026-11-03: from 12 px every bin stays below 10% (8.4% at 12-14 px);
+                              # S main keeps 72% of slices; 25 px (5% cut) is run as a sensitivity in calibrate
   # Decision H (evidence: `e3_calibrate.py calibrate`): per detector, "stratified" (separate
   # thresholds for single- and multi-lesion slices) or "pooled"
   strata:

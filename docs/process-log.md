@@ -213,3 +213,15 @@ in full, with what replaced them.
   by `KDTree` (same implementation since SciPy 1.6; the old name is missing from the type
   stubs). `pyarrow` deferred to step 5, where tables are first written. *Source: pytest; sanity
   script (scratch, not in the repo).*
+- **E1–E3 step 4: `bound-review` and decision G.** Built `memtk/calibration.py` (area bins,
+  chance-match rates, percentile with no match as 0, the bound rule; 7 tests), the stage package
+  `memtk/e3/` (`common`: T and H-cal after decision E, E2 settings in pixels; `bound`: the
+  stage) and `scripts/e3_calibrate.py`. Decision E is applied from `slices.csv` (all mask pixels
+  = lesion px + speck px; removes no H-cal slice, largest 514 px); 3 H-cal and 19 T slices have
+  no lesion ≥ 4 px and are left out. First run of a detector on H-cal: provisional τ_L 0.77,
+  bound 12 px at the 10% cut or 25 px at the 5% cut. The user set decision G: 0.77, 10%, 12 px;
+  the 25 px bound is added to `calibrate`'s sensitivity table. Pylance: 3 rewrites (array type
+  in a signature, `str(...)` on an ID, `list(...)` in a test) and 1 stub ignore (pandas group
+  key); output identical after the fixes. The user confirmed (2026-11-03) that parameter
+  choices are theirs; no supervisor sign-off is needed for them. *Source:
+  `results/stanford_brainmets/e3/bound_review/`, pytest.*

@@ -82,8 +82,8 @@ each experiment, in order, are listed in its plan document and in `scripts/READM
 
 ```mermaid
 flowchart TB
-    L1["<b>Scripts</b> · scripts/<br/>the command line, one per experiment<br/>e0a_prepare_data.py · e0b_audit.py · e3_calibrate.py (planned)"]
-    L2["<b>Stage packages</b> · src/memtk/e0b/, e3/ (planned)<br/>one experiment's stages: read inputs, call building blocks, write outputs"]
+    L1["<b>Scripts</b> · scripts/<br/>the command line, one per experiment<br/>e0a_prepare_data.py · e0b_audit.py · e3_calibrate.py"]
+    L2["<b>Stage packages</b> · src/memtk/e0b/, e3/<br/>one experiment's stages: read inputs, call building blocks, write outputs"]
     L3["<b>Library modules</b> · src/memtk/*.py<br/>building blocks that know nothing about stages"]
     L4["<b>Foundation</b> · config (YAML, paths, run logs) · io (files, tables, stacks)"]
     L1 --> L2 --> L3 --> L4
@@ -105,7 +105,7 @@ as from its script, e.g. `run_qc(load_config(), overwrite=True)`.
 | `stages` | shared helpers for stage packages: command-line options, decisions, overwrite guard |
 | `wholemask` | E1: the whole-mask detector (Dice with a small shift search) |
 | `lesionmatch` | E2: the lesion-level detector (lesion by lesion, Hungarian pairing) |
-| `calibration` (planned) | E3: thresholds and the informative-lesion bound |
+| `calibration` | E3: chance-match rates, the informative-lesion bound (thresholds follow in step 5) |
 
 Functions, imports, "used by" and tests: `docs/module-reference.md`.
 

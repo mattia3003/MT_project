@@ -14,13 +14,12 @@ E4 on planted copies and E5 on S.
 | 1 | Shared stage helpers → `memtk/stages.py`; config sections `detectors:`, `calibration:` | refactor + config | ✅ 2026-11-03: `decided` takes a dotted key and the full review command; F set in the config, G and H `null`; pytest 66 passed, E0b check 43/43 |
 | 2 | E1 library `memtk/wholemask.py` + tests | library | ✅ 2026-11-03: 10 tests; self-match sanity on 300 random T slices: all score 1 at no shift (4 matched an identical neighbouring slice); 4.4 ms per query (S main ≈ 3 min) |
 | 3 | E2 library `memtk/lesionmatch.py` + tests | library | ✅ 2026-11-03: 14 tests (shortcuts = brute force on random maps); on real T: self-match C = 1 for 300/300, shortcuts = brute force on 30 real slices (5,608 candidate slice pairs, 0 differences); 10 ms per query slice |
-| 4 | `bound-review` | review → decision G | ⏳ |
+| 4 | `bound-review` | review → decision G | ✅ 2026-11-03 (`memtk/calibration.py`, `memtk/e3/`, `scripts/e3_calibrate.py`, 7 tests); **decision G set** by the user: provisional tau_L 0.77, cut 10%, bound 12 px (the 5% cut gives 25 px) |
 | 5 | `calibrate` | production (needs G) → evidence for decision H | ⏳ |
 | 6 | `freeze` + `check` | production (needs H) + consistency checks | ⏳ |
 
-**Next: start here.** Step 4, `bound-review` (the first E3 stage, `scripts/e3_calibrate.py` and
-`src/memtk/e3/`), then decision G. Needs `memtk/calibration.py` (chance-match rate by area
-bin, the bound rule). (The architecture docs were reworked first, 2026-11-03: new
+**Next: start here.** Step 5, `calibrate` (needs decision G, set 2026-11-03: bound 12 px).
+Its sensitivity table adds the 5% cut's bound (25 px) next to the planned one-bin-lower bound. (The architecture docs were reworked first, 2026-11-03: new
 modules and files go into `docs/module-reference.md` and `docs/data-dictionary.md`.)
 
 **Milestone:** 9 Nov 2026, both detectors run on H-cal; informative-lesion bound and thresholds
@@ -177,7 +176,8 @@ module per topic (`bound`, `calibrate`, `check`, plus `common` for loading T and
      `memtk.plotting`), so the user can see what a chance match looks like.
    - Output: `results/<dataset>/e3/bound_review/` (`review.txt` with the proposal).
    - If the bound lands at 20 px or above, half of the main audit leaves the lesion-level
-     analysis: per the experiment plan, agree with the supervisor before continuing.
+     analysis: the review says so, and the user weighs it when setting G (parameter choices are
+     the user's; no supervisor sign-off, confirmed 2026-11-03).
 2. **`calibrate`** (needs G; F is set; step 5).
    - H-cal after decision E (pixel-sum filter; no slice expected to drop), slices without a
      lesion reported and left out.
@@ -186,7 +186,7 @@ module per topic (`bound`, `calibrate`, `check`, plus `common` for loading T and
    - τ_D, τ_C, τ_L at the 95th percentile, per stratum and pooled, each with its
      bootstrap-by-patient interval and the number of slices and patients behind it.
    - Sensitivity, one alternative per setting: σ = 0.08 × 128 ≈ 10.2 px; the 99th percentile;
-     the bound one bin lower.
+     the bound one bin lower (10 px); and, added with decision G, the 5% cut's bound (25 px).
    - Exclusion counts: lesions and slices the bound removes from T and H-cal (and S main from
      E0b `bound_impact`).
    - Score histograms of H-cal (both detectors) with the thresholds marked.
@@ -225,7 +225,7 @@ module per topic (`bound`, `calibrate`, `check`, plus `common` for loading T and
 - pytest passes; E0b `check` still passes after step 1.
 - The user views the evidence of each review stage before setting a decision.
 - Before E4: the frozen file exists, `check` passes, and the share of S excluded by the bound is
-  accepted (with the supervisor if large).
+  accepted by the user, with the reason recorded (decision G: 28% of S main, 2026-11-03).
 
 ## Related work
 

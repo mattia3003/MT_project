@@ -328,6 +328,18 @@ move the old ones, with the reason, to the process log.
   label maps and on 30 real T slices against all of T: 5,608 candidate slice pairs, 0
   differences in C. Exact for any τ_L ≥ 0.1, which the code enforces. *Source:
   `tests/test_lesionmatch.py` (brute-force test); sanity check on real T, 2026-11-03.*
+- **Informative-lesion bound 12 px** (decision G, set 2026-11-03; provisional τ_L 0.77,
+  chance-rate cut 10%). The provisional τ_L is the 95th percentile of the best E2 scores of the
+  1,360 H-cal lesions ≥ 10 px. At that τ_L every area bin from 12 px up stays below 10% (12–14
+  px: 8.4%). The 5% cut would give 25 px, but the 15–19 and 20–24 px bins sit at 5.1% and 5.8%
+  (about ±1.7 points each, from 196 and 155 lesions), so where that cut lands is decided by noise.
+  A 25 px bound would also leave 59% of S main without an informative lesion (E1 still scores
+  them), against 28% at 12 px; H-cal keeps 24 of 25 patients at 12 px. The bound only decides
+  which lesions may count as evidence: the false-positive rate is set afterwards by τ_L and τ_C
+  at the H-cal 95th percentile, per slice. 12 px lies in the experiment plan's expected 10–20 px.
+  25 px is kept as a sensitivity in `calibrate`. *Source:
+  `results/stanford_brainmets/e3/bound_review/review.txt`, `chance_rates.csv`;
+  `results/stanford_brainmets/e0b/stats/bound_impact_amibekk_v1.csv`, 2026-11-03.*
 
 ## 3. Findings
 
@@ -378,6 +390,15 @@ move the old ones, with the reason, to the process log.
   above and support counting copies per patient and slice window, not per slice. *Source: E1
   self-match sanity check (`memtk.wholemask.match`, 300 random T slices against T, seed 2026),
   2026-11-03.*
+- **Single small lesions match by chance very often.** For each of the 1,548 H-cal lesions
+  (never trained on), its best E2 match among T's 6,101 lesions reaches s ≥ 0.5 for 73–93% of
+  the lesions in every area bin from 5 to 39 px, and for 52% at ≥ 40 px; the 95th percentile of
+  these chance scores (lesions ≥ 10 px) is 0.77. T's lesions cover the brain so densely that
+  nearly every held-out lesion has a similar blob within a few pixels (position factor often
+  ≥ 0.9). A single small lesion is therefore weak evidence of copying; lesion-level evidence has
+  to come from larger lesions and multi-lesion configurations, consistent with the E0 finding
+  that lesions under about 40 px are hard to tell apart by shape and size. *Source:
+  `results/stanford_brainmets/e3/bound_review/chance_rates.csv`, `examples.png`, 2026-11-03.*
 - **Some synthetic MRIs contain no brain at all.** 152 of 37,624 samples have < 20 px of brain
   tissue; the 32 lowest have 0 px (a black image with only a lesion or a faint smudge). Between
   ~50 and ~400 px the images show small brain fragments, similar to the smallest real T lesion

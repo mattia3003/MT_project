@@ -32,7 +32,8 @@ Status: ✅ implemented · ⏳ planned
 | `e0b_audit.py stats` | ✅ | `lesions`, `qc`, `brain` outputs, `patients.csv`, real volumes | `results/<dataset>/e0b/stats/`: description table, native sizes, lesions per slice, lesion area, centroid density (pixels and brain-relative), bound-impact table (input for E3), adjacent-slice Dice, native vs model lesion area, brain size by slice height |
 | `e0b_audit.py filters-review` | ✅ | `lesions`, `brain`, `qc` outputs, real `seg` volumes | `results/<dataset>/e0b/filters_review/`: each sampling filter on the masks as saved and cleaned, per set; the cost of applying it to the real sets; proposal (`review.txt`) → **decision E** |
 | `e0b_audit.py check` | ✅ | all E0b outputs, synthetic pool | `results/<dataset>/e0b/check_report_<pool>.txt` (PASS/FAIL per check: decisions set and outputs made with them, lesion tables vs label maps, label maps vs masks as saved, caches vs source files, QC classes, unit tests; exit code 1 on any failure), `check_<pool>.run_info.json` |
-| `e3_calibrate.py` | ⏳ | E0 outputs, H-cal | frozen thresholds (runs the E1 + E2 detectors from `memtk`) |
+| `e3_calibrate.py bound-review` | ✅ | E0b lesion tables (T, H-cal only), decision F, E0 `bound_impact_<pool>.csv` | `results/<dataset>/e3/bound_review/`: every H-cal lesion's best E2 match in T, chance-match rate by lesion area and tau_L, proposal (`review.txt`), cost of each bound, example matches → **decision G** |
+| `e3_calibrate.py calibrate`, `freeze`, `check` | ⏳ | decisions G, H; T, H-cal | E1 + E2 on H-cal, thresholds with bootstrap intervals, frozen threshold file (`docs/e1-e3-plan.md`) |
 | `e4_validate.py` | ⏳ | thresholds, T, H-eval | planted-copy validation table (gate) |
 | `e5_audit.py` | ⏳ | validated config, S | main audit tables |
 | `e6_exposure.py` | ⏳ | E5 outputs | patient exposure, rarity, duplication |
@@ -77,6 +78,11 @@ the production stage)
 `check` also takes `--n-synthetic 300` (random samples whose cached masks are recomputed from the files).
 `brain-review` also takes `--n-synthetic 2000` (samples for the method comparison) and
 `--min-area 4` (provisional lesion size for that comparison).
+
+**E3: calibration on H-cal** (T and H-cal only; S is never scored before the freeze)
+```powershell
+.venv\Scripts\python.exe scripts\e3_calibrate.py bound-review     # evidence for decision G (provisional tau_L, cut, bound)
+```
 
 **Look at one slice** (after `lesions`): full-size picture with its lesion table, written to
 `results/<dataset|pool>/e0b/views/<key>.png`

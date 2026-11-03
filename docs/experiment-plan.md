@@ -268,7 +268,7 @@ The check never changes C or the copy class. It is supporting evidence for the m
 - How many lesions and slices the bound excludes.
 - A short sensitivity table.
 
-**Check before moving on:** The thresholds are frozen, and the share of S excluded by the bound is acceptable. If it is large, agree with your supervisor before continuing.
+**Check before moving on:** The thresholds are frozen, and the share of S excluded by the bound is acceptable. If it is large, weigh it explicitly and record the reason with the decision (parameter choices are the author's; no supervisor sign-off needed, 2026-11-03).
 
 ## E4 – Detector validation with planted copies
 

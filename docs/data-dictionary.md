@@ -30,7 +30,8 @@ ID columns as text.
 | | `stats` | ✅ | `lesions`, `qc`, `brain` outputs, `patients.csv`, real volumes (model space and native masks) | `results/<dataset>/e0b/stats/` |
 | | `filters-review` | ✅ | `lesions`, `brain`, `qc` outputs, real `seg` volumes | `results/<dataset>/e0b/filters_review/` (evidence for decision E) |
 | | `check` | ✅ | all E0b outputs, synthetic pool | `results/<dataset>/e0b/check_report_<pool>.txt` |
-| `e3_calibrate.py` | `bound-review`, `calibrate`, `freeze`, `check` | planned (`docs/e1-e3-plan.md`) | E0b outputs (T, H-cal only) | `results/<dataset>/e3/`, `<output_root>/<dataset>/e3/`, `configs/frozen/e3_<dataset>.yaml` |
+| `e3_calibrate.py` | `bound-review` | ✅ | E0b lesion tables (T, H-cal only), decision F, E0 `bound_impact_<pool>.csv` | `results/<dataset>/e3/bound_review/` (evidence for decision G) |
+| | `calibrate`, `freeze`, `check` | planned (`docs/e1-e3-plan.md`) | decisions G, H; T, H-cal | `results/<dataset>/e3/`, `<output_root>/<dataset>/e3/`, `configs/frozen/e3_<dataset>.yaml` |
 | `e4_validate.py` | *tbd* | planned | frozen thresholds, T, H-eval | validation table, planted copies |
 | `e5_audit.py` | — | planned | frozen thresholds, S | main audit tables |
 | `e6_exposure.py` | *tbd* | planned | E5 outputs | exposure, rarity, duplication |
@@ -396,9 +397,27 @@ pandas), `config` (the full config used), and stage-specific extras such as `sta
 
 ---
 
+## 6. E3: calibration on H-cal (`e3_calibrate.py`)
+
+### `results/<dataset>/e3/bound_review/`
+
+Written by `bound-review`. In git. Evidence for decision G (`calibration.provisional_tau_L`,
+`chance_rate_max`, `informative_bound_px`); nothing here is read by later stages. E2 runs with
+every H-cal lesion (≥ `lesions.min_lesion_area`) against every T lesion; S is not read (its
+cost comes from the E0 bound-impact table).
+
+| File | Content |
+| --- | --- |
+| `review.txt` | Sets and slices left out, E2 settings in pixels, the chance-match rate by area bin and tau_L, the proposal (provisional tau_L, bound at the 5% and 10% cuts), the cost of each candidate bound (E0), what to set next |
+| `best_matches_hcal.csv` | One row per H-cal lesion: `query` (slice key), `query_lesion`, `area`, `best_train_lesion`, `best_s` and its factors `best_shape`, `best_position`, `best_size` (NaN when no T lesion reaches s ≥ `candidate_min_s`), `patient_id` |
+| `chance_rates.csv` | Per area bin (`lower` edge, `bin` label) and `tau_L`: `lesions`, `patients`, `matched` (best score ≥ tau_L), `rate` |
+| `chance_rates.png` | Chance-match rate by area bin, one line per tau_L (the provisional one bold), with the 5% and 10% cuts |
+| `examples.png` | Per area bin, 3 random matched H-cal lesions (red) next to their best T lesion (green), 32×32 crops of the cleaned masks, with s and its factors |
+| `run_info.json` | Run log (with `inputs`: T, H-cal, and the E2 settings in pixels) |
+
 ## Planned files (E1–E3)
 
 Specified in `docs/e1-e3-plan.md`; entries are added here as each stage is built:
-`results/<dataset>/e3/bound_review/`, `results/<dataset>/e3/calibrate/`, the E1 and E2 tables
+`results/<dataset>/e3/calibrate/`, the E1 and E2 tables
 for H-cal in `<output_root>/<dataset>/e3/` (E1 as CSV; E2 slice pairs, lesion pairs and summary
 as Parquet), and the frozen thresholds `configs/frozen/e3_<dataset>.yaml` (in git).

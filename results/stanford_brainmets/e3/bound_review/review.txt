@@ -1,0 +1,39 @@
+E3 bound-review: dataset 'stanford_brainmets' (S cost from the E0 table of pool 'amibekk_v1'; no detector on S)
+
+Sets: T 3804 slices (19 no lesion of at least the minimum area); H-cal 989 slices, 25 patients (0 removed by decision E, 3 no lesion of at least the minimum area).
+E2 settings: every lesion >= 4 px; sigma 6.4 px; prefilter 25.6 px; candidate cut s >= 0.1.
+H-cal lesions: 1548; with a best match s >= 0.1: 1536 (the others count as no match at every tau_L).
+
+Chance-match rate by area bin (share of H-cal lesions whose best score reaches tau_L):
+tau_L     lesions  patients    0.3    0.4    0.5    0.6    0.7   0.77    0.8
+bin                                                                         
+4-4 px         18         7  0.833  0.611  0.333  0.167  0.167  0.167  0.111
+5-7 px         71        17  0.986  0.930  0.732  0.493  0.239  0.113  0.099
+8-9 px         99        18  1.000  1.000  0.899  0.576  0.394  0.141  0.081
+10-11 px      115        18  1.000  1.000  0.930  0.591  0.270  0.191  0.113
+12-14 px      167        22  1.000  0.994  0.922  0.689  0.240  0.084  0.078
+15-19 px      196        20  1.000  0.974  0.878  0.617  0.240  0.051  0.026
+20-24 px      155        20  1.000  0.981  0.916  0.619  0.219  0.058  0.019
+25-29 px      111        21  0.991  0.955  0.802  0.459  0.099  0.018  0.000
+30-39 px      165        22  0.988  0.958  0.794  0.485  0.158  0.024  0.012
+>= 40 px      451        18  0.874  0.736  0.519  0.308  0.060  0.011  0.002
+
+Proposal for decision G (the experiment plan's one-round rule):
+  calibration.provisional_tau_L = 0.77: the 95th percentile of the best scores of the 1360 H-cal lesions >= 10 px (no match counts as 0).
+  calibration.informative_bound_px = the smallest bin edge from which every larger bin stays below the cut:
+  cut 5%: bound = 25 px
+  cut 10%: bound = 12 px
+  calibration.chance_rate_max: 0.05 or 0.10 (the experiment plan allows 5-10%); it picks the bound above.
+  The final tau_L is computed by 'calibrate' from the informative lesions only.
+
+What each bound costs (share of slices left without an informative lesion; E0 stats, bound_impact_amibekk_v1.csv):
+set        T  H-cal  H-eval  S main  H-cal patients kept
+bound                                                   
+10     0.109  0.103   0.110   0.201                   24
+12     0.170  0.156   0.172   0.278                   24
+15     0.274  0.242   0.247   0.374                   24
+20     0.390  0.349   0.363   0.501                   23
+25     0.481  0.445   0.484   0.592                   23
+If the bound is 20 px or more, about half of the main audit leaves the lesion-level analysis (still scored by E1): weigh that cost when choosing, and record the reason with the decision.
+
+Look at chance_rates.png and examples.png (what a chance match looks like at each size), then set calibration.provisional_tau_L, calibration.chance_rate_max and calibration.informative_bound_px in configs/default.yaml (dated comment) and run 'e3_calibrate.py calibrate'.
