@@ -37,7 +37,10 @@ Stages, run in this order. Each one can be run and checked on its own:
                  table, lesions per slice, lesion area, centroid density in pixels and brain-
                  relative, impact of candidate informative-lesion bounds (input for E3)
                  -> results/<dataset>/e0b/stats/
-  (planned: filters-review, check)
+  filters-review evidence for decision E (which of the sampling script's filters to apply to H-cal
+                 and H-eval): each filter on the masks as saved and cleaned, for every set, and
+                 what applying it would cost -> results/<dataset>/e0b/filters_review/
+  (planned: check)
 
 Examples (from the repository root):
   .venv\\Scripts\\python.exe scripts\\e0b_audit.py brain-review
@@ -931,6 +934,64 @@ def run_stats(cfg: dict, args: argparse.Namespace) -> None:
     print(f"\n{text}\nWrote {out}")
 
 
+def run_filters_review(cfg: dict, args: argparse.Namespace) -> None:
+    max_px, small_px = int(cfg["filters"]["max_mask_px"]), int(cfg["qc"]["small_lesion_px"])
+    name, _ = config.real_dataset(cfg, args.dataset)
+    pool_name, _ = config.synthetic_pool(cfg, args.pool)
+    real_dir, syn_dir = config.output_dir(cfg, name), config.output_dir(cfg, pool_name)
+    out = config.results_dir(cfg, name, "e0b") / "filters_review"
+    if out.exists() and not args.overwrite:
+        raise SystemExit(f"{out} already exists; pass --overwrite to regenerate.")
+    if not (syn_dir / "qc.csv").exists():
+        raise SystemExit(f"{syn_dir / 'qc.csv'} not found; run the 'qc' stage first.")
+
+    # every real lesion slice and every synthetic mask, each filter on the mask as saved and cleaned
+    rows = []
+    real_sl = read_table(real_dir / "slices.csv")
+    labels, brains = LabelStack(real_dir / "labels.npz"), MaskStack(real_dir / "brain_masks.npz")
+    for pid, group in tqdm(real_sl.groupby("patient_id"), desc=f"{name} lesion slices"):
+        _, seg = load_real(real_dir, str(pid))
+        for key, set_name, z in zip(group["key"], group["set"], group["z"]):
+            rows.append({"set": set_name, "patient_id": pid, "key": key,
+                         **audit.filter_checks(seg[:, :, int(z)] > 0, labels[key], brains[key], max_px, small_px)})
+    syn_sl = read_table(syn_dir / "slices.csv").merge(read_table(syn_dir / "qc.csv")[["key", "mask_class"]], on="key")
+    raw, labels, brains = (MaskStack(syn_dir / "masks_raw.npz"), LabelStack(syn_dir / "labels.npz"),
+                           MaskStack(syn_dir / "brain_masks.npz"))
+    for key, mask_class in tqdm(list(zip(syn_sl["key"], syn_sl["mask_class"])), desc=pool_name):
+        rows.append({"set": "S main" if mask_class in ("clean", "minor") else "S other", "key": key,
+                     **audit.filter_checks(raw[key], labels[key], brains[key], max_px, small_px)})
+    checks = pd.DataFrame(rows)
+
+    synthetic = checks[checks["set"].isin(["S main", "S other"])]
+    groups = pd.concat([checks[checks["set"].isin(["T", "H-cal", "H-eval", "S main"])], synthetic.assign(set="S all")])
+    passing = audit.summarize_filters(groups, "set")
+    cost = audit.filter_cost(checks, ["H-cal", "H-eval", "T"])
+    speck_only = {s: int((d["raw_small_lesion"] & ~d["clean_small_lesion"]).sum())
+                  for s, d in groups.groupby("set", sort=False)}
+    holds = [f for f in audit.FILTERS
+             if passing.at[f"raw_{f}", "S all"] >= 0.99]  # pyright: ignore[reportOperatorIssue]  # pandas stubs: a cell of a float table
+
+    out.mkdir(parents=True, exist_ok=True)
+    passing.round(4).to_csv(out / f"filter_pass_{pool_name}.csv")
+    cost.round(4).to_csv(out / f"filter_cost_{name}.csv", index=False)
+    text = (f"E0b filters-review: dataset '{name}', pool '{pool_name}'. The sampling script kept a mask only if "
+            f"(max_mask_px) its pixel sum < {max_px}, (small_lesion) a lesion < {small_px} px, (inside_brain) every "
+            f"lesion pixel inside the generated brain.\n"
+            f"raw_* = on the mask as saved (every component counts, as the sampling script saw it); clean_* = on the "
+            f"lesions after attach-or-drop (as the detectors see it). The brain is our brain mask, not the script's.\n\n"
+            f"Share of masks passing each filter:\n{passing.round(4).to_string()}\n\n"
+            f"Masks with a small 'lesion' only because of a speck (raw passes, cleaned fails small_lesion): "
+            f"{speck_only}\n\n"
+            f"Cost of applying each filter (cleaned masks) to the real sets: slices removed, patients left:\n"
+            f"{cost.round(3).to_string(index=False)}\n\n"
+            f"Filters that hold in the pool (>= 99% of synthetic masks as saved pass): {holds}\n"
+            f"Decision E: which filters to apply to H-cal and H-eval (never T, the reference copies are matched "
+            f"against). Set filters.real_sets in configs/default.yaml (dated comment), as a list; [] for none.\n")
+    (out / "review.txt").write_text(text, encoding="utf-8")
+    config.write_run_info(out, cfg, script=__file__, extra={"stage": "filters-review", "pool": pool_name})
+    print(f"\n{text}\nWrote {out}")
+
+
 # lesions.csv columns in the view's table, with short headers
 VIEW_COLUMNS = {"lesion_id": "lesion", "area": "area px", "stray_px": "strays px", "centroid_row": "row",
                 "centroid_col": "col", "centroid_row_brain": "row in brain", "centroid_col_brain": "col in brain",
@@ -1036,6 +1097,13 @@ def main() -> None:
     p.add_argument("--pool", help="synthetic pool name in the config (default: default_synthetic_pool)")
     p.add_argument("--overwrite", action="store_true", help="regenerate existing output")
     p.set_defaults(func=run_stats)
+
+    p = stages.add_parser("filters-review", help="evidence for decision E: sampling filters for H-cal/H-eval")
+    config.add_config_arg(p)
+    p.add_argument("--dataset", help="real dataset name in the config (default: default_real_dataset)")
+    p.add_argument("--pool", help="synthetic pool name in the config (default: default_synthetic_pool)")
+    p.add_argument("--overwrite", action="store_true", help="regenerate existing output")
+    p.set_defaults(func=run_filters_review)
 
     p = stages.add_parser("view", help="one slice at full size with its lesion rows (helper, after 'lesions')")
     config.add_config_arg(p)

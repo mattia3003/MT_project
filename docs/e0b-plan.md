@@ -4,7 +4,7 @@ Working plan for E0b, kept in the repo so work can resume from here. The experim
 specified in `docs/experiment-plan.md` (E0); this file records how it is implemented, stage by
 stage, and what has been decided. Update the status table when a stage is done.
 
-## Status (end of 2026-11-02)
+## Status (2026-11-03)
 
 | # | Stage | Kind | Status |
 | --- | --- | --- | --- |
@@ -16,12 +16,12 @@ stage, and what has been decided. Update the status table when a stage is done.
 | 5 | `qc-review` | review → decision D | ✅ done; **decision D set** (2026-11-02): 9 isolated specks |
 | 6 | `qc` | production (needs D) | ✅ done (2026-11-02); mask class and failed-MRI flag kept apart |
 | 7a | `stats` | E0 description (no decision) | ✅ done (2026-11-03: items 1–6) |
-| 7b | `filters-review` | review → decision E (filters for H-cal/H-eval) | ⏳ |
+| 7b | `filters-review` | review → decision E (filters for H-cal/H-eval) | ✅ done; **decision E set** (2026-11-03): `[max_mask_px]` |
 | 8 | `check` | consistency checks | ⏳ |
 | 9 | Full re-run of E0a + E0b from scratch | end-to-end check | ⏳ after 8 |
 
-**Next: start here.** Stage 7b `filters-review` (decision E), then 8 `check`. Stage 7a
-`stats` was finished on 2026-11-03. The
+**Next: start here.** Stage 8 `check`, then 9 the full re-run. Stages 7a `stats` and 7b
+`filters-review` (decision E) were finished on 2026-11-03. The
 plan for both was approved on 2026-11-02, including the four points confirmed in "Stage 7
 details" below. Everything up to `qc-review` is committed; the `qc` stage (`qc.py`, its tests,
 the stage, docs and report notes) was finished on 2026-11-02 and awaits the user's commit.
@@ -96,7 +96,9 @@ qc:
   max_isolated_specks: 9      # decision D, set 2026-11-02 (end of the falling counts; then a flat noise tail)
   edge_outside_frac: 0.5      # plan: flag a real-sized lesion if > 50% of it is outside the brain
   small_lesion_px: 40         # plan: the sampling filter's "a lesion under 40 px"
-# planned with 7b: filters.real_sets: null   # decision E: sampling filters applied to H-cal/H-eval
+filters:
+  max_mask_px: 2000           # the sampling script's pixel-sum limit (a fact, not a decision)
+  real_sets: [max_mask_px]    # decision E, set 2026-11-03 (only filter the pool shows; removes no real slice)
 ```
 
 **Decided at the `qc` stage (2026-11-02):** edge flags only flag, never exclude; a failed MRI

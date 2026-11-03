@@ -278,6 +278,28 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
   unless the chance-match rates force it higher (see the shape-and-size finding in section 3:
   lesions under about 40 px are hard to tell apart by shape and size). Not decided here.
   *Source: `results/stanford_brainmets/e0b/stats/bound_impact_amibekk_v1.csv`, 2026-11-03.*
+- **Sampling filters applied to the held-out real sets: only the pixel-sum filter**
+  (`filters.real_sets: [max_mask_px]`, decision E, set 2026-11-03). The plan applies to the real
+  comparison sets only the sampling filters the pool actually shows, so that the chance
+  baseline (H-cal in E3, H-eval in E4/E5) describes the same kind of masks as S. T is never
+  filtered: it is the reference copies are matched against.
+  - *Pixel sum < 2,000:* holds for every synthetic mask (largest 731 px) and removes no real
+    slice. Applied; in practice H-cal (992 slices, 25 patients) and H-eval (1,094 slices, 26
+    patients) stay complete.
+  - *A lesion < 40 px:* does not hold; 10.7% of the masks as saved (14.6% after cleaning) have
+    none, although the repo labels lesions as we do. Applying it would remove about a quarter
+    of H-cal and H-eval (252 and 263 slices) and make H less like S: H-cal would have only
+    small-lesion masks, against 87% in the main audit. Not applied.
+  - *Every lesion pixel inside the brain:* not shown with a meaningful brain definition (85% of
+    the pool passes with our brain mask; the repo's check only required mask pixels to be
+    brighter than 0.005 in the synthetic MRI, which painted lesions always are). Real slices
+    pass at 98–99% anyway, and the `qc` edge check flags the cases that matter. Not applied.
+  - *Remaining difference, for E3:* the main audit has a lesion under 40 px more often than
+    H-cal (87% against 75%). If chance-match scores depend on it, E3 reports results stratified
+    by "has a lesion under 40 px".
+
+  *Source: `results/stanford_brainmets/e0b/filters_review/review.txt`, `filter_pass_amibekk_v1.csv`,
+  `filter_cost_stanford_brainmets.csv`; repo `Generation/Sampling_mask_bravo.py`, 2026-11-03.*
 - **The lesion definition and the informative-lesion bound are separate settings.**
   `min_lesion_area` defines what a lesion is (object vs noise) everywhere: QC speck counts,
   `no_lesion`, the lesion table and IDs, cleaned masks for E1, lesion counts and rarity. The
@@ -517,6 +539,19 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
 - **How the synthetic pool was produced is only partly known.** The repo's sampling script makes
   15,000 attempts with three filters; the pool shows six naming schemes and partly violates the
   <40 px filter (see section 1). E0b checks each filter on the data.
+  - *The repo is not the code that ran* (previous author, 2026-11-03): the code was written and
+    run on a university cloud system, often in notebooks, and the GitHub repo was assembled at
+    the end to store it. Choices and code that ran may be missing from it. Where the data and
+    the repo disagree, the data wins and we make reasoned assumptions, stated as such.
+  - *What the repo version does* (`Generation/Sampling_mask_bravo.py`): mask min–max scaled and
+    thresholded at 0.01; kept if the pixel sum < 2000; if at least one component (skimage
+    `label`, default = 8-connected, like ours) is under 40 px; and if every mask pixel has
+    intensity > 0.005 in the synthetic BRAVO (pixel-wise, no brain region). It saves as
+    `file_2_<n>`, one of the six naming schemes.
+  - *On the data* (`filters-review`): the pixel-sum filter holds for every mask; the small-lesion
+    filter fails for 10.7% of the masks as saved, although the labelling matches; so it was not
+    applied in that form to the whole pool. *Source: repo file above; `results/stanford_brainmets/
+    e0b/filters_review/review.txt`, 2026-11-03.*
 - **Chance rates for multi-lesion slices rest on few patients** (null model dropped). H-cal has
   303 multi-lesion slices from 17 patients (≥2 lesions ≥4 px), or 192 from 12 patients (≥2
   lesions ≥15 px). Slices of one patient are near-duplicates, so the patient count is the

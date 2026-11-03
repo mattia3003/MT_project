@@ -1,0 +1,13 @@
+set,filter,slices,removed,share_removed,patients_left,patients
+H-cal,max_mask_px,992,0,0.0,25,25
+H-cal,small_lesion,992,252,0.254,25,25
+H-cal,inside_brain,992,8,0.0081,25,25
+H-cal,all,992,257,0.2591,25,25
+H-eval,max_mask_px,1094,0,0.0,26,26
+H-eval,small_lesion,1094,263,0.2404,26,26
+H-eval,inside_brain,1094,18,0.0165,26,26
+H-eval,all,1094,275,0.2514,26,26
+T,max_mask_px,3823,0,0.0,105,105
+T,small_lesion,3823,999,0.2613,104,105
+T,inside_brain,3823,89,0.0233,105,105
+T,all,3823,1041,0.2723,104,105

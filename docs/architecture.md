@@ -52,7 +52,7 @@ flowchart TD
         QREV["qc-review ✅"]
         QC["qc ✅"]
         STATS["stats ✅"]
-        FREV["filters-review"]:::planned
+        FREV["filters-review ✅"]
         ECHECK["check"]:::planned
     end
     BREV -.->|"decision A"| BRAIN
@@ -99,7 +99,7 @@ flowchart TD
 | | `qc-review` | ✅ | `lesions` and `brain` outputs, synthetic index | `results/<pool>/e0b/qc_review/` (evidence for decision D) |
 | | `qc` | ✅ | decision D, `lesions` and `brain` outputs | `qc.csv` (pool), `results/<pool>/e0b/qc/` |
 | | `stats` | ✅ | `lesions`, `qc`, `brain` outputs, `patients.csv`, real volumes (model space and native masks) | `results/<dataset>/e0b/stats/` |
-| | `filters-review` | planned | E0b outputs | evidence for decision E |
+| | `filters-review` | ✅ | `lesions`, `brain`, `qc` outputs, real `seg` volumes | `results/<dataset>/e0b/filters_review/` (evidence for decision E) |
 | | `check` | planned | all E0b outputs | consistency checks |
 | `e3_calibrate.py` | *tbd* | planned | E0b outputs, H-cal | frozen thresholds |
 | `e4_validate.py` | *tbd* | planned | frozen thresholds, T, H-eval | validation table, planted copies |
@@ -157,7 +157,7 @@ flowchart LR
 | `lesions` | 8-connected labelling; attach-or-drop (specks below the minimum area become strays of a lesion within the gap, or are dropped; lesions numbered by area); lesion features (centroid in three frames, bbox, shape, fraction outside the brain); brain masks (six candidate methods), tissue area, brain box; distance and growing helpers | `label_components`, `count_components`, `attach_or_drop` (→ `LesionLabels`), `speck_gaps`, `lesion_features`, `brain_mask`, `tissue_px`, `brain_box`, `fraction_outside`, `chessboard_distance`, `grow` | SciPy, scikit-image |
 | `qc` | Quality classes of synthetic samples: mask class from the mask alone (`no_lesion`, `noisy`, `minor`, `clean`), the combined class with a failed MRI first, the edge count per slice | `mask_class`, `qc_class`, `edge_lesions`, `MASK_CLASSES`, `QC_CLASSES` | pandas |
 | `checks` | E0a consistency checks, independent reference transform, sample grid | `CheckReport`, `check_split`, `check_real_volumes`, `check_recompute`, `check_synthetic_index`, `sample_grid` | PyTorch, matplotlib |
-| `audit` | Evidence for the E0b review stages (candidate comparisons, figures, proposals) and overviews of the production stages | `evaluate_brain_methods`, `summarize_brain_methods`, `propose_brain_method`, `method_grid`, `threshold_sensitivity`, `summarize_threshold_sensitivity`, `sorted_sheet`, `tissue_counts`, `tissue_histogram`, `component_table`, `propose_min_area`, `size_counts`, `mask_specks`, `summarize_attach_or_drop`, `gap_counts`, `size_figure`, `crop_sheet`, `summarize_lesions`, `speck_stratum`, `summarize_speck_strata`, `summarize_qc`, `describe_sets`, `bound_impact`, `lesions_per_slice_figure`, `area_figure`, `centroid_density_figure`, `cumulative_lines`, `mask_dice`, `adjacency_figure`, `area_ratio_figure`, `brain_by_height`, `brain_height_figure`, `draw_lesions`, `lesion_sheet`, `lesion_view`, `summarize_brains`, `brain_sheet`, `draw_box` | pandas, matplotlib |
+| `audit` | Evidence for the E0b review stages (candidate comparisons, figures, proposals) and overviews of the production stages | `evaluate_brain_methods`, `summarize_brain_methods`, `propose_brain_method`, `method_grid`, `threshold_sensitivity`, `summarize_threshold_sensitivity`, `sorted_sheet`, `tissue_counts`, `tissue_histogram`, `component_table`, `propose_min_area`, `size_counts`, `mask_specks`, `summarize_attach_or_drop`, `gap_counts`, `size_figure`, `crop_sheet`, `summarize_lesions`, `speck_stratum`, `summarize_speck_strata`, `summarize_qc`, `describe_sets`, `bound_impact`, `lesions_per_slice_figure`, `area_figure`, `centroid_density_figure`, `FILTERS`, `filter_checks`, `summarize_filters`, `filter_cost`, `cumulative_lines`, `mask_dice`, `adjacency_figure`, `area_ratio_figure`, `brain_by_height`, `brain_height_figure`, `draw_lesions`, `lesion_sheet`, `lesion_view`, `summarize_brains`, `brain_sheet`, `draw_box` | pandas, matplotlib |
 | `plotting` | Shared figure helpers (no pyplot, so importing memtk never changes the plotting backend). `save` wraps the figure title to the figure width and uses the constrained layout, so the title never covers tile titles or runs off the image | `tile_figure`, `show_slice`, `hide_unused`, `save` | matplotlib |
 
 Tests (pytest, on small hand-built inputs): `tests/test_lesions.py` covers labelling,
@@ -200,7 +200,8 @@ Keys: `seed`; `output_root`, `results_root`, `splits_dir`; `default_real_dataset
 `slice_axis`); `brain.low_threshold` (data-dependent, checked by `brain-review`); E0b
 decisions, `null` until decided: `brain` (`method`, `min_tissue_px`),
 `lesions` (`connectivity`, `min_lesion_area`, `attach_gap`), `qc` (`max_isolated_specks`,
-`edge_outside_frac`, `small_lesion_px`); `real_datasets.<name>` (`root`, `image_file`, `mask_file`, `train_split`,
+`edge_outside_frac`, `small_lesion_px`); `filters` (`max_mask_px`, the sampling script's
+pixel-sum limit; `real_sets`, decision E); `real_datasets.<name>` (`root`, `image_file`, `mask_file`, `train_split`,
 `heldout_split`, `heldout_sets`); `synthetic_pools.<name>` (`dir`, `glob`, `image_channel`,
 `mask_channel`, `trained_on`, `legacy_exclusion_file`).
 
@@ -381,6 +382,20 @@ minor, the main audit) and S all.
 | `native_vs_model_<dataset>.csv` / `.png` | Per slice with exactly one lesion in both spaces: native area, native area scaled to 128×128 (`expected_area`), model-space area, their `ratio`, native size bin; scatter and ratio by size |
 | `brain_by_height_<dataset>.csv` | Brain area quartiles (`p25`, `median`, `p75`) of all real slices (decided brain method) per relative slice position (20 bins, indexed by bin centre; 0 = first, 1 = last slice with brain), with slices and lesion slices per bin |
 | `brain_by_height_<pool>.png` | Left: real brain area by relative position (median, middle 50%) with the synthetic median as a red line. Right: brain-area distributions of real lesion slices and synthetic samples (main audit, failed MRIs left out) |
+| `run_info.json` | Run log |
+
+### Results: `results/<dataset>/e0b/filters_review/`
+
+Written by `filters-review`. In git. Evidence for decision E (`filters.real_sets`); nothing here
+is used by later stages. The sampling script's filters: `max_mask_px` (pixel sum below
+`filters.max_mask_px`), `small_lesion` (a component under `qc.small_lesion_px`), `inside_brain`
+(every lesion pixel inside the brain; here with our brain mask, not the script's).
+
+| File | Content |
+| --- | --- |
+| `review.txt` | The tables below, masks that pass `small_lesion` only because of a speck, the filters that hold in the pool, what to set next |
+| `filter_pass_<pool>.csv` | Share of masks passing each filter, on the mask as saved (`raw_*`) and cleaned (`clean_*`), and all three, per set (T, H-cal, H-eval, S main, S all) |
+| `filter_cost_<dataset>.csv` | Per real set and filter (cleaned masks): slices removed and their share, patients left |
 | `run_info.json` | Run log |
 
 ### Results: `results/<pool>/e0b/qc_review/`

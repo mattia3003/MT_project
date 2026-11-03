@@ -56,6 +56,16 @@ qc:
   edge_outside_frac: 0.5      # flag a real-sized lesion if more than this fraction lies outside the brain
   small_lesion_px: 40         # the sampling filter's "at least one lesion under 40 px"
 
+filters:
+  # the sampling script kept a mask only if its pixel sum was below this (repo: Sampling_mask_bravo.py);
+  # its other filters are a lesion under qc.small_lesion_px and every lesion pixel inside the brain
+  max_mask_px: 2000
+  # Decision E (evidence: `e0b_audit.py filters-review`): which of max_mask_px, small_lesion,
+  # inside_brain to apply to H-cal and H-eval (never to T); a list, [] for none
+  real_sets: [max_mask_px]   # decided 2026-11-03: only this filter holds in the pool (100%; removes no real
+                             # slice); small_lesion fails for 10.7% of the masks as saved, inside_brain is not
+                             # shown with a meaningful brain definition
+
 real_datasets:
   stanford_brainmets:
     root: data/StanfordSkullStripped_1mm

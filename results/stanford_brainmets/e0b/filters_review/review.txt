@@ -1,0 +1,33 @@
+E0b filters-review: dataset 'stanford_brainmets', pool 'amibekk_v1'. The sampling script kept a mask only if (max_mask_px) its pixel sum < 2000, (small_lesion) a lesion < 40 px, (inside_brain) every lesion pixel inside the generated brain.
+raw_* = on the mask as saved (every component counts, as the sampling script saw it); clean_* = on the lesions after attach-or-drop (as the detectors see it). The brain is our brain mask, not the script's.
+
+Share of masks passing each filter:
+set                      T   H-cal  H-eval  S main   S all
+raw_max_mask_px     1.0000  1.0000  1.0000  1.0000  1.0000
+raw_small_lesion    0.7442  0.7490  0.7651  0.8877  0.8928
+raw_inside_brain    0.9767  0.9919  0.9835  0.8777  0.8458
+clean_max_mask_px   1.0000  1.0000  1.0000  1.0000  1.0000
+clean_small_lesion  0.7387  0.7460  0.7596  0.8650  0.8538
+clean_inside_brain  0.9767  0.9919  0.9835  0.9490  0.9431
+raw_all             0.7332  0.7440  0.7541  0.7698  0.7427
+clean_all           0.7277  0.7409  0.7486  0.8205  0.8038
+
+Masks with a small 'lesion' only because of a speck (raw passes, cleaned fails small_lesion): {'T': 21, 'H-cal': 3, 'H-eval': 6, 'S main': 813, 'S all': 1467}
+
+Cost of applying each filter (cleaned masks) to the real sets: slices removed, patients left:
+   set       filter  slices  removed  share_removed  patients_left  patients
+ H-cal  max_mask_px     992        0          0.000             25        25
+ H-cal small_lesion     992      252          0.254             25        25
+ H-cal inside_brain     992        8          0.008             25        25
+ H-cal          all     992      257          0.259             25        25
+H-eval  max_mask_px    1094        0          0.000             26        26
+H-eval small_lesion    1094      263          0.240             26        26
+H-eval inside_brain    1094       18          0.016             26        26
+H-eval          all    1094      275          0.251             26        26
+     T  max_mask_px    3823        0          0.000            105       105
+     T small_lesion    3823      999          0.261            104       105
+     T inside_brain    3823       89          0.023            105       105
+     T          all    3823     1041          0.272            104       105
+
+Filters that hold in the pool (>= 99% of synthetic masks as saved pass): ['max_mask_px']
+Decision E: which filters to apply to H-cal and H-eval (never T, the reference copies are matched against). Set filters.real_sets in configs/default.yaml (dated comment), as a list; [] for none.

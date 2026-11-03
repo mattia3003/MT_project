@@ -27,7 +27,7 @@ Status: ✅ implemented · ⏳ planned
 | `e0b_audit.py qc-review` | ✅ | `lesions` and `brain` outputs, synthetic index | `results/<pool>/e0b/qc_review/`: masks by number of isolated specks, exact counts, sheets per stratum, clean masks with a lesion outside the brain, proposal (`review.txt`) → **decision D** |
 | `e0b_audit.py qc` | ✅ | decision D, `lesions` and `brain` outputs | `<output_root>/<pool>/qc.csv` (per sample: mask class, failed-MRI flag, combined QC class, edge and small-lesion flags); `results/<pool>/e0b/qc/` (summary, old-QC cross-table, edge check on the real sets, example sheet) |
 | `e0b_audit.py stats` | ✅ | `lesions`, `qc`, `brain` outputs, `patients.csv`, real volumes | `results/<dataset>/e0b/stats/`: description table, native sizes, lesions per slice, lesion area, centroid density (pixels and brain-relative), bound-impact table (input for E3), adjacent-slice Dice, native vs model lesion area, brain size by slice height |
-| `e0b_audit.py filters-review` | ⏳ | E0b outputs | evidence for **decision E** (sampling filters for H-cal/H-eval) |
+| `e0b_audit.py filters-review` | ✅ | `lesions`, `brain`, `qc` outputs, real `seg` volumes | `results/<dataset>/e0b/filters_review/`: each sampling filter on the masks as saved and cleaned, per set; the cost of applying it to the real sets; proposal (`review.txt`) → **decision E** |
 | `e0b_audit.py check` | ⏳ | all E0b outputs | consistency checks |
 | `e3_calibrate.py` | ⏳ | E0 outputs, H-cal | frozen thresholds (runs the E1 + E2 detectors from `memtk`) |
 | `e4_validate.py` | ⏳ | thresholds, T, H-eval | planted-copy validation table (gate) |
@@ -60,6 +60,7 @@ the production stage)
 .venv\Scripts\python.exe scripts\e0b_audit.py qc-review          # evidence for decision D (speck cut-off)
 .venv\Scripts\python.exe scripts\e0b_audit.py qc                 # needs D: QC class per synthetic sample
 .venv\Scripts\python.exe scripts\e0b_audit.py stats              # E0 description, figures, bound impact (a few min)
+.venv\Scripts\python.exe scripts\e0b_audit.py filters-review     # evidence for decision E (filters for H-cal/H-eval)
 ```
 `brain-review` also takes `--n-synthetic 2000` (samples for the method comparison) and
 `--min-area 4` (provisional lesion size for that comparison).

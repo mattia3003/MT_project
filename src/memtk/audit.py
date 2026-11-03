@@ -564,6 +564,54 @@ def brain_height_figure(table: pd.DataFrame, real_lesion_px: pd.Series, syntheti
     return save(fig, path, title)
 
 
+# --- filters-review: the sampling script's filters -------------------------------------------
+
+# The sampling script's three filters, by the names used in the config (`filters.real_sets`)
+FILTERS = ("max_mask_px", "small_lesion", "inside_brain")
+
+
+def filter_checks(mask: np.ndarray, labels: np.ndarray, brain: np.ndarray, max_mask_px: int,
+                  small_lesion_px: int) -> dict:
+    """Whether one mask passes each sampling filter, in two versions: `raw_*` on the mask as saved
+    (every component counts, as the sampling script saw it) and `clean_*` on the lesions after
+    attach-or-drop (as the detectors see it). A cleaned mask without lesions fails `small_lesion`
+    and passes `inside_brain`."""
+    raw = mask > 0
+    comp, n = label_components(raw)
+    raw_sizes = np.bincount(comp.ravel(), minlength=n + 1)[1:]
+    lesion = labels > 0
+    lesion_sizes = np.bincount(labels.ravel())[1:]
+    lesion_sizes = lesion_sizes[lesion_sizes > 0]
+    return {"raw_max_mask_px": bool(raw.sum() < max_mask_px),
+            "raw_small_lesion": bool((raw_sizes < small_lesion_px).any()),
+            "raw_inside_brain": not bool((raw & ~brain).any()),
+            "clean_max_mask_px": bool(lesion.sum() < max_mask_px),
+            "clean_small_lesion": bool((lesion_sizes < small_lesion_px).any()),
+            "clean_inside_brain": not bool((lesion & ~brain).any())}
+
+
+def summarize_filters(checks: pd.DataFrame, by: str) -> pd.DataFrame:
+    """Per set: the share of masks passing each filter in both versions, and all three together."""
+    cols = [f"{v}_{f}" for v in ("raw", "clean") for f in FILTERS]
+    table = checks.assign(raw_all=checks[[f"raw_{f}" for f in FILTERS]].all(axis=1),
+                          clean_all=checks[[f"clean_{f}" for f in FILTERS]].all(axis=1))
+    return table.groupby(by, sort=False)[[*cols, "raw_all", "clean_all"]].mean().T
+
+
+def filter_cost(checks: pd.DataFrame, sets, version: str = "clean") -> pd.DataFrame:
+    """For each filter (and all three) on the real sets: slices removed and their share, and
+    patients left with no slice at all."""
+    rows = []
+    for name in sets:
+        d = checks[checks["set"] == name]
+        for f in (*FILTERS, "all"):
+            passed = d[[f"{version}_{g}" for g in FILTERS]].all(axis=1) if f == "all" else d[f"{version}_{f}"]
+            rows.append({"set": name, "filter": f, "slices": len(d), "removed": int((~passed).sum()),
+                         "share_removed": float((~passed).mean()),
+                         "patients_left": d.loc[passed, "patient_id"].nunique(), "patients": d["patient_id"].nunique()})
+    return pd.DataFrame(rows)
+
+
 # --- brain: overview of the production brain masks -------------------------------------------
 
 def summarize_brains(df: pd.DataFrame, by: str) -> pd.DataFrame:
