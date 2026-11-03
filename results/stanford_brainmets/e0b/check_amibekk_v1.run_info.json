@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-11-03T13:33:58",
+  "timestamp": "2026-11-03T17:24:03",
   "script": "C:\\Master thesis\\MT_project\\src\\memtk\\e0b\\check.py",
   "argv": [
     "scripts\\e0b_audit.py",
@@ -53,6 +53,30 @@
       "real_sets": [
         "max_mask_px"
       ]
+    },
+    "detectors": {
+      "whole_mask": {
+        "top_k_dice": 20,
+        "top_k_centroid": 20,
+        "max_shift_px": 3
+      },
+      "lesion": {
+        "position_frame": "pixel",
+        "sigma": 0.05,
+        "prefilter": 0.2,
+        "candidate_min_s": 0.1
+      }
+    },
+    "calibration": {
+      "percentile": 95,
+      "bootstrap_draws": 2000,
+      "provisional_tau_L": null,
+      "chance_rate_max": null,
+      "informative_bound_px": null,
+      "strata": {
+        "whole_mask": null,
+        "lesion": null
+      }
     },
     "real_datasets": {
       "stanford_brainmets": {

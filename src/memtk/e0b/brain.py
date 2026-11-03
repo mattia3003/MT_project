@@ -22,11 +22,12 @@ from matplotlib.figure import Figure
 from tqdm import tqdm
 
 from memtk import config, ids
-from memtk.e0b.common import BOX_COLUMNS, decided, load_real, pick, refuse_overwrite
+from memtk.e0b.common import BOX_COLUMNS, load_real
 from memtk.io import MaskStackWriter, read_table
 from memtk.lesions import BRAIN_METHODS, brain_box, brain_mask, fraction_outside, grow, label_components, tissue_px
 from memtk.plotting import (BRAIN_COLOR, LESION_COLOR, draw_box, hide_unused, save, show_slice,
                             tile_figure)
+from memtk.stages import decided, pick, refuse_overwrite
 from memtk.synthetic import load_sample
 
 # Multiples of brain.low_threshold at which the brain area is recomputed (threshold sensitivity)
@@ -51,7 +52,7 @@ def run_brain_review(cfg: dict, dataset: str | None = None, pool: str | None = N
     refuse_overwrite([out], overwrite)
     rng = np.random.default_rng(cfg["seed"])
     pool_dir = config.resolve_path(pool_cfg["dir"])
-    low = float(decided(cfg, "brain", "low_threshold", "brain-review"))
+    low = float(decided(cfg, "brain.low_threshold", "e0b_audit.py brain-review"))
 
     slices = read_table(real_dir / "lesion_slices.csv")
     t_slices = slices[slices["set"] == "T"]  # decisions use T only; H-cal/H-eval stay untouched
@@ -158,9 +159,9 @@ def run_brain(cfg: dict, dataset: str | None = None, pool: str | None = None, ov
     synthetic masks as saved (read from the pool once, cached for later stages). Writes
     `brain.csv` + `brain_masks.npz` per dataset and pool, `masks_raw.npz` per pool, and a summary
     with outline sheets to `results/<dataset|pool>/e0b/brain/`."""
-    method = decided(cfg, "brain", "method", "brain-review")
-    min_tissue = int(decided(cfg, "brain", "min_tissue_px", "brain-review"))
-    low = float(decided(cfg, "brain", "low_threshold", "brain-review"))
+    method = decided(cfg, "brain.method", "e0b_audit.py brain-review")
+    min_tissue = int(decided(cfg, "brain.min_tissue_px", "e0b_audit.py brain-review"))
+    low = float(decided(cfg, "brain.low_threshold", "e0b_audit.py brain-review"))
     name, _ = config.real_dataset(cfg, dataset)
     pool_name, pool_cfg = config.synthetic_pool(cfg, pool)
     real_dir, syn_dir = config.output_dir(cfg, name), config.output_dir(cfg, pool_name)

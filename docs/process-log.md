@@ -176,3 +176,15 @@ in full, with what replaced them.
   `lesionmatch`) and two doc links whose rule is in CLAUDE.md. The CLAUDE.md update rule now
   says which document to change for which kind of change; the E0b and E1–E3 plans point to the
   new files. *Source: `git show HEAD:docs/architecture.md` against the three new documents.*
+- **E1–E3 step 1: shared stage helpers and config sections.** `decided`, `refuse_overwrite`,
+  `require`, `pick` (from `e0b/common.py`) and `add_stage` (from `e0b_audit.py`) moved to the
+  library module `memtk/stages.py`, because E3 needs them too. `decided` now takes a dotted key
+  and the full review command (`decided(cfg, "brain.method", "e0b_audit.py brain-review")`), so
+  E3 can read nested keys such as `calibration.strata.lesion` and the stop message names the
+  right script; the 19 E0b calls were updated (the diff contains only those lines and the
+  imports). `config.value` and `decided` are annotated `-> Any`: the dotted lookup had made
+  Pylance infer `dict | Unknown` and report 34 errors in the E0b modules. New config sections
+  `detectors:` (fixed plan values; decision F = pixel, set with its reason) and `calibration:`
+  (percentile 95, 2,000 bootstrap draws; decisions G and H `null`). Verified: pytest 66 passed
+  (6 new in `tests/test_stages.py`), E0b check 43/43 (report changed only in the pytest line),
+  no Pylance problems. *Source: `git diff`, pytest, `e0b_audit.py check`.*

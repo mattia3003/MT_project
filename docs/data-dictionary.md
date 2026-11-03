@@ -54,7 +54,12 @@ Keys: `seed`; `output_root`, `results_root`, `splits_dir`; `default_real_dataset
 decisions, `null` until decided: `brain` (`method`, `min_tissue_px`),
 `lesions` (`connectivity`, `min_lesion_area`, `attach_gap`), `qc` (`max_isolated_specks`,
 `edge_outside_frac`, `small_lesion_px`); `filters` (`max_mask_px`, the sampling script's
-pixel-sum limit; `real_sets`, decision E); `real_datasets.<name>` (`root`, `image_file`, `mask_file`, `train_split`,
+pixel-sum limit; `real_sets`, decision E); E1–E3 (`docs/e1-e3-plan.md`): `detectors.whole_mask`
+(`top_k_dice`, `top_k_centroid`, `max_shift_px`), `detectors.lesion` (`position_frame`,
+decision F; `sigma`, `prefilter` as fractions of the 128-px field; `candidate_min_s`),
+`calibration` (`percentile`, `bootstrap_draws`; decision G: `provisional_tau_L`,
+`chance_rate_max`, `informative_bound_px`; decision H: `strata.whole_mask`, `strata.lesion`);
+`real_datasets.<name>` (`root`, `image_file`, `mask_file`, `train_split`,
 `heldout_split`, `heldout_sets`); `synthetic_pools.<name>` (`dir`, `glob`, `image_channel`,
 `mask_channel`, `trained_on`, `legacy_exclusion_file`).
 

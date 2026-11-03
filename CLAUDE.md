@@ -240,7 +240,7 @@ Not aimed at publication for now. Original weights (Branch A) only as a fallback
     are building blocks that know nothing about stages. Stage packages
     (`src/memtk/<experiment>/`, e.g. `e0b/`) hold one experiment's stages, one module per topic
     (e0b: `brain`, `lesions`, `qc`, `stats`, `filters`, `check`, plus `common` for shared helpers).
-  - The script is only the command line (~100 lines): an `add_stage` helper adds the shared
+  - The script is only the command line (~100 lines): `memtk.stages.add_stage` adds the shared
     options (`--config`, `--dataset`, `--pool`, `--overwrite`); options reach the stage function
     as keywords. Stage functions: `run_<stage>(cfg, <options named like the CLI options>)`, so
     they can also be called from a notebook.
@@ -250,8 +250,9 @@ Not aimed at publication for now. Original weights (Branch A) only as a fallback
     tables and figures they use under `# --- ... ---` section headers.
   - Every function has a docstring (what it reads, writes or returns; for stages also the
     decision it needs). Comments only where the *why* is not obvious; no line-by-line comments.
-  - Reuse the shared helpers instead of rewriting them: `e0b.common` (`refuse_overwrite`,
-    `require`, `decided`, `pick(rng, ...)`, `load_real`, `Slices`), `memtk.io.read_table` for
+  - Reuse the shared helpers instead of rewriting them: `memtk.stages` (`add_stage`,
+    `decided(cfg, "<dotted.key>", "<script> <review stage>")`, `refuse_overwrite`, `require`,
+    `pick(rng, ...)`), `e0b.common` (`load_real`, `Slices`, `boxes_of`), `memtk.io.read_table` for
     every pipeline CSV, `memtk.ids` for keys and lesion IDs, `memtk.plotting` for shared
     drawing and colours. A helper needed by two experiments moves to a library module.
   - `scripts/e0a_prepare_data.py` predates this layout (its stages are small and call library

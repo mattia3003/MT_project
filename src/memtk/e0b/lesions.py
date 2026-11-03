@@ -18,12 +18,13 @@ from matplotlib.figure import Figure
 from tqdm import tqdm
 
 from memtk import config, ids
-from memtk.e0b.common import Slices, decided, load_real, pick, refuse_overwrite, require
+from memtk.e0b.common import Slices, load_real
 from memtk.io import LabelStack, LabelStackWriter, MaskStack, read_table, save_nifti
 from memtk.lesions import (LesionLabels, attach_or_drop, chessboard_distance, fraction_outside, label_components,
                            lesion_features, speck_gaps)
 from memtk.plotting import (HIGHLIGHT_COLOR, LESION_COLOR, draw_lesions, hide_unused, lesion_sheet, save, show_slice,
                             tile_figure)
+from memtk.stages import decided, pick, refuse_overwrite, require
 from memtk.synthetic import load_sample
 
 
@@ -167,8 +168,8 @@ def run_lesions(cfg: dict, dataset: str | None = None, pool: str | None = None,
     frames), `slices.csv` (one row per slice), `labels.npz` per dataset and pool, a
     `labels.nii.gz` per real patient, and a summary with an overview sheet in
     `results/<dataset|pool>/e0b/lesions/`. Needs the `brain` stage."""
-    min_area = int(decided(cfg, "lesions", "min_lesion_area", "lesions-review"))
-    gap = int(decided(cfg, "lesions", "attach_gap", "lesions-review"))
+    min_area = int(decided(cfg, "lesions.min_lesion_area", "e0b_audit.py lesions-review"))
+    gap = int(decided(cfg, "lesions.attach_gap", "e0b_audit.py lesions-review"))
     small_lesion_px = int(cfg["qc"]["small_lesion_px"])
     name, _ = config.real_dataset(cfg, dataset)
     pool_name, pool_cfg = config.synthetic_pool(cfg, pool)
@@ -262,8 +263,8 @@ def run_view(cfg: dict, sample: str | None = None, patient: str | None = None, z
     a synthetic sample (`sample`) or a real slice (`patient` and 0-based `z`). With `nifti`, a
     synthetic sample's image and labels are also written as NIfTI. Writes
     `results/<dataset|pool>/e0b/views/<key>.png`. Needs the `lesions` stage."""
-    min_area = int(decided(cfg, "lesions", "min_lesion_area", "lesions-review"))
-    gap = int(decided(cfg, "lesions", "attach_gap", "lesions-review"))
+    min_area = int(decided(cfg, "lesions.min_lesion_area", "e0b_audit.py lesions-review"))
+    gap = int(decided(cfg, "lesions.attach_gap", "e0b_audit.py lesions-review"))
     if sample is not None:
         source, pool_cfg = config.synthetic_pool(cfg, pool)
         key = ids.sample_key(sample)

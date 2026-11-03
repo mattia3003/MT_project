@@ -11,14 +11,14 @@ E4 on planted copies and E5 on S.
 | # | Step | Kind | Status |
 | --- | --- | --- | --- |
 | 0 | This plan; decision F recorded in the docs | docs | ✅ 2026-11-03, reviewed by the user (choices accepted) |
-| 1 | Shared stage helpers → `memtk/stages.py`; config sections `detectors:`, `calibration:` | refactor + config | ⏳ next |
+| 1 | Shared stage helpers → `memtk/stages.py`; config sections `detectors:`, `calibration:` | refactor + config | ✅ 2026-11-03: `decided` takes a dotted key and the full review command; F set in the config, G and H `null`; pytest 66 passed, E0b check 43/43 |
 | 2 | E1 library `memtk/wholemask.py` + tests | library | ⏳ |
 | 3 | E2 library `memtk/lesionmatch.py` + tests | library | ⏳ |
 | 4 | `bound-review` | review → decision G | ⏳ |
 | 5 | `calibrate` | production (needs G) → evidence for decision H | ⏳ |
 | 6 | `freeze` + `check` | production (needs H) + consistency checks | ⏳ |
 
-**Next: start here.** Step 1. (The architecture docs were reworked first, 2026-11-03: new
+**Next: start here.** Step 2, the E1 library `memtk/wholemask.py` and its tests. (The architecture docs were reworked first, 2026-11-03: new
 modules and files go into `docs/module-reference.md` and `docs/data-dictionary.md`.)
 
 **Milestone:** 9 Nov 2026, both detectors run on H-cal; informative-lesion bound and thresholds

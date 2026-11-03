@@ -19,10 +19,11 @@ from matplotlib.figure import Figure
 from tqdm import tqdm
 
 from memtk import config, ids
-from memtk.e0b.common import decided, load_real, refuse_overwrite, require
+from memtk.e0b.common import load_real
 from memtk.io import LabelStack, load_image, patient_files, read_table
 from memtk.lesions import brain_mask, count_components
 from memtk.plotting import SET_COLORS, save, tile_figure
+from memtk.stages import decided, refuse_overwrite, require
 
 
 # --- stage ------------------------------------------------------------------------------------
@@ -101,8 +102,8 @@ def run_stats(cfg: dict, dataset: str | None = None, pool: str | None = None,
 
     # brain area of every real slice by relative position in the head, against synthetic brains
     heights = real_brain_heights(real_dir, patients, set(real_sl["key"]),
-                                 decided(cfg, "brain", "method", "brain-review"),
-                                 float(decided(cfg, "brain", "low_threshold", "brain-review")))
+                                 decided(cfg, "brain.method", "e0b_audit.py brain-review"),
+                                 float(decided(cfg, "brain.low_threshold", "e0b_audit.py brain-review")))
     by_height = brain_by_height(heights)
     syn_brain = read_table(syn_dir / "brain.csv").merge(main_sl[["sample_id"]], on="sample_id")
     syn_brain_px = syn_brain.loc[~syn_brain["mri_failed"].astype(bool), "brain_px"]

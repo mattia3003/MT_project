@@ -13,6 +13,7 @@ import sys
 from datetime import datetime
 from importlib import metadata
 from pathlib import Path
+from typing import Any
 
 import yaml
 
@@ -47,7 +48,7 @@ def _lookup(cfg: dict, section: str, default_key: str, name: str | None) -> tupl
     return name, entries[name]
 
 
-def value(cfg: dict, key: str):
+def value(cfg: dict, key: str) -> Any:
     """A config value by dotted key, e.g. value(cfg, "lesions.min_lesion_area"); None if absent."""
     v = cfg
     for part in key.split("."):

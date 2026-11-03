@@ -102,7 +102,7 @@ as from its script, e.g. `run_qc(load_config(), overwrite=True)`.
 | `qc` | quality classes of synthetic masks |
 | `plotting` | shared figure helpers and colours |
 | `checks` | the E0 consistency checks |
-| `stages` (planned, E1–E3 step 1) | shared helpers for stage packages |
+| `stages` | shared helpers for stage packages: command-line options, decisions, overwrite guard |
 | `wholemask`, `lesionmatch`, `calibration` (planned) | the E1 and E2 detectors and E3 calibration |
 
 Functions, imports, "used by" and tests: `docs/module-reference.md`.

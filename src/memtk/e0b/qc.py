@@ -12,11 +12,12 @@ import numpy as np
 import pandas as pd
 
 from memtk import config
-from memtk.e0b.common import Slices, decided, pick, refuse_overwrite, require
+from memtk.e0b.common import Slices
 from memtk.io import read_table
 from memtk.lesions import attach_or_drop
 from memtk.plotting import lesion_sheet
 from memtk.qc import MASK_CLASSES, QC_CLASSES, edge_lesions, mask_class, qc_class
+from memtk.stages import decided, pick, refuse_overwrite, require
 
 
 # --- stages -----------------------------------------------------------------------------------
@@ -26,8 +27,8 @@ def run_qc_review(cfg: dict, pool: str | None = None, overwrite: bool = False) -
     specks, exact counts, a sheet per stratum, and clean masks with a lesion outside the brain.
     Synthetic masks only (no detector has touched S yet). Needs the `lesions` stage. Writes
     `results/<pool>/e0b/qc_review/`."""
-    min_area = int(decided(cfg, "lesions", "min_lesion_area", "lesions-review"))
-    gap = int(decided(cfg, "lesions", "attach_gap", "lesions-review"))
+    min_area = int(decided(cfg, "lesions.min_lesion_area", "e0b_audit.py lesions-review"))
+    gap = int(decided(cfg, "lesions.attach_gap", "e0b_audit.py lesions-review"))
     edge_frac = float(cfg["qc"]["edge_outside_frac"])
     pool_name, pool_cfg = config.synthetic_pool(cfg, pool)
     syn_dir = config.output_dir(cfg, pool_name)
@@ -109,9 +110,9 @@ def run_qc(cfg: dict, dataset: str | None = None, pool: str | None = None, overw
     the mask alone), the failed-MRI flag, the combined class, and the edge and small-lesion
     flags (`<pool>/qc.csv`); a summary, the old-QC cross-table, the edge check on the real sets
     and an example sheet in `results/<pool>/e0b/qc/`. Needs the `lesions` stage."""
-    min_area = int(decided(cfg, "lesions", "min_lesion_area", "lesions-review"))
-    gap = int(decided(cfg, "lesions", "attach_gap", "lesions-review"))
-    max_specks = int(decided(cfg, "qc", "max_isolated_specks", "qc-review"))
+    min_area = int(decided(cfg, "lesions.min_lesion_area", "e0b_audit.py lesions-review"))
+    gap = int(decided(cfg, "lesions.attach_gap", "e0b_audit.py lesions-review"))
+    max_specks = int(decided(cfg, "qc.max_isolated_specks", "e0b_audit.py qc-review"))
     edge_frac, small_px = float(cfg["qc"]["edge_outside_frac"]), int(cfg["qc"]["small_lesion_px"])
     name, _ = config.real_dataset(cfg, dataset)
     pool_name, pool_cfg = config.synthetic_pool(cfg, pool)

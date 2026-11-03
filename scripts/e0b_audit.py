@@ -56,21 +56,7 @@ import argparse
 
 from memtk import config
 from memtk.e0b import brain, check, filters, lesions, qc, stats
-
-
-def add_stage(stages, name: str, help: str, run, dataset: bool = True, overwrite: bool = True):
-    """A stage subcommand with the options every stage shares: --config, --dataset (real
-    dataset), --pool (synthetic pool) and --overwrite. Returns its parser for extra options;
-    each option reaches the stage function as the keyword of the same name."""
-    p = stages.add_parser(name, help=help)
-    config.add_config_arg(p)
-    if dataset:
-        p.add_argument("--dataset", help="real dataset name in the config (default: default_real_dataset)")
-    p.add_argument("--pool", help="synthetic pool name in the config (default: default_synthetic_pool)")
-    if overwrite:
-        p.add_argument("--overwrite", action="store_true", help="regenerate existing output")
-    p.set_defaults(run=run)
-    return p
+from memtk.stages import add_stage
 
 
 def main() -> None:

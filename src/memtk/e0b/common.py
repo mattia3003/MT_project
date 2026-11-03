@@ -1,5 +1,6 @@
-"""Helpers shared by the E0b stages: loading real volumes, reading decisions, the overwrite
-guard, random picks for example figures, and access to any slice of a dataset or pool."""
+"""Helpers shared by the E0b stages: loading real volumes, brain boxes, and access to any slice
+of a dataset or pool. Helpers every stage package uses (decisions, overwrite and input guards,
+random picks) are in `memtk.stages`."""
 
 from __future__ import annotations
 
@@ -21,35 +22,6 @@ def load_real(real_dir: Path, pid: str) -> tuple[np.ndarray, np.ndarray]:
     vol_dir = real_dir / "volumes" / pid
     return (np.asanyarray(load_image(vol_dir / "bravo.nii.gz").dataobj),
             np.asanyarray(load_image(vol_dir / "seg.nii.gz").dataobj))
-
-
-def decided(cfg: dict, section: str, key: str, review_stage: str):
-    """A decision value from the config; stops with instructions while it is still null."""
-    value = cfg[section][key]
-    if value is None:
-        raise SystemExit(f"{section}.{key} is not set in {cfg['_config_path']}. Run "
-                         f"'e0b_audit.py {review_stage}', view its evidence and set the value first.")
-    return value
-
-
-def refuse_overwrite(paths, overwrite: bool) -> None:
-    """Stop if any of the stage's outputs already exists, unless overwriting was asked for."""
-    existing = [p for p in paths if Path(p).exists()]
-    if existing and not overwrite:
-        raise SystemExit(f"{existing[0]} already exists; pass --overwrite to regenerate.")
-
-
-def require(path: Path, stage: str) -> None:
-    """Stop if an input made by an earlier stage is missing."""
-    if not path.exists():
-        raise SystemExit(f"{path} not found; run the '{stage}' stage first.")
-
-
-def pick(rng: np.random.Generator, df: pd.DataFrame, n: int) -> pd.DataFrame:
-    """Up to n random rows of a table, in their original order (for example figures)."""
-    if not len(df):
-        return df
-    return df.iloc[np.sort(rng.choice(len(df), size=min(n, len(df)), replace=False))]
 
 
 def boxes_of(brain_csv: pd.DataFrame, key_col: str) -> dict[str, tuple[int, int, int, int] | None]:

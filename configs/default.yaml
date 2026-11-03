@@ -66,6 +66,36 @@ filters:
                              # slice); small_lesion fails for 10.7% of the masks as saved, inside_brain is not
                              # shown with a meaningful brain definition
 
+# --- E1-E3: detectors and calibration (docs/e1-e3-plan.md) ------------------------------------
+# Fixed values come from the experiment plan; decisions are null until set after their review
+# stage (`e3_calibrate.py`). E4 and E5 read the frozen copy written by `e3_calibrate.py freeze`.
+
+detectors:
+  whole_mask:                 # E1
+    top_k_dice: 20            # candidates per query: the best by plain Dice ...
+    top_k_centroid: 20        # ... plus the nearest by the centroid of the largest lesion
+    max_shift_px: 3           # shift search of +-3 px in rows and columns (49 positions)
+  lesion:                     # E2
+    # Decision F (evidence: e0b_audit.py stats, centroid density)
+    position_frame: pixel     # decided 2026-11-03: pixel coordinates; stage 1 copies keep the training
+                              # mask's pixel positions, synthetic brains are smaller (median 3,009 vs 7,765 px)
+    sigma: 0.05               # position factor exp(-d^2 / 2 sigma^2); fraction of the 128-px field = 6.4 px
+    prefilter: 0.2            # lesion pairs farther apart are skipped: 25.6 px, position factor exp(-8)
+    candidate_min_s: 0.1      # C is computed only for training slices sharing a lesion pair with s >= this
+
+calibration:                  # E3
+  percentile: 95              # thresholds at this percentile of H-cal
+  bootstrap_draws: 2000       # bootstrap by patient for the interval of every threshold
+  # Decision G (evidence: `e3_calibrate.py bound-review`)
+  provisional_tau_L: null     # lesion-score threshold used to find the bound
+  chance_rate_max: null       # highest chance-match rate (0.05 or 0.10) at which a lesion size counts
+  informative_bound_px: null  # informative-lesion bound: only lesions of at least this area enter E2
+  # Decision H (evidence: `e3_calibrate.py calibrate`): per detector, "stratified" (separate
+  # thresholds for single- and multi-lesion slices) or "pooled"
+  strata:
+    whole_mask: null
+    lesion: null
+
 real_datasets:
   stanford_brainmets:
     root: data/StanfordSkullStripped_1mm

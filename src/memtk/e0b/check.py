@@ -13,9 +13,10 @@ import sys
 import numpy as np
 
 from memtk import checks, config
-from memtk.e0b.common import decided, load_real
+from memtk.e0b.common import load_real
 from memtk.io import LabelStack, MaskStack, read_table
 from memtk.lesions import brain_mask
+from memtk.stages import decided
 from memtk.synthetic import load_sample
 
 
@@ -38,9 +39,9 @@ def run_check(cfg: dict, dataset: str | None = None, pool: str | None = None,
     made with them (run logs), lesion tables against label maps, label maps against the masks as
     saved, caches against the source files (`n_synthetic` random samples), QC classes, the unit
     tests. Writes `results/<dataset>/e0b/check_report_<pool>.txt`; exit code 1 on any failure."""
-    min_area = int(decided(cfg, "lesions", "min_lesion_area", "lesions-review"))
-    gap = int(decided(cfg, "lesions", "attach_gap", "lesions-review"))
-    max_specks = int(decided(cfg, "qc", "max_isolated_specks", "qc-review"))
+    min_area = int(decided(cfg, "lesions.min_lesion_area", "e0b_audit.py lesions-review"))
+    gap = int(decided(cfg, "lesions.attach_gap", "e0b_audit.py lesions-review"))
+    max_specks = int(decided(cfg, "qc.max_isolated_specks", "e0b_audit.py qc-review"))
     name, _ = config.real_dataset(cfg, dataset)
     pool_name, pool_cfg = config.synthetic_pool(cfg, pool)
     real_dir, syn_dir = config.output_dir(cfg, name), config.output_dir(cfg, pool_name)
@@ -82,7 +83,7 @@ def run_check(cfg: dict, dataset: str | None = None, pool: str | None = None,
     checks.check_lesion_tables(report, pool_name, syn_les, syn_sl, syn_labels)
     checks.check_labels_vs_masks(report, pool_name, raw, syn_labels, syn_sl["key"], min_area, gap)
     files = dict(zip(index["sample_id"], index["filename"]))
-    method, low = decided(cfg, "brain", "method", "brain-review"), float(cfg["brain"]["low_threshold"])
+    method, low = decided(cfg, "brain.method", "e0b_audit.py brain-review"), float(cfg["brain"]["low_threshold"])
     pool_dir, differs = config.resolve_path(pool_cfg["dir"]), []
     picks = rng.choice(samples.to_numpy(), size=min(n_synthetic, len(samples)), replace=False)
     for sid in picks:
