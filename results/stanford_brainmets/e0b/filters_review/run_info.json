@@ -1,9 +1,10 @@
 {
-  "timestamp": "2026-11-03T10:50:10",
-  "script": "C:\\Master thesis\\MT_project\\scripts\\e0b_audit.py",
+  "timestamp": "2026-11-03T13:32:19",
+  "script": "C:\\Master thesis\\MT_project\\src\\memtk\\e0b\\filters.py",
   "argv": [
     "scripts\\e0b_audit.py",
-    "filters-review"
+    "filters-review",
+    "--overwrite"
   ],
   "seed": 2026,
   "python": "3.11.9",
@@ -50,7 +51,9 @@
     },
     "filters": {
       "max_mask_px": 2000,
-      "real_sets": null
+      "real_sets": [
+        "max_mask_px"
+      ]
     },
     "real_datasets": {
       "stanford_brainmets": {

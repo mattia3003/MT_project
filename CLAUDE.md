@@ -11,7 +11,9 @@ Reference docs (read the relevant one before starting work):
   This is the main reference when implementing an experiment.
 - `docs/literature-timeline.md`: literature timeline and notes.
 - `docs/report-notes.md`: running log of decisions, findings, limitations and open questions,
-  organized by report section. Raw material for the written report.
+  organized by report section. Raw material for the written report; only what the report may use.
+- `docs/process-log.md`: dated log of how the work was done (stages built, re-runs and
+  verifications, refactors, bugs fixed, replaced numbers, things tried and removed).
 - `docs/architecture.md`: pipeline flow chart, module diagram (Mermaid) and data dictionary
   (every file the pipeline reads or writes, with its columns).
 - `docs/e0b-plan.md`: E0b implementation plan, stage status and decisions made so far.
@@ -243,8 +245,13 @@ Not aimed at publication for now. Original weights (Branch A) only as a fallback
 - The user stages and commits all git changes manually; work in small steps, each one
   reviewed before the next.
 - At the end of each step, and whenever a decision, finding, limitation or open question comes
-  up in discussion, suggest additions to `docs/report-notes.md` (dated, with their source) for
-  the user to review. Never record a number without saying where it comes from.
+  up in discussion, suggest additions (dated, with their source) for the user to review, to the
+  right file: `docs/report-notes.md` for what the report may use (decisions with evidence and
+  rejected alternatives, findings, limitations, open questions, figure candidates);
+  `docs/process-log.md` for how the work was done (re-runs, verifications, refactors, bugs
+  fixed, replaced numbers with the reason, things tried and removed). A step can need both,
+  e.g. a short claim in report-notes pointing to the details in the log. Never record a number
+  without saying where it comes from.
 - When a stage or module is added or changed, update `docs/architecture.md` in the same change
   (flow chart, module diagram from the actual imports, data dictionary), together with the
   status table and the copy-paste "Commands" section in `scripts/README.md` (every stage and

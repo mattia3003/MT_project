@@ -3,12 +3,12 @@ E0b check: dataset 'stanford_brainmets', pool 'amibekk_v1', seed 2026
 [PASS] all E0b decisions are set in the config
 [PASS] 'brain (stanford_brainmets)' outputs made with the current config values: brain.method, brain.low_threshold, brain.min_tissue_px
 [PASS] 'lesions (stanford_brainmets)' outputs made with the current config values: lesions.connectivity, lesions.min_lesion_area, lesions.attach_gap, qc.small_lesion_px
-[PASS] 'lesions (stanford_brainmets)' ran after 'brain (stanford_brainmets)': 2026-11-02T22:03:16 vs 2026-11-02T18:25:50
+[PASS] 'lesions (stanford_brainmets)' ran after 'brain (stanford_brainmets)': 2026-11-03T13:30:04 vs 2026-11-03T13:26:40
 [PASS] 'brain (amibekk_v1)' outputs made with the current config values: brain.method, brain.low_threshold, brain.min_tissue_px
 [PASS] 'lesions (amibekk_v1)' outputs made with the current config values: lesions.connectivity, lesions.min_lesion_area, lesions.attach_gap, qc.small_lesion_px
-[PASS] 'lesions (amibekk_v1)' ran after 'brain (amibekk_v1)': 2026-11-02T22:03:16 vs 2026-11-02T18:25:50
+[PASS] 'lesions (amibekk_v1)' ran after 'brain (amibekk_v1)': 2026-11-03T13:30:04 vs 2026-11-03T13:26:40
 [PASS] 'qc (amibekk_v1)' outputs made with the current config values: qc.max_isolated_specks, qc.edge_outside_frac
-[PASS] 'qc (amibekk_v1)' ran after 'lesions (amibekk_v1)': 2026-11-02T22:48:52 vs 2026-11-02T22:03:16
+[PASS] 'qc (amibekk_v1)' ran after 'lesions (amibekk_v1)': 2026-11-03T13:30:45 vs 2026-11-03T13:30:04
 [PASS] stanford_brainmets brain_masks.npz: keys == expected slices/samples: 5909 keys
 [PASS] stanford_brainmets: brain.csv rows == lesion slices
 [PASS] stanford_brainmets: lesion IDs unique
@@ -42,6 +42,6 @@ E0b check: dataset 'stanford_brainmets', pool 'amibekk_v1', seed 2026
 [PASS] qc: every class is known
 [PASS] qc: classes reproduced from lesion and speck counts (cut-off 9)
 [PASS] qc: class counts add up to the pool: mri_failed 152, no_lesion 393, noisy 1241, minor 3701, clean 32137
-[PASS] unit tests (pytest) pass: 60 passed in 11.75s
+[PASS] unit tests (pytest) pass: 60 passed in 11.79s
 
 43 passed, 0 failed

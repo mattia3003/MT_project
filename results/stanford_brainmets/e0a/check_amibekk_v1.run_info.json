@@ -1,8 +1,8 @@
 {
-  "timestamp": "2026-11-01T17:25:23",
+  "timestamp": "2026-11-03T13:22:25",
   "script": "C:\\Master thesis\\MT_project\\scripts\\e0a_prepare_data.py",
   "argv": [
-    "scripts/e0a_prepare_data.py",
+    "scripts\\e0a_prepare_data.py",
     "check"
   ],
   "seed": 2026,
@@ -32,6 +32,27 @@
       "interpolation": "area",
       "mask_threshold": 0.01,
       "slice_axis": 2
+    },
+    "brain": {
+      "low_threshold": 0.02,
+      "method": "low_threshold_all",
+      "min_tissue_px": 20
+    },
+    "lesions": {
+      "connectivity": 8,
+      "min_lesion_area": 4,
+      "attach_gap": 2
+    },
+    "qc": {
+      "max_isolated_specks": 9,
+      "edge_outside_frac": 0.5,
+      "small_lesion_px": 40
+    },
+    "filters": {
+      "max_mask_px": 2000,
+      "real_sets": [
+        "max_mask_px"
+      ]
     },
     "real_datasets": {
       "stanford_brainmets": {

@@ -19,23 +19,33 @@ stage, and what has been decided. Update the status table when a stage is done.
 | 7b | `filters-review` | review → decision E (filters for H-cal/H-eval) | ✅ done; **decision E set** (2026-11-03): `[max_mask_px]` |
 | 8 | `check` | consistency checks | ✅ implemented (2026-11-03) |
 | 8b | Code restructuring | readability | ✅ 2026-11-03: stages moved to `src/memtk/e0b/`, `audit.py` dissolved, conventions in CLAUDE.md; verified by step 9 |
-| 9 | Full re-run of E0a + E0b from scratch | end-to-end check | ⏳ next (also verifies 8b) |
+| 9 | Full re-run of E0a + E0b from scratch | end-to-end check | ✅ 2026-11-03: all 13 stages exit 0; outputs identical (below) |
 
-**Next: start here.** Step 9, the full re-run of E0a and E0b from scratch (every stage in run
-order with `--overwrite`, commands in `scripts/README.md`), then `git diff results/`: tables
-must be identical; figures may differ only where their layout or example order changed
-(titles, label outlines, plurals, `pick` order in brain-review). It also verifies the code
-restructuring (8b). After that, close E0 (requirements lock, docs) and plan E1/E2. The
-plan for both was approved on 2026-11-02, including the four points confirmed in "Stage 7
-details" below. Everything up to `qc-review` is committed; the `qc` stage (`qc.py`, its tests,
-the stage, docs and report notes) was finished on 2026-11-02 and awaits the user's commit.
+**Step 9 result (2026-11-03).** Every E0a and E0b stage was re-run in order with `--overwrite`
+(about 20 min in total). The E0a check passes 32/32 and the E0b check 43/43, with pytest at 60 passed.
+- `processed_data/model_space/`: every table and cache is byte-identical to the run before the
+  restructuring (15 CSV/NPZ files), and so are all 624 volume files (156 patients ×
+  `bravo`, `seg_soft`, `seg`, `labels`).
+- `results/` (`git diff`): no table changed. Run logs changed (time, full config, and `script`
+  now names the stage module, e.g. `src\memtk\e0b\stats.py`; the command is in `argv`). The E0b
+  check report changed only in timestamps. Four figures changed, with the same examples in
+  the same order: the E0a check grid (layout from `plotting.save`), the QC class sheet and
+  both lesion overview sheets (tile subtitles in the singular, outlines on the lesion numbers).
+- This also verifies the code restructuring (8b). Full record in `docs/process-log.md`
+  (2026-11-03). All figures checked by eye by the user: no issues.
+- Docs split the same day: process entries moved from `docs/report-notes.md` into the new
+  `docs/process-log.md`.
+
+**Next: start here.** Close E0 (requirements lock, docs), then plan E1/E2. The plan for both
+was approved on 2026-11-02, including the four points confirmed in "Stage 7 details" below.
 
 **Working rules:**
 - Small reviewed steps, one stage at a time.
 - The user does all git operations.
 - Decision values are set only after the user agrees to that specific value.
 - After each stage, update `docs/architecture.md` and `scripts/README.md`, and suggest
-  `docs/report-notes.md` entries.
+  entries for `docs/report-notes.md` (what the report may use) and `docs/process-log.md` (how
+  the work was done).
 
 ## Context
 
@@ -360,10 +370,8 @@ lesion is under 40 px, (3) every lesion pixel lies inside the generated brain.
   have no speck noise, so 3D lesion linking and slice span for H1 should probably use all
   components of the real mask as saved, not the cleaned labels; otherwise every lesion loses
   its thin end slices.
-- **Full re-run of E0a + E0b from scratch** once both are done and accepted: regenerate every
-  output, as an end-to-end check, and to give all figures the fixed titles (2026-11-02:
-  `plotting.save` wraps titles and reserves room for them; existing PNGs still have the old
-  layout).
+- ~~**Full re-run of E0a + E0b from scratch**~~ done 2026-11-03 (step 9): outputs identical,
+  all figures now have the fixed titles.
 - **Per-pool decisions, when a new synthetic pool arrives** (e.g. from the master-thesis models).
   The `brain:` decisions in the config are global, including `brain.low_threshold` (0.02, which
   assumes skull-stripped images with a near-zero background). For a new pool, re-run

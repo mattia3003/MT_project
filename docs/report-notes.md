@@ -2,11 +2,15 @@
 
 A running log of decisions, findings, limitations and open questions, gathered while the
 experiments run. It is raw material for the written report, not report text. Sections follow
-the report structure.
+the report structure. Only what the report may use goes here: decisions with their evidence and
+rejected alternatives, findings, limitations, open questions, figure candidates. How the work
+was done (re-runs, verifications, refactors, bugs fixed, replaced numbers, preliminary
+observations later measured in full) goes in `docs/process-log.md`.
 
 Entry format: **claim or number**, then why or how, then *source* and date. Sources are files
 in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the data
-(`processed_data/` is not in git). Mark an entry *superseded* rather than deleting it.
+(`processed_data/` is not in git). When numbers are replaced, keep the current ones here and
+move the old ones, with the reason, to the process log.
 
 ---
 
@@ -66,15 +70,12 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
 - **Old quality-control list: 2,243 masks** (1,583 "excessive noise fragments", 660 "pixels
   outside brain", the latter triggered by a single pixel). All entries match a file.
   *Source: `docs/corrupted_synthetic_masks_10_0.txt`, check report, 2026-11-01.*
-- *Preliminary, verify in E0b:* in a sample of 1,600 masks, about 11% have no component under
-  40 px, so the sampling script's "<40 px" filter did not hold for the whole pool.
-  *Source: inspection sample, 2026-11-01.*
 
 ## 2. Methods decisions
 
 - **All comparisons happen in model space, converted from the 3D volumes.** Why: ScaleIntensity
-  uses each volume's min and max, so the model space cannot be derived from single slices. The
-  earlier per-slice native-resolution files were therefore not reusable. 2026-11-01.
+  uses each volume's min and max, so the model space cannot be derived from single slices.
+  2026-11-01.
 - **Brain mask: fixed threshold 0.02, keep every region ≥ 30 px, fill holes** (`low_threshold_all`;
   decision A, set in the config 2026-11-01). Six candidates were compared on all 6,101 T lesions
   (≥ 4 px) and 2,000 random synthetic samples. Share of lesions more than half outside the
@@ -113,11 +114,7 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
   bright background pixels would in any case fall below the 30 px region minimum, which the
   small area changes confirm. *Source: `results/stanford_brainmets/e0b/brain_review/review.txt`
   and `threshold_sensitivity_amibekk_v1.csv` (all 3,823 T lesion slices, 2,000 random synthetic
-  samples), re-run 2026-11-03.*
-  *Superseded numbers (2026-11-02):* 0.006 (T) / 0.021 (S) near-worst. They came from measuring
-  "3 px from the brain" in the four straight directions only; the measure now grows diagonally
-  too, like every other distance in the project (gaps, specks). The area changes and the
-  conclusion are unchanged.
+  samples), re-run 2026-11-03.* Earlier numbers, measured differently: process log, 2026-11-03.
 - **A failed synthetic MRI is judged by its brain tissue area, not its maximum intensity**
   (`brain.min_tissue_px` = 20 px, decision A, set 2026-11-01: below 20 px every viewed sample has
   no brain at all, and the smallest real T lesion slice has 31 px). Tissue = pixels of the brain
@@ -141,9 +138,6 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
       lesion: T has Mets_314/z137 with 31 px of tissue.
     - It would add two pool-specific thresholds (margin, speck size), which a new pool would
       have to retune.
-  - *Also found:* measured from the raw mask, the specks of noisy masks, grown by the margin,
-    covered normal brains; ignoring components < 4 px fixed that.
-  - The code was removed after the decision.
 
   *Source: manual inspection and a temporary `brain-review` extension (since removed), its counts
   and sheet `near_blank_away_amibekk_v1.png`; `results/amibekk_v1/e0b/brain/outlines.png`,
@@ -165,8 +159,9 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
   from H-cal only; see the limitation in section 4. 2026-11-01.
 - **Reproducibility setup:** one config file (`configs/default.yaml`) and one global seed (2026).
   Every stage writes a run log (seed, full config, package versions). Stages refuse to overwrite
-  existing outputs, and the split is fixed for the whole project. The earlier segmentation work
-  is preserved under the git tag `segmentation-final`. 2026-11-01.
+  existing outputs, and the split is fixed for the whole project. 2026-11-01.
+  **The pipeline is deterministic:** re-running E0a and E0b from scratch gives byte-identical
+  tables, caches and model-space volumes. *Source: full re-run, process log 2026-11-03.*
 - **Minimum lesion area 4 px** (`lesions.min_lesion_area`, decision B, set 2026-11-02). Smaller
   8-connected components are specks.
   - *Rule:* the largest m with at most 1% of T components smaller than m: 61 of 6,162 (0.99%)
@@ -314,25 +309,6 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
 
 ## 3. Findings
 
-*(Experiment results go here from E0b onwards.)*
-
-- *Observation, to quantify in E0b:* synthetic brains often look smaller or off-centre compared
-  with real lesion slices. Positions are compared in brain-relative coordinates, so this matters
-  mainly for the distribution comparison. *Source: check grid, 2026-11-01.*
-- *Observation:* some synthetic masks are dominated by scattered specks across the background
-  (e.g. sample `2750`). *Source: check grid, 2026-11-01.*
-- *Preliminary, to quantify in E0b `stats`:* **synthetic lesions are spatially concentrated.**
-  Lesion centroids (lesions ≥4 px) spread less than in T: row SD 14.9 vs 24.1 px, column SD 18.6
-  vs 25.3 px, around the same centre. Synthetic brain boxes are smaller (median 63×66 vs
-  103×95 px; Otsu brain area median ~3,000 vs ~7,200 px). Only 3.8% of synthetic lesions lie more
-  than half outside the synthetic brain (T: 1.4%). So stage 2 draws smaller brains around
-  concentrated lesions, rather than too-small brains around normally spread ones. One possible
-  reading is that synthetic samples resemble slices from near the top of the head. The centroid
-  spread uses the masks only, so it does not depend on the brain-mask method.
-  *Source: read-only sample, all T lesion slices vs 3,000 synthetic samples (old-QC and
-  near-blank excluded), 2026-11-01.* With the proposed brain mask (`low_threshold_all`), 1.6% of
-  synthetic lesions lie more than half outside the brain (T: 0.02%). *Source: brain-review
-  `review.txt`, 2000 random samples, 2026-11-01.*
 - **Stage 2 paints a bright dot at mask specks, even far outside the brain.** Of 2,000 random
   synthetic samples, 120 have background pixels above 0.02 (99.9th percentile of the area
   outside the brain). 93% of those bright pixels (13,070 of 14,037) lie on or next to a mask
@@ -407,17 +383,22 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
   | | T | H-cal | H-eval | S main |
   | --- | --- | --- | --- | --- |
   | Lesion area, median (IQR), px | 19 (11–45) | 23 (13–45) | 17 (11–28) | 13 (8–26) |
+  | Slices with a lesion under 40 px | 74% | 75% | 76% | 87% |
   | Single-lesion slices | 68% | 69% | 64% | 53% |
   | Two-lesion slices | 18% | 18% | 17% | 34% |
   | Most lesions in one slice | 13 | 7 | 13 | 7 |
 
-  The synthetic area distribution lies below every real one over the whole range, and the
-  largest synthetic lesions stop near 330 px (T: about 700). Lesions per slice are similar on
-  average (1.63 against 1.60), but synthetic masks have two lesions about twice as often and
-  four or more rarely. So S does not have fewer multi-lesion slices than T (a concern raised in
-  the experiment plan); it has more two-lesion slices and a shorter tail. *Source:
+  The synthetic area distribution lies below every real one over the whole range (5th
+  percentile 4 px in all of S against 6 px in T), and the largest synthetic lesions stop near
+  330 px (T: about 700). The sampling script's "at least one lesion under 40 px" filter shows in
+  the pool, but 13.5% of S main (14.6% of all of S) has no such lesion; see decision E in
+  section 2. Lesions per slice are similar on average (1.63 against 1.60), but synthetic masks
+  have two lesions about twice as often and four or more rarely. So S does not have fewer
+  multi-lesion slices than T (a concern raised in the experiment plan); it has more two-lesion
+  slices and a shorter tail. *Source:
   `results/stanford_brainmets/e0b/stats/description_amibekk_v1.csv`, `lesion_area_amibekk_v1.png`,
-  `lesions_per_slice_amibekk_v1.png`, 2026-11-03.*
+  `lesions_per_slice_amibekk_v1.png`, 2026-11-03; 5th percentiles from
+  `results/<dataset|pool>/e0b/lesions/summary.txt` (`area_p5`), 2026-11-02.*
 - **Synthetic lesion positions: compact in pixels, real-like relative to the brain box.**
   - *In pixels:* synthetic lesion centroids fill a compact central rectangle (roughly rows
     40–85, columns 55–105) with fairly sharp edges; real centroids spread over the whole round
@@ -431,20 +412,16 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
     2's brain drawing, not stage 1's placement. Pixel-exact copies of real lesions far from the
     centre are therefore unlikely to exist in S.
 
-  Confirms and quantifies the earlier read-only sample (section 3, 2026-11-01) on the full
-  pool. *Source: `results/stanford_brainmets/e0b/stats/centroid_density_amibekk_v1.png`,
+  Confirms on the full pool an earlier read-only sample of 3,000 masks (process log,
+  2026-11-01). *Source: `results/stanford_brainmets/e0b/stats/centroid_density_amibekk_v1.png`,
   `description_amibekk_v1.csv`, 2026-11-03.*
-- **Synthetic lesions are smaller than real ones.** Median lesion area 13 px in S against 19 px
-  in T (H-cal 23, H-eval 17); 5th percentile 4 px against 6 px. 85% of synthetic masks have a
-  lesion under 40 px (T 74%, H-cal 75%, H-eval 76%), so the sampling script's "at least one lesion
-  under 40 px" filter shows in the pool, but 15% of the pool has no such lesion. Lesions per
-  slice are similar (S 1.64, T 1.60). *Source: `results/stanford_brainmets/e0b/lesions/summary.txt`
-  and `results/amibekk_v1/e0b/lesions/summary.txt` (min lesion area 4 px, attach gap 2), 2026-11-02.*
 - **2.0% of synthetic lesions lie more than half outside the brain** (1,213 of 61,635), against
   1 of 6,101 in T (H-cal 0, H-eval 1). Part of this comes from the 152 failed MRIs without any
   brain, where every lesion counts as outside; the `qc` edge check separates the two. 82% of the
-  isolated specks lie outside the brain (T: none). *Source: as above, 2026-11-02.* Broken down
-  by QC group in the next entry.
+  isolated specks lie outside the brain (T: none). *Source:
+  `results/amibekk_v1/e0b/lesions/summary.txt` and `results/stanford_brainmets/e0b/lesions/summary.txt`
+  (min lesion area 4 px, attach gap 2), 2026-11-02.* Broken down by QC class in "Most synthetic
+  lesions outside the brain sit in clean masks" below.
 - **The old QC list (2,243 masks) evidently cut at about 10 fragments.** It excluded every mask
   with 10 or more isolated specks, and fewer below that (79% at 6–9, 49% at 4–5, 29% at 3, 5% at
   1, 0.8% at 0). That explains its count, and it agrees with the break used for decision D.
@@ -465,27 +442,31 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
   *Source: `results/amibekk_v1/e0b/qc/old_qc_crosstab_amibekk_v1.csv`, `synthetic_index.csv`
   (`legacy_reason`), 2026-11-02.*
 - **Most synthetic lesions outside the brain sit in clean masks, not noisy ones.** Lesions more
-  than half outside the synthetic brain, by provisional QC group (cut at 3 isolated specks;
-  decision D pending):
+  than half outside the synthetic brain, by QC class (`qc_class`: failed MRI first, cut at 9
+  isolated specks):
 
-  | Group | Masks | Lesions | Mostly outside | Share | Masks affected |
+  | QC class | Masks | Lesions | Mostly outside | Share | Masks affected |
   | --- | --- | --- | --- | --- | --- |
   | Clean (0 specks) | 32,137 | 51,816 | 838 | 1.6% | 829 |
-  | Minor (1–3) | 3,423 | 5,410 | 71 | 1.3% | 70 |
-  | Noisy (> 3) | 1,912 | 4,325 | 220 | 5.1% | 172 |
+  | Minor (1–9) | 3,701 | 6,757 | 93 | 1.4% | 89 |
+  | Noisy (> 9) | 1,241 | 2,978 | 198 | 6.6% | 153 |
+  | No lesion | 393 | 0 | – | – | – |
   | Failed MRI | 152 | 84 | 84 | 100% | 82 |
 
-  They are small (median 5–7 px in every group). Likely cause: stage 1 places lesions without
+  They are small (median 5–7 px in every class). Likely cause: stage 1 places lesions without
   seeing a brain, and stage 2 draws smaller brains than real ones (median 3,009 vs 7,765 px), so
   a lesion where a real cortex would be can fall outside the synthetic brain.
-  - *Recommendation for `qc`:* flag rather than exclude. A genuine copy of a training lesion near
-    a real cortex lands at the same pixel position, which can lie outside a smaller synthetic
-    brain; excluding edge-flagged masks could remove real copies.
+  - *Hence edge flags only flag* (decided at the `qc` stage, see "QC classes" in section 2): a
+    genuine copy of a training lesion near a real cortex lands at the same pixel position, which
+    can lie outside a smaller synthetic brain; excluding edge-flagged masks could remove real
+    copies.
   - Most are below the expected informative-lesion bound, so they barely affect lesion-level
     matching.
 
-  *Source: `lesions.csv`, `slices.csv` and `brain.csv` of `amibekk_v1` (min lesion area 4 px,
-  attach gap 2), read-only breakdown, 2026-11-02.*
+  *Source: read-only breakdown of `lesions.csv` (`frac_outside_brain` > 0.5) and `qc.csv` of
+  `amibekk_v1`, 2026-11-03; "masks affected" equals the edge-flagged column of
+  `results/amibekk_v1/e0b/qc/qc_classes_amibekk_v1.csv`. First computed with a provisional cut
+  at 3 specks (process log, 2026-11-03).*
 - **In noisy synthetic masks, some "lesions" are noise blobs.** The synthetic masks with the most
   lesions are all noisy masks (15–444 isolated specks), and several of their lesions of 4 px or
   more lie in the background outside the brain (e.g. `file_2593`: L6, L7, L9 of 5–7 px;
@@ -494,19 +475,24 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
   `results/amibekk_v1/e0b/lesions/overview.png` (row 3), views of `file_2593`, read-only check,
   2026-11-02.*
 - **Attached strays barely change lesions in clean masks; the distortion sits in noisy masks.**
-  At 4 px / gap 2, by provisional QC group (cut at 3 isolated specks; decision D pending):
+  At 4 px / gap 2, by mask class (`mask_class`, cut at 9 isolated specks; failed MRIs keep their
+  mask class, masks without a lesion have no strays):
 
-  | Group | Masks | Lesions with any stray | Median growth, if any | Lesions grown > 25% | Stray px / lesion px |
-  | --- | --- | --- | --- | --- | --- |
-  | Clean (0 isolated) | 32,219 | 5.9% | +7.7% | 0.4% | 0.4% |
-  | Minor (1–3) | 3,038 | 36% | +9.1% | 4.8% | 3.2% |
-  | Noisy (> 3) | 1,904 | 78% | +16% | 23% | 9.3% |
+  | Mask class | Masks | Lesions | Lesions with any stray | Median growth, if any | Lesions grown > 25% | Stray px / lesion px |
+  | --- | --- | --- | --- | --- | --- | --- |
+  | Clean (0 isolated) | 32,219 | 51,900 | 5.9% | +7.7% | 0.4% | 0.4% |
+  | Minor (1–9) | 3,701 | 6,757 | 43% | +10% | 6.9% | 4.1% |
+  | Noisy (> 9) | 1,241 | 2,978 | 80% | +18% | 27% | 10.5% |
 
-  In clean masks a stray at gap 1–2 is most likely the lesion's own faint fringe, cut off by
-  the 0.01 threshold. Noisy masks, where the halo is partly noise, are excluded from the main
-  audit by QC; E5's drop-only re-run covers the rest. Example: sample `401` has 93 components,
-  2 lesions, 14 attached strays (lesions +29% and +73%) and 77 dropped specks. *Source:
-  read-only check on all 37,624 synthetic masks, 2026-11-02.*
+  Growth = stray px / lesion px without strays; the last column is stray px over lesion px
+  including strays. In clean masks a stray at gap 1–2 is most likely the lesion's own faint
+  fringe, cut off by the 0.01 threshold. Noisy masks, where the halo is partly noise, are
+  excluded from the main audit by QC; minor masks, kept in it, carry a moderate share (7% of
+  their lesions grown > 25%), which E5's drop-only re-run covers. Example: sample `401` has 93
+  components, 2 lesions, 14 attached strays (lesions +29% and +73%) and 77 dropped specks.
+  *Source: read-only breakdown of `lesions.csv` (`area`, `stray_px`) and `qc.csv` of
+  `amibekk_v1`, all 37,624 masks, 2026-11-03. First computed with a provisional cut at 3 specks
+  (process log, 2026-11-03).*
 - **Synthetic masks are dominated by 1–2 px specks.** 62% of all synthetic mask components are
   1 px and 5% are 2 px (T: 0.08% and 0.4%). They gather in a halo 1–2 px around lesions (17,101
   specks at gap 1–2) and are spread over the background (105,468 specks at gap ≥ 11). Fits the
@@ -542,7 +528,7 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
   From CLAUDE.md.
 - **How the synthetic pool was produced is only partly known.** The repo's sampling script makes
   15,000 attempts with three filters; the pool shows six naming schemes and partly violates the
-  <40 px filter (see section 1). E0b checks each filter on the data.
+  <40 px filter (see decision E in section 2). E0b checks each filter on the data.
   - *The repo is not the code that ran* (previous author, 2026-11-03): the code was written and
     run on a university cloud system, often in notebooks, and the GitHub repo was assembled at
     the end to store it. Choices and code that ran may be missing from it. Where the data and
@@ -609,16 +595,8 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
 - [x] **Does a failed synthetic MRI exclude its mask from the mask audit?** *Resolved
       2026-11-02 at the `qc` stage: no.* `qc.csv` keeps `mask_class` and `mri_failed` as separate
       columns; the main audit uses `mask_class` clean or minor, and `mri_failed` only excludes a
-      sample where the brain is used. See "QC classes" in section 2. Original question: decide
-      at the E0b `qc` stage. The mask comes from stage 1 whatever stage 2 does, so a blank or failed MRI does not
-      make its mask invalid for E1–E5, which use masks only. A failed MRI matters where the
-      brain is used: the edge check, brain-relative positions, and E8. Option: `mri_failed` is
-      a flag that excludes a sample from those analyses only, rather than a QC class that
-      removes the mask from S. The experiment plan does not say. The failed images come in at
-      least two kinds: a lesion with a thin rim of tissue painted around it, and a small faint
-      patch away from the lesion, each on an otherwise black image. *Source: `brain` stage
-      outline sheet `results/amibekk_v1/e0b/brain/outlines.png` (row 3) and a read-only check of
-      its 8 samples, 2026-11-02.*
+      sample where the brain is used. See "QC classes" in section 2; the question as first
+      recorded is in the process log (2026-11-02).
 - [ ] **Position frame for copy detection (E2), a deviation from the plan to decide when E2 is
       planned.** The plan measures lesion position relative to the brain box of the paired MRI.
       But stage 1 generates masks without seeing a brain, so a memorized mask reproduces its

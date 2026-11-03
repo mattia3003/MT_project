@@ -8,10 +8,11 @@ In VS Code, install the extension *Markdown Preview Mermaid Support* (`bierner.m
 and open the Markdown preview.
 
 **Keeping it current:** updating this file is part of finishing each experiment, together with
-the status table in `scripts/README.md` and the entries in `docs/report-notes.md`.
+the status table in `scripts/README.md` and the entries in `docs/report-notes.md` and
+`docs/process-log.md`.
 
-*Status: E0a and E0b implemented; E0b code restructured into `src/memtk/e0b/` (2026-11-03);
-the full re-run of E0 is next.*
+*Status: E0a and E0b implemented; E0b code restructured into `src/memtk/e0b/` and verified by
+a full re-run with identical outputs (2026-11-03).*
 
 ---
 
