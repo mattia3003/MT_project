@@ -53,9 +53,10 @@ import pandas as pd
 from tqdm import tqdm
 
 from memtk import audit, config, ids, qc
-from memtk.io import LabelStack, LabelStackWriter, MaskStack, MaskStackWriter, load_image, read_table, save_nifti
-from memtk.lesions import (LesionLabels, attach_or_drop, brain_box, brain_mask, fraction_outside, label_components,
-                           lesion_features, tissue_px)
+from memtk.io import (LabelStack, LabelStackWriter, MaskStack, MaskStackWriter, load_image, patient_files,
+                      read_table, save_nifti)
+from memtk.lesions import (LesionLabels, attach_or_drop, brain_box, brain_mask, count_components, fraction_outside,
+                           label_components, lesion_features, tissue_px)
 from memtk.synthetic import load_sample
 
 BOX_COLUMNS = ["box_r0", "box_r1", "box_c0", "box_c1"]
@@ -765,6 +766,63 @@ def run_qc(cfg: dict, args: argparse.Namespace) -> None:
 
 # Candidate informative-lesion bounds (px) for the bound-impact table; the bound itself is set in E3
 CANDIDATE_BOUNDS = (5, 8, 10, 12, 15, 20, 25, 30, 40)
+# Native lesion-size bins (native px) for the enlargement table
+NATIVE_SIZE_BINS = [0, 5, 10, 20, 50, 100, 200, 500, np.inf]
+
+
+def adjacency_pairs(slices: pd.DataFrame, labels: LabelStack) -> pd.DataFrame:
+    """Dice of every pair of consecutive lesion slices (z, z + 1) of a patient, on the cleaned
+    masks (labels > 0)."""
+    rows = []
+    for (set_name, pid), group in slices.groupby(["set", "patient_id"], sort=False):
+        zs = set(group["z"])
+        for z in sorted(zs):
+            if z + 1 in zs:
+                a, b = labels[ids.slice_key(str(pid), z)] > 0, labels[ids.slice_key(str(pid), z + 1)] > 0
+                rows.append({"set": set_name, "patient_id": pid, "z": z, "dice": audit.mask_dice(a, b)})
+    return pd.DataFrame(rows)
+
+
+def native_vs_model(slices: pd.DataFrame, patients: pd.DataFrame, dataset_cfg: dict, prep: dict) -> pd.DataFrame:
+    """Per real slice with exactly one component in both spaces: native area, the native area
+    scaled to the model grid (plain downscaling), the model-space area, their ratio and a native
+    size bin. A single speck counts too: enlargement matters most for tiny components."""
+    h, w = prep["spatial_size"]
+    orig_split = patients.set_index("patient_id")["orig_split"]
+    single = slices[slices["n_components"] == 1]
+    rows = []
+    for pid, group in tqdm(single.groupby("patient_id"), desc="native masks"):
+        _, mask_path = patient_files(dataset_cfg, str(orig_split[pid]), str(pid))
+        native_mask = np.asanyarray(load_image(mask_path).dataobj) > 0
+        scale = (h / native_mask.shape[0]) * (w / native_mask.shape[1])
+        for key, set_name, z, model_px in zip(group["key"], group["set"], group["z"],
+                                              group["lesion_px"] + group["speck_px"]):
+            native_slice = np.take(native_mask, int(z), axis=prep["slice_axis"])
+            if count_components(native_slice) == 1:
+                rows.append({"key": key, "set": set_name, "native_area": int(native_slice.sum()),
+                             "expected_area": int(native_slice.sum()) * scale, "model_area": int(model_px)})
+    areas = pd.DataFrame(rows)
+    areas["ratio"] = areas["model_area"] / areas["expected_area"]
+    edges = NATIVE_SIZE_BINS
+    labels = [f"{lo + 1}-{hi}" if hi != np.inf else f">{lo}" for lo, hi in zip(edges[:-1], edges[1:])]
+    areas["size_bin"] = pd.cut(areas["native_area"], edges, labels=labels)
+    return areas
+
+
+def real_brain_heights(real_dir: Path, patients: pd.DataFrame, lesion_keys: set, method: str,
+                       low: float) -> pd.DataFrame:
+    """Brain area of every real slice between a patient's first and last slice with brain, with
+    its relative position there (0 = first, 1 = last) and whether it is a lesion slice."""
+    rows = []
+    for pid, set_name in tqdm(list(zip(patients["patient_id"], patients["set"])), desc="brain by height"):
+        bravo, _ = load_real(real_dir, str(pid))
+        brain_px = [int(brain_mask(bravo[:, :, z], method, low).sum()) for z in range(bravo.shape[2])]
+        with_brain = [z for z, px in enumerate(brain_px) if px > 0]
+        z0, z1 = with_brain[0], with_brain[-1]
+        for z in range(z0, z1 + 1):
+            rows.append({"patient_id": pid, "set": set_name, "z": z, "brain_px": brain_px[z],
+                         "rel_pos": (z - z0) / (z1 - z0), "lesion_slice": ids.slice_key(str(pid), z) in lesion_keys})
+    return pd.DataFrame(rows)
 
 
 def run_stats(cfg: dict, args: argparse.Namespace) -> None:
@@ -808,16 +866,66 @@ def run_stats(cfg: dict, args: argparse.Namespace) -> None:
                                   "Lesion centroids: T, H (H-cal + H-eval) and the synthetic main audit; top row in "
                                   "pixels, bottom row relative to the brain box (0 = first, 1 = last row/column)")
 
+    # adjacency: Dice between consecutive lesion slices of a patient, on the cleaned masks
+    pairs = adjacency_pairs(real_sl, LabelStack(real_dir / "labels.npz"))
+    adjacency = (pairs.groupby(["set", "patient_id"], sort=False)["dice"]
+                 .agg(pairs="size", median="median", min="min", max="max").reset_index())
+    adjacency_sets = pd.DataFrame({
+        "patients": adjacency.groupby("set", sort=False).size(),
+        "pairs": pairs.groupby("set", sort=False).size(),
+        "median_of_patient_medians": adjacency.groupby("set", sort=False)["median"].median(),
+        "median_all_pairs": pairs.groupby("set", sort=False)["dice"].median(),
+        "share_pairs_dice_ge_0.5": pairs.groupby("set", sort=False)["dice"].agg(lambda d: (d >= 0.5).mean()),
+    })
+    audit.adjacency_figure(pairs, out / f"adjacency_dice_{name}.png",
+                           f"{name}: Dice between consecutive lesion slices of a patient (cleaned masks)")
+
+    # native vs model-space area, on slices with exactly one component in both spaces
+    areas = native_vs_model(real_sl, patients, config.real_dataset(cfg, args.dataset)[1], cfg["preprocessing"])
+    ratio_by_size = areas.groupby("size_bin", observed=True)["ratio"].describe()[["count", "25%", "50%", "75%"]]
+    audit.area_ratio_figure(areas, out / f"native_vs_model_{name}.png",
+                            f"{name}: lesion area after conversion to 128x128 against plain downscaling, on slices "
+                            f"with one lesion in both spaces")
+
+    # brain area of every real slice by relative position in the head, against synthetic brains
+    heights = real_brain_heights(real_dir, patients, set(real_sl["key"]),
+                                 decided(cfg, "brain", "method", "brain-review"),
+                                 float(decided(cfg, "brain", "low_threshold", "brain-review")))
+    by_height = audit.brain_by_height(heights)
+    syn_brain = read_table(syn_dir / "brain.csv").merge(main_sl[["sample_id"]], on="sample_id")
+    syn_brain_px = syn_brain.loc[~syn_brain["mri_failed"].astype(bool), "brain_px"]
+    real_lesion_px = heights.loc[heights["lesion_slice"], "brain_px"]
+    s_median = float(syn_brain_px.median())
+    small_positions = [round(float(p), 3) for p in by_height.index[by_height["median"] <= s_median]]
+    audit.brain_height_figure(by_height, real_lesion_px, syn_brain_px, out / f"brain_by_height_{pool_name}.png",
+                              f"Brain area: real slices by position in the head ({name}) against synthetic brains "
+                              f"({pool_name}, main audit, failed MRIs left out)")
+
     describe.round(3).to_csv(out / f"description_{pool_name}.csv")
     native.to_csv(out / f"native_sizes_{name}.csv")
     bounds.round(4).to_csv(out / f"bound_impact_{pool_name}.csv", index=False)
+    adjacency.round(4).to_csv(out / f"adjacency_dice_{name}.csv", index=False)
+    areas.round(4).to_csv(out / f"native_vs_model_{name}.csv", index=False)
+    by_height.round(1).to_csv(out / f"brain_by_height_{name}.csv")
     text = (f"E0b stats: dataset '{name}', pool '{pool_name}' (S main = mask class clean or minor)\n\n"
             f"Data description:\n{describe.round(3).to_string()}\n\n"
             f"Native in-plane sizes (patients per set):\n{native.to_string()}\n\n"
             f"Bound impact (input for E3, not decided here), by candidate informative-lesion bound:\n"
             f"Share of slices left without an informative lesion:\n{without.round(3).to_string()}\n"
             f"Share of lesions kept:\n{kept.round(3).to_string()}\n"
-            f"Patients with at least one informative slice, per bound: see bound_impact_{pool_name}.csv.\n")
+            f"Patients with at least one informative slice, per bound: see bound_impact_{pool_name}.csv.\n\n"
+            f"Adjacency: Dice between consecutive lesion slices of a patient (cleaned masks):\n"
+            f"{adjacency_sets.round(3).to_string()}\n\n"
+            f"Lesion area after conversion / native area scaled to the model grid (plain downscaling = 1), "
+            f"{len(areas)} slices with one lesion in both spaces, by native lesion area:\n"
+            f"{ratio_by_size.round(2).to_string()}\n\n"
+            f"Brain area by relative slice position (0 = first, 1 = last slice with brain), all "
+            f"{len(heights)} real slices:\n{by_height.round(0).to_string()}\n"
+            f"Synthetic brains (main audit, failed MRIs left out): median {s_median:.0f} px, IQR "
+            f"{syn_brain_px.quantile(0.25):.0f}-{syn_brain_px.quantile(0.75):.0f} px. Real brains are this small or "
+            f"smaller (median) only at positions {small_positions}. Brain at most {s_median:.0f} px: "
+            f"{(syn_brain_px <= s_median).mean():.1%} of synthetic samples, "
+            f"{(real_lesion_px <= s_median).mean():.1%} of real lesion slices.\n")
     (out / "summary.txt").write_text(text, encoding="utf-8")
     config.write_run_info(out, cfg, script=__file__, extra={"stage": "stats", "pool": pool_name})
     print(f"\n{text}\nWrote {out}")

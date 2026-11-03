@@ -426,20 +426,26 @@ def lesions_per_slice_figure(counts: dict[str, pd.Series], path: Path, title: st
     return save(fig, path, title)
 
 
+def cumulative_lines(ax, values: dict[str, pd.Series], unit: str, fmt: str = "g") -> None:
+    """Cumulative distribution per set on one axis: the share of values at or below each value.
+    Overlapping sets stay readable (lines, no bars) and medians read off at the dotted 0.5."""
+    for name, v in values.items():
+        x = np.sort(v.to_numpy())
+        ax.step(x, np.arange(1, len(x) + 1) / len(x), where="post", color=SET_COLORS.get(name),
+                label=f"{name} ({len(x)}; median {np.median(x):{fmt}}{unit})")
+    ax.axhline(0.5, color="0.6", lw=0.6, ls=":")
+    ax.legend(fontsize=7)
+
+
 def area_figure(areas: dict[str, pd.Series], path: Path, title: str) -> Path:
-    """Cumulative distribution of lesion area per set: the share of lesions with at most each
-    area (no binning, so integer areas give no artefacts; medians read off at 0.5)."""
+    """Cumulative distribution of lesion area per set (no binning, so integer areas give no
+    artefacts)."""
     fig = Figure(figsize=(8, 3.6))
     ax = fig.subplots()
-    for name, a in areas.items():
-        values = np.sort(a.to_numpy())
-        ax.step(values, np.arange(1, len(values) + 1) / len(values), where="post", color=SET_COLORS.get(name),
-                label=f"{name} ({len(values)}; median {np.median(values):g} px)")
-    ax.axhline(0.5, color="0.6", lw=0.6, ls=":")
+    cumulative_lines(ax, areas, " px")
     ax.set_xscale("log")
     ax.set_xlabel("lesion area (px, log scale)")
     ax.set_ylabel("share of lesions with at most this area")
-    ax.legend(fontsize=8)
     return save(fig, path, title)
 
 
@@ -462,6 +468,99 @@ def centroid_density_figure(lesions: dict[str, pd.DataFrame], path: Path, title:
             ax.set_title(f"{name}: {label}", fontsize=8)
             ax.tick_params(labelsize=6)
         fig.colorbar(scale, ax=axes[r, :].tolist(), shrink=0.8, label="share of lesions")
+    return save(fig, path, title)
+
+
+def mask_dice(a: np.ndarray, b: np.ndarray) -> float:
+    """Dice overlap of two boolean masks (1.0 if both are empty)."""
+    total = int(a.sum()) + int(b.sum())
+    return 2.0 * int((a & b).sum()) / total if total else 1.0
+
+
+def adjacency_figure(pairs: pd.DataFrame, path: Path, title: str) -> Path:
+    """Dice between consecutive lesion slices as cumulative curves per set: all slice pairs
+    (left) and the median per patient (right). A curve further right = more similar neighbours."""
+    fig = Figure(figsize=(10, 3.6))
+    left, right = fig.subplots(1, 2)
+    per_patient = pairs.groupby(["set", "patient_id"], sort=False)["dice"].median().reset_index()
+    for ax, data, what in ((left, pairs, "all slice pairs"), (right, per_patient, "median per patient")):
+        cumulative_lines(ax, {str(s): d["dice"] for s, d in data.groupby("set", sort=False)}, "", ".2f")
+        ax.set_xlabel("Dice between consecutive lesion slices")
+        ax.set_ylabel(f"share of {what.split()[-1]} with at most this Dice")
+        ax.set_title(what, fontsize=9)
+    return save(fig, path, title)
+
+
+def area_ratio_figure(table: pd.DataFrame, path: Path, title: str) -> Path:
+    """Left: model-space lesion area against the native area scaled to 128x128 (log-log; the
+    dashed line is plain downscaling). Right: the enlargement factor (model area / scaled native
+    area) by native lesion size, as boxes (middle 50% of lesions, median written above)."""
+    fig = Figure(figsize=(10, 3.8))
+    left, right = fig.subplots(1, 2)
+    left.scatter(table["expected_area"], table["model_area"], s=3, alpha=0.3, color="tab:blue")
+    lim = (0.5, float(max(table["expected_area"].max(), table["model_area"].max())) * 1.2)
+    left.plot(lim, lim, color="k", lw=0.8, ls="--", label="plain downscaling (no enlargement)")
+    left.set_xscale("log")
+    left.set_yscale("log")
+    left.set_xlabel("native area scaled to 128x128 (px)")
+    left.set_ylabel("model-space area (px)")
+    left.legend(fontsize=8)
+    groups = [(str(b), g.to_numpy()) for b, g in table.groupby("size_bin", observed=True)["ratio"]]
+    right.boxplot([g for _, g in groups], showfliers=False)
+    tops = []
+    for i, (_, g) in enumerate(groups, start=1):
+        q1, q3 = np.percentile(g, [25, 75])
+        tops.append(float(g[g <= q3 + 1.5 * (q3 - q1)].max()))  # matplotlib's default upper whisker
+        right.text(i, tops[-1] + 0.05, f"{np.median(g):.2f}x", ha="center", va="bottom", fontsize=7)
+    right.set_ylim(top=max(tops) + 0.35)  # room for the highest label
+    right.set_xticks(range(1, len(groups) + 1), [b for b, _ in groups], fontsize=7, rotation=30)
+    right.axhline(1, color="k", lw=0.8, ls="--")
+    right.set_xlabel("native lesion area (native px)")
+    right.set_ylabel("enlargement factor")
+    right.set_title("box = middle 50% of lesions, line = median, whiskers = typical range", fontsize=8)
+    return save(fig, path, title)
+
+
+def brain_by_height(heights: pd.DataFrame, n_bins: int = 20) -> pd.DataFrame:
+    """Brain-area quartiles of real slices per relative slice position (n_bins bins, indexed by
+    the bin centre), with the number of slices and lesion slices per bin. Expects columns
+    `rel_pos` (0 = first, 1 = last slice with brain), `brain_px` and `lesion_slice`."""
+    position = np.minimum((heights["rel_pos"] * n_bins).astype(int), n_bins - 1)
+    table = (heights.groupby(position)["brain_px"]
+             .quantile([0.25, 0.5, 0.75])  # pyright: ignore[reportArgumentType]  # pandas stubs: a list of quantiles is valid
+             .unstack())
+    table.columns = ["p25", "median", "p75"]
+    table["slices"] = heights.groupby(position).size()
+    table["lesion_slices"] = heights.groupby(position)["lesion_slice"].sum()
+    table.index = (table.index + 0.5) / n_bins
+    return table.rename_axis("position")
+
+
+def brain_height_figure(table: pd.DataFrame, real_lesion_px: pd.Series, synthetic_px: pd.Series, path: Path,
+                        title: str) -> Path:
+    """Left: brain area of real slices by relative slice position (median and interquartile band,
+    from `brain_by_height`), with the synthetic median as a red line: where it crosses the curve,
+    real brains are as small as a typical synthetic one. Right: brain-area distributions of real
+    lesion slices and synthetic samples, on the same vertical scale."""
+    fig = Figure(figsize=(10, 4))
+    left, right = fig.subplots(1, 2, width_ratios=[2, 1], sharey=True)
+    left.plot(table.index, table["median"], color="tab:blue", label="real slices: median brain area")
+    left.fill_between(table.index, table["p25"], table["p75"], color="tab:blue", alpha=0.2,
+                      label="real slices: middle 50%")
+    left.axhline(synthetic_px.median(), color="tab:red", lw=1.2,
+                 label=f"synthetic brains: median ({synthetic_px.median():.0f} px)")
+    left.set_xlabel("relative slice position in the head (0 = first, 1 = last slice with brain)")
+    left.set_ylabel("brain area (px)")
+    left.legend(fontsize=7, loc="upper left")
+    bins = np.linspace(0, float(max(real_lesion_px.max(), synthetic_px.max())), 41)
+    for values, color, label in ((real_lesion_px, "tab:blue", "real lesion slices"),
+                                 (synthetic_px, "tab:red", "synthetic samples")):
+        share = np.histogram(values, bins=bins)[0] / len(values)
+        right.stairs(share, bins, orientation="horizontal", color=color, lw=1.5,
+                     label=f"{label} ({len(values)}; median {values.median():.0f} px)")
+    right.set_xlabel("share of slices / samples")
+    right.set_title("brain area distribution", fontsize=8)
+    right.legend(fontsize=7, loc="upper center", bbox_to_anchor=(0.5, -0.18))  # below: the curves fill the panel
     return save(fig, path, title)
 
 

@@ -34,6 +34,16 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
   because any pixel with >1% lesion coverage becomes lesion. Lesion pixel totals, native →
   model: T 364,829 → 280,550; H-cal 79,759 → 62,713; H-eval 90,417 → 69,883. E0b measures it
   per lesion. *Source: `patients.csv`, 2026-11-01.*
+- **Per lesion, the enlargement depends strongly on size.** On 3,937 real slices with exactly
+  one component in both spaces, model-space area divided by the native area scaled to 128×128
+  (plain downscaling = 1), median by native lesion area: 1–5 px 2.64×, 6–10 px 2.15×, 11–20 px
+  1.81×, 21–50 px 1.51×, 51–100 px 1.33×, 101–200 px 1.24×, 201–500 px 1.15×, > 500 px 1.10×.
+  The 0.01 threshold adds about a one-pixel rim, a large share of a tiny lesion and a small
+  share of a big one. Refines the per-patient median of 1.5× above. Real and synthetic masks
+  share this effect (both were thresholded at 0.01), so it does not explain why synthetic
+  lesions are smaller than real ones in model space. *Source:
+  `results/stanford_brainmets/e0b/stats/native_vs_model_stanford_brainmets.csv` and `.png`,
+  2026-11-03.*
 - **No lesion slice is lost or gained by the conversion** (5,909 lesion slices in total).
   *Source: check report, 2026-11-01.*
 - **Real and synthetic images share the same array orientation** (checked visually: midline
@@ -308,7 +318,36 @@ in git (`splits/`, `results/`, `docs/`) or pipeline stages that regenerate the d
   slices resembling the top or bottom of the head, outlined well by every method. Median brain
   area 2,975 px (S) vs 7,765 px (T lesion slices). *Source:
   `results/stanford_brainmets/e0b/brain_review/methods_synthetic_amibekk_v1.png`, `review.txt`,
-  2026-11-01.* `stats` compares them with real slices by height.
+  2026-11-01.* `stats` compares them with real slices by height: see the next entry.
+- **Synthetic brains are the size of real end-of-head slices, and far more often.** Over all
+  20,829 real slices with brain, brain area rises from the ends of the head to a median of
+  about 9,900 px in the middle; real lesion slices follow the same curve. The median synthetic
+  brain (3,009 px; main audit, failed MRIs left out) matches real slices only in the outer
+  10–15% at each end of the head (relative positions ≤ 0.15 and ≥ 0.90).
+  - Brain area at most 3,009 px: 50.0% of synthetic samples against 11.7% of real lesion slices
+    (T 12.4%, H-cal 8.9%, H-eval 12.0%).
+  - The synthetic sizes are bimodal, with peaks around 1,300 and 3,800 px.
+
+  So the small synthetic brains look like genuine end-of-head slices, but stage 2 draws them far
+  more often than lesion slices occur there in real data. That fits stage 1's compact, central
+  lesion placement (section 3, lesion positions) with stage 2 drawing a brain around it.
+  *Source: `results/stanford_brainmets/e0b/stats/brain_by_height_amibekk_v1.png`,
+  `brain_by_height_stanford_brainmets.csv`, `summary.txt`, 2026-11-03.*
+- **Neighbouring lesion slices of a patient are near-duplicates.** Dice between consecutive
+  lesion slices (z, z + 1) on the cleaned masks:
+
+  | | Patients | Slice pairs | Median of per-patient medians | Pairs with Dice ≥ 0.5 |
+  | --- | --- | --- | --- | --- |
+  | T | 105 | 3,351 | 0.80 | 86% |
+  | H-cal | 25 | 872 | 0.78 | 88% |
+  | H-eval | 26 | 975 | 0.79 | 87% |
+
+  About 4% of pairs have Dice 0 (a lesion appears or vanishes between slices). A copied lesion
+  can therefore match several neighbouring training slices, which is the inflation risk the
+  plan raises (Akbar et al.): E5 must group matches by source patient and a ±2-slice window,
+  and count per patient and per lesion, not per slice. *Source:
+  `results/stanford_brainmets/e0b/stats/adjacency_dice_stanford_brainmets.csv` and `.png`,
+  `summary.txt`, 2026-11-03.*
 - **Some synthetic MRIs contain no brain at all.** 152 of 37,624 samples have < 20 px of brain
   tissue; the 32 lowest have 0 px (a black image with only a lesion or a faint smudge). Between
   ~50 and ~400 px the images show small brain fragments, similar to the smallest real T lesion

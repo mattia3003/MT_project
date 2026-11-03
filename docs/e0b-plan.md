@@ -15,13 +15,13 @@ stage, and what has been decided. Update the status table when a stage is done.
 | 4 | `lesions` + `view` | production (needs B, C) | ✅ done (2026-11-02) |
 | 5 | `qc-review` | review → decision D | ✅ done; **decision D set** (2026-11-02): 9 isolated specks |
 | 6 | `qc` | production (needs D) | ✅ done (2026-11-02); mask class and failed-MRI flag kept apart |
-| 7a | `stats` | E0 description (no decision) | step 1 ✅ (2026-11-03: items 1, 2, 6); step 2 (items 3–5) next |
+| 7a | `stats` | E0 description (no decision) | ✅ done (2026-11-03: items 1–6) |
 | 7b | `filters-review` | review → decision E (filters for H-cal/H-eval) | ⏳ |
 | 8 | `check` | consistency checks | ⏳ |
 | 9 | Full re-run of E0a + E0b from scratch | end-to-end check | ⏳ after 8 |
 
-**Next: start here.** Stage 7a `stats` step 2 (items 3–5 below, which read volumes), then 7b
-`filters-review`. Step 1 (items 1, 2, 6) was done on 2026-11-03. The
+**Next: start here.** Stage 7b `filters-review` (decision E), then 8 `check`. Stage 7a
+`stats` was finished on 2026-11-03. The
 plan for both was approved on 2026-11-02, including the four points confirmed in "Stage 7
 details" below. Everything up to `qc-review` is committed; the `qc` stage (`qc.py`, its tests,
 the stage, docs and report notes) was finished on 2026-11-02 and awaits the user's commit.
