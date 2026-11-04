@@ -42,6 +42,6 @@ E0b check: dataset 'stanford_brainmets', pool 'amibekk_v1', seed 2026
 [PASS] qc: every class is known
 [PASS] qc: classes reproduced from lesion and speck counts (cut-off 9)
 [PASS] qc: class counts add up to the pool: mri_failed 152, no_lesion 393, noisy 1241, minor 3701, clean 32137
-[PASS] unit tests (pytest) pass: 66 passed in 11.50s
+[PASS] unit tests (pytest) pass: 125 passed in 12.84s
 
 43 passed, 0 failed

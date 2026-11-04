@@ -13,8 +13,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from memtk import config
-from memtk.e0b.common import load_real
-from memtk.io import LabelStack, MaskStack, read_table
+from memtk.io import LabelStack, MaskStack, load_real, read_table
 from memtk.lesions import label_components
 from memtk.stages import refuse_overwrite, require
 

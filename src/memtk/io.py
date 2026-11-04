@@ -43,6 +43,14 @@ def save_nifti(array: np.ndarray, path: str | Path) -> None:
     nib.save(nib.Nifti1Image(array, np.eye(4)), path)
 
 
+def load_real(real_dir: Path, pid: str) -> tuple[np.ndarray, np.ndarray]:
+    """(bravo, seg) model-space volumes of one patient, shape (128, 128, D), from the E0a outputs
+    in `real_dir` (`volumes/<pid>/`). Moved from `memtk.e0b.common` on 2026-11-04 (E4 needs it)."""
+    vol_dir = real_dir / "volumes" / pid
+    return (np.asanyarray(load_image(vol_dir / "bravo.nii.gz").dataobj),
+            np.asanyarray(load_image(vol_dir / "seg.nii.gz").dataobj))
+
+
 def list_patients(dataset_cfg: dict, split: str) -> list[str]:
     """Sorted patient IDs (folder names) in one source split of a real dataset."""
     split_dir = resolve_path(dataset_cfg["root"]) / split

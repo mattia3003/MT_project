@@ -18,8 +18,8 @@ from matplotlib.figure import Figure
 from tqdm import tqdm
 
 from memtk import config, ids
-from memtk.e0b.common import Slices, load_real
-from memtk.io import LabelStack, LabelStackWriter, MaskStack, read_table, save_nifti
+from memtk.e0b.common import Slices
+from memtk.io import LabelStack, LabelStackWriter, MaskStack, load_real, read_table, save_nifti
 from memtk.lesions import (LesionLabels, attach_or_drop, chessboard_distance, fraction_outside, label_components,
                            lesion_features, speck_gaps)
 from memtk.plotting import (HIGHLIGHT_COLOR, LESION_COLOR, draw_lesions, hide_unused, lesion_sheet, save, show_slice,

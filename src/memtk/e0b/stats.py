@@ -19,8 +19,7 @@ from matplotlib.figure import Figure
 from tqdm import tqdm
 
 from memtk import config, ids
-from memtk.e0b.common import load_real
-from memtk.io import LabelStack, load_image, patient_files, read_table
+from memtk.io import LabelStack, load_image, load_real, patient_files, read_table
 from memtk.lesions import brain_mask, count_components
 from memtk.plotting import SET_COLORS, save, tile_figure
 from memtk.stages import decided, refuse_overwrite, require

@@ -1,0 +1,179 @@
+{
+  "timestamp": "2026-11-04T13:02:51",
+  "script": "C:\\Master thesis\\MT_project\\src\\memtk\\e4\\plant.py",
+  "argv": [
+    "scripts\\e4_validate.py",
+    "plant",
+    "--overwrite"
+  ],
+  "seed": 2026,
+  "python": "3.11.9",
+  "packages": {
+    "memtk": "0.1.0",
+    "numpy": "2.4.6",
+    "scipy": "1.17.1",
+    "scikit-image": "0.26.0",
+    "nibabel": "5.4.2",
+    "monai": "1.6.0",
+    "torch": "2.6.0+cu124",
+    "pandas": "2.3.3"
+  },
+  "config": {
+    "seed": 2026,
+    "output_root": "processed_data/model_space",
+    "results_root": "results",
+    "splits_dir": "splits",
+    "frozen_dir": "configs/frozen",
+    "default_real_dataset": "stanford_brainmets",
+    "default_synthetic_pool": "amibekk_v1",
+    "preprocessing": {
+      "spatial_size": [
+        128,
+        128
+      ],
+      "interpolation": "area",
+      "mask_threshold": 0.01,
+      "slice_axis": 2
+    },
+    "brain": {
+      "low_threshold": 0.02,
+      "method": "low_threshold_all",
+      "min_tissue_px": 20
+    },
+    "lesions": {
+      "connectivity": 8,
+      "min_lesion_area": 4,
+      "attach_gap": 2
+    },
+    "qc": {
+      "max_isolated_specks": 9,
+      "edge_outside_frac": 0.5,
+      "small_lesion_px": 40
+    },
+    "filters": {
+      "max_mask_px": 2000,
+      "real_sets": [
+        "max_mask_px"
+      ]
+    },
+    "detectors": {
+      "whole_mask": {
+        "top_k_dice": 20,
+        "top_k_centroid": 20,
+        "max_shift_px": 3
+      },
+      "lesion": {
+        "position_frame": "pixel",
+        "sigma": 0.05,
+        "prefilter": 0.2,
+        "candidate_min_s": 0.1
+      }
+    },
+    "calibration": {
+      "percentile": 95,
+      "bootstrap_draws": 2000,
+      "provisional_tau_L": 0.77,
+      "chance_rate_max": 0.1,
+      "informative_bound_px": 12,
+      "strata": {
+        "whole_mask": "stratified",
+        "lesion": "stratified"
+      }
+    },
+    "validation": {
+      "bases": {
+        "min_informative_slices": 5,
+        "patients_multi": 10,
+        "min_multi_slices": 3,
+        "multi_per_patient": 3,
+        "single_per_patient": 2,
+        "patients_other": 10,
+        "slices_per_patient": 5,
+        "min_z_gap": 2
+      },
+      "variants": {
+        "shift_small_px": 2,
+        "shift_large_px": 5,
+        "rotate_deg": 5,
+        "rotate_threshold": 0.5,
+        "morph_px": 1,
+        "add_min_gap_px": 3,
+        "add_max_tries": 50
+      },
+      "gate": "keeps_base_lesions",
+      "caught": "flagged_and_source_patient",
+      "criteria": {
+        "recall": {
+          "P1": {
+            "detector": "both",
+            "min": 1.0
+          },
+          "P2": {
+            "detector": "any",
+            "min": 0.9
+          },
+          "P4": {
+            "detector": "any",
+            "min": 0.9
+          },
+          "P6": {
+            "detector": "lesion",
+            "min": 0.8,
+            "variants": [
+              "P6-remove",
+              "P6-add"
+            ]
+          }
+        },
+        "reported_only": [
+          "P3",
+          "P5-erode",
+          "P5-dilate"
+        ],
+        "false_positive_max": {
+          "e1_copy": 0.07,
+          "e2_full": 0.07,
+          "e2_flagged": 0.12
+        }
+      }
+    },
+    "real_datasets": {
+      "stanford_brainmets": {
+        "root": "data/StanfordSkullStripped_1mm",
+        "image_file": "bravo.nii",
+        "mask_file": "seg.nii",
+        "train_split": "train",
+        "heldout_split": "test",
+        "heldout_sets": [
+          "H-cal",
+          "H-eval"
+        ]
+      }
+    },
+    "synthetic_pools": {
+      "amibekk_v1": {
+        "dir": "data/Synthetic_data/mask_conditioned_synthesis",
+        "glob": "*.nii",
+        "image_channel": 0,
+        "mask_channel": 1,
+        "trained_on": "stanford_brainmets",
+        "legacy_exclusion_file": "docs/corrupted_synthetic_masks_10_0.txt"
+      }
+    },
+    "_config_path": "C:\\Master thesis\\MT_project\\configs\\default.yaml"
+  },
+  "stage": "plant",
+  "inputs": [
+    "T",
+    "H-eval"
+  ],
+  "frozen_file": "e3_stanford_brainmets.yaml",
+  "frozen_sha256": "3ea3b5de05891e35716550d965e6fb4f4581a348c6023bd2061babfaaa36bb0c",
+  "streams": [
+    "bases",
+    "direction",
+    "angle",
+    "remove",
+    "add"
+  ]
+}

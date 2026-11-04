@@ -34,8 +34,8 @@ Reference docs (read the relevant one before starting work):
   (stratified), the redefinition of C with tau_C kept (rule A), stages, tests. Its open items
   moved to `docs/experiment-plan.md` (E4, E5, E6 "Carried over" notes) and report-notes.
 - `docs/e4-plan.md`: E4 plan (planted-copy gate), ACTIVE since 2026-11-04. Read it before
-  continuing E4 work. Decisions I (planting design) and J (caught = flagged + right patient) are
-  set; K (go/no-go criteria) is set after the `plant` stage, before `validate` runs.
+  continuing E4 work. Decisions I (planting design, gate rule), J (caught = flagged + right
+  patient) and K (go/no-go criteria; P5 reported only) are set; `plant` done, `validate` next.
 This file is a summary. If it disagrees with the docs, the docs win; flag the mismatch.
 
 ## Data
@@ -223,6 +223,11 @@ can this be detected and explained using generated outputs alone?
   centroid; P5 two sub-variants (3x3 cross), gated only on masks keeping every base lesion
   >= the bound; P6-remove and P6-add as separate sub-variants. Caught = flagged (E2: full or
   partial) AND source patient = base patient (decision J); `all_copied` shows incompleteness.
+  Go/no-go (decision K, 2026-11-04, `validation.criteria`): P1 100% both detectors; P2, P4 >= 90%
+  any detector; P6 >= 80% lesion-level; H-eval FP per stratum E1 copy <= 7%, E2 full <= 7%, E2
+  flagged <= 12%; P3, P5 reported only (1 px boundary change gives s ~ r^2, below chance
+  thresholds: a stated detection limit). Gate counts only masks keeping every informative base
+  lesion >= the bound (all variants but P6-remove).
 - Count per patient and per lesion, not per slice (adjacent slices are near-duplicates).
 
 ## Master thesis (plan: retrain both models with fixed seeds, Branch B; compute is available)
@@ -271,7 +276,7 @@ Not aimed at publication for now. Original weights (Branch A) only as a fallback
     decision it needs). Comments only where the *why* is not obvious; no line-by-line comments.
   - Reuse the shared helpers instead of rewriting them: `memtk.stages` (`add_stage`,
     `decided(cfg, "<dotted.key>", "<script> <review stage>")`, `refuse_overwrite`, `require`,
-    `pick(rng, ...)`), `e0b.common` (`load_real`, `Slices`, `boxes_of`), `memtk.io.read_table` for
+    `pick(rng, ...)`), `e0b.common` (`Slices`, `boxes_of`), `memtk.io` (`load_real`, `read_table`) for
     every pipeline CSV, `memtk.ids` for keys and lesion IDs, `memtk.plotting` for shared
     drawing and colours. A helper needed by two experiments moves to a library module.
   - `scripts/e0a_prepare_data.py` predates this layout (its stages are small and call library

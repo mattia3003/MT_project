@@ -114,7 +114,8 @@ validation:
   # Decision I (planting design), decided 2026-11-04 by the user while planning E4: bases from 10
   # patients with many multi-lesion slices + 10 others (a plain random draw gives ~25 multi-lesion
   # bases, too few for P6-remove); P4 about the lesion-pixel centroid (not the image centre, which
-  # would mix rotation with shift); P5 erode and dilate with the 3x3 cross, gated on surviving lesions
+  # would mix rotation with shift); P5 erode and dilate with the 3x3 cross. Gate rule amended
+  # 2026-11-04 (with decision K): see `gate` below
   bases:
     min_informative_slices: 5 # eligible: T patients with at least this many slices with an informative lesion
     patients_multi: 10        # drawn from eligible patients with >= min_multi_slices multi-lesion slices ...
@@ -132,11 +133,29 @@ validation:
     morph_px: 1               # P5-erode and P5-dilate, 3x3 cross
     add_min_gap_px: 3         # P6-add: background px between the added lesion and every base lesion
     add_max_tries: 50         # P6-add: H-eval lesions tried per base before the base is skipped
+  # Decision I amended 2026-11-04 by the user (first: P5 only): a planted mask counts in the gate only
+  # if every informative base lesion is still a lesion >= the bound (planted.csv keeps_base_lesions),
+  # for every variant except P6-remove (removes a lesion on purpose); excludes 6 of 100 P4 masks whose
+  # 12-19 px lesion fell just below 12 px (they test the bound, not robustness to rotation)
+  gate: keeps_base_lesions
   # Decision J, decided 2026-11-04 by the user: caught = flagged (E1 copy; E2 full or partial) and
   # the source patient is the base patient; incompleteness is shown by all_copied, not by the class
   caught: flagged_and_source_patient
-  # Decision K (evidence: `e4_validate.py plant`): the go/no-go criteria, set before `validate` runs
-  criteria: null
+  # Decision K (evidence: `e4_validate.py plant`), decided 2026-11-04 by the user before any detector
+  # ran on the planted set. P5 is reported only: a 1 px boundary change gives a lesion score of about
+  # r^2 (r = area ratio; median 0.43 eroded, 1.7 dilated, plant area_change.csv), below the chance-based
+  # single-lesion thresholds for nearly every lesion size, a resolution limit no setting can fix
+  criteria:
+    recall:                   # share caught (decision J) of the gated planted masks of each variant
+      P1: {detector: both, min: 1.0}       # a miss is a bug, not a setting to tune
+      P2: {detector: any, min: 0.9}        # any = caught by at least one detector
+      P4: {detector: any, min: 0.9}
+      P6: {detector: lesion, min: 0.8, variants: [P6-remove, P6-add]}   # pooled; each also reported
+    reported_only: [P3, P5-erode, P5-dilate]
+    false_positive_max:       # H-eval share flagged, per stratum (point estimate; bootstrap interval reported)
+      e1_copy: 0.07           # H-cal at chance 5.1% / 5.3% (single / multi)
+      e2_full: 0.07           # H-cal 5.1% / 5.2%
+      e2_flagged: 0.12        # full or partial; H-cal 7.4% / 8.7%
 
 real_datasets:
   stanford_brainmets:

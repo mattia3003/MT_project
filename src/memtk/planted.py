@@ -185,7 +185,7 @@ def provenance(planted: np.ndarray, reference: np.ndarray) -> dict[int, int]:
 class Planted:
     """One planted mask: its label map after attach-or-drop, how it was made, where each lesion
     comes from, and whether every informative base lesion is still a lesion of at least the bound
-    (the rule that gates P5)."""
+    (the E4 gate rule, `validation.gate`)."""
     variant: str
     key: str
     base_key: str

@@ -326,3 +326,40 @@ in full, with what replaced them.
   P6-add made, P6-remove for the 37 multi-lesion bases; P6-add needed at most 8 tries (median 1);
   every informative base lesion still ≥ 12 px for P4 94, P5-erode 50, P5-dilate 98 of 100
   (relevant to decision K). *Source: pytest, scratch script (not in the repo).*
+- **E4 step 3: `plant` stage.** New `scripts/e4_validate.py` (stage `plant`) and
+  `src/memtk/e4/` (`common`, `plant`). `load_real` moved from `e0b.common` to `memtk.io` (E4
+  needs the BRAVO slices for its figures); E0b check 43/43 after the move. Run: 737 planted masks
+  (100 bases × 7 variants + 37 P6-remove), 1,264 planted lesions, all traced to a source; every P1
+  map equals its base (read-back check of the written stack and tables). The first run's figures
+  used yellow for added H-eval lesions, the same colour as the zoom box, and called lesions merged
+  by dilation "gone"; both fixed (orange; "gone or merged") and the stage re-run with `--overwrite`
+  (same planted set). Pylance: values of a `.loc` row were typed as possibly a Series, so the base
+  rows are now read as dicts. As built, beyond the plan: three tiles per base in the variant
+  sheets instead of an inset, and the extra tables `lesion_fate.csv`, `area_change.csv`,
+  `skipped_variants.csv`. *Source: `results/stanford_brainmets/e4/plant/review.txt`, scratch
+  check (not in the repo).*
+- **E4 `plant` figures improved after the user's review.** The user found the change between
+  base and variant hard to follow side by side (mainly P3's 5 px shift, also erosion and
+  dilation) and P6 unclear in the grid. Now the third tile of each variant sheet draws the base
+  lesions dashed in their colour under the filled planted lesions, with a dot at the old centre
+  and an arrow to the new one where a centre moved by ≥ 1 px (black edge for contrast on the
+  fill); in the grid, base lesions with no planted lesion traced to them (removed or eroded away)
+  are filled red and added H-eval lesions orange. The user's note that P4 barely moves some
+  lesions was kept as designed: a single-lesion base rotates in place (shape only), multi-lesion
+  bases also move their lesions relative to each other. Stage re-run with `--overwrite` (same
+  planted set; figures only changed); pytest 125. Accepted by the user as documentation of the
+  variants, with known limits left as they are: the dashed base outline inside a dilated lesion
+  is hard to see, and arrows on small lesions add little; figures for the report are picked by
+  hand from these sheets.
+- **E4 step 4: decision K set, decision I amended** (user, after a summary of the open choices
+  with recommendations). Before any detector ran on the planted set, the expected behaviour of
+  each variant was worked out from the score definitions and the `plant` area changes (no
+  scores computed): P5 would fail any recall criterion by construction (s ≈ r²), so it became
+  reported only, like P3; the gate rule (`keeps_base_lesions`) now covers every variant but
+  P6-remove (P4 94 of 100 counted). Config: `validation.gate` and `validation.criteria` with
+  dated comments. `plant`'s review text no longer hardcodes the proposal; it prints decision K
+  from the config (or where to set it); docstrings and review text say "gate rule" instead of
+  "P5 gate". `plant` re-run with `--overwrite` (same planted set); pytest 125. Docs: E4 plan
+  (status, decisions I and K, definitions), experiment plan E4, CLAUDE.md, data dictionary,
+  report-notes (section 2 decisions, section 4 detection limit, section 5 item closed).
+  *Source: `configs/default.yaml`, `docs/e4-plan.md`.*

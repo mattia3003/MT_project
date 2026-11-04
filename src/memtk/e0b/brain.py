@@ -22,8 +22,8 @@ from matplotlib.figure import Figure
 from tqdm import tqdm
 
 from memtk import config, ids
-from memtk.e0b.common import BOX_COLUMNS, load_real
-from memtk.io import MaskStackWriter, read_table
+from memtk.e0b.common import BOX_COLUMNS
+from memtk.io import MaskStackWriter, load_real, read_table
 from memtk.lesions import BRAIN_METHODS, brain_box, brain_mask, fraction_outside, grow, label_components, tissue_px
 from memtk.plotting import (BRAIN_COLOR, LESION_COLOR, draw_box, hide_unused, save, show_slice,
                             tile_figure)

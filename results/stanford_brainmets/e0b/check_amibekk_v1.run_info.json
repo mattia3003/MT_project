@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-11-03T17:24:03",
+  "timestamp": "2026-11-04T10:53:34",
   "script": "C:\\Master thesis\\MT_project\\src\\memtk\\e0b\\check.py",
   "argv": [
     "scripts\\e0b_audit.py",
@@ -22,6 +22,7 @@
     "output_root": "processed_data/model_space",
     "results_root": "results",
     "splits_dir": "splits",
+    "frozen_dir": "configs/frozen",
     "default_real_dataset": "stanford_brainmets",
     "default_synthetic_pool": "amibekk_v1",
     "preprocessing": {
@@ -70,13 +71,36 @@
     "calibration": {
       "percentile": 95,
       "bootstrap_draws": 2000,
-      "provisional_tau_L": null,
-      "chance_rate_max": null,
-      "informative_bound_px": null,
+      "provisional_tau_L": 0.77,
+      "chance_rate_max": 0.1,
+      "informative_bound_px": 12,
       "strata": {
-        "whole_mask": null,
-        "lesion": null
+        "whole_mask": "stratified",
+        "lesion": "stratified"
       }
+    },
+    "validation": {
+      "bases": {
+        "min_informative_slices": 5,
+        "patients_multi": 10,
+        "min_multi_slices": 3,
+        "multi_per_patient": 3,
+        "single_per_patient": 2,
+        "patients_other": 10,
+        "slices_per_patient": 5,
+        "min_z_gap": 2
+      },
+      "variants": {
+        "shift_small_px": 2,
+        "shift_large_px": 5,
+        "rotate_deg": 5,
+        "rotate_threshold": 0.5,
+        "morph_px": 1,
+        "add_min_gap_px": 3,
+        "add_max_tries": 50
+      },
+      "caught": "flagged_and_source_patient",
+      "criteria": null
     },
     "real_datasets": {
       "stanford_brainmets": {

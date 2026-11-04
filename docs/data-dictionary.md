@@ -34,7 +34,8 @@ ID columns as text.
 | | `calibrate` | ✅ | decision G, E0b lesion tables (T, H-cal), E0 `bound_impact_<pool>.csv` | `<output_root>/<dataset>/e3/` (E1 and E2 tables of H-cal), `results/<dataset>/e3/calibrate/` (evidence for decision H) |
 | | `freeze` | ✅ | decision H, the `calibrate` tables and `thresholds.csv` | `configs/frozen/e3_<dataset>.yaml` + `e3_<dataset>.run_info.json` |
 | | `check` | ✅ | all E3 outputs, T and H-cal label maps | `results/<dataset>/e3/check_report.txt`, `check.run_info.json` |
-| `e4_validate.py` | *tbd* | planned | frozen thresholds, T, H-eval | validation table, planted copies |
+| `e4_validate.py` | `plant` | ✅ | decision I (`validation.bases`, `validation.variants`), decision C, the frozen file (bound, minimum area), E0b lesion tables (T, H-eval), `brain_masks.npz`, real BRAVO volumes (figures) | `<output_root>/<dataset>/e4/` (planted set), `results/<dataset>/e4/plant/` (evidence for decision K) |
+| | `validate`, `check` | planned | frozen file, T, H-eval, planted set, decision K | validation table, gate verdict |
 | `e5_audit.py` | — | planned | frozen thresholds, S | main audit tables |
 | `e6_exposure.py` | *tbd* | planned | E5 outputs | exposure, rarity, duplication |
 | `e7_reports.py` | *tbd* | planned | E5, E6 outputs, planted copies | match reports, deletion test |
@@ -66,8 +67,11 @@ latter for tau_L and tau_C); E4 (`docs/e4-plan.md`): `validation.bases` (decisio
 `min_informative_slices`, `patients_multi`, `min_multi_slices`, `multi_per_patient`,
 `single_per_patient`, `patients_other`, `slices_per_patient`, `min_z_gap`),
 `validation.variants` (decision I: `shift_small_px`, `shift_large_px`, `rotate_deg`,
-`rotate_threshold`, `morph_px`, `add_min_gap_px`, `add_max_tries`), `validation.caught`
-(decision J), `validation.criteria` (decision K, `null` until set; read by `validate`). E4 and E5
+`rotate_threshold`, `morph_px`, `add_min_gap_px`, `add_max_tries`), `validation.gate` (decision
+I amended: the rule a planted mask must meet to count in the gate, `keeps_base_lesions`),
+`validation.caught` (decision J), `validation.criteria` (decision K: `recall` per variant with
+`detector` both / any / lesion, `min` and optional `variants` pooled; `reported_only`;
+`false_positive_max` per class; read by `validate`, which refuses to run while it is `null`). E4 and E5
 take detector settings and thresholds from the frozen file, not from these config sections;
 `real_datasets.<name>` (`root`, `image_file`, `mask_file`, `train_split`,
 `heldout_split`, `heldout_sets`); `synthetic_pools.<name>` (`dir`, `glob`, `image_channel`,
@@ -482,3 +486,37 @@ the stored H-cal tables; the frozen file equal to it under decision H and to the
 the E2 shortcut conditions at the frozen thresholds; the shortcuts against brute force on random
 H-cal slices; a self-match of random T slices (E1 score 1, E2 C 1); the unit tests. Exit code 1 on
 any failure. Run log: `check.run_info.json`.
+
+---
+
+## 7. E4: planted-copy validation (`e4_validate.py`)
+
+### Planted set: `<output_root>/<dataset>/e4/`
+
+Written by `plant`; read by `validate` and `check` (planned) and by E7 (correctness of the match
+reports). Not in git; `plant` reproduces it from the seed. Planted keys are
+`<variant>__<patient_id>_z<z>` (e.g. `P2__Mets_005_z127`), lesion IDs `<key>/L<n>`.
+
+| File | Content |
+| --- | --- |
+| `planted_labels.npz` | Label stack (`memtk.io.LabelStack`), one label map per planted mask after attach-or-drop, by planted key |
+| `planted.csv` | One row per planted mask: `key`, `variant` (P1, P2, P3, P4, P5-erode, P5-dilate, P6-remove, P6-add), `base_key`, `patient_id` (the base patient: the true source), `z`, `group` (`multi` or `other`, decision I), `base_n_informative`, `base_stratum`, `n_lesions` (≥ the minimum area), `n_informative` (≥ the bound), `stratum_e1`, `stratum_e2` (`none` = not scorable by that detector), `keeps_base_lesions` (every informative base lesion still a lesion ≥ the bound: the gate rule, `validation.gate`, for every variant but P6-remove), and the parameters `shift_row`, `shift_col` (P2, P3), `angle` (P4, degrees), `removed` (P6-remove: base lesion ID), `added` (P6-add: H-eval lesion ID), `tries` (P6-add: donors tried) |
+| `planted_lesions.csv` | One row per planted lesion: `lesion_id`, `key`, `variant`, `base_key`, `number`, `area`, `source_lesion` (the base lesion it overlaps most after the same geometric change, or the added H-eval lesion; "" if none), `source_area` |
+| `plant.run_info.json` | Run log (inputs T and H-eval, the frozen file's name and SHA-256, the random streams) |
+
+### `results/<dataset>/e4/plant/`
+
+Written by `plant`. In git. Evidence for decision K (`validation.criteria`); no detector runs.
+
+| File | Content |
+| --- | --- |
+| `review.txt` | Bases by group, skipped patients, P6-add donors, the variant summary, variants not made, the area change by size bin, what to look at, and decision K as set in the config (or where to set it) |
+| `bases.csv` | One row per base slice: `key`, `patient_id`, `z`, `n_informative`, `group`, `stratum` (by informative lesions) |
+| `variant_summary.csv` | Per variant: `planted`, `skipped`, `scorable_e1`, `scorable_e2`, `e2_single`, `e2_multi`, `stratum_changed` (E2 stratum differs from the base's), `keeps_base_lesions`, `base_lesions`, `base_lesions_lost` (largest traced piece below the bound, gone or merged; P6-remove's removed lesion excluded), `median_area_ratio` |
+| `lesion_fate.csv` | One row per planted mask and informative base lesion: `key`, `variant`, `base_key`, `base_lesion`, `base_area`, `planted_area` (all planted lesions traced to it), `largest_piece`, `kept` (largest piece ≥ the bound), `removed` (P6-remove's removed lesion) |
+| `area_change.csv` | P4, P5-erode, P5-dilate by base lesion size bin (12–19, 20–39, 40–79, ≥ 80 px): `lesions`, `kept` (share), `median_ratio`, `min_ratio`, `max_ratio` (largest piece / base area) |
+| `skipped_variants.csv` | Variants not made: `base_key`, `variant`, `reason` |
+| `variants_grid.png` | 12 random bases (6 single-, 6 multi-lesion) × the original and every variant, zoomed on the BRAVO slice: base outline red, planted green; base lesions with no planted lesion traced to them (removed, eroded away) filled red, added H-eval lesions filled orange |
+| `variant_<variant>.png` | One per variant, 20 random bases, three tiles each: the planted mask on the whole slice (zoom box dashed), the base lesions, and the planted lesions filled in the colour of the lesion they come from (orange = added H-eval lesion) over the base lesions dashed in their colour, with a dot and arrow where a lesion centre moved by ≥ 1 px |
+| `area_change.png` | Largest planted piece against base lesion area for P4, P5-erode, P5-dilate (log axes), lost lesions in red, the bound dashed |
+| `run_info.json` | Run log (as above) |

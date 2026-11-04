@@ -446,6 +446,37 @@ move the old ones, with the reason, to the process log.
   (P6's class depends on C, so the expectation would be arbitrary). The go/no-go criteria
   themselves (decision K) are set after the planted set is built and before any detector scores
   it. *Source: `docs/e4-plan.md`; frozen thresholds in `configs/frozen/e3_stanford_brainmets.yaml`.*
+- **Which planted copies count in the gate** (decision I amended, 2026-11-04, with decision K).
+  A planted mask counts only if every informative base lesion is still a lesion ≥ the 12 px
+  bound, for every variant except P6-remove (which removes a lesion on purpose). First planned
+  for P5 only; extended because 6 of 100 rotated masks (P4) had a 12–19 px lesion fall just below
+  12 px (area ratio down to 0.85), so they test the bound, not robustness to rotation. Counted:
+  P1–P3 and P6-add 100 of 100, P4 94, P5-erode 50, P5-dilate 98; all masks are still reported.
+  *Source: `results/stanford_brainmets/e4/plant/variant_summary.csv`, `area_change.csv`.*
+- **E4 go/no-go criteria** (decision K, 2026-11-04, set before any detector ran on the planted
+  set; caught as in decision J):
+
+  | Criterion | Value |
+  | --- | --- |
+  | P1 exact | 100% caught by both detectors (a miss is a bug, not a setting to tune) |
+  | P2 shift 2 px, P4 rotate 5° | ≥ 90% caught by at least one detector |
+  | P6 one lesion removed or added (pooled) | ≥ 80% caught by the lesion-level detector |
+  | H-eval false positives, per stratum | E1 copy ≤ 7%, E2 full ≤ 7%, E2 flagged (full or partial) ≤ 12% |
+  | P3 shift 5 px, P5 erode / dilate 1 px | reported only |
+
+  The false-positive limits sit 2–3 points above the H-cal chance rates (5.1 / 5.3%, 5.1 / 5.2%,
+  7.4 / 8.7%, single / multi); a single 7% limit on "flagged" would fail at chance.
+  *Deviation from the experiment plan's suggestion (P5 ≥ 90%): P5 is reported only.* From the
+  score definitions, an eroded lesion with area ratio r has shape factor ≈ r and size factor r,
+  so s ≈ r², and Dice 2r / (1 + r); dilation the same with 1 / r. The planted set gives r
+  0.29–0.86 after erosion (median 0.43) and 1.15–3.1 after dilation (median 1.7); even for
+  lesions ≥ 80 px, s ≈ 0.52 / 0.59 and Dice ≈ 0.84 / 0.87 stay below the single-lesion
+  thresholds (τ_C 0.719, τ_D 0.905). The thresholds are set by chance, so no detector setting
+  could make P5 pass: a P5 criterion would fail with no allowed remedy. Set aside: P5 gated at
+  ≥ 90%, and a P5 criterion per size bin (single-lesion masks fail even at ≥ 80 px). This was
+  decided from the definitions and the planted geometry, before any score existed.
+  *Source: `configs/default.yaml` (`validation.criteria`), `docs/e4-plan.md` (decision K),
+  `results/stanford_brainmets/e4/plant/area_change.csv`.*
 
 ## 3. Findings
 
@@ -670,6 +701,16 @@ move the old ones, with the reason, to the process log.
   suspected cause: per-mask min–max scaling and the 0.01 threshold in the sampling script.
   *Source: `lesions_review/component_sizes_amibekk_v1.csv`, `speck_gaps_amibekk_v1.csv`,
   2026-11-02.*
+- **What 1 px of boundary change does to small lesions** (E4 `plant`, 2026-11-04). Of the 147
+  informative lesions of the 100 planted-copy bases, a 1 px erosion (3×3 cross) leaves none of
+  the 12–19 px lesions at ≥ 12 px and half of the 20–39 px ones (median area ratio 0.43); 12 of
+  the 100 eroded masks have no lesion ≥ 4 px left. A 1 px dilation roughly doubles 12–19 px
+  lesions (median ratio 2.07) and merges 2 lesions into a neighbour. A ±5° rotation about the
+  lesion centroid pushes 6 lesions of 12–19 px just below 12 px (smallest ratio 0.85). At
+  128×128 the small lesions that dominate the data are fragile to any boundary noise, so P5
+  tests robustness only for lesions of about 20 px and more (50 of 100 eroded masks keep every
+  lesion and enter the gate). *Source: `results/stanford_brainmets/e4/plant/area_change.csv`,
+  `variant_summary.csv`, `area_change.png`.*
 
 ## 4. Limitations and assumptions
 
@@ -749,6 +790,18 @@ move the old ones, with the reason, to the process log.
   slices would be missed; they are 0.5% of T slices. *Source: `lesions_review/review.txt`,
   2026-11-02.*
 
+- **Detection limit: copies with boundary noise are not detected** (2026-11-04, decision K).
+  Both detectors are calibrated to chance, and at 128×128 a 1 px change of a lesion's boundary
+  moves it further from its original than chance matches lie: lesion score ≈ r² for area ratio r
+  (median r 0.43 after a 1 px erosion, 1.7 after a 1 px dilation), below the single-lesion
+  thresholds even for lesions ≥ 80 px; multi-lesion configurations of lesions of about 40 px and
+  more can still pass. So the audit finds copies that reproduce the lesion boundaries (with
+  shifts up to a few pixels and small rotations, tested by P2–P4), not copies whose small
+  lesions are redrawn with about 1 px of boundary noise; a generator that memorized
+  configurations but not exact boundaries would be undercounted. P5's recall by lesion size
+  (E4 `validate`) quantifies this. *Source: `docs/e4-plan.md` (decision K),
+  `results/stanford_brainmets/e4/plant/area_change.csv`.*
+
 ## 5. Open questions
 
 **For the previous author** (status: open, 2026-11-01)
@@ -762,8 +815,9 @@ move the old ones, with the reason, to the process log.
 
 **Project decisions** (from the experiment plan)
 - [ ] Informative-lesion bound: decided during E0b/E3 coding, by its effect on the synthetic pool.
-- [ ] E4 go/no-go criteria (decision K in `docs/e4-plan.md`): fixed after the `plant` stage and
-      before `validate` runs. The lesion-level false-positive criterion must be stated per class
+- [x] E4 go/no-go criteria (decision K in `docs/e4-plan.md`): fixed after the `plant` stage and
+      before `validate` runs. *Resolved 2026-11-04: see "E4 go/no-go criteria" in section 2
+      (P5 reported only; detection limit in section 4).* The lesion-level false-positive criterion must be stated per class
       (full copies ~5% at chance; full or partial together 7–9%); proposal: E1 copy ≤ 7%, E2
       full ≤ 7%, E2 flagged ≤ 12% per stratum. Also weigh P5-dilate on small lesions (may be
       missed by both detectors by construction). 2026-11-03, updated 2026-11-04.

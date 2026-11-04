@@ -1,0 +1,52 @@
+E4 plant: dataset 'stanford_brainmets' (T and H-eval only; no detector runs)
+
+Bases (decision I): 100 slices of 20 T patients, 37 multi-lesion (by informative lesions >= 12 px):
+       patients  bases  multi
+group                        
+multi        10     50     30
+other        10     50      7
+Drawn patients skipped (quota not met with the z spacing): Mets_171, Mets_251, Mets_235, Mets_074.
+P6-add donors: 1503 informative H-eval lesions.
+
+Variants (scorable_e1 / e2 = at least one lesion >= the minimum area / informative lesion; keeps_base_lesions = every informative base lesion still >= 12 px, the gate rule for every variant but P6-remove; base_lesions_lost excludes the lesion P6-remove removes on purpose):
+  variant  planted  skipped  scorable_e1  scorable_e2  e2_single  e2_multi  stratum_changed  keeps_base_lesions  base_lesions  base_lesions_lost  median_area_ratio
+       P1      100        0          100          100         63        37                0                 100           147                  0              1.000
+       P2      100        0          100          100         63        37                0                 100           147                  0              1.000
+       P3      100        0          100          100         63        37                0                 100           147                  0              1.000
+       P4      100        0          100           98         64        34                5                  94           147                  6              1.000
+ P5-erode      100        0           88           63         49        14               47                  50           147                 68              0.433
+P5-dilate      100        0          100          100         57        43                6                  98           147                  2              1.700
+P6-remove       37       63           37           37         28         9               28                   0            47                  0              1.000
+   P6-add      100        0          100          100          0       100               63                 100           147                  0              1.000
+
+Variants not made:
+  variant                           reason  bases
+P6-remove fewer than 2 informative lesions     63
+
+Area change of the informative base lesions by size (ratio = largest planted piece / base area; kept = share still >= 12 px):
+  variant      bin  lesions  kept  median_ratio  min_ratio  max_ratio
+       P4 12-19 px       46  0.87          1.00       0.85       1.00
+       P4 20-39 px       44  1.00          1.00       0.95       1.04
+       P4 40-79 px       24  1.00          1.00       0.96       1.00
+       P4 >= 80 px       33  1.00          1.00       0.98       1.02
+ P5-erode 12-19 px       46  0.00          0.00       0.00       0.37
+ P5-erode 20-39 px       44  0.50          0.41       0.29       0.53
+ P5-erode 40-79 px       24  1.00          0.57       0.42       0.65
+ P5-erode >= 80 px       33  1.00          0.72       0.60       0.86
+P5-dilate 12-19 px       46  0.96          2.07       0.00       2.42
+P5-dilate 20-39 px       44  1.00          1.73       1.58       3.09
+P5-dilate 40-79 px       24  1.00          1.50       1.40       1.67
+P5-dilate >= 80 px       33  1.00          1.30       1.15       1.56
+
+Look at variants_grid.png, the variant_<P>.png sheets (colours: is every planted lesion traced to the right base lesion?) and area_change.png.
+Decision K (validation.criteria, set in the config; reasons in docs/e4-plan.md):
+recall:
+  P1: {detector: both, min: 1.0}
+  P2: {detector: any, min: 0.9}
+  P4: {detector: any, min: 0.9}
+  P6:
+    detector: lesion
+    min: 0.8
+    variants: [P6-remove, P6-add]
+reported_only: [P3, P5-erode, P5-dilate]
+false_positive_max: {e1_copy: 0.07, e2_full: 0.07, e2_flagged: 0.12}

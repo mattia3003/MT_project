@@ -14,14 +14,15 @@ when a step is done. E4 runs the E1 and E2 library detectors (`memtk.wholemask`,
 | 0 | This plan; decisions I and J recorded in the docs | docs | ✅ 2026-11-04 (decisions I and J set by the user in the planning session) |
 | 1 | Shared helpers to the library (`memtk/sets.py`); frozen-file helpers in `memtk/calibration.py`; config section `validation:` | refactor + library + config | ✅ 2026-11-04: `SliceSet`, `load_set`, `decision_e` moved unchanged (E3 check 16/16); `frozen_settings`, `e1_classes`, `e2_classes` + 3 tests (pytest 109); the class helpers reproduce the frozen H-cal chance rates exactly from the stored tables; `validation:` with I and J, `criteria: null` |
 | 2 | `memtk/planted.py` + `tests/test_planted.py` | library | ✅ 2026-11-04: 16 tests (pytest 125). Dry run on real T in memory (nothing written, no detector): 100 bases from 20 patients, 37 multi-lesion (30 from the multi group, 7 from the other); 4 multi-pool patients skipped (no spaced quota); all P1–P5 and P6-add made, P6-remove for the 37 multi bases; P6-add needed at most 8 tries (median 1). Every informative base lesion still ≥ 12 px: P4 94, P5-erode 50, P5-dilate 98 of 100 |
-| 3 | `plant`: base masks, variants, provenance, figures (no detector) | production (needs I) → evidence for K | open |
-| 4 | Decision K: go/no-go criteria in `validation.criteria` | decision | open |
+| 3 | `plant`: base masks, variants, provenance, figures (no detector) | production (needs I) → evidence for K | ✅ 2026-11-04: 737 planted masks (100 bases × 7 variants + 37 P6-remove), 1,264 planted lesions, every one traced to a source; every P1 map equals its base. Gated by `keeps_base_lesions`: P4 94, P5-erode 50, P5-dilate 98 of 100 (P5-erode keeps no 12–19 px lesion and half of the 20–39 px ones). `load_real` moved from `e0b.common` to `memtk.io` (E0b check 43/43); pytest 125 |
+| 4 | Decision K: go/no-go criteria in `validation.criteria` | decision | ✅ 2026-11-04, set by the user before any detector ran on the planted set: P1 100% both detectors; P2, P4 ≥ 90% any detector; P6 ≥ 80% lesion-level; H-eval false positives per stratum E1 copy ≤ 7%, E2 full ≤ 7%, E2 flagged ≤ 12%; P3, P5-erode, P5-dilate reported only. Decision I amended: the gate rule (`keeps_base_lesions`) applies to every variant but P6-remove. `plant` re-run so its review shows K |
 | 5 | `validate`: E1 + E2 on the planted set and H-eval; validation table; gate verdict | production (needs K) | open |
 | 6 | `check`; close the plan | consistency checks + docs | open |
 
-**Next: start here.** Step 3: the `plant` stage (`scripts/e4_validate.py`, `src/memtk/e4/`):
-bases and variants written with their provenance, `variant_summary.csv`, the figures, and
-`review.txt` as the evidence for decision K.
+**Next: start here.** Step 5: the `validate` stage (`src/memtk/e4/validate.py`): E1 and E2 on the
+planted set and H-eval with the frozen settings and thresholds, the gated recall per variant
+(decision J, `validation.gate`), false positives per stratum, the gate verdict against
+`validation.criteria`, the figures.
 
 **Milestone:** 13 Nov 2026, E4 gate passed. Indicative schedule: step 0 on 4 Nov, steps 1–2 on
 5 Nov, step 3 on 6 Nov, decision K on 7 Nov, step 5 on 8 Nov, step 6 on 9 Nov; 10–13 Nov is
@@ -77,12 +78,12 @@ Lettering continues from E1–E3 (F–H).
 
 | | Decision | Evidence | Needed by |
 | --- | --- | --- | --- |
-| I | Planting design: base selection and variant parameters. **Set 2026-11-04** | this plan; base counts above | `plant` |
+| I | Planting design: base selection and variant parameters. **Set 2026-11-04**; gate rule amended the same day with K | this plan; base counts above; `plant` review | `plant`, `validate` (gate rule) |
 | J | What counts as caught. **Set 2026-11-04** | report-notes section 5; frozen rule A | `validate` |
-| K | Go/no-go criteria (numbers) | `plant` review: the variants, their area changes, stratum changes (no scores) | `validate` |
+| K | Go/no-go criteria. **Set 2026-11-04**, before any detector ran on the planted set | `plant` review (variants, area changes, stratum changes; no scores) and the score definitions | `validate` |
 
-Each decision is a config value under `validation:`; I and J are entered as decided in step 1
-(dated comments), K starts as `null` and `validate` refuses to run while it is `null`.
+Each decision is a config value under `validation:` (dated comments): I as `bases`, `variants`
+and `gate`, J as `caught`, K as `criteria`; `validate` refuses to run while `criteria` is `null`.
 
 **Decision I (set 2026-11-04 by the user): planting design.**
 - **Base masks.** Eligible: T patients with ≥ 5 slices holding an informative lesion (92). With
@@ -101,7 +102,7 @@ Each decision is a config value under `validation:`; I and J are entered as deci
   | P2 shift 2 px | one random axis direction per base (up, down, left, right), so the distance is exact; no wrap-around (a direction that would push lesion pixels off the image is redrawn) | all |
   | P3 shift 5 px | as P2, same direction; reported only | all |
   | P4 rotate | ±5° (random sign) about the centroid of all lesion pixels; bilinear on the float mask, re-binarized at 0.5. Chosen over the image centre, which also moves peripheral lesions (≈ 4.4 px at 50 px from the centre) and so mixes rotation with the shift P2/P3 already test | all |
-  | P5-erode, P5-dilate | 1 px with the 3×3 cross (the smallest 1 px change); two sub-variants. Gated only on planted masks that keep every base lesion at ≥ the bound; the others are reported as "lesion destroyed", and recall is shown by lesion size | all |
+  | P5-erode, P5-dilate | 1 px with the 3×3 cross (the smallest 1 px change); two sub-variants. Reported only (decision K); recall shown by lesion size, masks that lose a lesion reported as "lesion destroyed" | all |
   | P6-remove | remove one random informative lesion, with its strays | ≥ 2 informative lesions |
   | P6-add | add one random informative H-eval lesion at its own pixel position, inside the base's brain mask and ≥ 3 background px from every base lesion (so it stays a separate lesion); redrawn up to a fixed number of tries, else skipped and reported | all |
 
@@ -115,6 +116,12 @@ Each decision is a config value under `validation:`; I and J are entered as deci
 - **Seeds:** one child generator per purpose (`np.random.SeedSequence(seed).spawn`: bases,
   directions, angles, P6 choices), so changing one draw leaves the others unchanged; logged in
   run_info.
+- **Gate rule (amended 2026-11-04 with decision K; first planned for P5 only):** a planted mask
+  counts in the gate only if every informative base lesion is still a lesion ≥ the bound
+  (`keeps_base_lesions`), for every variant except P6-remove, which removes a lesion on purpose.
+  Effect on the planted set: P1–P3 and P6-add keep 100 of 100, P4 94 of 100 (6 masks whose
+  12–19 px lesion fell just below 12 px test the bound, not robustness to rotation), P5-erode 50,
+  P5-dilate 98 (P5 is reported only). Config: `validation.gate`.
 
 **Decision J (set 2026-11-04 by the user): what counts as caught.** A planted mask is caught when
 it is flagged *and* the source patient is the base patient:
@@ -127,17 +134,32 @@ a complete copy shows in `all_copied` = False, not in its class. Chosen over "fl
 patient" (a flag pointing at the wrong patient is not a detection) and over restating an
 expected class per variant (P6's class depends on C, so the expectation would be arbitrary).
 
-**Decision K (open, set at step 4 before `validate`): go/no-go criteria.** Proposal:
-- P1: 100% caught by both detectors. A miss is a bug to fix in code, not a setting to tune.
-- P2, P4, P5-erode, P5-dilate (gated masks): ≥ 90% caught by at least one detector, per variant.
-- P6 (remove and add together; each also reported): ≥ 80% caught by E2.
-- H-eval false-positive rate per stratum (point estimate; bootstrap-by-patient interval
-  reported): E1 copy ≤ 7%, E2 full ≤ 7%, E2 flagged (full or partial) ≤ 12% (H-cal at chance
-  7.4% / 8.7%).
-- P3: reported only.
-- To weigh at K: P5-dilate may miss small lesions in both detectors by construction (see
-  Context). The `plant` review shows the area change of every planted lesion, so K can state the
-  P5 criterion by lesion-size bin if needed, before any score exists.
+**Decision K (set 2026-11-04 by the user, before any detector ran on the planted set): go/no-go
+criteria.** Config `validation.criteria`. Recall = share caught (decision J) of the gated masks.
+
+| Criterion | Value | Expected from the definitions |
+| --- | --- | --- |
+| P1 exact | 100%, both detectors | 100%; a miss is a bug to fix in code, not a setting to tune |
+| P2 shift 2 px | ≥ 90%, at least one detector | about 100%: E1's shift search covers 2 px; E2 position factor exp(−4 / (2 · 6.4²)) ≈ 0.95 |
+| P4 rotate 5° | ≥ 90%, at least one detector | likely, but a real test: rotation changes a few pixels of a small lesion's shape |
+| P6 remove + add (pooled; each reported) | ≥ 80%, lesion-level detector | about 100%: one lesion added to a one-lesion base gives C = 0.5 ≥ τ_C multi 0.406 (full); one of two lesions removed leaves a pair with s ≈ 1 ≥ τ_L single (partial) |
+| H-eval false positives, per stratum | E1 copy ≤ 7%, E2 full ≤ 7%, E2 flagged ≤ 12% | H-cal at chance 5.1 / 5.3%, 5.1 / 5.2%, 7.4 / 8.7% (single / multi); point estimate, bootstrap-by-patient interval reported |
+| P3, P5-erode, P5-dilate | reported only | P3 at the edge by construction (Context); P5 below |
+
+*Why P5 is reported only* (decided with the reasoning below, from the score definitions and the
+`plant` area changes, not from any detector score). An eroded lesion lies inside the original,
+so with area ratio r its shape factor (IoU) is about r and its size factor r: s ≈ r²; its Dice
+is 2r / (1 + r). Dilation is the same with 1 / r. The `plant` review gives r = 0.29–0.86 after
+erosion (median 0.43) and 1.15–3.1 after dilation (median 1.7). Even for lesions ≥ 80 px (erode
+r ≈ 0.72, dilate ≈ 1.30) s ≈ 0.52 / 0.59 and Dice ≈ 0.84 / 0.87, below the single-lesion
+thresholds (τ_C 0.719, τ_D 0.905); multi-lesion configurations (τ_C 0.406, τ_D 0.729) can pass
+for lesions of about 40 px and more. A 1 px boundary change at 128×128 therefore moves a typical
+lesion further from its original than chance matches lie. No detector setting can change that,
+because the thresholds are set by chance, so a P5 criterion would fail with no allowed remedy.
+P5 is reported by lesion size, and the detection limit is stated as a limitation: the audit
+finds copies that keep their lesion boundaries, not copies with about 1 px of boundary noise on
+small lesions. Considered and set aside: P5 gated at ≥ 90% (very likely to fail by
+construction), and a P5 criterion per lesion-size bin (single-lesion masks fail even at ≥ 80 px).
 
 ## Definitions (fixed in code and docs)
 
@@ -151,8 +173,8 @@ expected class per variant (P6's class depends on C, so the expectation would be
 - **Recall** of a variant: caught / scorable planted masks, per detector, by stratum and by base
   lesion-size bin, with a bootstrap-by-patient interval (resample the 20 base patients).
   **Per-patient recall:** base patients with all their planted masks of that variant caught.
-- **Gated:** the planted masks the criteria count (P5: those keeping every base lesion at ≥ the
-  bound; all others: every scorable mask).
+- **Gated:** the planted masks the criteria count: those keeping every informative base lesion
+  at ≥ the bound (`keeps_base_lesions`), for every variant but P6-remove (all its masks count).
 - **False-positive rate:** the share of H-eval slices flagged, per class (E1 copy; E2 full,
   partial, flagged) and stratum, with a bootstrap-by-patient interval (26 patients).
 - **RQ2 evidence:** planted masks caught by E2 and missed by E1, per variant.
@@ -189,8 +211,10 @@ T, H-eval and the planted set).
      E1 and E2 strata, all base lesions kept at ≥ the bound), `planted_lesions.csv` (one row per
      planted lesion: ID, source lesion ID, area before and after).
    - `results/<dataset>/e4/plant/`: `bases.csv`, `variant_summary.csv` (masks per variant,
-     skipped, unscorable, stratum changes, lesions destroyed, area change by size bin), the
-     figures below, `review.txt` (counts, and what to look at before setting K).
+     skipped, unscorable, stratum changes, lesions destroyed), and as built also
+     `lesion_fate.csv` (each informative base lesion in each planted mask), `area_change.csv`
+     (by size bin) and `skipped_variants.csv`; the figures below; `review.txt` (counts, and what
+     to look at before setting K).
 2. **`validate`** (needs K; step 5).
    - E1 and E2 on the planted set and on H-eval against T, settings and thresholds from the
      frozen file.
@@ -224,9 +248,14 @@ Added 2026-11-04 at the user's request, for seeing what the variants do and for 
   a zoomed crop around the lesions on the base BRAVO slice, the original outline in one colour
   and the planted outline in another, titled with the variant's parameters (direction, angle,
   lesion removed or added).
-- **`plant/variant_<P>.png`**, one per variant: about 20 bases, original next to planted (full
-  128×128 slice with a zoomed inset), lesions coloured per lesion (`LESION_COLORS`) so the
-  provenance can be checked by eye.
+- **`plant/variant_<P>.png`**, one per variant: 20 bases, three tiles each (as built: the planted
+  mask on the whole slice with the zoom window dashed, then the zoomed base lesions and planted
+  lesions; three tiles instead of an inset), lesions coloured per lesion (`LESION_COLORS`, the
+  planted ones in the colour of their source, orange for an added H-eval lesion) so the
+  provenance can be checked by eye. After the user's review (2026-11-04) the third tile also
+  shows the base lesions dashed in their colour and a dot and arrow where a lesion centre moved
+  by ≥ 1 px, so a shift, rotation, erosion or removal is visible in one tile; in the grid, base
+  lesions with no planted lesion traced to them are filled red and added lesions orange.
 - **`plant/area_change.png`:** area after vs before for every planted lesion of P4, P5-erode and
   P5-dilate, by base lesion size, with the 12 px bound marked: which lesions the morphology
   destroys or doubles (evidence for K).

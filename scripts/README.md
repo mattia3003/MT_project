@@ -36,7 +36,8 @@ Status: ✅ implemented · ⏳ planned
 | `e3_calibrate.py calibrate` | ✅ | decision G, E0b lesion tables (T, H-cal), E0 `bound_impact_<pool>.csv` | `<output_root>/<dataset>/e3/` (E1 and E2 tables of H-cal); `results/<dataset>/e3/calibrate/`: tau_D, tau_L, tau_C pooled and per stratum with bootstrap-by-patient intervals, E2 classes on H-cal, sensitivity, exclusions, histograms → **decision H** |
 | `e3_calibrate.py freeze` | ✅ | decision H, the `calibrate` tables and `thresholds.csv` | `configs/frozen/e3_<dataset>.yaml`: tau_D, tau_L, tau_C per stratum with intervals, class rule, bound, detector settings, H-cal chance rates (read by E4 and E5); refuses if the stored tables and `thresholds.csv` disagree or the E2 shortcuts would not be exact |
 | `e3_calibrate.py check` | ✅ | all E3 outputs, T and H-cal | `results/<dataset>/e3/check_report.txt` (PASS/FAIL: decisions, run logs reading only T and H-cal, frozen file reproduced, shortcuts against brute force, self-match on T, unit tests; exit code 1 on any failure) |
-| `e4_validate.py` | ⏳ (plan: `docs/e4-plan.md`; stages `plant`, `validate`, `check`) | frozen file, T, H-eval, `validation:` config (decisions I, J, K) | planted set and its provenance, validation table, gate verdict (read by E5) |
+| `e4_validate.py plant` | ✅ | decision I (`validation.bases`, `validation.variants`), decision C, the frozen file (bound, minimum area), E0b lesion tables (T, H-eval), brain masks, real BRAVO volumes (figures) | `<output_root>/<dataset>/e4/` (planted label maps, `planted.csv`, `planted_lesions.csv`); `results/<dataset>/e4/plant/`: bases, variant summary, lesion fate and area change by size, variants grid, one sheet per variant, area-change figure, proposal (`review.txt`) → **decision K**; no detector runs |
+| `e4_validate.py validate`, `check` | ⏳ (plan: `docs/e4-plan.md`) | decision K, frozen file, T, H-eval, planted set | validation table, gate verdict (read by E5), consistency checks |
 | `e5_audit.py` | ⏳ | validated config, S | main audit tables |
 | `e6_exposure.py` | ⏳ | E5 outputs | patient exposure, rarity, duplication |
 | `e7_reports.py` | ⏳ | E5, E6 outputs, planted copies | match reports, deletion test, correctness |
@@ -90,6 +91,12 @@ the production stage)
 ```
 `check` also takes `--n-brute 20` (random H-cal slices compared with brute force) and `--n-self 50`
 (random T slices for the self-match).
+
+**E4: planted-copy validation, the gate** (T, H-eval and the frozen file only; never S)
+```powershell
+.venv\Scripts\python.exe scripts\e4_validate.py plant            # needs I: planted copies P1-P6, provenance, figures -> evidence for decision K
+```
+`validate` (needs K) and `check` follow in later steps (`docs/e4-plan.md`).
 
 **Look at one slice** (after `lesions`): full-size picture with its lesion table, written to
 `results/<dataset|pool>/e0b/views/<key>.png`

@@ -8,9 +8,10 @@ data flows between them, and how the code is organised. The details live in two 
 - `docs/module-reference.md`: every code module (purpose, main functions, imports and "used
   by", external libraries), the tests, and the planned modules.
 
-*Status (2026-11-03): E0 (E0a + E0b) done and closed; environment pinned in
+*Status (2026-11-04): E0 (E0a + E0b) done and closed; environment pinned in
 `requirements-lock.txt`. E1–E3 done: thresholds frozen in `configs/frozen/` (`docs/e1-e3-plan.md`).
-E4 (the gate) is next.*
+E4 (the gate) in progress (`docs/e4-plan.md`): the planted copies are built; the go/no-go
+criteria and the detector run on them come next.*
 
 The diagrams are [Mermaid](https://mermaid.js.org/): GitHub renders them; in VS Code install
 *Markdown Preview Mermaid Support* (`bierner.markdown-mermaid`) and open the Markdown preview.
@@ -30,7 +31,7 @@ flowchart TD
     E2["E2 · lesion-level detector ✅<br/>(lesion by lesion)"]
     E3["E3 · calibration on H-cal ✅<br/>informative-lesion bound, thresholds"]
     FREEZE[["Thresholds frozen ✅<br/>S is never scored before this"]]
-    E4{"E4 · planted copies<br/>go / no-go gate"}
+    E4{"E4 · planted copies<br/>go / no-go gate (in progress)"}
     E5["E5 · main audit: score S once<br/>RQ1, RQ2"]
     E6["E6 · patient exposure, rarity,<br/>duplication (RQ3a, H1, H3)"]
     E7["E7 · match reports and their<br/>evaluation (RQ3b, xAI)"]
@@ -65,7 +66,7 @@ synthetic masks (what is audited; the main audit uses the clean and minor masks)
 | E0a (`e0a_prepare_data.py`) | raw real volumes, raw synthetic pool | patient split; real volumes in model space; index of the synthetic pool | everything after |
 | E0b (`e0b_audit.py`) | E0a outputs | brain masks; **lesion tables** (one row per lesion, label maps); **QC classes** of S; E0 statistics | E1–E7 |
 | E3 with E1, E2 (`e3_calibrate.py`) | lesion tables of T and H-cal | detector tables for H-cal; **frozen thresholds** (`configs/frozen/`) | E4, E5 |
-| E4 (`e4_validate.py`) | frozen thresholds, T, H-eval | validation table; planted copies | gate for E5; E7 |
+| E4 (`e4_validate.py`) | frozen thresholds, T, H-eval | planted copies with their provenance; validation table; gate verdict | gate for E5; E7 |
 | E5 (`e5_audit.py`) | frozen thresholds, S | main audit tables; flagged masks | E6, E7 |
 | E6, E7, E8 | E5 outputs (E7 also E6 and the planted copies) | exposure and rarity; match reports; paired-MRI similarity | the report |
 
@@ -76,15 +77,15 @@ columns: `docs/data-dictionary.md`.
 **Inside an experiment: review → decision → production.** Where a setting has to be chosen
 from the data, a *review stage* writes the evidence and a proposed value; the user sets the
 value in `configs/default.yaml` (with a dated comment); the *production stage* refuses to run
-while it is still `null`. E0b used this for decisions A–E; E3 continues with F–H. The stages of
+while it is still `null`. E0b used this for decisions A–E; E3 continues with F–H, E4 with I–K. The stages of
 each experiment, in order, are listed in its plan document and in `scripts/README.md`.
 
 ## 3. How the code is organised
 
 ```mermaid
 flowchart TB
-    L1["<b>Scripts</b> · scripts/<br/>the command line, one per experiment<br/>e0a_prepare_data.py · e0b_audit.py · e3_calibrate.py"]
-    L2["<b>Stage packages</b> · src/memtk/e0b/, e3/<br/>one experiment's stages: read inputs, call building blocks, write outputs"]
+    L1["<b>Scripts</b> · scripts/<br/>the command line, one per experiment<br/>e0a_prepare_data.py · e0b_audit.py · e3_calibrate.py · e4_validate.py"]
+    L2["<b>Stage packages</b> · src/memtk/e0b/, e3/, e4/<br/>one experiment's stages: read inputs, call building blocks, write outputs"]
     L3["<b>Library modules</b> · src/memtk/*.py<br/>building blocks that know nothing about stages"]
     L4["<b>Foundation</b> · config (YAML, paths, run logs) · io (files, tables, stacks)"]
     L1 --> L2 --> L3 --> L4
@@ -106,7 +107,9 @@ as from its script, e.g. `run_qc(load_config(), overwrite=True)`.
 | `stages` | shared helpers for stage packages: command-line options, decisions, overwrite guard |
 | `wholemask` | E1: the whole-mask detector (Dice with a small shift search) |
 | `lesionmatch` | E2: the lesion-level detector (lesion by lesion, Hungarian pairing) |
-| `calibration` | E3: chance-match rates, the informative-lesion bound, thresholds with bootstrap-by-patient intervals |
+| `calibration` | E3: chance-match rates, the informative-lesion bound, thresholds with bootstrap-by-patient intervals; for E4 and E5 the frozen file, its settings and the classes it gives |
+| `sets` | the real slice sets T, H-cal and H-eval as label-map stacks (held-out sets after decision E) |
+| `planted` | E4: planted copies P1–P6 of training masks, with the source of every planted lesion |
 
 Functions, imports, "used by" and tests: `docs/module-reference.md`.
 

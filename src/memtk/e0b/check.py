@@ -13,8 +13,7 @@ import sys
 import numpy as np
 
 from memtk import checks, config
-from memtk.e0b.common import load_real
-from memtk.io import LabelStack, MaskStack, read_table
+from memtk.io import LabelStack, MaskStack, load_real, read_table
 from memtk.lesions import brain_mask
 from memtk.stages import decided
 from memtk.synthetic import load_sample

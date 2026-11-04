@@ -1,6 +1,6 @@
-"""Helpers shared by the E0b stages: loading real volumes, brain boxes, and access to any slice
-of a dataset or pool. Helpers every stage package uses (decisions, overwrite and input guards,
-random picks) are in `memtk.stages`."""
+"""Helpers shared by the E0b stages: brain boxes, and access to any slice of a dataset or pool.
+Helpers every stage package uses (decisions, overwrite and input guards, random picks) are in
+`memtk.stages`; loading a patient's real volumes is `memtk.io.load_real` (moved 2026-11-04)."""
 
 from __future__ import annotations
 
@@ -10,18 +10,11 @@ import numpy as np
 import pandas as pd
 
 from memtk import config, ids
-from memtk.io import MaskStack, load_image, read_table
+from memtk.io import MaskStack, load_real, read_table
 from memtk.synthetic import load_sample
 
 # Brain-box columns of a brain.csv (inclusive rows and columns; -1 for a slice without brain)
 BOX_COLUMNS = ["box_r0", "box_r1", "box_c0", "box_c1"]
-
-
-def load_real(real_dir: Path, pid: str) -> tuple[np.ndarray, np.ndarray]:
-    """(bravo, seg) model-space volumes of one patient, shape (128, 128, D)."""
-    vol_dir = real_dir / "volumes" / pid
-    return (np.asanyarray(load_image(vol_dir / "bravo.nii.gz").dataobj),
-            np.asanyarray(load_image(vol_dir / "seg.nii.gz").dataobj))
 
 
 def boxes_of(brain_csv: pd.DataFrame, key_col: str) -> dict[str, tuple[int, int, int, int] | None]:
