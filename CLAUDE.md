@@ -38,9 +38,10 @@ Reference docs (read the relevant one before starting work):
   patient), K (go/no-go criteria; P5 reported only), the accepted deviation, stages, check 16/16.
   Its open items moved to `docs/experiment-plan.md` (E5, E7 "Carried over from E4") and
   report-notes.
-- No active working plan until E5 is planned: the next one is an E5 plan document (main audit);
-  read `docs/experiment-plan.md` E5 including its "Carried over from E1-E3" and "Carried over
-  from E4" notes first.
+- No active working plan until E5 is planned: the next one is `docs/e5-plan.md` (main audit,
+  E5 alone); read `docs/experiment-plan.md` E5 including its "Carried over from E1-E3" and
+  "Carried over from E4" notes first. Suggested grouping of the rest (experiment-plan,
+  "Plan documents for E5-E8"): E5 alone, E6 + E7 in one plan, E8 alone.
 This file is a summary. If it disagrees with the docs, the docs win; flag the mismatch.
 
 ## Data

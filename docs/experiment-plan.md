@@ -504,7 +504,7 @@ The full draft goes to your supervisor by Nov 30, 2026, and the final report is 
 | 31 Oct | E0, including mask quality control | Split confirmed; preprocessing and quality-control rules fixed; lesion table cached | Must (done 3 Nov) |
 | 9 Nov | E1, E2, E3 | Both detectors run on H-cal; informative-lesion bound and thresholds frozen | Must (done 3 Nov) |
 | — | E3 null model | Dropped (2026-11-01); see E3 step 6 | — |
-| 13 Nov | E4 (gate) | Validation passed | Must |
+| 13 Nov | E4 (gate) | Validation passed | Must (done 4 Nov: ACCEPTED with a recorded deviation) |
 | 17 Nov | E5 | Main audit tables for RQ1 and RQ2 | Must |
 | 24 Nov | E6; E7 match reports, deletion test and correctness on planted copies | Results for RQ3a, H1, H3 and RQ3b | Must |
 | 24 Nov, if time | E8 | Optional RQ4 (H4); otherwise moved to the master thesis | Could |
@@ -512,6 +512,16 @@ The full draft goes to your supervisor by Nov 30, 2026, and the final report is 
 | 1–8 Dec | Revision after feedback | Final report | Must |
 
 **Write while you run.** Draft the data and methods sections from early November, while E1–E4 are running, so only results and discussion remain after 24 November.
+
+**Plan documents for E5–E8 (suggested 2026-11-04, after E4; the user decides when each is planned).** As E1–E3 shared one plan, the rest group into three:
+
+| Plan | Experiments | Why |
+| --- | --- | --- |
+| `docs/e5-plan.md` | E5 alone | The only step that scores S, once: every analysis choice is fixed in the plan before the run (sensitivity runs on S, the drop-only re-run, the adjacent-slice window, the tests, the noisy masks), as E4's criteria were fixed before `validate`. Its outputs are frozen evidence that E6–E8 only read. Last exit item: the number of flagged masks, which decides whether E8 runs (about 20 or more). |
+| `docs/e6-e7-plan.md` | E6 and E7 together | Same frozen E5 pair tables, per-patient counting and deadline (24 Nov); shared decisions made once: 3D lesion identity (E6 H1 and E7's adjacent slices in Panel C) and nearest neighbour vs strongest pair (report-notes section 5); E7's Panel C shows E6's exposure ratio. Cuttable steps (taxonomy, lesion-level correctness) marked optional. Order inside: build and check the match-report generator on the E4 planted copies first (known source; needs no S, can start while E5 runs), then apply it to the S flags, so report rules are never tuned on S. |
+| `docs/e8-plan.md` | E8 alone | Different data and methods (paired synthetic MRI, BRAVO, SSIM); optional, last, own go/no-go after E5; first to cut without touching anything else. |
+
+Rough effort: E5 4–6 working days, E6 + E7 7–9, E8 3–4 if run.
 
 **If you fall behind, cut in this order:**
 
@@ -531,6 +541,6 @@ Never cut E4: without validation, a negative result means nothing.
 
 **Decisions still open**
 
-- [ ] Go/no-go criteria for E4: decided during the work, but fixed before E4 runs.
+- [x] Go/no-go criteria for E4: decision K, 2026-11-04, fixed before `validate` ran (P5 reported only); three false-positive criteria failed and were accepted as a recorded deviation (see E4 result).
 - [x] Position frame for copy detection in E2: pixel coordinates (decision F, 2026-11-03); see "Carried over from E0" in E2.
 - [ ] The informative-lesion bound: decided during coding, by looking at how candidate bounds affect the synthetic pool, together with the quality-control re-run in E0.

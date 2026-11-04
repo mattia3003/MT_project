@@ -403,3 +403,8 @@ in full, with what replaced them.
   through the planted set). Plan closed: `docs/e4-plan.md` marked reference only with a "Carried
   forward" table; CLAUDE.md says no active plan until E5 is planned. *Source:
   `results/stanford_brainmets/e4/check_report.txt`.*
+- **E5–E8 plan grouping suggested** (at the user's request, not yet decided): E5 alone (scores S
+  once, all choices fixed first), E6 + E7 in one plan (shared tables, decisions and deadline;
+  report generator built on the E4 planted copies before S), E8 alone (optional, own go/no-go).
+  Recorded in `docs/experiment-plan.md` ("Plan documents for E5–E8"), with the E4 milestone and
+  the E4 criteria item marked done there; pointer in CLAUDE.md.
