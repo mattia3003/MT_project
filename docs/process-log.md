@@ -304,3 +304,25 @@ in full, with what replaced them.
   to "P6"); `docs/report-notes.md` (section 2: decisions I and J; the C-weighting entry's claim
   that P6 "expects" the partial class corrected; section 5: P6 question resolved, criteria item
   updated). No code or config changed. *Source: `docs/e4-plan.md`.*
+- **E4 step 1: shared helpers and config.** `SliceSet`, `load_set`, `decision_e` moved unchanged
+  from `memtk/e3/common.py` to the new library module `memtk/sets.py` (E3, E4 and E5 use them);
+  E3 imports updated; E3 check 16/16 after the move. New in `memtk/calibration.py`:
+  `frozen_settings` (detector keywords from the frozen file), `e1_classes`, `e2_classes` (classes
+  under each query's frozen stratum thresholds, with the patients of the nearest neighbour and
+  strongest-pair slice); 3 tests, pytest 109. Verified on the stored H-cal tables: the class
+  helpers reproduce the frozen `hcal_chance_rates` exactly in both strata. Config: `validation:`
+  section with decisions I and J, `criteria: null` (K). Module reference: "used by" lists
+  re-taken from the code, which also added a few entries missing since E3 (`e3.check`,
+  `e3.common`, `e3.freeze`). *Source: pytest, `results/stanford_brainmets/e3/check_report.txt`,
+  scratch check (not in the repo).*
+- **E4 step 2: `memtk/planted.py`.** Base selection, the variants, attach-or-drop labelling and
+  provenance as pure functions; 16 tests (pytest 125). While writing it, the base draw was
+  simplified twice before the tests ran (a patient missing the quota first crashed instead of
+  being skipped; then a for/else replaced by a count check), and a patient skipped in the multi
+  group may still be drawn as an "other" patient. One Pylance false alarm (scipy stubs type
+  `affine_transform`'s `offset` as float) silenced with a reasoned ignore. Dry run on real T in
+  memory (no detector, nothing written): 100 bases from 20 patients, 37 multi-lesion (30 from the
+  multi group, 7 from the other); 4 multi-group patients skipped for z spacing; all P1–P5 and
+  P6-add made, P6-remove for the 37 multi-lesion bases; P6-add needed at most 8 tries (median 1);
+  every informative base lesion still ≥ 12 px for P4 94, P5-erode 50, P5-dilate 98 of 100
+  (relevant to decision K). *Source: pytest, scratch script (not in the repo).*

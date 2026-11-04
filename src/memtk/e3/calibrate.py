@@ -19,8 +19,9 @@ from matplotlib.figure import Figure
 
 from memtk import calibration, config, lesionmatch, wholemask
 from memtk.e3.bound import EDGES
-from memtk.e3.common import SliceSet, lesion_settings, load_set
+from memtk.e3.common import lesion_settings
 from memtk.plotting import save
+from memtk.sets import SliceSet, load_set
 from memtk.stages import decided, refuse_overwrite, require
 
 # The 5% cut's bound from bound-review (2026-11-03), kept as a sensitivity next to decision G's 12 px

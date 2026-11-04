@@ -15,9 +15,10 @@ import pandas as pd
 from matplotlib.figure import Figure
 
 from memtk import calibration, config, lesionmatch
-from memtk.e3.common import SliceSet, lesion_settings, load_set
+from memtk.e3.common import lesion_settings
 from memtk.ids import parse_lesion_id
 from memtk.plotting import HIGHLIGHT_COLOR, LESION_COLOR, hide_unused, save, show_slice, tile_figure
+from memtk.sets import SliceSet, load_set
 from memtk.stages import decided, pick, refuse_overwrite, require
 
 # Lower edges of the area bins: the minimum lesion area, then the candidate bounds of the E0

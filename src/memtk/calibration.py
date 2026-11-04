@@ -1,6 +1,7 @@
 """E3 building blocks: chance-match rates of held-out lesions by size and the informative-lesion
 bound (`docs/experiment-plan.md`, E3 step 1; `docs/e1-e3-plan.md`, decision G), and percentile
-thresholds with bootstrap-by-patient intervals (E3 step 2; decision H).
+thresholds with bootstrap-by-patient intervals (E3 step 2; decision H). For E4 and E5: the frozen
+threshold file, its detector settings, and the classes it gives the detectors' results.
 
 A held-out (H-cal) lesion was never trained on, so its best match against the training lesions
 is chance. The chance-match rate of an area bin is the share of its lesions whose best lesion
@@ -17,6 +18,9 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import yaml
+
+from memtk.ids import parse_slice_key
+from memtk.lesionmatch import LesionMatch
 
 
 def area_bins(area: np.ndarray, edges: Sequence[int]) -> pd.Series:
@@ -84,6 +88,46 @@ def frozen_threshold(frozen: dict, detector: str, name: str, n_lesions: np.ndarr
     stratum from its lesion count (the count the detector uses)."""
     values = frozen["thresholds"][detector][name]
     return np.where(stratum(n_lesions) == "multi", float(values["multi"]), float(values["single"]))
+
+
+def frozen_settings(frozen: dict) -> tuple[dict, dict]:
+    """Keywords for `wholemask.match` (top_k_dice, top_k_centroid, max_shift) and for
+    `lesionmatch.match` (min_area = the informative-lesion bound, sigma_px, prefilter_px,
+    candidate_min_s), read from the frozen file: E4 and E5 take their settings only from there."""
+    wm, les = frozen["detectors"]["whole_mask"], frozen["detectors"]["lesion"]
+    if les["position_frame"] != "pixel":
+        raise ValueError(f"Frozen position_frame '{les['position_frame']}' is not implemented (only 'pixel')")
+    return ({"top_k_dice": int(wm["top_k_dice"]), "top_k_centroid": int(wm["top_k_centroid"]),
+             "max_shift": int(wm["max_shift_px"])},
+            {"min_area": int(frozen["informative_bound_px"]), "sigma_px": float(les["sigma_px"]),
+             "prefilter_px": float(les["prefilter_px"]), "candidate_min_s": float(les["candidate_min_s"])})
+
+
+def e1_classes(e1: pd.DataFrame, n_lesions: np.ndarray, frozen: dict) -> pd.DataFrame:
+    """The E1 table (`wholemask.match`) with each query's `n_lesions` (lesions >= the minimum
+    area, in the table's row order), `stratum`, frozen `tau_D` and `copy` (score >= tau_D)."""
+    out = e1.copy()
+    out["n_lesions"] = np.asarray(n_lesions)
+    out["stratum"] = stratum(out["n_lesions"].to_numpy())
+    out["tau_D"] = frozen_threshold(frozen, "whole_mask", "tau_D", out["n_lesions"].to_numpy())
+    out["copy"] = out["score"] >= out["tau_D"]
+    return out
+
+
+def e2_classes(e2: LesionMatch, frozen: dict) -> pd.DataFrame:
+    """`LesionMatch.summary` under the frozen tau_L and tau_C of each query's stratum: one row per
+    query slice with an informative lesion, with its `stratum` (by informative lesions), `tau_L`,
+    `tau_C`, and the patients of the nearest neighbour and of the strongest-pair slice
+    (`nn_patient`, `strongest_patient`; "" without a candidate)."""
+    n = e2.queries[e2.queries["n_informative"] > 0].set_index("query")["n_informative"]
+    tau_L = pd.Series(frozen_threshold(frozen, "lesion", "tau_L", n.to_numpy()), index=n.index)
+    tau_C = pd.Series(frozen_threshold(frozen, "lesion", "tau_C", n.to_numpy()), index=n.index)
+    out = e2.summary(tau_L, tau_C)
+    out["stratum"] = stratum(out["n_informative"].to_numpy())
+    out["tau_L"], out["tau_C"] = out["query"].map(tau_L), out["query"].map(tau_C)
+    for col, key in (("nn_patient", "nn"), ("strongest_patient", "strongest_train")):
+        out[col] = [parse_slice_key(k)[0] if k else "" for k in out[key]]
+    return out
 
 
 def propose_bound(rates: pd.DataFrame, cut: float) -> int | None:

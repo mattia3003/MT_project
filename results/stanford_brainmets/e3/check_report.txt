@@ -15,6 +15,6 @@ E3 check: dataset 'stanford_brainmets', seed 2026
 [PASS] E2 shortcuts exact at the frozen thresholds (tau_L >= cut and > score at the prefilter; tau_C > 0)
 [PASS] E2 shortcuts == brute force (candidate slices and C): 2428 candidate slice pairs of 20 random H-cal slices
 [PASS] self-match: random T slices find an identical slice (E1 score 1, E2 C 1): 50 slices
-[PASS] unit tests (pytest) pass: 106 passed in 12.84s
+[PASS] unit tests (pytest) pass: 109 passed in 12.94s
 
 16 passed, 0 failed

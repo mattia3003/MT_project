@@ -36,7 +36,7 @@ Status: ✅ implemented · ⏳ planned
 | `e3_calibrate.py calibrate` | ✅ | decision G, E0b lesion tables (T, H-cal), E0 `bound_impact_<pool>.csv` | `<output_root>/<dataset>/e3/` (E1 and E2 tables of H-cal); `results/<dataset>/e3/calibrate/`: tau_D, tau_L, tau_C pooled and per stratum with bootstrap-by-patient intervals, E2 classes on H-cal, sensitivity, exclusions, histograms → **decision H** |
 | `e3_calibrate.py freeze` | ✅ | decision H, the `calibrate` tables and `thresholds.csv` | `configs/frozen/e3_<dataset>.yaml`: tau_D, tau_L, tau_C per stratum with intervals, class rule, bound, detector settings, H-cal chance rates (read by E4 and E5); refuses if the stored tables and `thresholds.csv` disagree or the E2 shortcuts would not be exact |
 | `e3_calibrate.py check` | ✅ | all E3 outputs, T and H-cal | `results/<dataset>/e3/check_report.txt` (PASS/FAIL: decisions, run logs reading only T and H-cal, frozen file reproduced, shortcuts against brute force, self-match on T, unit tests; exit code 1 on any failure) |
-| `e4_validate.py` | ⏳ | thresholds, T, H-eval | planted-copy validation table (gate) |
+| `e4_validate.py` | ⏳ (plan: `docs/e4-plan.md`; stages `plant`, `validate`, `check`) | frozen file, T, H-eval, `validation:` config (decisions I, J, K) | planted set and its provenance, validation table, gate verdict (read by E5) |
 | `e5_audit.py` | ⏳ | validated config, S | main audit tables |
 | `e6_exposure.py` | ⏳ | E5 outputs | patient exposure, rarity, duplication |
 | `e7_reports.py` | ⏳ | E5, E6 outputs, planted copies | match reports, deletion test, correctness |

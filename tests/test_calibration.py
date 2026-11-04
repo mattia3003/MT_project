@@ -4,10 +4,25 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from memtk.calibration import (area_bins, bin_label, bootstrap_interval, chance_rates, frozen_threshold,
-                               percentile_threshold, propose_bound, read_frozen, stratum)
+from memtk import lesionmatch
+from memtk.calibration import (area_bins, bin_label, bootstrap_interval, chance_rates, e1_classes, e2_classes,
+                               frozen_settings, frozen_threshold, percentile_threshold, propose_bound, read_frozen,
+                               stratum)
 
 EDGES = (4, 10, 20)
+FROZEN = {
+    "thresholds": {"whole_mask": {"tau_D": {"single": 0.9, "multi": 0.7}},
+                   "lesion": {"tau_L": {"single": 0.74, "multi": 0.82}, "tau_C": {"single": 0.72, "multi": 0.41}}},
+    "informative_bound_px": 12,
+    "detectors": {"whole_mask": {"top_k_dice": 20, "top_k_centroid": 20, "max_shift_px": 3},
+                  "lesion": {"position_frame": "pixel", "sigma": 0.05, "prefilter": 0.2, "candidate_min_s": 0.1,
+                             "sigma_px": 6.4, "prefilter_px": 25.6}},
+}
+
+
+def square(labels: np.ndarray, label: int, row: int, col: int, side: int = 4) -> np.ndarray:
+    labels[row:row + side, col:col + side] = label
+    return labels
 
 
 def test_area_bins_and_labels():
@@ -38,6 +53,41 @@ def test_frozen_thresholds_are_read_back_per_stratum(tmp_path):
     path.write_text("thresholds:\n  lesion:\n    tau_C: {single: 0.7, multi: 0.4}\n", encoding="utf-8")
     frozen = read_frozen(path)
     assert frozen_threshold(frozen, "lesion", "tau_C", np.array([1, 2, 3])).tolist() == [0.7, 0.4, 0.4]
+
+
+def test_frozen_settings_are_keywords_for_both_detectors():
+    wm, les = frozen_settings(FROZEN)
+    assert wm == {"top_k_dice": 20, "top_k_centroid": 20, "max_shift": 3}
+    assert les == {"min_area": 12, "sigma_px": 6.4, "prefilter_px": 25.6, "candidate_min_s": 0.1}
+    other = {**FROZEN, "detectors": {**FROZEN["detectors"], "lesion": {**FROZEN["detectors"]["lesion"],
+                                                                       "position_frame": "brain"}}}
+    with pytest.raises(ValueError):
+        frozen_settings(other)
+
+
+def test_e1_classes_use_each_query_stratum_threshold():
+    e1 = pd.DataFrame({"query": ["a", "b", "c"], "score": [0.95, 0.85, 0.85]})
+    out = e1_classes(e1, np.array([1, 1, 2]), FROZEN)
+    assert out["stratum"].tolist() == ["single", "single", "multi"]
+    assert out["tau_D"].tolist() == [0.9, 0.9, 0.7]
+    assert out["copy"].tolist() == [True, False, True]   # 0.85 is a copy only in the multi stratum
+
+
+def test_e2_classes_give_strata_thresholds_and_patients():
+    reference = np.stack([square(np.zeros((64, 64), int), 1, 10, 10),
+                          square(square(np.zeros((64, 64), int), 1, 40, 10), 2, 40, 40)])
+    queries = np.stack([reference[0],                                  # exact copy of A/z0
+                        reference[1],                                  # exact copy of B/z3 (two lesions)
+                        square(np.zeros((64, 64), int), 1, 10, 50),    # far from every reference lesion
+                        square(np.zeros((64, 64), int), 1, 30, 30, side=2)])  # 4 px: not informative
+    _, settings = frozen_settings(FROZEN)
+    e2 = lesionmatch.match(queries, ["q1", "q2", "q3", "q4"], reference, ["A/z0", "B/z3"], **settings)
+    out = e2_classes(e2, FROZEN).set_index("query")
+    assert out.index.tolist() == ["q1", "q2", "q3"]                    # q4 has no informative lesion
+    assert out["stratum"].tolist() == ["single", "multi", "single"]
+    assert out["tau_C"].tolist() == [0.72, 0.41, 0.72] and out["tau_L"].tolist() == [0.74, 0.82, 0.74]
+    assert out["class"].tolist() == ["full", "full", "novel"]
+    assert out["nn_patient"].tolist() == ["A", "B", ""] and out["strongest_patient"].tolist() == ["A", "B", ""]
 
 
 def test_bootstrap_is_repeatable_and_collapses_for_constant_scores():

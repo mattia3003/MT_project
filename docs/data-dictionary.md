@@ -62,7 +62,13 @@ pixel-sum limit; `real_sets`, decision E); E1–E3 (`docs/e1-e3-plan.md`): `dete
 decision F; `sigma`, `prefilter` as fractions of the 128-px field; `candidate_min_s`),
 `calibration` (`percentile`, `bootstrap_draws`; decision G: `provisional_tau_L`,
 `chance_rate_max`, `informative_bound_px`; decision H: `strata.whole_mask`, `strata.lesion`, the
-latter for tau_L and tau_C);
+latter for tau_L and tau_C); E4 (`docs/e4-plan.md`): `validation.bases` (decision I:
+`min_informative_slices`, `patients_multi`, `min_multi_slices`, `multi_per_patient`,
+`single_per_patient`, `patients_other`, `slices_per_patient`, `min_z_gap`),
+`validation.variants` (decision I: `shift_small_px`, `shift_large_px`, `rotate_deg`,
+`rotate_threshold`, `morph_px`, `add_min_gap_px`, `add_max_tries`), `validation.caught`
+(decision J), `validation.criteria` (decision K, `null` until set; read by `validate`). E4 and E5
+take detector settings and thresholds from the frozen file, not from these config sections;
 `real_datasets.<name>` (`root`, `image_file`, `mask_file`, `train_split`,
 `heldout_split`, `heldout_sets`); `synthetic_pools.<name>` (`dir`, `glob`, `image_channel`,
 `mask_channel`, `trained_on`, `legacy_exclusion_file`).

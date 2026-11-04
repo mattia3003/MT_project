@@ -12,16 +12,16 @@ when a step is done. E4 runs the E1 and E2 library detectors (`memtk.wholemask`,
 | # | Step | Kind | Status |
 | --- | --- | --- | --- |
 | 0 | This plan; decisions I and J recorded in the docs | docs | ✅ 2026-11-04 (decisions I and J set by the user in the planning session) |
-| 1 | Shared helpers to the library (`memtk/sets.py`); frozen-file helpers in `memtk/calibration.py`; config section `validation:` | refactor + library + config | open |
-| 2 | `memtk/planted.py` + `tests/test_planted.py` | library | open |
+| 1 | Shared helpers to the library (`memtk/sets.py`); frozen-file helpers in `memtk/calibration.py`; config section `validation:` | refactor + library + config | ✅ 2026-11-04: `SliceSet`, `load_set`, `decision_e` moved unchanged (E3 check 16/16); `frozen_settings`, `e1_classes`, `e2_classes` + 3 tests (pytest 109); the class helpers reproduce the frozen H-cal chance rates exactly from the stored tables; `validation:` with I and J, `criteria: null` |
+| 2 | `memtk/planted.py` + `tests/test_planted.py` | library | ✅ 2026-11-04: 16 tests (pytest 125). Dry run on real T in memory (nothing written, no detector): 100 bases from 20 patients, 37 multi-lesion (30 from the multi group, 7 from the other); 4 multi-pool patients skipped (no spaced quota); all P1–P5 and P6-add made, P6-remove for the 37 multi bases; P6-add needed at most 8 tries (median 1). Every informative base lesion still ≥ 12 px: P4 94, P5-erode 50, P5-dilate 98 of 100 |
 | 3 | `plant`: base masks, variants, provenance, figures (no detector) | production (needs I) → evidence for K | open |
 | 4 | Decision K: go/no-go criteria in `validation.criteria` | decision | open |
 | 5 | `validate`: E1 + E2 on the planted set and H-eval; validation table; gate verdict | production (needs K) | open |
 | 6 | `check`; close the plan | consistency checks + docs | open |
 
-**Next: start here.** Step 1: move `SliceSet`, `load_set` and `decision_e` from
-`memtk/e3/common.py` to `memtk/sets.py`, add the frozen-file helpers, and add the `validation:`
-config section with decision I's values (dated comments) and `criteria: null`.
+**Next: start here.** Step 3: the `plant` stage (`scripts/e4_validate.py`, `src/memtk/e4/`):
+bases and variants written with their provenance, `variant_summary.csv`, the figures, and
+`review.txt` as the evidence for decision K.
 
 **Milestone:** 13 Nov 2026, E4 gate passed. Indicative schedule: step 0 on 4 Nov, steps 1–2 on
 5 Nov, step 3 on 6 Nov, decision K on 7 Nov, step 5 on 8 Nov, step 6 on 9 Nov; 10–13 Nov is
@@ -168,9 +168,13 @@ expected class per variant (P6's class depends on C, so the expectation would be
   - `e1_classes(e1, frozen, n_lesions)` and `e2_classes(lesion_match, frozen)`: one row per query
     with stratum, its thresholds and class under the frozen stratified thresholds (reused by
     E5). Built on `frozen_threshold`, `stratum`, `LesionMatch.summary`.
-- **`memtk/planted.py` (step 2):** `shift`, `rotate`, `morph` (erode / dilate), `remove_lesion`,
-  `add_lesion` (pure functions on masks, returning the planted mask and its parameters);
-  `choose_bases` (quotas, z spacing, seeded); `provenance` (planted lesion → source lesion).
+- **`memtk/planted.py` (step 2):** `shift`, `shift_direction`, `rotate` / `rotate_labels`,
+  `morph` (erode / dilate), `add_lesion` (pure functions on masks); `variants_of` (every variant
+  of one base: labelled with attach-or-drop, with parameters, sources and the P5 survivor flag;
+  variants that cannot be made are returned with a reason); `choose_bases` (quotas, z spacing,
+  seeded; a patient who cannot meet the quota is skipped and the next drawn patient used);
+  `provenance` (planted lesion → source lesion); `planted_key`. P6-remove needs no function of
+  its own (the mask without one label).
 
 ## Stages: `scripts/e4_validate.py` → `src/memtk/e4/`
 

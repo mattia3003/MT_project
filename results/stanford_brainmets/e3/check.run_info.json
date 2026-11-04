@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-11-03T22:04:45",
+  "timestamp": "2026-11-04T10:34:56",
   "script": "C:\\Master thesis\\MT_project\\src\\memtk\\e3\\check.py",
   "argv": [
     "scripts\\e3_calibrate.py",
@@ -78,6 +78,29 @@
         "whole_mask": "stratified",
         "lesion": "stratified"
       }
+    },
+    "validation": {
+      "bases": {
+        "min_informative_slices": 5,
+        "patients_multi": 10,
+        "min_multi_slices": 3,
+        "multi_per_patient": 3,
+        "single_per_patient": 2,
+        "patients_other": 10,
+        "slices_per_patient": 5,
+        "min_z_gap": 2
+      },
+      "variants": {
+        "shift_small_px": 2,
+        "shift_large_px": 5,
+        "rotate_deg": 5,
+        "rotate_threshold": 0.5,
+        "morph_px": 1,
+        "add_min_gap_px": 3,
+        "add_max_tries": 50
+      },
+      "caught": "flagged_and_source_patient",
+      "criteria": null
     },
     "real_datasets": {
       "stanford_brainmets": {

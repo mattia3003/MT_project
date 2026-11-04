@@ -18,9 +18,10 @@ import numpy as np
 from memtk import checks, config, lesionmatch, wholemask
 from memtk.calibration import read_frozen
 from memtk.e3.calibrate import thresholds
-from memtk.e3.common import SliceSet, lesion_settings, load_hcal_tables, load_set
+from memtk.e3.common import lesion_settings, load_hcal_tables
 from memtk.e3.freeze import compare_tables, frozen_thresholds, shortcut_problems
 from memtk.io import read_table
+from memtk.sets import SliceSet, load_set
 from memtk.stages import decided
 
 DECISION_KEYS = ["detectors.lesion.position_frame", "calibration.provisional_tau_L", "calibration.chance_rate_max",

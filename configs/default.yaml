@@ -107,6 +107,37 @@ calibration:                  # E3
                               # 0.771 flags 2.1% / 12.6%); tau_C 0.719 vs 0.406 (a pooled 0.710 flags 6.9% / 0%);
                               # the multi stratum rests on 17 patients with tight intervals
 
+# --- E4: planted-copy validation, the gate (docs/e4-plan.md) ------------------------------------
+# Detector settings and thresholds come only from the frozen E3 file, never from this config.
+
+validation:
+  # Decision I (planting design), decided 2026-11-04 by the user while planning E4: bases from 10
+  # patients with many multi-lesion slices + 10 others (a plain random draw gives ~25 multi-lesion
+  # bases, too few for P6-remove); P4 about the lesion-pixel centroid (not the image centre, which
+  # would mix rotation with shift); P5 erode and dilate with the 3x3 cross, gated on surviving lesions
+  bases:
+    min_informative_slices: 5 # eligible: T patients with at least this many slices with an informative lesion
+    patients_multi: 10        # drawn from eligible patients with >= min_multi_slices multi-lesion slices ...
+    min_multi_slices: 3
+    multi_per_patient: 3      # ... giving this many multi- and single-lesion slices each
+    single_per_patient: 2
+    patients_other: 10        # drawn from the other eligible patients ...
+    slices_per_patient: 5     # ... giving this many random informative slices each
+    min_z_gap: 2              # slices of one patient at least this far apart in z
+  variants:
+    shift_small_px: 2         # P2, one random axis direction per base
+    shift_large_px: 5         # P3, same direction as P2; reported only
+    rotate_deg: 5             # P4, random sign, about the centroid of all lesion pixels
+    rotate_threshold: 0.5     # P4 re-binarizes the bilinearly rotated mask at this value
+    morph_px: 1               # P5-erode and P5-dilate, 3x3 cross
+    add_min_gap_px: 3         # P6-add: background px between the added lesion and every base lesion
+    add_max_tries: 50         # P6-add: H-eval lesions tried per base before the base is skipped
+  # Decision J, decided 2026-11-04 by the user: caught = flagged (E1 copy; E2 full or partial) and
+  # the source patient is the base patient; incompleteness is shown by all_copied, not by the class
+  caught: flagged_and_source_patient
+  # Decision K (evidence: `e4_validate.py plant`): the go/no-go criteria, set before `validate` runs
+  criteria: null
+
 real_datasets:
   stanford_brainmets:
     root: data/StanfordSkullStripped_1mm
