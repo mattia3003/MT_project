@@ -33,10 +33,14 @@ Reference docs (read the relevant one before starting work):
   of how the detectors and E3 were built: decisions F (pixel coordinates), G (bound 12 px), H
   (stratified), the redefinition of C with tau_C kept (rule A), stages, tests. Its open items
   moved to `docs/experiment-plan.md` (E4, E5, E6 "Carried over" notes) and report-notes.
-- `docs/e4-plan.md`: E4 plan (planted-copy gate), ACTIVE since 2026-11-04. Read it before
-  continuing E4 work. Decisions I (planting design, gate rule), J (caught = flagged + right
-  patient) and K (go/no-go criteria; P5 reported only) are set; `plant` and `validate` done
-  (gate ACCEPTED with a recorded deviation, 2026-11-04); `check` next, then close the plan.
+- `docs/e4-plan.md`: E4 plan, CLOSED 2026-11-04 (reference only, not updated). The record of how
+  the gate was built: decisions I (planting design, gate rule), J (caught = flagged + right
+  patient), K (go/no-go criteria; P5 reported only), the accepted deviation, stages, check 16/16.
+  Its open items moved to `docs/experiment-plan.md` (E5, E7 "Carried over from E4") and
+  report-notes.
+- No active working plan until E5 is planned: the next one is an E5 plan document (main audit);
+  read `docs/experiment-plan.md` E5 including its "Carried over from E1-E3" and "Carried over
+  from E4" notes first.
 This file is a summary. If it disagrees with the docs, the docs win; flag the mismatch.
 
 ## Data
@@ -138,7 +142,7 @@ Roadmap: preliminary audit (no weights) -> master thesis on retrained models (Br
 original weights = Branch A fallback); the preliminary toolkit is reused in the master thesis.
 
 Timeline: full draft to supervisor by 30 Nov 2026, submission 9 Dec 2026. Milestones:
-E0 + mask QC by 31 Oct (done 3 Nov); E1-E3 (bound + thresholds frozen) by 9 Nov (done 3 Nov); E4 gate by 13 Nov;
+E0 + mask QC by 31 Oct (done 3 Nov); E1-E3 (bound + thresholds frozen) by 9 Nov (done 3 Nov); E4 gate by 13 Nov (done 4 Nov, ACCEPTED);
 E5 by 17 Nov; E6/E7 by 24 Nov; E8 (optional RQ4) last, if time. If behind, cut: E8 (moves to
 the master thesis), then optional small-lesion agreement (E2/E7) (null model already dropped),
 then E7 taxonomy, then the lesion-level part of

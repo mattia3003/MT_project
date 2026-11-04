@@ -1,0 +1,20 @@
+E4 check: dataset 'stanford_brainmets', seed 2026
+
+[PASS] all E4 decisions (I, J, K) are set in the config
+[PASS] 'plant' outputs made with the current config values: seed, lesions.attach_gap, validation.bases, validation.variants
+[PASS] 'validate' outputs made with the current config values: seed, lesions.attach_gap, validation.bases, validation.variants, validation.gate, validation.caught, validation.criteria, validation.accepted_deviation, calibration.bootstrap_draws
+[PASS] 'validate' ran after 'plant': 2026-11-04T14:03:17 vs 2026-11-04T13:14:35
+[PASS] 'plant' read only T, H-eval (S never read): ['T', 'H-eval']
+[PASS] 'validate' read only T, H-eval, planted (S never read): ['T', 'H-eval', 'planted']
+[PASS] frozen file unchanged since 'plant' and 'validate' ran (SHA-256): plant: 3ea3b5de0589, validate: 3ea3b5de0589
+[PASS] frozen file settings == current config
+[PASS] planted set reproduced from the seed (keys and label maps): 737 planted masks
+[PASS] provenance reproduced; every planted lesion has a source: 1264 lesions
+[PASS] every P1 label map equals its base map: 100 masks
+[PASS] bases are T slices; added lesions (P6-add) come from H-eval only: 20 base patients, 100 added lesions
+[PASS] per-mask outcomes (caught by decision J) reproduced from the stored tables: 737 planted masks
+[PASS] gate.csv reproduced (values, pass, accepted): 10 criteria
+[PASS] verdict reproduced and equal to the logged and stored one: ACCEPTED (logged ACCEPTED, gate.csv ACCEPTED)
+[PASS] unit tests (pytest) pass: 128 passed in 12.79s
+
+16 passed, 0 failed

@@ -494,6 +494,12 @@ move the old ones, with the reason, to the process log.
   criterion was written as a point estimate. *Source: `configs/default.yaml`
   (`validation.accepted_deviation`), `results/stanford_brainmets/e4/validate/fp_heval.csv`,
   `gate.csv`; patient clustering from a read-only check of `heval_classes.csv` (process log).*
+- **E4 verified as reproducible and run without S** (2026-11-04). The E4 check passes 16/16: the
+  planted set (737 masks, 1,264 lesions with their sources) is reproduced from the seed; the gate
+  table, the per-mask outcomes and the verdict are reproduced from the stored detector tables;
+  the frozen thresholds are unchanged since both E4 stages ran (SHA-256); every E4 run log lists
+  only T, H-eval and the planted set as inputs; the bases are T slices and every added lesion
+  comes from H-eval. *Source: `results/stanford_brainmets/e4/check_report.txt`.*
 
 ## 3. Findings
 

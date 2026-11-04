@@ -1,5 +1,12 @@
 # E4 plan: planted-copy validation, the go/no-go gate (`scripts/e4_validate.py`)
 
+> **Closed 2026-11-04. Reference only, no longer updated.** E4 is done: gate ACCEPTED (every
+> recall criterion passed; three false-positive criteria failed by 0.1–0.4 points and were
+> accepted by the user as a recorded deviation), E4 check 16/16. This file stays as the record of
+> how E4 was built: decisions I–K, the gate rule, the accepted deviation, the stages. Open items
+> were carried forward on 2026-11-04 (see "Carried forward" at the end); the next work is planned
+> in a new plan document for E5.
+
 Working plan for E4, kept in the repo so work can resume from here. The experiment is specified
 in `docs/experiment-plan.md` (E4, including its "Carried over from E1–E3" notes); this file
 records how it is implemented, stage by stage, and what has been decided. Update the status table
@@ -17,12 +24,11 @@ when a step is done. E4 runs the E1 and E2 library detectors (`memtk.wholemask`,
 | 3 | `plant`: base masks, variants, provenance, figures (no detector) | production (needs I) → evidence for K | ✅ 2026-11-04: 737 planted masks (100 bases × 7 variants + 37 P6-remove), 1,264 planted lesions, every one traced to a source; every P1 map equals its base. Gated by `keeps_base_lesions`: P4 94, P5-erode 50, P5-dilate 98 of 100 (P5-erode keeps no 12–19 px lesion and half of the 20–39 px ones). `load_real` moved from `e0b.common` to `memtk.io` (E0b check 43/43); pytest 125 |
 | 4 | Decision K: go/no-go criteria in `validation.criteria` | decision | ✅ 2026-11-04, set by the user before any detector ran on the planted set: P1 100% both detectors; P2, P4 ≥ 90% any detector; P6 ≥ 80% lesion-level; H-eval false positives per stratum E1 copy ≤ 7%, E2 full ≤ 7%, E2 flagged ≤ 12%; P3, P5-erode, P5-dilate reported only. Decision I amended: the gate rule (`keeps_base_lesions`) applies to every variant but P6-remove. `plant` re-run so its review shows K |
 | 5 | `validate`: E1 + E2 on the planted set and H-eval; validation table; gate verdict | production (needs K) | ✅ 2026-11-04. Recall (gated, caught by decision J): P1 100%, P2 100%, P4 98.9% (93/94), P6 97.1% (133/137): all pass. H-eval false positives: E1 copy 7.2% / 7.4% and E2 full single 7.1% exceed the 7% limit (E2 full multi 2.9%, E2 flagged 10.1% / 8.5% pass): FAIL, **accepted by the user as a recorded deviation** (`validation.accepted_deviation`; verdict ACCEPTED). A dtype bug in `criterion_caught` (every mask counted as missed in `misses.png`; gate values unaffected) fixed with a regression test; pytest 128 |
-| 6 | `check`; close the plan | consistency checks + docs | open |
+| 6 | `check`; close the plan | consistency checks + docs | ✅ 2026-11-04: E4 check 16/16 (decisions, run logs and inputs, frozen file unchanged since both stages (SHA-256), settings, planted set and provenance reproduced from the seed, P1 = bases, bases from T and added lesions from H-eval only, outcomes, gate and verdict reproduced from the stored tables, pytest 128); checked to fail on damaged copies of the gate table, a flipped caught flag and an incomplete deviation list. Plan closed |
 
-**Next: start here.** Step 6: the `check` stage (consistency checks of all E4 outputs, listed under
-Stages below, plus the verdict reproduced under `validation.accepted_deviation`), then close this
-plan and carry its open items forward (E5: `gate_status`, the H-eval tables as baseline, the
-measured H-eval rates; E7: nearest neighbour vs strongest pair).
+**E4 done (2026-11-04), ahead of the 13 Nov milestone; plan closed the same day.** Next: plan E5,
+the main audit, in its own plan document (`docs/experiment-plan.md`, E5, including its "Carried
+over from E1–E3" and "Carried over from E4" notes).
 
 **Milestone:** 13 Nov 2026, E4 gate passed. Indicative schedule: step 0 on 4 Nov, steps 1–2 on
 5 Nov, step 3 on 6 Nov, decision K on 7 Nov, step 5 on 8 Nov, step 6 on 9 Nov; 10–13 Nov is
@@ -315,14 +321,22 @@ Added 2026-11-04 at the user's request, for seeing what the variants do and for 
 - The user views the `plant` review and figures before setting K.
 - Before E5: `gate.csv` records PASS for every criterion, and `check` passes.
 
-## Carried forward (to fill in when the plan closes)
+## Carried forward (2026-11-04)
 
-Known already:
-- E5 checks `memtk.e4.common.gate_status` (runs only on PASS or ACCEPTED) and reuses the H-eval
-  detector tables and `heval_classes.csv` of `validate`; S is compared with the measured H-eval
-  rates per class and stratum (7.1–7.4% for E1 copy and E2 full single, not the nominal 5%).
-- E7 reads `planted.csv` and `planted_lesions.csv` for its correctness check (source patient
-  ≥ 90% of planted copies, correct lesions ≥ 80% of P6).
-- E7: a flag's nearest neighbour (by C) and strongest lesion pair can name different patients
-  (4 P6 masks flagged full against another patient while the strongest pair, s = 1.00, pointed to
-  the base); match reports should show both.
+The open items of this plan moved to the documents where they will be used:
+
+| Item (first noted) | Moved to |
+| --- | --- |
+| E5 runs only on PASS or ACCEPTED (`memtk.e4.common.gate_status`) | `docs/experiment-plan.md`, E5, "Carried over from E4" |
+| E5 reuses the H-eval detector tables and `heval_classes.csv`; compares S with the measured H-eval rates (7.1–7.4% in three cells), not 5%, with bootstrap by patient | the same E5 notes; `docs/report-notes.md` section 4 |
+| The detection limit for boundary noise (P5: 0% at 12–19 px, 85% at ≥ 80 px): S rates are lower bounds for such copies | the same E5 notes; `docs/report-notes.md` sections 3 and 4 |
+| Nearest neighbour and strongest pair can name different patients (4 P6 masks); match reports show both | `docs/experiment-plan.md`, E7, "Carried over from E4"; `docs/report-notes.md` section 5 |
+| The planted set and its provenance for E7's correctness check | `docs/experiment-plan.md`, E7, "Carried over from E4" |
+| Adjacent-slice nearest neighbours (caught P5-erode masks match a neighbouring slice of the base patient): count per patient, credit every pair | `docs/report-notes.md` section 3 (supports E6's design) |
+| Combined perturbations not tested | `docs/report-notes.md` section 4 |
+| The accepted deviation and its reasons | `docs/report-notes.md` section 2; `configs/default.yaml` (`validation.accepted_deviation`) |
+
+Done before closing: decisions I, J, K set (I amended with K); the planted set built and checked;
+the gate run and accepted with a recorded deviation; the E4 check passes; the docs (data
+dictionary, module reference, scripts README, architecture overview) describe every E4 stage and
+file.

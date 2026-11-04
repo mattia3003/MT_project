@@ -10,9 +10,8 @@ data flows between them, and how the code is organised. The details live in two 
 
 *Status (2026-11-04): E0 (E0a + E0b) done and closed; environment pinned in
 `requirements-lock.txt`. E1–E3 done: thresholds frozen in `configs/frozen/` (`docs/e1-e3-plan.md`).
-E4 (the gate) in progress (`docs/e4-plan.md`): planted copies built and validated; gate ACCEPTED
-with a recorded deviation (three false-positive rates 0.1–0.4 points over their limit); the
-consistency check comes next.*
+E4 (the gate) done (`docs/e4-plan.md`): gate ACCEPTED with a recorded deviation (three
+false-positive rates 0.1–0.4 points over their limit), check 16/16. E5 (the main audit) is next.*
 
 The diagrams are [Mermaid](https://mermaid.js.org/): GitHub renders them; in VS Code install
 *Markdown Preview Mermaid Support* (`bierner.markdown-mermaid`) and open the Markdown preview.
@@ -32,7 +31,7 @@ flowchart TD
     E2["E2 · lesion-level detector ✅<br/>(lesion by lesion)"]
     E3["E3 · calibration on H-cal ✅<br/>informative-lesion bound, thresholds"]
     FREEZE[["Thresholds frozen ✅<br/>S is never scored before this"]]
-    E4{"E4 · planted copies<br/>go / no-go gate (in progress)"}
+    E4{"E4 · planted copies ✅<br/>go / no-go gate: accepted"}
     E5["E5 · main audit: score S once<br/>RQ1, RQ2"]
     E6["E6 · patient exposure, rarity,<br/>duplication (RQ3a, H1, H3)"]
     E7["E7 · match reports and their<br/>evaluation (RQ3b, xAI)"]
@@ -48,8 +47,8 @@ flowchart TD
 
     classDef next fill:#fff3cd,stroke:#b8860b
     classDef planned stroke-dasharray: 5 5,color:#666
-    class E4 next
-    class E5,E6,E7,E8 planned
+    class E5 next
+    class E6,E7,E8 planned
 ```
 
 ✅ done · yellow: next · dashed: planned. The procedures are in

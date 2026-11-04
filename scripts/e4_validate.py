@@ -14,17 +14,21 @@ Stages, run in this order (see docs/e4-plan.md):
              thresholds; recall per variant (gated masks), false positives per stratum, the gate
              verdict (PASS / FAIL) against validation.criteria, figures
              -> <output_root>/<dataset>/e4/ (detector tables), results/<dataset>/e4/validate/
-  check      (step 6, not yet implemented) consistency checks of all E4 outputs
+  check      consistency checks of all E4 outputs: decisions and run logs (only T, H-eval and the
+             planted set read), the frozen file unchanged, the planted set reproduced from the seed,
+             the gate reproduced from the stored tables, the unit tests; exit code 1 on any failure
+             -> results/<dataset>/e4/check_report.txt
 
 Examples (from the repository root):
   .venv\\Scripts\\python.exe scripts\\e4_validate.py plant
   .venv\\Scripts\\python.exe scripts\\e4_validate.py validate
+  .venv\\Scripts\\python.exe scripts\\e4_validate.py check
 """
 
 import argparse
 
 from memtk import config
-from memtk.e4 import plant, validate
+from memtk.e4 import check, plant, validate
 from memtk.stages import add_stage
 
 
@@ -36,6 +40,8 @@ def main() -> None:
               plant.run_plant)
     add_stage(stages, "validate", "both detectors on the planted set and H-eval; gate verdict (needs K)",
               validate.run_validate)
+    add_stage(stages, "check", "consistency checks of all E4 outputs (exit code 1 on any failure)",
+              check.run_check, overwrite=False)
 
     args = parser.parse_args()
     options = {k: v for k, v in vars(args).items() if k not in ("stage", "run", "config")}

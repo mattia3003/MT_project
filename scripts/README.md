@@ -38,7 +38,7 @@ Status: ✅ implemented · ⏳ planned
 | `e3_calibrate.py check` | ✅ | all E3 outputs, T and H-cal | `results/<dataset>/e3/check_report.txt` (PASS/FAIL: decisions, run logs reading only T and H-cal, frozen file reproduced, shortcuts against brute force, self-match on T, unit tests; exit code 1 on any failure) |
 | `e4_validate.py plant` | ✅ | decision I (`validation.bases`, `validation.variants`), decision C, the frozen file (bound, minimum area), E0b lesion tables (T, H-eval), brain masks, real BRAVO volumes (figures) | `<output_root>/<dataset>/e4/` (planted label maps, `planted.csv`, `planted_lesions.csv`); `results/<dataset>/e4/plant/`: bases, variant summary, lesion fate and area change by size, variants grid, one sheet per variant, area-change figure, proposal (`review.txt`) → **decision K**; no detector runs |
 | `e4_validate.py validate` | ✅ | decisions I (gate rule), J, K, `validation.accepted_deviation`, frozen file, T, H-eval, planted set | `<output_root>/<dataset>/e4/` (E1 and E2 tables of the planted set and H-eval, `heval_classes.csv`: E5's baseline); `results/<dataset>/e4/validate/`: per-mask outcomes, recall per variant with intervals, false positives per stratum, RQ2 counts, `gate.csv`, figures, `review.txt` ending in PASS / ACCEPTED / FAIL (E5 runs on PASS or ACCEPTED) |
-| `e4_validate.py check` | ⏳ (plan: `docs/e4-plan.md`) | all E4 outputs | consistency checks |
+| `e4_validate.py check` | ✅ | all E4 outputs, T and H-eval, the frozen file | `results/<dataset>/e4/check_report.txt` (PASS/FAIL: decisions, run logs reading only T, H-eval and the planted set, frozen file unchanged, planted set reproduced from the seed, P1 = bases, bases from T and added lesions from H-eval, gate and verdict reproduced from the stored tables, unit tests; exit code 1 on any failure) |
 | `e5_audit.py` | ⏳ | validated config, S | main audit tables |
 | `e6_exposure.py` | ⏳ | E5 outputs | patient exposure, rarity, duplication |
 | `e7_reports.py` | ⏳ | E5, E6 outputs, planted copies | match reports, deletion test, correctness |
@@ -97,8 +97,8 @@ the production stage)
 ```powershell
 .venv\Scripts\python.exe scripts\e4_validate.py plant            # needs I: planted copies P1-P6, provenance, figures -> evidence for decision K
 .venv\Scripts\python.exe scripts\e4_validate.py validate         # needs K: both detectors on planted set + H-eval, gate verdict
+.venv\Scripts\python.exe scripts\e4_validate.py check            # consistency checks of all E4 outputs (exit code 1 on failure)
 ```
-`check` follows in step 6 (`docs/e4-plan.md`).
 
 **Look at one slice** (after `lesions`): full-size picture with its lesion table, written to
 `results/<dataset|pool>/e0b/views/<key>.png`

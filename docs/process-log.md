@@ -393,3 +393,13 @@ in full, with what replaced them.
   - The user agreed not to add a combined variant (remove a lesion and move the others); reason
     in report-notes section 4.
   *Source: `results/stanford_brainmets/e4/validate/review.txt`, `gate.csv`, `fp_heval.csv`.*
+- **E4 step 6: `check`; E4 done** (milestone of 13 Nov met on 4 Nov). New
+  `src/memtk/e4/check.py` and stage `check` (reuses `checks.CheckReport` and
+  `check_run_logs`, and the `plant` / `validate` functions to reproduce their outputs). First
+  run 16/16. Because every check passed at once, a read-only test confirmed that they can fail:
+  a changed gate value, a flipped `accepted` flag, a flipped caught flag and a deviation list
+  missing one failed criterion are all detected (scratch script, not in the repo). Two checks
+  beyond the plan: bases are T slices and every P6-add lesion comes from H-eval (no leakage
+  through the planted set). Plan closed: `docs/e4-plan.md` marked reference only with a "Carried
+  forward" table; CLAUDE.md says no active plan until E5 is planned. *Source:
+  `results/stanford_brainmets/e4/check_report.txt`.*

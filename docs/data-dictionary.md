@@ -36,7 +36,7 @@ ID columns as text.
 | | `check` | ✅ | all E3 outputs, T and H-cal label maps | `results/<dataset>/e3/check_report.txt`, `check.run_info.json` |
 | `e4_validate.py` | `plant` | ✅ | decision I (`validation.bases`, `validation.variants`), decision C, the frozen file (bound, minimum area), E0b lesion tables (T, H-eval), `brain_masks.npz`, real BRAVO volumes (figures) | `<output_root>/<dataset>/e4/` (planted set), `results/<dataset>/e4/plant/` (evidence for decision K) |
 | | `validate` | ✅ | decisions I (gate rule), J, K and `validation.accepted_deviation`, the frozen file (settings, thresholds), T and H-eval label maps, the planted set, real BRAVO volumes (figures) | `<output_root>/<dataset>/e4/` (detector tables of the planted set and H-eval, `heval_classes.csv`), `results/<dataset>/e4/validate/` (gate verdict) |
-| | `check` | planned | all E4 outputs | check report |
+| | `check` | ✅ | all E4 outputs, T and H-eval label maps, the frozen file | `results/<dataset>/e4/check_report.txt`, `check.run_info.json` |
 | `e5_audit.py` | — | planned | frozen thresholds, S | main audit tables |
 | `e6_exposure.py` | *tbd* | planned | E5 outputs | exposure, rarity, duplication |
 | `e7_reports.py` | *tbd* | planned | E5, E6 outputs, planted copies | match reports, deletion test |
@@ -497,8 +497,7 @@ any failure. Run log: `check.run_info.json`.
 
 ### Planted set: `<output_root>/<dataset>/e4/`
 
-Written by `plant`; read by `validate` and `check` (planned) and by E7 (correctness of the match
-reports). Not in git; `plant` reproduces it from the seed. Planted keys are
+Written by `plant`; read by `validate` and `check` and by E7 (correctness of the match reports). Not in git; `plant` reproduces it from the seed. Planted keys are
 `<variant>__<patient_id>_z<z>` (e.g. `P2__Mets_005_z127`), lesion IDs `<key>/L<n>`.
 
 | File | Content |
@@ -557,3 +556,13 @@ Written by `validate`. In git. The gate verdict, read by E5 through `memtk.e4.co
 | `misses.png` | Gated planted masks missed by their criterion's detector: base, planted mask, nearest neighbour found, scores, and why ("not flagged" or "flagged, wrong patient"); written only when there are misses |
 | `heval_flags.png` | Random H-eval false positives per class next to the training slice that flagged them |
 | `run_info.json` | Run log (as above) |
+
+### `results/<dataset>/e4/check_report.txt`
+
+Written by `check`. In git. One PASS/FAIL line per check: decisions I, J, K set; the `plant` and
+`validate` run logs made with today's settings, in order, reading only T, H-eval and the planted
+set; the frozen file unchanged since both stages ran (SHA-256) and equal to the current settings;
+the planted set and its provenance reproduced from the seed; every P1 map equal to its base; bases
+from T and added lesions from H-eval only; the per-mask outcomes, `gate.csv` and the verdict
+reproduced from the stored detector tables; the unit tests. Exit code 1 on any failure. Run log:
+`check.run_info.json`.
