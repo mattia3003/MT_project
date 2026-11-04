@@ -281,3 +281,26 @@ in full, with what replaced them.
   drop-only re-run needs drop-only label maps and recalibrated thresholds, S under the E3
   sensitivity settings, strata for the noisy-mask E1 run). CLAUDE.md: the plan listed as
   closed; no active plan until E4 is planned. *Source: `docs/e1-e3-plan.md` ("Carried forward").*
+
+## 2026-11-04: E4 planned
+
+- **E4 plan written** (`docs/e4-plan.md`, step 0). Its layout follows `docs/e1-e3-plan.md`: steps
+  0–6, decision gates I–K, the stages `plant`, `validate` and `check` of a new
+  `scripts/e4_validate.py`, library modules `memtk/sets.py` (moved from `memtk/e3/common.py`),
+  additions to `memtk/calibration.py`, and a new `memtk/planted.py`, plus tests and figures. The
+  figure list (a variants-vs-original grid, one sheet per variant, area change, and debugging
+  figures for `validate`) was added at the user's request. Base availability was checked first
+  with a read-only query of `lesions.csv` / `slices.csv`: 3,172 T slices with an informative
+  lesion (805 multi-lesion), 92 eligible patients (≥ 5 such slices), 45 of them with ≥ 3
+  multi-lesion slices; informative lesion area median 28 px (quartiles 17 / 64).
+- **Decisions I and J set by the user** in the planning session (each chosen from options with a
+  recommendation): bases 10 + 10 patients, P4 about the lesion-pixel centroid, P5 erode and
+  dilate gated on surviving lesions, caught = flagged and the right source patient. One detail
+  changed while writing the plan: P6-add places the added lesion inside the base's brain *mask*
+  (`brain_masks.npz` exists for every real lesion slice) rather than its brain box. Decision K
+  (criteria) left open with a proposal.
+- **Docs updated:** CLAUDE.md (the E4 plan as the active plan; decisions I and J in the E4
+  bullet); `docs/experiment-plan.md` E4 (status line; typo "P6 or P7" in the Outputs line fixed
+  to "P6"); `docs/report-notes.md` (section 2: decisions I and J; the C-weighting entry's claim
+  that P6 "expects" the partial class corrected; section 5: P6 question resolved, criteria item
+  updated). No code or config changed. *Source: `docs/e4-plan.md`.*

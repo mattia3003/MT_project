@@ -379,7 +379,11 @@ move the old ones, with the reason, to the process log.
     and score, and E5 counts near-exact whole-mask copies separately;
   - "partial" is the honest label: a memorized slice would be reproduced with all its lesions,
     and E4's planted variant P6 (one lesion added or removed) expects exactly that class, which
-    an area-weighted C would miss for small added lesions;
+    an area-weighted C would miss for small added lesions (*corrected 2026-11-04:* under the
+    frozen rule A most P6 variants come out *full*, since C stays above τ_C multi; E4 therefore
+    counts P6 as caught when flagged and shows incompleteness with `all_copied`, decision J
+    below; the point about area weighting stands, as an added small lesion would barely lower
+    an area-weighted C);
   - area weighting turns the lesion-level score into a variant of whole-mask Dice and blurs the
     contrast RQ2 tests;
   - weak small-lesion evidence is already handled by the informative-lesion bound and the
@@ -410,6 +414,38 @@ move the old ones, with the reason, to the process log.
   tables, and the E2 shortcuts were verified exact at the frozen thresholds, including against
   brute force on 20 random H-cal slices (2,428 candidate slice pairs). *Source:
   `configs/frozen/e3_stanford_brainmets.yaml`, `results/stanford_brainmets/e3/check_report.txt`.*
+- **E4 planting design** (decision I, 2026-11-04, set by the user while planning E4).
+  - *Base masks:* 10 T patients drawn from those with ≥ 3 multi-lesion slices (3 multi- and 2
+    single-lesion slices each) and 10 from the other eligible patients (5 slices each); slices of
+    one patient at least 2 apart in z. Eligible: ≥ 5 slices with an informative lesion (92 of
+    the 103 T patients that have one; 45 of the 92 have ≥ 3 multi-lesion slices). A plain random
+    draw would give about 25 multi-lesion bases (T: 805 of 3,172 informative slices are
+    multi-lesion, 25%), too few for P6-remove, which needs two informative lesions. Drawing half
+    multi-lesion overall was set aside as over-representing them against T.
+  - *P4* rotates by ±5° about the centroid of all lesion pixels. Rotating about the image centre
+    also moves peripheral lesions (about 4.4 px at 50 px from the centre, beyond E1's 3 px shift
+    search) and would mix rotation with the shift that P2 and P3 already test.
+  - *P5* is split into erode and dilate (1 px, 3×3 cross). Half of the informative T lesions are
+    ≤ 28 px (quartiles 17 / 64 px), so erosion can destroy a lesion and dilation roughly doubles
+    it. The gate counts only planted masks that keep every base lesion at ≥ the bound; destroyed
+    ones are reported separately and recall is shown by lesion size.
+  - *P6* is split into remove (one random informative lesion, bases with ≥ 2) and add (one
+    informative H-eval lesion at its own pixel position, inside the base's brain mask, ≥ 3
+    background px from the base lesions).
+
+  *Source: read-only query of `processed_data/model_space/stanford_brainmets/lesions.csv` and
+  `slices.csv`, 2026-11-04; `docs/e4-plan.md`.*
+- **What counts as caught in E4** (decision J, 2026-11-04, set by the user). A planted copy is
+  caught when it is flagged (E1: copy; E2: full or partial) *and* the source patient is the base
+  patient (E2: the nearest neighbour's patient for full copies, the strongest pair's patient for
+  partial ones). Under the frozen rule A, "full" means the configuration is closer than chance,
+  not that every lesion is copied, so most P6 variants come out full (one lesion added to a
+  one-lesion base: C = 1.0 / 2 = 0.5 ≥ τ_C multi 0.406). That a copy is incomplete is shown by
+  `all_copied` = False, not by the class. Considered and set aside: "flagged, any patient" (a
+  flag pointing at the wrong patient is not a detection) and an expected class per variant
+  (P6's class depends on C, so the expectation would be arbitrary). The go/no-go criteria
+  themselves (decision K) are set after the planted set is built and before any detector scores
+  it. *Source: `docs/e4-plan.md`; frozen thresholds in `configs/frozen/e3_stanford_brainmets.yaml`.*
 
 ## 3. Findings
 
@@ -726,13 +762,13 @@ move the old ones, with the reason, to the process log.
 
 **Project decisions** (from the experiment plan)
 - [ ] Informative-lesion bound: decided during E0b/E3 coding, by its effect on the synthetic pool.
-- [ ] E4 go/no-go criteria: fixed before E4 runs. The lesion-level false-positive criterion must
-      be stated per class (full copies ~5% at chance; full or partial together 7–9%). Also
-      decide P6's expected class: under the frozen rule A, "full" means the configuration is
-      closer than chance, not that every lesion is copied, so most P6 variants come out full
-      (one lesion added to a one-lesion base: C = 0.5 ≥ τ_C multi 0.406). Options: count P6 as
-      caught when flagged and check "partial" with `all_copied` / `n_kept`, or restate the
-      expected classes. 2026-11-03.
+- [ ] E4 go/no-go criteria (decision K in `docs/e4-plan.md`): fixed after the `plant` stage and
+      before `validate` runs. The lesion-level false-positive criterion must be stated per class
+      (full copies ~5% at chance; full or partial together 7–9%); proposal: E1 copy ≤ 7%, E2
+      full ≤ 7%, E2 flagged ≤ 12% per stratum. Also weigh P5-dilate on small lesions (may be
+      missed by both detectors by construction). 2026-11-03, updated 2026-11-04.
+      *P6's expected class: resolved 2026-11-04 by decision J* (caught = flagged and the right
+      source patient; incompleteness shown with `all_copied`; see section 2).
 - [ ] **3D lesion identity for H1 (E6).** 26-connected 3D linking merges neighbouring metastases
       for 2.7% of T's 3D lesions, holding 10.3% of the 2D lesions (section 3). Options: link 2D
       lesions slice to slice by overlap (one-to-one), or keep 26-connectivity and re-run H1

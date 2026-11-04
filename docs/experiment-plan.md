@@ -320,7 +320,9 @@ The check never changes C or the copy class. It is supporting evidence for the m
 - **P3 sits at the edge by construction.** A single lesion shifted 5 px keeps shape and size but its position factor drops to exp(−25 / (2 · 6.4²)) ≈ 0.737, just under τ\_L (0.739) and above τ\_C (0.719); E1's shift search only reaches 3 px. P3 stays "reported only", as planned.
 - **The false-positive criterion per class** (see the note under the criteria above); H-cal chance rates at the frozen thresholds are in the frozen file (`hcal_chance_rates`).
 
-**Outputs:** The validation table, and the planted copies themselves, which E7 reuses to check whether explanations are correct. It also doubles as the first evidence for RQ2: the cases where whole-mask Dice misses P6 or P7 and the lesion-level detector catches them.
+**Outputs:** The validation table, and the planted copies themselves, which E7 reuses to check whether explanations are correct. It also doubles as the first evidence for RQ2: the cases where whole-mask Dice misses P6 and the lesion-level detector catches them.
+
+*Status (2026-11-04): planned in `docs/e4-plan.md`.* Decided there: decision I (planting design: 10 + 10 base patients so ~35–40 bases are multi-lesion; P4 about the lesion-pixel centroid; P5 as erode and dilate sub-variants with the 3×3 cross, gated only on masks that keep every base lesion at ≥ the bound; P6-remove and P6-add as sub-variants) and decision J (caught = flagged, i.e. E1 copy or E2 full or partial, *and* source patient = base patient; whether every lesion was copied shows in `all_copied`). This resolves the P6 question above. The go/no-go criteria are decision K, set after the `plant` stage and before `validate` runs; the proposal states the false-positive criterion per class (E1 copy ≤ 7%, E2 full ≤ 7%, E2 flagged ≤ 12%).
 
 ## E5 – Main audit (RQ1, RQ2)
 

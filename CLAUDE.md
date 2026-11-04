@@ -33,8 +33,9 @@ Reference docs (read the relevant one before starting work):
   of how the detectors and E3 were built: decisions F (pixel coordinates), G (bound 12 px), H
   (stratified), the redefinition of C with tau_C kept (rule A), stages, tests. Its open items
   moved to `docs/experiment-plan.md` (E4, E5, E6 "Carried over" notes) and report-notes.
-- No active working plan until E4 is planned: the next one is an E4 plan document (planted-copy
-  gate); read `docs/experiment-plan.md` E4 including its "Carried over from E1-E3" notes first.
+- `docs/e4-plan.md`: E4 plan (planted-copy gate), ACTIVE since 2026-11-04. Read it before
+  continuing E4 work. Decisions I (planting design) and J (caught = flagged + right patient) are
+  set; K (go/no-go criteria) is set after the `plant` stage, before `validate` runs.
 This file is a summary. If it disagrees with the docs, the docs win; flag the mismatch.
 
 ## Data
@@ -217,6 +218,11 @@ can this be detected and explained using generated outputs alone?
 - E4 planted copies: 20 of the 105 training patients x 5 lesion slices; variants P1 exact,
   P2 shift 2 px, P3 shift 5 px (tolerance limit, reported only), P4 rotate 5 deg, P5 erode/
   dilate 1 px, P6 remove one lesion or add one from H-eval. Negatives: all H-eval masks.
+  Decided 2026-11-04 (`docs/e4-plan.md`): bases 10 patients with >= 3 multi-lesion slices (3
+  multi + 2 single each) + 10 other patients (5 slices), z >= 2 apart; P4 about the lesion-pixel
+  centroid; P5 two sub-variants (3x3 cross), gated only on masks keeping every base lesion
+  >= the bound; P6-remove and P6-add as separate sub-variants. Caught = flagged (E2: full or
+  partial) AND source patient = base patient (decision J); `all_copied` shows incompleteness.
 - Count per patient and per lesion, not per slice (adjacent slices are near-duplicates).
 
 ## Master thesis (plan: retrain both models with fixed seeds, Branch B; compute is available)
