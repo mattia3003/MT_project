@@ -156,6 +156,19 @@ validation:
       e1_copy: 0.07           # H-cal at chance 5.1% / 5.3% (single / multi)
       e2_full: 0.07           # H-cal 5.1% / 5.2%
       e2_flagged: 0.12        # full or partial; H-cal 7.4% / 8.7%
+  # Accepted deviation from decision K, decided 2026-11-04 by the user AFTER the first `validate` run
+  # (recorded as such; null = none). `validate` gives ACCEPTED only if the failed criteria are exactly
+  # these; any other failure is still FAIL. E5 runs on PASS or ACCEPTED.
+  accepted_deviation:
+    criteria: [false positives e1_copy single, false positives e1_copy multi, false positives e2_full single]
+    reason: >-
+      H-eval false-positive rates 7.2%, 7.4% and 7.1% exceed the 7% limit by 0.1-0.4 points (H-cal at
+      the same thresholds 5.1-5.3%); every bootstrap-by-patient interval contains both the limit and the
+      H-cal rate. Flags cluster in few patients (top 3 give 33-62% of a cell's flags; 25-26 patients per
+      held-out half), so the gap is patient sampling, not a detector fault, and it goes both ways (E2
+      full multi 2.9% vs 5.2%). No remedy within the rules: re-fitting thresholds to H-eval would leak
+      it into calibration. Every recall criterion passes. E5 compares S with the measured H-eval rates,
+      not with 5%.
 
 real_datasets:
   stanford_brainmets:

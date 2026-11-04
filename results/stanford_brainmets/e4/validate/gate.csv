@@ -1,0 +1,11 @@
+criterion,detail,value,limit,pass,accepted
+recall P1,"both, P1, 100 gated masks",1.0,>= 1.0,True,False
+recall P2,"any, P2, 100 gated masks",1.0,>= 0.9,True,False
+recall P4,"any, P4, 94 gated masks",0.9893617021276596,>= 0.9,True,False
+recall P6,"lesion, P6-remove + P6-add, 137 gated masks",0.9708029197080292,>= 0.8,True,False
+false positives e1_copy single,"H-eval, 696 slices",0.07183908045977011,<= 0.07,False,True
+false positives e1_copy multi,"H-eval, 393 slices",0.0737913486005089,<= 0.07,False,True
+false positives e2_full single,"H-eval, 634 slices",0.07097791798107256,<= 0.07,False,True
+false positives e2_full multi,"H-eval, 272 slices",0.029411764705882353,<= 0.07,True,False
+false positives e2_flagged single,"H-eval, 634 slices",0.10094637223974763,<= 0.12,True,False
+false positives e2_flagged multi,"H-eval, 272 slices",0.08455882352941177,<= 0.12,True,False

@@ -35,7 +35,8 @@ Reference docs (read the relevant one before starting work):
   moved to `docs/experiment-plan.md` (E4, E5, E6 "Carried over" notes) and report-notes.
 - `docs/e4-plan.md`: E4 plan (planted-copy gate), ACTIVE since 2026-11-04. Read it before
   continuing E4 work. Decisions I (planting design, gate rule), J (caught = flagged + right
-  patient) and K (go/no-go criteria; P5 reported only) are set; `plant` done, `validate` next.
+  patient) and K (go/no-go criteria; P5 reported only) are set; `plant` and `validate` done
+  (gate ACCEPTED with a recorded deviation, 2026-11-04); `check` next, then close the plan.
 This file is a summary. If it disagrees with the docs, the docs win; flag the mismatch.
 
 ## Data
@@ -228,6 +229,12 @@ can this be detected and explained using generated outputs alone?
   flagged <= 12%; P3, P5 reported only (1 px boundary change gives s ~ r^2, below chance
   thresholds: a stated detection limit). Gate counts only masks keeping every informative base
   lesion >= the bound (all variants but P6-remove).
+  E4 result (2026-11-04): all recall criteria pass (P1 100%, P2 100%, P4 98.9%, P6 97.1%); H-eval
+  FP E1 copy 7.2/7.4% and E2 full single 7.1% exceed 7% (H-cal 5.1-5.3%; patient sampling, flags
+  cluster in few patients) -> accepted by the user as a recorded deviation
+  (`validation.accepted_deviation`), verdict ACCEPTED (`memtk.e4.common.gate_status`). E5 runs on
+  PASS or ACCEPTED, reuses the stored H-eval tables, and compares S with the measured H-eval
+  rates, not 5%.
 - Count per patient and per lesion, not per slice (adjacent slices are near-duplicates).
 
 ## Master thesis (plan: retrain both models with fixed seeds, Branch B; compute is available)

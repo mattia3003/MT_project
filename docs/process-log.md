@@ -363,3 +363,33 @@ in full, with what replaced them.
   (status, decisions I and K, definitions), experiment plan E4, CLAUDE.md, data dictionary,
   report-notes (section 2 decisions, section 4 detection limit, section 5 item closed).
   *Source: `configs/default.yaml`, `docs/e4-plan.md`.*
+- **E4 step 5: `validate` stage; gate run, FAIL, accepted as a recorded deviation.** New
+  `src/memtk/e4/validate.py` and stage `validate`; `calibration.bootstrap_share` (1 test);
+  `e4.common` gains `load_planted`, `slice_images` (replaces `plant`'s `base_images`) and later
+  `gate_status`. `plant` re-run first because its code changed (same planted set).
+  - *Gate run 1* (frozen file of 2026-11-03, unchanged): every recall criterion passed (P1 100%,
+    P2 100%, P4 98.9%, P6 97.1%); E1 copy 7.2% / 7.4% and E2 full single 7.1% failed the 7%
+    limit; verdict FAIL. The review also reported 431 missed masks: a bug. `criterion_caught`
+    assigned into a `pd.Series(False)` through a boolean-Series mask, which upcast it to object,
+    so `~` turned `True` into −2 (truthy) and every gated mask counted as missed. It affected only
+    the misses count and `misses.png`, not the gate values. Fixed with a numpy array, regression
+    test added (`tests/test_e4_validate.py`); re-run: 5 misses, same gate values.
+  - *Read-only checks after the run* (scratch scripts, not in the repo): H-eval flags cluster in
+    patients (E1 copy single: 50 flags from 15 of 26 patients, 44% from the top 3; E2 full multi:
+    8 from 6 of 14, 62% from the top 3); two H-eval slices match a T slice with Dice 1.00 (single
+    lesions of 8 and 4 px, shift 1–2 px): chance, not leakage. The user's question about the one
+    P4 miss (its nearest neighbour is its own base slice): checked, correct by the definitions
+    (13 px lesion rotated to 12 px, shape 0.667, s 0.613 below the single-lesion thresholds;
+    E1 0.615 below τ_D multi); `misses.png` captions now say "not flagged (below thresholds)" or
+    "flagged, wrong patient".
+  - *Decision (user, after the run):* the three failed false-positive criteria accepted as a
+    recorded deviation (`validation.accepted_deviation`, criteria and reason). `validate` now
+    names criteria uniquely by class and stratum in `gate.csv`, adds an `accepted` column, and
+    gives ACCEPTED only when the failed criteria are exactly the listed ones;
+    `e4.common.gate_status` reads the verdict for E5. Two Pylance errors fixed by rewriting
+    (`gate_table` reuses the `pass` column of `fp_table`; `verdict_text` guards the deviation).
+    Gate runs 2–4 (the bug fix, the deviation mechanism, the Pylance rewrite; one accidental
+    duplicate run) gave the same values; final verdict ACCEPTED. pytest 128.
+  - The user agreed not to add a combined variant (remove a lesion and move the others); reason
+    in report-notes section 4.
+  *Source: `results/stanford_brainmets/e4/validate/review.txt`, `gate.csv`, `fp_heval.csv`.*

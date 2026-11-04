@@ -23,9 +23,9 @@ from matplotlib.colors import to_rgba
 from matplotlib.figure import Figure
 
 from memtk import calibration, config, lesionmatch
-from memtk.e4.common import STREAMS, load_frozen, streams
+from memtk.e4.common import STREAMS, load_frozen, slice_images, streams
 from memtk.ids import lesion_id, parse_lesion_id, parse_slice_key
-from memtk.io import LabelStackWriter, MaskStack, load_real
+from memtk.io import LabelStackWriter, MaskStack
 from memtk.planted import VARIANTS, Planted, choose_bases, variants_of
 from memtk.plotting import HIGHLIGHT_COLOR, LESION_COLOR, LESION_COLORS, draw_box, hide_unused, save, show_slice, tile_figure
 from memtk.sets import SliceSet, load_set
@@ -78,7 +78,7 @@ def run_plant(cfg: dict, dataset: str | None = None, pool: str | None = None, ov
     change.to_csv(out / "area_change.csv", index=False)
     fate.to_csv(out / "lesion_fate.csv", index=False)
     ps.skipped.to_csv(out / "skipped_variants.csv", index=False)
-    images = base_images(cfg, name, ps.bases)
+    images = slice_images(cfg, name, ps.bases["key"])
     rng = np.random.default_rng(cfg["seed"])
     variants_grid(ps, images, rng, out / "variants_grid.png",
                   f"{name}: planted variants of {GRID_BASES} random bases (rows), zoomed; red outline = the base "
@@ -252,16 +252,6 @@ def area_change(fate: pd.DataFrame) -> pd.DataFrame:
 
 
 # --- figures ----------------------------------------------------------------------------------
-
-def base_images(cfg: dict, name: str, bases: pd.DataFrame) -> dict[str, np.ndarray]:
-    """The model-space BRAVO slice of every base (figure backgrounds only), one volume read per patient."""
-    real_dir = config.output_dir(cfg, name)
-    images = {}
-    for pid, rows in bases.groupby("patient_id"):
-        bravo, _ = load_real(real_dir, str(pid))
-        images.update({k: bravo[:, :, int(z)] for k, z in zip(rows["key"], rows["z"])})
-    return images
-
 
 def zoom_window(masks: list[np.ndarray]) -> tuple[slice, slice]:
     """A square window around the pixels of all masks, MARGIN px wide on each side and at least

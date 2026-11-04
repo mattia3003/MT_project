@@ -35,7 +35,8 @@ ID columns as text.
 | | `freeze` | ✅ | decision H, the `calibrate` tables and `thresholds.csv` | `configs/frozen/e3_<dataset>.yaml` + `e3_<dataset>.run_info.json` |
 | | `check` | ✅ | all E3 outputs, T and H-cal label maps | `results/<dataset>/e3/check_report.txt`, `check.run_info.json` |
 | `e4_validate.py` | `plant` | ✅ | decision I (`validation.bases`, `validation.variants`), decision C, the frozen file (bound, minimum area), E0b lesion tables (T, H-eval), `brain_masks.npz`, real BRAVO volumes (figures) | `<output_root>/<dataset>/e4/` (planted set), `results/<dataset>/e4/plant/` (evidence for decision K) |
-| | `validate`, `check` | planned | frozen file, T, H-eval, planted set, decision K | validation table, gate verdict |
+| | `validate` | ✅ | decisions I (gate rule), J, K and `validation.accepted_deviation`, the frozen file (settings, thresholds), T and H-eval label maps, the planted set, real BRAVO volumes (figures) | `<output_root>/<dataset>/e4/` (detector tables of the planted set and H-eval, `heval_classes.csv`), `results/<dataset>/e4/validate/` (gate verdict) |
+| | `check` | planned | all E4 outputs | check report |
 | `e5_audit.py` | — | planned | frozen thresholds, S | main audit tables |
 | `e6_exposure.py` | *tbd* | planned | E5 outputs | exposure, rarity, duplication |
 | `e7_reports.py` | *tbd* | planned | E5, E6 outputs, planted copies | match reports, deletion test |
@@ -71,7 +72,10 @@ latter for tau_L and tau_C); E4 (`docs/e4-plan.md`): `validation.bases` (decisio
 I amended: the rule a planted mask must meet to count in the gate, `keeps_base_lesions`),
 `validation.caught` (decision J), `validation.criteria` (decision K: `recall` per variant with
 `detector` both / any / lesion, `min` and optional `variants` pooled; `reported_only`;
-`false_positive_max` per class; read by `validate`, which refuses to run while it is `null`). E4 and E5
+`false_positive_max` per class; read by `validate`, which refuses to run while it is `null`),
+`validation.accepted_deviation` (`criteria`: the failed gate criteria accepted by the user, by
+their name in `gate.csv`; `reason`; `null` = none; decided after a `validate` run and recorded
+as such). E4 and E5
 take detector settings and thresholds from the frozen file, not from these config sections;
 `real_datasets.<name>` (`root`, `image_file`, `mask_file`, `train_split`,
 `heldout_split`, `heldout_sets`); `synthetic_pools.<name>` (`dir`, `glob`, `image_channel`,
@@ -519,4 +523,37 @@ Written by `plant`. In git. Evidence for decision K (`validation.criteria`); no 
 | `variants_grid.png` | 12 random bases (6 single-, 6 multi-lesion) × the original and every variant, zoomed on the BRAVO slice: base outline red, planted green; base lesions with no planted lesion traced to them (removed, eroded away) filled red, added H-eval lesions filled orange |
 | `variant_<variant>.png` | One per variant, 20 random bases, three tiles each: the planted mask on the whole slice (zoom box dashed), the base lesions, and the planted lesions filled in the colour of the lesion they come from (orange = added H-eval lesion) over the base lesions dashed in their colour, with a dot and arrow where a lesion centre moved by ≥ 1 px |
 | `area_change.png` | Largest planted piece against base lesion area for P4, P5-erode, P5-dilate (log axes), lost lesions in red, the bound dashed |
+| `run_info.json` | Run log (as above) |
+
+### Detector tables of the planted set and H-eval: `<output_root>/<dataset>/e4/`
+
+Written by `validate` (settings and thresholds from the frozen file), next to the planted set.
+Not in git. The H-eval tables are E5's baseline (E5 reuses them). `<set>` is `planted` or
+`heval`; the four E2 files of a set rebuild a `memtk.lesionmatch.LesionMatch`, as for H-cal in E3.
+
+| File | Content |
+| --- | --- |
+| `e1_<set>.csv` | E1, one row per query with a lesion ≥ the minimum area (unscorable planted masks left out): the columns of `memtk.wholemask.match` plus `n_lesions`, `stratum`, `tau_D`, `copy` (`memtk.calibration.e1_classes`) |
+| `e2_<set>_queries.csv`, `e2_<set>_lesions.csv`, `e2_<set>_slice_pairs.parquet`, `e2_<set>_lesion_pairs.parquet` | E2, as the H-cal tables of E3 |
+| `heval_classes.csv` | One row per H-eval slice: `key`, `patient_id`, `n_lesions`, `stratum_e1`, `e1_score`, `e1_nn`, `e1_nn_patient`, `e1_copy`, `n_informative`, `stratum_e2` (`none` without an informative lesion), `e2_class` (`full`, `partial`, `novel`, `none`), `e2_C`, `e2_nn`, `e2_nn_patient`, `e2_strongest_s`, `e2_strongest_train`, `e2_n_kept`, `e2_all_copied`; every flag is a false positive |
+| `validate.run_info.json` | Run log (inputs T, H-eval, planted; the frozen file's SHA-256; the verdict) |
+
+### `results/<dataset>/e4/validate/`
+
+Written by `validate`. In git. The gate verdict, read by E5 through `memtk.e4.common.gate_status`.
+
+| File | Content |
+| --- | --- |
+| `review.txt` | Sets, recall of the gated masks per variant and detector with intervals, flagged / source accuracy / NN = base, E2 classes, the reported-only variants by size, false positives with H-cal rates, RQ2 counts, the gate table, and the verdict (PASS, ACCEPTED with the deviation's reason, or FAIL with what to do) |
+| `gate.csv` | One row per criterion of decision K: `criterion` (e.g. `recall P4`, `false positives e1_copy single`), `detail`, `value`, `limit`, `pass`, `accepted` (failed and listed in `validation.accepted_deviation`) |
+| `planted_outcomes.csv` | One row per planted mask: `key`, `variant`, `base_key`, `patient_id`, `group`, `base_stratum`, `stratum_e1`, `stratum_e2`, `keeps_base_lesions`, `gated`, `base_l1_area`, `size_bin`; E1 `e1_score`, `e1_nn`, `e1_nn_patient`, `e1_copy`; E2 `e2_class`, `e2_C`, `e2_nn`, `e2_nn_patient`, `e2_strongest_s`, `e2_strongest_train`, `e2_strongest_patient`, `e2_n_kept`, `e2_all_copied`; `e1_caught`, `e2_caught`, `any_caught`, `both_caught` (decision J), `e1_nn_is_base`, `e2_nn_is_base` |
+| `validation.csv` | Per `variant`, `subset` (`gated`; `all` = every planted mask, unscorable = missed) and `detector` (`e1`, `e2`, `any`, `both`): `masks`, `patients`, `caught`, `recall`, `ci_low`, `ci_high` (bootstrap by base patient), `patient_recall`; for e1 / e2 `flagged`, `source_accuracy`, `nn_is_base`; for e2 `full`, `partial`, `all_copied` |
+| `recall_by_group.csv` | Per variant, `by` (`stratum` of the base, `size` of the base's largest lesion) and `group`: `masks`, recall for `e1`, `e2`, `any` (all masks) |
+| `fp_heval.csv` | Per `class` (`e1_copy`, `e2_full`, `e2_partial`, `e2_flagged`) and `stratum` (`single`, `multi`, `all`): `slices`, `patients`, `flagged`, `rate`, `ci_low`, `ci_high` (bootstrap by patient), `hcal_rate` (frozen file), `limit`, `pass` |
+| `rq2_planted.csv` | Per variant, gated masks: `masks`, `e2_only`, `e1_only`, `both`, `neither` |
+| `score_distributions.png` | E1 score, E2 C(q, NN) and strongest pair per variant and for H-eval, by stratum, with the frozen thresholds |
+| `recall_by_size.png` | Recall per variant (one panel each) by the size of the base's largest lesion, for E1, E2 and either |
+| `factors.png` | Shape, position, size and s of the E2 pairs between each planted mask and its own base slice, per variant |
+| `misses.png` | Gated planted masks missed by their criterion's detector: base, planted mask, nearest neighbour found, scores, and why ("not flagged" or "flagged, wrong patient"); written only when there are misses |
+| `heval_flags.png` | Random H-eval false positives per class next to the training slice that flagged them |
 | `run_info.json` | Run log (as above) |

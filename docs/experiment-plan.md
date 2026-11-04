@@ -324,6 +324,8 @@ The check never changes C or the copy class. It is supporting evidence for the m
 
 *Status (2026-11-04): planned in `docs/e4-plan.md`.* Decided there: decision I (planting design: 10 + 10 base patients so ~35–40 bases are multi-lesion; P4 about the lesion-pixel centroid; P5 as erode and dilate sub-variants with the 3×3 cross, gated only on masks that keep every base lesion at ≥ the bound; P6-remove and P6-add as sub-variants) and decision J (caught = flagged, i.e. E1 copy or E2 full or partial, *and* source patient = base patient; whether every lesion was copied shows in `all_copied`). This resolves the P6 question above. *Criteria decided 2026-11-04 (decision K, before any detector ran on the planted set):* P1 100% for both detectors; P2 and P4 ≥ 90% for at least one detector; P6 (remove and add) ≥ 80% for the lesion-level detector; H-eval false positives per stratum E1 copy ≤ 7%, E2 full ≤ 7%, E2 flagged ≤ 12%. **Deviation from the suggested criteria: P5 is reported only, like P3.** From the score definitions, a 1 px erosion or dilation to area ratio r gives a lesion score of about r² (median r 0.43 eroded, 1.7 dilated), below the single-lesion thresholds even for lesions ≥ 80 px, so no detector setting could make P5 pass; the detection limit is stated as a limitation. A planted mask counts in the gate only if every informative base lesion is still ≥ the bound (all variants but P6-remove; decision I amended). Details: `docs/e4-plan.md`, decision K.
 
+*Result (2026-11-04, `e4_validate.py validate`): gate ACCEPTED with a recorded deviation.* Every recall criterion passes: P1 100%, P2 100%, P4 98.9%, P6 97.1% (caught as in decision J). On H-eval, E1 copy 7.2% / 7.4% and E2 full single 7.1% exceed the 7% limit by 0.1–0.4 points (H-cal 5.1–5.3%; every bootstrap-by-patient interval contains both; flags cluster in few patients), while E2 full multi (2.9%) and E2 flagged (10.1% / 8.5%) pass. Changing a setting and re-calibrating on H-cal cannot fix a difference between two samples of 25–26 patients, and fitting thresholds to H-eval would leak it, so the user accepted the three as a recorded deviation (`validation.accepted_deviation`; reasons in `docs/e4-plan.md`). Reported only: P3 caught 92% by the lesion-level detector, 13% by whole-mask Dice; P5 0% at 12–19 px, about 85% at ≥ 80 px (the detection limit). First RQ2 evidence: the lesion-level detector alone catches 79 of 100 P3, 19 of 37 P6-remove and 33 of 100 P6-add masks.
+
 ## E5 – Main audit (RQ1, RQ2)
 
 **Purpose:** Answer whether the mask generator copies more than chance (RQ1), and whether lesion-level matching finds copies that whole-mask matching misses (RQ2). This is the first time S is scored against frozen thresholds.
@@ -369,6 +371,13 @@ The check never changes C or the copy class. It is supporting evidence for the m
 - **The drop-only re-run (step 3) needs its own label maps and thresholds.** The frozen thresholds were calibrated with attach-or-drop at gap 2. A drop-only re-run needs drop-only label maps (gap 0) for S, T and H-cal, and τ\_L and τ\_C recalibrated on H-cal with them, or it compares unlike scores. Decide when E5 is planned whether to recalibrate or to report the drop-only re-run as descriptive only.
 - **The E3 sensitivity settings** (σ 0.08, 99th percentile, bound 10 and 25 px) have threshold values in `results/stanford_brainmets/e3/calibrate/sensitivity.csv`. Whether S is also scored under them (as sensitivity analyses of the main rates) is decided when E5 is planned.
 - **Noisy masks (step 3) and strata:** the E1-only run on noisy masks uses the same stratified τ\_D, with the stratum counted on the cleaned mask, as for the main audit.
+
+**Carried over from E4 (2026-11-04), for planning E5**
+
+- **The gate:** E5 runs only if `memtk.e4.common.gate_status` returns PASS or ACCEPTED (now ACCEPTED, a recorded deviation on three false-positive criteria; see E4 result).
+- **The H-eval baseline is already scored:** `validate` stored E1 and E2 tables for H-eval in `processed_data/model_space/<dataset>/e4/` and one row per slice with both detectors' classes in `heval_classes.csv`; E5 reuses them instead of re-running the detectors on H-eval.
+- **Compare with the measured H-eval rates, not with 5%:** at the frozen thresholds H-eval gives E1 copy 7.2% / 7.4%, E2 full 7.1% / 2.9%, E2 flagged 10.1% / 8.5% (single / multi; `results/<dataset>/e4/validate/fp_heval.csv`), with flags clustered in few patients; the bootstrap by patient (`calibration.bootstrap_share`) is needed for every H-eval rate.
+- **Detection limit:** copies whose small lesions carry about 1 px of boundary noise are not detected (E4 P5: 0% at 12–19 px); the S rates are lower bounds for such copies.
 
 ## E6 – Patient exposure, rarity and duplication (RQ1 H1, RQ3a H3)
 
@@ -438,6 +447,11 @@ The check never changes C or the copy class. It is supporting evidence for the m
    - For each, record whether the report names the correct source patient, the correct source slice (or one within ±2 slices of it), and, for partial copies (P6), the correct lesions.
    - Report the share explained correctly for each variant.
    - Suggested criteria: the correct source patient for at least 90% of planted copies, and the correct lesions for at least 80% of P6.
+
+**Carried over from E4 (2026-11-04), for planning E7**
+
+- **Nearest neighbour and strongest pair can name different patients.** In E4, 4 P6 masks were flagged as full copies of another patient's slice (highest C, e.g. 0.91), while their strongest lesion pair (s = 1.00) pointed to the true base slice. A match report should show both, and the correctness check should say which one it scores. E4's `planted_outcomes.csv` holds both for every planted mask.
+- **Planted copies for the correctness check:** `planted.csv` and `planted_lesions.csv` (the source lesion of every planted lesion) in `processed_data/model_space/<dataset>/e4/`.
 
 **Optional: small-lesion agreement in the reports.** If the E2 small-lesion check was run, add it to Panel C and the verdict line, for example: "the large lesion matches patient P017, slice 84, and both small lesions also coincide in position (H-cal chance rate: x%)". It strengthens or weakens the case for a copy, but it does not change the class, the taxonomy or the deletion test.
 

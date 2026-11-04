@@ -477,6 +477,23 @@ move the old ones, with the reason, to the process log.
   decided from the definitions and the planted geometry, before any score existed.
   *Source: `configs/default.yaml` (`validation.criteria`), `docs/e4-plan.md` (decision K),
   `results/stanford_brainmets/e4/plant/area_change.csv`.*
+- **E4 gate accepted with a recorded deviation** (2026-11-04, decided by the user *after* the
+  first `validate` run; stated as such in the report). Every recall criterion passed, but three
+  of six false-positive criteria failed on H-eval by 0.1–0.4 points: E1 copy 7.2% [4.5, 9.7]
+  (single) and 7.4% [4.9, 11.3] (multi), E2 full single 7.1% [4.8, 9.6], against a limit of 7%
+  (H-cal at the same thresholds 5.1–5.3%). Reasons for accepting: every bootstrap-by-patient
+  interval contains both the limit and the H-cal rate; the flags cluster in few patients (the 3
+  patients with most flags give 33–62% of a cell's flags), so with 25–26 patients per held-out
+  half the gap is patient sampling; it goes both ways (E2 full multi 2.9% on H-eval vs 5.2% on
+  H-cal), as chance does. The planned remedy (change a detector setting, re-calibrate on H-cal)
+  cannot help: re-calibration gives the same thresholds, and choosing thresholds so that H-eval
+  passes would leak it into calibration. Rejected: stopping at FAIL (blocks E5 with no allowed
+  remedy) and re-calibrating on H-cal and H-eval pooled (no independent check and no clean E5
+  baseline). Consequence: E5 compares S with the measured H-eval rates, not with 5%. The
+  possibility was flagged before the run (the multi stratum rests on few patients), but the
+  criterion was written as a point estimate. *Source: `configs/default.yaml`
+  (`validation.accepted_deviation`), `results/stanford_brainmets/e4/validate/fp_heval.csv`,
+  `gate.csv`; patient clustering from a read-only check of `heval_classes.csv` (process log).*
 
 ## 3. Findings
 
@@ -711,6 +728,63 @@ move the old ones, with the reason, to the process log.
   tests robustness only for lesions of about 20 px and more (50 of 100 eroded masks keep every
   lesion and enter the gate). *Source: `results/stanford_brainmets/e4/plant/area_change.csv`,
   `variant_summary.csv`, `area_change.png`.*
+- **E4: both detectors find planted copies** (2026-11-04). Share caught (flagged with the base
+  patient as source, decision J) of the gated planted masks, with bootstrap-by-patient intervals:
+
+  | Variant | Whole-mask (E1) | Lesion-level (E2) | Either |
+  | --- | --- | --- | --- |
+  | P1 exact (100) | 100% | 100% | 100% |
+  | P2 shift 2 px (100) | 100% | 100% | 100% |
+  | P3 shift 5 px (100, reported only) | 13% [5, 23] | 92% [87, 97] | 92% |
+  | P4 rotate 5° (94) | 78% [64, 89] | 98% [95, 100] | 99% |
+  | P6-remove (37) | 41% [23, 59] | 92% [83, 100] | 92% |
+  | P6-add (100) | 67% [59, 75] | 99% [97, 100] | 100% |
+
+  P6 at 97% (133 of 137) was expected from the definitions: the remaining lesions are pixel-exact,
+  so P6 tests whether an incomplete copy is seen, not robustness to noise. Among masks E2 caught,
+  the nearest neighbour is the base slice itself for 99–100% of P1–P4 and P6-add, but for 41% of
+  P6-remove and none of P5-erode (11% of P5-dilate): there it is another slice of the base
+  patient. An eroded lesion resembles the neighbouring slice, where the same lesion is smaller,
+  more than its own slice; adjacent slices are near-duplicates, which is why sources are counted
+  per patient and E6 credits every pair above the threshold. *Source:
+  `results/stanford_brainmets/e4/validate/validation.csv` (`nn_is_base`), `review.txt`.*
+- **First RQ2 evidence: lesion-level matching catches planted copies that whole-mask Dice misses**
+  (E4, 2026-11-04). Of the gated masks, E2 alone catches 79 of 100 shifted by 5 px (P3; E1's
+  shift search reaches 3 px, so only large lesions keep overlap: E1 catches 44% at ≥ 80 px, 0% below
+  40 px), 19 of 37 with one lesion removed (P6-remove) and 33 of 100 with one held-out lesion added
+  (P6-add; an added lesion swamps the Dice of a small base: E1 30% at 12–19 px, 96% at ≥ 80 px).
+  E1 alone catches at most 1 mask per variant (P4, P6-add) and 8 P5-dilate masks. This is evidence
+  on constructed copies; whether S contains such copies is E5's question. *Source:
+  `results/stanford_brainmets/e4/validate/rq2_planted.csv`, `recall_by_group.csv`,
+  `recall_by_size.png`.*
+- **The detection limit for boundary noise, measured** (E4, 2026-11-04). Recall of all P5 masks
+  (either detector) by the size of the base's largest lesion: erosion 0% at 12–19 px, 12% at
+  20–39 px, 47% at 40–79 px, 85% at ≥ 80 px; dilation 13%, 30%, 59%, 85%. The lesion score of a
+  planted lesion against its own base lesion has a median of about 0.36 (shape and size factors
+  both about 0.6), as the r² reasoning behind decision K predicted. *Source:
+  `results/stanford_brainmets/e4/validate/recall_by_group.csv`, `factors.png`.*
+- **False positives on H-eval at the frozen thresholds** (E4, 2026-11-04): E1 copy 7.2% / 7.4%,
+  E2 full 7.1% / 2.9%, E2 partial 3.0% / 5.5%, E2 flagged 10.1% / 8.5% (single / multi; 1,089
+  slices of 26 patients, 906 with an informative lesion), against 5.1% / 5.3%, 5.1% / 5.2%,
+  2.3% / 3.5% and 7.4% / 8.7% on H-cal. Flags cluster in patients: E1 copy single 50 flags from
+  15 of 26 patients (44% from the top 3), E2 full multi 8 flags from 6 of 14 (62% from the top
+  3). *Source: `results/stanford_brainmets/e4/validate/fp_heval.csv`; clustering from a
+  read-only check of `heval_classes.csv`.*
+- **Small lesions can match exactly by chance** (E4, 2026-11-04). Two H-eval slices match a
+  training slice of another patient with whole-mask Dice 1.00 after a shift of 1–2 px: single
+  lesions of 8 and 4 px (`Mets_021/z96` with `Mets_051/z88`, `Mets_053/z75` with
+  `Mets_167/z65`). Not leakage (held-out patients, unrelated slices): a few-pixel blob has
+  almost no shape. E1 counts every lesion ≥ 4 px, so such matches enter its chance tail; E2
+  ignores lesions below the 12 px bound. *Source: `results/stanford_brainmets/e4/validate/
+  heval_flags.png`; read-only check of `e1_heval.csv`.*
+- **The nearest neighbour and the strongest lesion pair can name different patients** (E4,
+  2026-11-04). The 4 missed P6 masks were all flagged as full copies, but of another patient's
+  slice (highest C, e.g. 0.91 for `Mets_107/z56` with one lesion removed, against
+  `Mets_271/z53`), while their strongest lesion pair (s = 1.00) still pointed to the base. A
+  single remaining small lesion often fits another patient's slice as a whole better than its
+  own (incomplete) slice does. The one P4 miss is different: both detectors rank the base slice
+  first, but its 13 px lesion shrank to 12 px with shape overlap 0.67 (s 0.61), not closer than
+  chance. *Source: `results/stanford_brainmets/e4/validate/misses.png`, `planted_outcomes.csv`.*
 
 ## 4. Limitations and assumptions
 
@@ -799,8 +873,24 @@ move the old ones, with the reason, to the process log.
   shifts up to a few pixels and small rotations, tested by P2–P4), not copies whose small
   lesions are redrawn with about 1 px of boundary noise; a generator that memorized
   configurations but not exact boundaries would be undercounted. P5's recall by lesion size
-  (E4 `validate`) quantifies this. *Source: `docs/e4-plan.md` (decision K),
-  `results/stanford_brainmets/e4/plant/area_change.csv`.*
+  (E4 `validate`) quantifies this: 0% at 12–19 px, 85% at ≥ 80 px (section 3). *Source:
+  `docs/e4-plan.md` (decision K), `results/stanford_brainmets/e4/plant/area_change.csv`.*
+
+- **The chance rate at the frozen thresholds is about 7%, not 5%, on H-eval** (E4, 2026-11-04).
+  The thresholds are 95th percentiles of 25 H-cal patients; on the other 26 held-out patients
+  they flag 7.1–7.4% in three cells (E1 copy, E2 full single). E5 therefore compares S with the
+  measured H-eval rates per class and stratum, never with the nominal 5%, and every chance rate
+  is reported with a bootstrap-by-patient interval. With so few held-out patients, chance rates
+  are uncertain by a few points. *Source: `results/stanford_brainmets/e4/validate/fp_heval.csv`.*
+- **Combined perturbations were not tested** (decided 2026-11-04 with the user). E4 varies one
+  thing at a time (shift, rotation, boundary, one lesion removed or added). A copy that both
+  drops a lesion and moves the others is not planted: its result follows from the parts, since C
+  averages the lesion scores and each lesion score is shape × position × size (e.g. one of two
+  lesions removed and the other shifted 2 px: caught as partial, s 0.95; shifted 5 px: missed,
+  s 0.737 < τ_L 0.739). A copy altered so much that it falls below the chance level cannot be told
+  from a novel mask by any output-only method; whether S contains such "drifted" partial copies
+  is described in E5/E7 from the stored lesion pairs, not validated. *Source: discussion,
+  2026-11-04; frozen thresholds.*
 
 ## 5. Open questions
 
@@ -851,7 +941,22 @@ move the old ones, with the reason, to the process log.
       1 produces. See "Synthetic lesion positions" in section 3. *Source:
       `results/stanford_brainmets/e0b/stats/centroid_density_amibekk_v1.png`.*
 
+- [ ] **How a match report presents a flag whose nearest neighbour and strongest lesion pair name
+      different patients (E7).** Seen in E4 for 4 P6 masks (section 3). Options: show both in
+      Panel A/C and let the verdict line name the strongest pair's patient when it differs; and
+      decide which one the E7 correctness check scores. Decide when E7 is planned; noted in
+      `docs/experiment-plan.md`, E7 "Carried over from E4". 2026-11-04.
+
 ## 6. Figure and table candidates
+
+- **E4 planted variants** (methods): rows picked by hand from
+  `results/stanford_brainmets/e4/plant/variants_grid.png` or the `variant_<P>.png` sheets; with
+  `area_change.png` for what 1 px of boundary change does to small lesions.
+- **E4 recall by lesion size** (results, RQ2 and the detection limit):
+  `results/stanford_brainmets/e4/validate/recall_by_size.png`; the recall table in section 3.
+- **What a chance match looks like** (methods or discussion):
+  `results/stanford_brainmets/e4/validate/heval_flags.png`.
+- **Where each variant loses its score** (methods): `results/stanford_brainmets/e4/validate/factors.png`.
 
 - **Data overview figure:** `results/stanford_brainmets/e0a/check_grid_amibekk_v1.png`. Random
   lesion slices of T, H-cal and H-eval and random synthetic samples, all in model space.

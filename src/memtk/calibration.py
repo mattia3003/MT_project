@@ -77,6 +77,21 @@ def bootstrap_interval(scores: np.ndarray, patients: np.ndarray, percentile: flo
     return float(low), float(high)
 
 
+def bootstrap_share(flags: np.ndarray, patients: np.ndarray, draws: int, rng: np.random.Generator,
+                    level: float = 0.95) -> tuple[float, float]:
+    """Interval of the share of flagged slices when patients (all slices of each) are resampled
+    with replacement `draws` times; (NaN, NaN) without slices."""
+    flags, patients = np.asarray(flags, dtype=bool), np.asarray(patients)
+    if not len(flags):
+        return np.nan, np.nan
+    _, codes = np.unique(patients, return_inverse=True)
+    k, n = np.bincount(codes, weights=flags), np.bincount(codes)
+    chosen = rng.integers(0, len(n), size=(draws, len(n)))
+    shares = k[chosen].sum(axis=1) / n[chosen].sum(axis=1)
+    low, high = np.percentile(shares, [50 * (1 - level), 50 * (1 + level)])
+    return float(low), float(high)
+
+
 def read_frozen(path: str | Path) -> dict:
     """The frozen E3 threshold file (written by `e3_calibrate.py freeze`), as a dict."""
     with open(path, encoding="utf-8") as f:

@@ -16,13 +16,13 @@ when a step is done. E4 runs the E1 and E2 library detectors (`memtk.wholemask`,
 | 2 | `memtk/planted.py` + `tests/test_planted.py` | library | ✅ 2026-11-04: 16 tests (pytest 125). Dry run on real T in memory (nothing written, no detector): 100 bases from 20 patients, 37 multi-lesion (30 from the multi group, 7 from the other); 4 multi-pool patients skipped (no spaced quota); all P1–P5 and P6-add made, P6-remove for the 37 multi bases; P6-add needed at most 8 tries (median 1). Every informative base lesion still ≥ 12 px: P4 94, P5-erode 50, P5-dilate 98 of 100 |
 | 3 | `plant`: base masks, variants, provenance, figures (no detector) | production (needs I) → evidence for K | ✅ 2026-11-04: 737 planted masks (100 bases × 7 variants + 37 P6-remove), 1,264 planted lesions, every one traced to a source; every P1 map equals its base. Gated by `keeps_base_lesions`: P4 94, P5-erode 50, P5-dilate 98 of 100 (P5-erode keeps no 12–19 px lesion and half of the 20–39 px ones). `load_real` moved from `e0b.common` to `memtk.io` (E0b check 43/43); pytest 125 |
 | 4 | Decision K: go/no-go criteria in `validation.criteria` | decision | ✅ 2026-11-04, set by the user before any detector ran on the planted set: P1 100% both detectors; P2, P4 ≥ 90% any detector; P6 ≥ 80% lesion-level; H-eval false positives per stratum E1 copy ≤ 7%, E2 full ≤ 7%, E2 flagged ≤ 12%; P3, P5-erode, P5-dilate reported only. Decision I amended: the gate rule (`keeps_base_lesions`) applies to every variant but P6-remove. `plant` re-run so its review shows K |
-| 5 | `validate`: E1 + E2 on the planted set and H-eval; validation table; gate verdict | production (needs K) | open |
+| 5 | `validate`: E1 + E2 on the planted set and H-eval; validation table; gate verdict | production (needs K) | ✅ 2026-11-04. Recall (gated, caught by decision J): P1 100%, P2 100%, P4 98.9% (93/94), P6 97.1% (133/137): all pass. H-eval false positives: E1 copy 7.2% / 7.4% and E2 full single 7.1% exceed the 7% limit (E2 full multi 2.9%, E2 flagged 10.1% / 8.5% pass): FAIL, **accepted by the user as a recorded deviation** (`validation.accepted_deviation`; verdict ACCEPTED). A dtype bug in `criterion_caught` (every mask counted as missed in `misses.png`; gate values unaffected) fixed with a regression test; pytest 128 |
 | 6 | `check`; close the plan | consistency checks + docs | open |
 
-**Next: start here.** Step 5: the `validate` stage (`src/memtk/e4/validate.py`): E1 and E2 on the
-planted set and H-eval with the frozen settings and thresholds, the gated recall per variant
-(decision J, `validation.gate`), false positives per stratum, the gate verdict against
-`validation.criteria`, the figures.
+**Next: start here.** Step 6: the `check` stage (consistency checks of all E4 outputs, listed under
+Stages below, plus the verdict reproduced under `validation.accepted_deviation`), then close this
+plan and carry its open items forward (E5: `gate_status`, the H-eval tables as baseline, the
+measured H-eval rates; E7: nearest neighbour vs strongest pair).
 
 **Milestone:** 13 Nov 2026, E4 gate passed. Indicative schedule: step 0 on 4 Nov, steps 1–2 on
 5 Nov, step 3 on 6 Nov, decision K on 7 Nov, step 5 on 8 Nov, step 6 on 9 Nov; 10–13 Nov is
@@ -84,6 +84,8 @@ Lettering continues from E1–E3 (F–H).
 
 Each decision is a config value under `validation:` (dated comments): I as `bases`, `variants`
 and `gate`, J as `caught`, K as `criteria`; `validate` refuses to run while `criteria` is `null`.
+After the first `validate` run, the user accepted three failed false-positive criteria as a
+recorded deviation (`accepted_deviation`, below).
 
 **Decision I (set 2026-11-04 by the user): planting design.**
 - **Base masks.** Eligible: T patients with ≥ 5 slices holding an informative lesion (92). With
@@ -161,6 +163,20 @@ finds copies that keep their lesion boundaries, not copies with about 1 px of bo
 small lesions. Considered and set aside: P5 gated at ≥ 90% (very likely to fail by
 construction), and a P5 criterion per lesion-size bin (single-lesion masks fail even at ≥ 80 px).
 
+**Accepted deviation (decided 2026-11-04 by the user, after the first `validate` run).** Three
+false-positive criteria failed on H-eval: E1 copy single 7.2% [4.5, 9.7], E1 copy multi 7.4%
+[4.9, 11.3], E2 full single 7.1% [4.8, 9.6] against the 7% limit (H-cal at the same thresholds
+5.1–5.3%); every recall criterion and the other three false-positive criteria passed. Every
+interval contains both the limit and the H-cal rate; flags cluster in few patients (the top 3
+patients give 33–62% of a cell's flags; 25–26 patients per held-out half), and the gap goes both
+ways (E2 full multi 2.9% vs 5.2%), so it is patient sampling, not a detector fault. The plan's
+remedy (change a setting, re-calibrate on H-cal) cannot help: re-calibrating gives the same
+thresholds, and fitting them so that H-eval passes would leak H-eval into calibration. Accepted,
+with E5 comparing S against the measured H-eval rates rather than the nominal 5%. Rejected: stop
+at FAIL (blocks E5 with no allowed remedy), re-calibrate on H-cal and H-eval pooled (no
+independent check, no clean E5 baseline). Config `validation.accepted_deviation` (criteria and
+reason); `validate` gives ACCEPTED only if the failed criteria are exactly the listed ones.
+
 ## Definitions (fixed in code and docs)
 
 - **Planted set:** the variants of the base masks, label maps after attach-or-drop. **Reference
@@ -188,7 +204,8 @@ construction), and a P5 criterion per lesion-size bin (single-lesion masks fail 
   - `frozen_settings(frozen)`: keywords for `wholemask.match` and `lesionmatch.match` (top-k,
     shift range, bound, σ and prefilter in px, candidate cut) read from the frozen file;
   - `e1_classes(e1, frozen, n_lesions)` and `e2_classes(lesion_match, frozen)`: one row per query
-    with stratum, its thresholds and class under the frozen stratified thresholds (reused by
+    with stratum, its thresholds and class under the frozen stratified thresholds; and (step 5)
+    `bootstrap_share`, the share of flagged slices with a bootstrap-by-patient interval (reused by
     E5). Built on `frozen_threshold`, `stratum`, `LesionMatch.summary`.
 - **`memtk/planted.py` (step 2):** `shift`, `shift_direction`, `rotate` / `rotate_labels`,
   `morph` (erode / dilate), `add_lesion` (pure functions on masks); `variants_of` (every variant
@@ -219,13 +236,20 @@ T, H-eval and the planted set).
    - E1 and E2 on the planted set and on H-eval against T, settings and thresholds from the
      frozen file.
    - `<output_root>/<dataset>/e4/`: E1 tables (CSV) and E2 tables (queries and lesions CSV,
-     slice and lesion pairs Parquet) for the planted set and for H-eval. The H-eval tables are
-     E5's baseline, so E5 does not recompute them.
-   - `results/<dataset>/e4/validate/`: `validation.csv` (variant × detector: planted, scorable,
-     gated, caught, flagged, full / partial, source-patient accuracy, NN = base slice,
-     `all_copied`, by stratum and lesion-size bin, per-patient recall, intervals);
-     `fp_heval.csv`; `rq2_planted.csv`; `gate.csv` (each criterion: value, limit, pass); the
-     figures below; `review.txt` ending in PASS or FAIL.
+     slice and lesion pairs Parquet) for the planted set and for H-eval, and `heval_classes.csv`
+     (one row per H-eval slice with both detectors' classes). The H-eval tables are E5's
+     baseline, so E5 does not recompute them.
+   - `results/<dataset>/e4/validate/`: `planted_outcomes.csv` (one row per planted mask, both
+     detectors, caught), `validation.csv` (variant × subset gated / all × detector e1, e2, any,
+     both: masks, caught, recall with interval, per-patient recall, flagged, source-patient
+     accuracy, NN = base slice, full / partial / `all_copied`), `recall_by_group.csv` (by base
+     stratum and size of the base's largest lesion), `fp_heval.csv`, `rq2_planted.csv`,
+     `gate.csv` (each criterion: value, limit, pass, accepted); the figures below; `review.txt`
+     ending in PASS, ACCEPTED or FAIL (as built).
+   - **Verdict (as built):** PASS if every criterion passes; ACCEPTED if the failed criteria are
+     exactly those listed in `validation.accepted_deviation` (a deviation recorded by the user);
+     FAIL otherwise. `memtk.e4.common.gate_status` reads it from `gate.csv`; E5 runs only on PASS
+     or ACCEPTED.
    - **If it fails:** nothing changes in E4. The user decides which detector setting to change
      (top-k first for a missed shifted copy, then shift range or σ); E3 `calibrate` and `freeze`
      are re-run on H-cal; `validate` runs again. The planted set stays fixed (it does not depend
@@ -266,7 +290,9 @@ Added 2026-11-04 at the user's request, for seeing what the variants do and for 
   variant: where each variant loses its score (position for P3, size for P5-dilate).
 - **`validate/misses.png`:** every gated planted mask that was not caught: original, planted, and
   the nearest neighbour found (patient, slice, E1 score, C, strongest pair with its three
-  factors). The first place to look when a criterion fails.
+  factors). The first place to look when a criterion fails. As built, each caption says why:
+  "not flagged (below thresholds)" (the right slice may still be the nearest neighbour, as for
+  the one P4 miss) or "flagged, wrong patient".
 - **`validate/heval_flags.png`:** a seeded sample of H-eval false positives with their nearest
   training neighbour, per class: what a chance match looks like (a report candidate).
 
@@ -292,6 +318,11 @@ Added 2026-11-04 at the user's request, for seeing what the variants do and for 
 ## Carried forward (to fill in when the plan closes)
 
 Known already:
-- E5 reads `gate.csv` (refuses to run on FAIL) and the H-eval detector tables of `validate`.
+- E5 checks `memtk.e4.common.gate_status` (runs only on PASS or ACCEPTED) and reuses the H-eval
+  detector tables and `heval_classes.csv` of `validate`; S is compared with the measured H-eval
+  rates per class and stratum (7.1–7.4% for E1 copy and E2 full single, not the nominal 5%).
 - E7 reads `planted.csv` and `planted_lesions.csv` for its correctness check (source patient
   ≥ 90% of planted copies, correct lesions ≥ 80% of P6).
+- E7: a flag's nearest neighbour (by C) and strongest lesion pair can name different patients
+  (4 P6 masks flagged full against another patient while the strongest pair, s = 1.00, pointed to
+  the base); match reports should show both.

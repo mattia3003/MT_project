@@ -5,9 +5,9 @@ import pandas as pd
 import pytest
 
 from memtk import lesionmatch
-from memtk.calibration import (area_bins, bin_label, bootstrap_interval, chance_rates, e1_classes, e2_classes,
-                               frozen_settings, frozen_threshold, percentile_threshold, propose_bound, read_frozen,
-                               stratum)
+from memtk.calibration import (area_bins, bin_label, bootstrap_interval, bootstrap_share, chance_rates, e1_classes,
+                               e2_classes, frozen_settings, frozen_threshold, percentile_threshold, propose_bound,
+                               read_frozen, stratum)
 
 EDGES = (4, 10, 20)
 FROZEN = {
@@ -105,6 +105,16 @@ def test_bootstrap_resamples_patients_not_slices():
     patients = np.array(["A"] * 100 + ["B"])
     low, high = bootstrap_interval(scores, patients, 95, 400, np.random.default_rng(0))
     assert (low, high) == (0.0, 1.0)
+
+
+def test_bootstrap_share_resamples_patients_and_repeats():
+    flags = np.array([1] * 10 + [0] * 10, dtype=bool)
+    patients = np.repeat(["A", "B"], 10)                        # A all flagged, B none
+    low, high = bootstrap_share(flags, patients, 500, np.random.default_rng(0))
+    assert (low, high) == (0.0, 1.0)                            # a draw of only A (or only B) is possible
+    assert bootstrap_share(np.ones(6, bool), np.repeat(["A", "B", "C"], 2), 50, np.random.default_rng(1)) == (1.0, 1.0)
+    assert (low, high) == bootstrap_share(flags, patients, 500, np.random.default_rng(0))
+    assert all(np.isnan(bootstrap_share(np.array([], bool), np.array([]), 10, np.random.default_rng(0))))
 
 
 @pytest.mark.parametrize("rates, cut, expected", [

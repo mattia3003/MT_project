@@ -10,8 +10,9 @@ data flows between them, and how the code is organised. The details live in two 
 
 *Status (2026-11-04): E0 (E0a + E0b) done and closed; environment pinned in
 `requirements-lock.txt`. E1–E3 done: thresholds frozen in `configs/frozen/` (`docs/e1-e3-plan.md`).
-E4 (the gate) in progress (`docs/e4-plan.md`): the planted copies are built; the go/no-go
-criteria and the detector run on them come next.*
+E4 (the gate) in progress (`docs/e4-plan.md`): planted copies built and validated; gate ACCEPTED
+with a recorded deviation (three false-positive rates 0.1–0.4 points over their limit); the
+consistency check comes next.*
 
 The diagrams are [Mermaid](https://mermaid.js.org/): GitHub renders them; in VS Code install
 *Markdown Preview Mermaid Support* (`bierner.markdown-mermaid`) and open the Markdown preview.
@@ -66,7 +67,7 @@ synthetic masks (what is audited; the main audit uses the clean and minor masks)
 | E0a (`e0a_prepare_data.py`) | raw real volumes, raw synthetic pool | patient split; real volumes in model space; index of the synthetic pool | everything after |
 | E0b (`e0b_audit.py`) | E0a outputs | brain masks; **lesion tables** (one row per lesion, label maps); **QC classes** of S; E0 statistics | E1–E7 |
 | E3 with E1, E2 (`e3_calibrate.py`) | lesion tables of T and H-cal | detector tables for H-cal; **frozen thresholds** (`configs/frozen/`) | E4, E5 |
-| E4 (`e4_validate.py`) | frozen thresholds, T, H-eval | planted copies with their provenance; validation table; gate verdict | gate for E5; E7 |
+| E4 (`e4_validate.py`) | frozen thresholds, T, H-eval | planted copies with their provenance; validation table; gate verdict; H-eval detector tables | gate for E5 and its H-eval baseline; E7 |
 | E5 (`e5_audit.py`) | frozen thresholds, S | main audit tables; flagged masks | E6, E7 |
 | E6, E7, E8 | E5 outputs (E7 also E6 and the planted copies) | exposure and rarity; match reports; paired-MRI similarity | the report |
 

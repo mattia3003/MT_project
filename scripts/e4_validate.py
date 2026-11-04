@@ -10,18 +10,21 @@ Stages, run in this order (see docs/e4-plan.md):
              lesions), labelled like real masks, each planted lesion traced to its source; no
              detector runs -> evidence for decision K (the go/no-go criteria)
              -> <output_root>/<dataset>/e4/ (planted set), results/<dataset>/e4/plant/
-  validate   (needs decision K; step 5, not yet implemented) both detectors on the planted set and
-             H-eval with the frozen thresholds; validation table; gate verdict
+  validate   (needs decision K) both detectors on the planted set and H-eval with the frozen
+             thresholds; recall per variant (gated masks), false positives per stratum, the gate
+             verdict (PASS / FAIL) against validation.criteria, figures
+             -> <output_root>/<dataset>/e4/ (detector tables), results/<dataset>/e4/validate/
   check      (step 6, not yet implemented) consistency checks of all E4 outputs
 
 Examples (from the repository root):
   .venv\\Scripts\\python.exe scripts\\e4_validate.py plant
+  .venv\\Scripts\\python.exe scripts\\e4_validate.py validate
 """
 
 import argparse
 
 from memtk import config
-from memtk.e4 import plant
+from memtk.e4 import plant, validate
 from memtk.stages import add_stage
 
 
@@ -31,6 +34,8 @@ def main() -> None:
 
     add_stage(stages, "plant", "planted copies P1-P6 of T base masks, provenance, review figures (needs I)",
               plant.run_plant)
+    add_stage(stages, "validate", "both detectors on the planted set and H-eval; gate verdict (needs K)",
+              validate.run_validate)
 
     args = parser.parse_args()
     options = {k: v for k, v in vars(args).items() if k not in ("stage", "run", "config")}

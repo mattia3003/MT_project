@@ -1,0 +1,99 @@
+E4 validate: dataset 'stanford_brainmets' (T, H-eval and the planted set; settings and thresholds from the frozen file; S never read)
+
+Sets: T 3804 slices; H-eval 1089 slices of 26 patients (left out: T: 19 no lesion of at least the minimum area; H-eval: 0 removed by decision E, 5 no lesion of at least the minimum area); planted 737 masks, 679 gated.
+
+Recall of the gated masks (caught = flagged and the base patient as source, decision J), with bootstrap-by-patient 95% intervals:
+detector                            e1                           e2                          any                         both
+variant                                                                                                                      
+P1         1.00 [1.00, 1.00] (100/100)  1.00 [1.00, 1.00] (100/100)  1.00 [1.00, 1.00] (100/100)  1.00 [1.00, 1.00] (100/100)
+P2         1.00 [1.00, 1.00] (100/100)  1.00 [1.00, 1.00] (100/100)  1.00 [1.00, 1.00] (100/100)  1.00 [1.00, 1.00] (100/100)
+P3          0.13 [0.05, 0.23] (13/100)   0.92 [0.87, 0.97] (92/100)   0.92 [0.87, 0.97] (92/100)   0.13 [0.05, 0.23] (13/100)
+P4           0.78 [0.64, 0.89] (73/94)    0.98 [0.95, 1.00] (92/94)    0.99 [0.97, 1.00] (93/94)    0.77 [0.63, 0.89] (72/94)
+P5-erode     0.44 [0.25, 0.60] (22/50)    0.58 [0.43, 0.71] (29/50)    0.58 [0.43, 0.70] (29/50)    0.44 [0.26, 0.61] (22/50)
+P5-dilate    0.38 [0.24, 0.51] (37/98)    0.38 [0.26, 0.50] (37/98)    0.46 [0.35, 0.57] (45/98)    0.30 [0.18, 0.43] (29/98)
+P6-remove    0.41 [0.23, 0.59] (15/37)    0.92 [0.83, 1.00] (34/37)    0.92 [0.84, 1.00] (34/37)    0.41 [0.23, 0.59] (15/37)
+P6-add      0.67 [0.59, 0.75] (67/100)   0.99 [0.97, 1.00] (99/100)  1.00 [1.00, 1.00] (100/100)   0.66 [0.59, 0.73] (66/100)
+
+Flagged, source-patient accuracy among flagged, nearest neighbour = the base slice among caught:
+          flagged        source_accuracy        nn_is_base       
+detector       e1     e2              e1     e2         e1     e2
+variant                                                          
+P1          100.0  100.0           1.000  1.000      1.000  1.000
+P2          100.0  100.0           1.000  1.000      0.990  1.000
+P3           22.0   96.0           0.591  0.958      0.385  0.989
+P4           73.0   92.0           1.000  1.000      0.945  1.000
+P5-erode     25.0   30.0           0.880  0.967      0.136  0.000
+P5-dilate    41.0   42.0           0.902  0.881      0.297  0.108
+P6-remove    16.0   37.0           0.938  0.919      0.800  0.412
+P6-add       72.0  100.0           0.931  0.990      1.000  1.000
+
+E2 classes of the gated masks (all_copied = every lesion of both slices paired >= tau_L):
+            full  partial  all_copied
+variant                              
+P1         100.0      0.0       100.0
+P2         100.0      0.0       100.0
+P3          96.0      0.0         5.0
+P4          92.0      0.0        67.0
+P5-erode    30.0      0.0        15.0
+P5-dilate   40.0      2.0        17.0
+P6-remove   16.0     21.0         6.0
+P6-add     100.0      0.0         0.0
+
+Reported only, recall of all masks by the size of the base's largest lesion (unscorable = missed):
+  variant   by    group  masks    e1    e2   any
+       P3 size 12-19 px     23 0.000 0.913 0.913
+       P3 size 20-39 px     33 0.000 0.848 0.848
+       P3 size 40-79 px     17 0.059 1.000 1.000
+       P3 size >= 80 px     27 0.444 0.963 0.963
+ P5-erode size 12-19 px     23 0.000 0.000 0.000
+ P5-erode size 20-39 px     33 0.030 0.091 0.121
+ P5-erode size 40-79 px     17 0.235 0.471 0.471
+ P5-erode size >= 80 px     27 0.815 0.852 0.852
+P5-dilate size 12-19 px     23 0.130 0.043 0.130
+P5-dilate size 20-39 px     33 0.152 0.273 0.303
+P5-dilate size 40-79 px     17 0.471 0.412 0.588
+P5-dilate size >= 80 px     27 0.815 0.778 0.852
+
+False positives on H-eval (every flag is chance), with the H-cal rate at the same thresholds:
+     class stratum  slices  patients  flagged  rate             ci  hcal_rate  limit  pass
+   e1_copy  single     696        26       50 0.072 [0.045, 0.097]      0.051   0.07 False
+   e1_copy   multi     393        17       29 0.074 [0.049, 0.113]      0.053   0.07 False
+   e1_copy     all    1089        26       79 0.073 [0.052, 0.093]        NaN    NaN  None
+   e2_full  single     634        26       45 0.071 [0.048, 0.096]      0.051   0.07 False
+   e2_full   multi     272        14        8 0.029 [0.014, 0.055]      0.052   0.07  True
+   e2_full     all     906        26       53 0.058 [0.041, 0.078]        NaN    NaN  None
+e2_partial  single     634        26       19 0.030 [0.016, 0.047]      0.023    NaN  None
+e2_partial   multi     272        14       15 0.055 [0.012, 0.087]      0.035    NaN  None
+e2_partial     all     906        26       34 0.038 [0.019, 0.056]        NaN    NaN  None
+e2_flagged  single     634        26       64 0.101 [0.073, 0.131]      0.074   0.12  True
+e2_flagged   multi     272        14       23 0.085 [0.041, 0.106]      0.087   0.12  True
+e2_flagged     all     906        26       87 0.096 [0.075, 0.116]        NaN    NaN  None
+
+RQ2, gated masks caught by E2 only / E1 only / both / neither:
+  variant  masks  e2_only  e1_only  both  neither
+       P1    100        0        0   100        0
+       P2    100        0        0   100        0
+       P3    100       79        0    13        8
+       P4     94       20        1    72        1
+ P5-erode     50        7        0    22       21
+P5-dilate     98        8        8    29       53
+P6-remove     37       19        0    15        3
+   P6-add    100       33        1    66        0
+
+Gate (decision K):
+                        criterion                                      detail  value   limit  pass  accepted
+                        recall P1                   both, P1, 100 gated masks  1.000  >= 1.0  True     False
+                        recall P2                    any, P2, 100 gated masks  1.000  >= 0.9  True     False
+                        recall P4                     any, P4, 94 gated masks  0.989  >= 0.9  True     False
+                        recall P6 lesion, P6-remove + P6-add, 137 gated masks  0.971  >= 0.8  True     False
+   false positives e1_copy single                          H-eval, 696 slices  0.072 <= 0.07 False      True
+    false positives e1_copy multi                          H-eval, 393 slices  0.074 <= 0.07 False      True
+   false positives e2_full single                          H-eval, 634 slices  0.071 <= 0.07 False      True
+    false positives e2_full multi                          H-eval, 272 slices  0.029 <= 0.07  True     False
+false positives e2_flagged single                          H-eval, 634 slices  0.101 <= 0.12  True     False
+ false positives e2_flagged multi                          H-eval, 272 slices  0.085 <= 0.12  True     False
+
+Missed gated masks of a criterion's variants: 5 (misses.png).
+Figures: score_distributions.png, recall_by_size.png, factors.png, heval_flags.png.
+
+GATE: ACCEPTED. Failed (false positives e1_copy single; false positives e1_copy multi; false positives e2_full single), accepted as a recorded deviation (validation.accepted_deviation): H-eval false-positive rates 7.2%, 7.4% and 7.1% exceed the 7% limit by 0.1-0.4 points (H-cal at the same thresholds 5.1-5.3%); every bootstrap-by-patient interval contains both the limit and the H-cal rate. Flags cluster in few patients (top 3 give 33-62% of a cell's flags; 25-26 patients per held-out half), so the gap is patient sampling, not a detector fault, and it goes both ways (E2 full multi 2.9% vs 5.2%). No remedy within the rules: re-fitting thresholds to H-eval would leak it into calibration. Every recall criterion passes. E5 compares S with the measured H-eval rates, not with 5%. E5 may run.
