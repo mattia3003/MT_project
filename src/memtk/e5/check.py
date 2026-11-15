@@ -21,7 +21,8 @@ import pandas as pd
 
 from memtk import calibration, checks, config, lesionmatch
 from memtk.calibration import load_frozen
-from memtk.e5.analyze import analyze_scored, heldout, informative_areas, load_scored, write_tables
+from memtk.audit import heldout, load_scored
+from memtk.e5.analyze import analyze_scored, informative_areas, write_tables
 from memtk.e5.common import audit_config, audit_hash, score_marker
 from memtk.e5.prepare import heldout_maxima, tau_d_star
 from memtk.io import read_table

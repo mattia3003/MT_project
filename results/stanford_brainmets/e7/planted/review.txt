@@ -1,0 +1,51 @@
+E7 planted: dataset 'stanford_brainmets' (E4's planted copies, known source; S never read)
+698 planted masks with an informative lesion; gated 679, of them flagged by E2 597.
+
+Correctness per variant (decision Z; shares over the gated masks E2 flags; patient_all_gated counts an unflagged mask as not named):
+  variant  gated  flagged  patient  slice_within_window  either_source  lesions  patient_all_gated
+       P1    100      100    1.000                1.000          1.000      NaN              1.000
+       P2    100      100    1.000                1.000          1.000      NaN              1.000
+       P3    100       96    0.958                0.948          0.958      NaN              0.920
+       P4     94       92    1.000                1.000          1.000      NaN              0.979
+P5-dilate     98       42    0.881                0.619          0.881      NaN              0.378
+ P5-erode     50       30    0.967                0.600          0.967      NaN              0.580
+   P6-add    100      100    0.990                0.990          1.000    0.990              0.990
+P6-remove     37       37    0.919                0.892          1.000    0.811              0.919
+
+Criteria (thesis plan): PASS
+               criterion  value  min  pass
+       source patient P1  1.000  0.9  True
+       source patient P2  1.000  0.9  True
+       source patient P4  1.000  0.9  True
+   source patient P6-add  0.990  0.9  True
+source patient P6-remove  0.919  0.9  True
+          lesions P6-add  0.990  0.8  True
+       lesions P6-remove  0.811  0.8  True
+
+Deletion test (decision Y; drop = before - after; flips = no longer flagged with the same source patient after a full re-match):
+set                    planted controls  H-eval chance flags
+masks                               106                    7
+still_flagged_before                106                    7
+C_drop_top                        0.432                0.208
+C_drop_small                      0.408                0.075
+C_wilcoxon_p                        0.0                0.008
+e1_drop_top                       0.334                0.161
+e1_drop_small                     0.148                0.103
+e1_wilcoxon_p                       0.0                0.766
+flips_top                            23                    7
+flips_small                           6                    4
+discordant_top_only                  22                    3
+discordant_small_only                 5                    0
+mcnemar_p                         0.001                0.125
+
+Taxonomy (rule-based) of the gated, E2-flagged masks, variant x category:
+taxonomy   deformed  exact  partial  shifted
+variant                                     
+P1                0    100        0        0
+P2                0      0        0      100
+P3                5      0        0       91
+P4               36     51        0        5
+P5-dilate        40      0        2        0
+P5-erode         28      1        1        0
+P6-add            1      0       99        0
+P6-remove         6      0       30        1

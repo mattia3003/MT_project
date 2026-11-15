@@ -44,8 +44,11 @@ Status: ✅ implemented · ⏳ planned
 | `e5_audit.py score` | ✅ | the E4 gate (PASS / ACCEPTED), `prepare` and `rehearse` made with the current `audit:` and frozen files, T, S (pool `qc.csv`, `labels.npz`, `masks_raw.npz`; main and noisy masks) | `<output_root>/<pool>/e5/`: raw tables of S (main and every variant), `score_log.csv`, `score.complete.json`; no rate shown; runs once (the marker locks `prepare`, `audit:` and itself) |
 | `e5_audit.py analyze` | ✅ | `score` outputs and marker (the `audit:` section and both frozen files must equal those `score` recorded), H-eval baseline, T, pool labels and sample files (figures) | `results/<pool>/e5/analyze/`: every table and figure of the rehearsal, on S; `flagged.csv` (read by E6, E7, E8); `review.txt` ending in the mechanical outcome reading and the E8 exit count |
 | `e5_audit.py check` | ✅ | all E5 outputs, the frozen files, `audit:` | `results/<pool>/e5/check_report.txt` (PASS/FAIL: decisions, run logs in order with S read by `score` only, the lock, one complete score run, `prepare` values and every `analyze` table reproduced with the same seed, unit tests; exit code 1 on any failure) |
-| `e6_exposure.py` | ⏳ | E5 outputs | patient exposure, rarity, duplication |
-| `e7_reports.py` | ⏳ | E5, E6 outputs, planted copies | match reports, deletion test, correctness |
+| `e6_exposure.py reference` | ✅ | decisions R, V, W (`exposure:`), the frozen E3 file, T label maps, `lesions.csv`, model-space `seg` volumes, E4 `heval_classes.csv`; never S | `<output_root>/<dataset>/e6/`: 3D lesions of T (both methods) and the 2D → 3D map, slice rarity (E1, E2), patient features and rarity, T slice shares, H-eval nearest-neighbour counts; `results/<dataset>/e6/reference/` (`review.txt`, `reference.png`); ~3 min |
+| `e6_exposure.py rehearse` | ✅ | `reference` outputs, E5's mock sets (null: H-cal; positive: H-cal + planted P1, P2, P4), H-cal and T (placement mocks: lesions moved to T lesion positions, built and scored here), E4 H-eval tables, the frozen E3 file; never S | `<output_root>/<dataset>/e6/rehearse/<case>/` (placement mocks); `results/<dataset>/e6/rehearse/<case>/`: exposure, concentration, margins, H3, H1, flag details, top patients, figures, `review.txt` ending in the reading of decision U (placement mocks also E5's rates, exploratory); ~45 s |
+| `e6_exposure.py exposure`, `check` | ⏳ planned (`docs/e6-e7-plan.md`) | E5's S tables, E6 reference tables; config `exposure:` (decisions R–W) | the same analysis on S; consistency checks |
+| `e7_reports.py planted` | ✅ | decisions X, Y, Z (`reports:`), E4's planted set and tables, E4's H-eval tables and `fp_heval.csv`, T and H-eval label maps, the frozen E3 file; never S | `results/<dataset>/e7/planted/`: report table with verdicts, correctness per variant and the criteria, deletion test (planted controls, H-eval chance flags), taxonomy confusion, one example report per variant; `<output_root>/<dataset>/e7/pseudonyms.csv`; ~30 s |
+| `e7_reports.py reports`, `check` | ⏳ planned (`docs/e6-e7-plan.md`) | E5's S tables, E6 `exposure`; config `reports:` | match reports on S, deletion test on S; consistency checks |
 | `e8_paired_mri.py` | ⏳ (optional) | E5 outputs, paired MRIs | paired-MRI similarity |
 
 ## Commands
@@ -118,6 +121,18 @@ decisions L–Q, and the E5 file from `prepare`; see `docs/e5-plan.md`)
 `prepare` and `score` refuse to run once S has been scored, even with `--overwrite`. `score
 --overwrite` only replaces the tables of a run that stopped before writing `score.complete.json`;
 record such a re-run in `docs/process-log.md`.
+
+**E6: patient exposure, copying vs placement, rarity, duplication** (every choice in `exposure:`,
+decisions R, U, V, W; S only from E5's stored tables; see `docs/e6-e7-plan.md`)
+```powershell
+.venv\Scripts\python.exe scripts\e6_exposure.py reference         # no S: 3D lesions, slice/patient rarity, H-eval NN counts, ~3 min
+.venv\Scripts\python.exe scripts\e6_exposure.py rehearse          # no S: the E6 analysis on mock sets (null, positive, 2 placement mocks), ~45 s
+```
+
+**E7: match reports** (every choice in `reports:`, decisions X, Y, Z; built on planted copies before S)
+```powershell
+.venv\Scripts\python.exe scripts\e7_reports.py planted           # no S: reports, correctness, deletion test, taxonomy on planted copies, ~30 s
+```
 
 **Look at one slice** (after `lesions`): full-size picture with its lesion table, written to
 `results/<dataset|pool>/e0b/views/<key>.png`

@@ -10,19 +10,26 @@
 - AUC of two score samples with a two-level bootstrap (decision M, secondary).
 - Chained adjacent-slice groups (decision N), the copied-area share (E5 step 7), standardised rates
   (size-confound check) and held-out maxima per stratum and size bin (decision Q).
+- Scored query sets (`Scored`, `query_table`, `load_scored`, `heldout`) and the source slice and
+  chained group of each flag (`sources`, decision J; `chained`, decision N). Moved from
+  `memtk.e5.analyze` / `memtk.e5.score` on 2026-11-15, because E6 and E7 read the same scored sets.
 """
 
 from __future__ import annotations
 
 from collections.abc import Sequence
+from dataclasses import dataclass
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
-from memtk import calibration
-from memtk.ids import parse_lesion_id
+from memtk import calibration, config
+from memtk.ids import parse_lesion_id, parse_slice_key
+from memtk.io import read_table
 from memtk.lesionmatch import LesionMatch
 from memtk.sets import SliceSet
+from memtk.stages import require
 
 CLASSES = ("e1_copy", "e2_full", "e2_partial", "e2_flagged")
 CHUNK = 100   # bootstrap draws per block (bounds memory for large samples)
@@ -263,3 +270,76 @@ def beyond_max(scores: np.ndarray, strata: np.ndarray, sizes: np.ndarray, maxima
 
     limits = np.array([limit(st, lo) for st, lo in zip(np.asarray(strata), lower)], dtype=float)
     return np.asarray(scores, dtype=float) > limits
+
+
+# --- scored sets ------------------------------------------------------------------------------
+
+@dataclass
+class Scored:
+    """A scored set: `meta` (one row per slice: key, cluster, mask_class, scheme, n_lesions,
+    l1_area) and the class table of each variant (`main` and E5 decision O)."""
+    name: str
+    meta: pd.DataFrame
+    classes: dict[str, pd.DataFrame]
+
+    def table(self, variant: str) -> pd.DataFrame:
+        """The class table of a variant joined with `meta` (one row per slice)."""
+        return self.classes[variant].drop(columns=["patient_id"]).merge(
+            self.meta.drop(columns=["n_lesions"]), on="key", how="left", validate="one_to_one")
+
+
+def query_table(q: SliceSet, clusters: np.ndarray | Sequence[str], mask_class: Sequence[str],
+                scheme: Sequence[str]) -> pd.DataFrame:
+    """One row per query slice: `key`, `cluster` (the bootstrap unit: the sample itself for S,
+    the patient for real slices), `mask_class`, `scheme` (naming scheme or source set),
+    `n_lesions` (lesions >= the minimum area) and `l1_area` (area of the largest lesion, strays
+    included: the size used for near-exact copies and the size-confound check)."""
+    flat = q.labels.reshape(len(q.labels), -1)
+    return pd.DataFrame({"key": q.keys, "cluster": list(clusters), "mask_class": list(mask_class),
+                         "scheme": list(scheme), "n_lesions": flat.max(axis=1).astype(int),
+                         "l1_area": (flat == 1).sum(axis=1).astype(int)})
+
+
+def load_scored(name: str, score_dir: Path, variants: list[str]) -> Scored:
+    """A query set scored by E5's `score_query` (its `queries.csv` and class tables)."""
+    return Scored(name, read_table(score_dir / "queries.csv"),
+                  {v: read_table(score_dir / f"classes_{v}.csv") for v in ["main", *variants]})
+
+
+def heldout(cfg: dict, dataset: str, heval: SliceSet, variants: list[str]) -> Scored:
+    """H-eval as a scored set (the baseline): its slices clustered by patient, the main class table
+    from E4 and one per variant from E5 `prepare` (pass no variants for the main table only)."""
+    meta = query_table(heval, heval.patients, ["clean"] * len(heval.keys), ["H-eval"] * len(heval.keys))
+    e4_dir, e5_dir = (config.output_dir(cfg, dataset) / e for e in ("e4", "e5"))
+    require(e4_dir / "heval_classes.csv", "e4_validate.py validate")
+    classes = {"main": read_table(e4_dir / "heval_classes.csv")}
+    for v in variants:
+        require(e5_dir / f"heval_classes_{v}.csv", "e5_audit.py prepare")
+        classes[v] = read_table(e5_dir / f"heval_classes_{v}.csv")
+    return Scored("H-eval", meta, classes)
+
+
+# --- sources and groups -----------------------------------------------------------------------
+
+def sources(t: pd.DataFrame, cls: str) -> pd.Series:
+    """The source slice of each slice a class flags (decision J): E1 copy -> E1 nearest neighbour;
+    E2 full -> E2 nearest neighbour; E2 partial -> the strongest-pair slice; E2 flagged -> by its
+    class. Indexed like `t`, flagged rows only."""
+    on, flag = class_flags(t, cls)
+    d = t[on & flag]
+    if cls == "e1_copy":
+        return d["e1_nn"]
+    return pd.Series(np.where(d["e2_class"] == "full", d["e2_nn"], d["e2_strongest_train"]), index=d.index)
+
+
+def chained(src: pd.Series, max_gap: int) -> pd.Series:
+    """Decision N: the group of each source slice (chained within max_gap slices of one patient),
+    labelled `<patient>:z<first z>`."""
+    if not len(src):
+        return pd.Series(dtype=str)
+    parsed = [parse_slice_key(k) for k in src]
+    patients, z = [p for p, _ in parsed], [zz for _, zz in parsed]
+    g = chain_groups(patients, z, max_gap)
+    first = pd.DataFrame({"g": g, "p": patients, "z": z}).groupby("g").agg(p=("p", "first"), z=("z", "min"))
+    labels = {i: f"{r.p}:z{r.z}" for i, r in first.iterrows()}
+    return pd.Series([labels[i] for i in g], index=src.index)

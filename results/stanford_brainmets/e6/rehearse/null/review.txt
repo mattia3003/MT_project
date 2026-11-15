@@ -1,0 +1,77 @@
+E6 rehearse, case 'null': dataset 'stanford_brainmets', mock query set (S never read); the analysis that will run on S.
+Expected: exposure ratios near 1, margin and source-rarity AUC about 0.5, reading not 'patient copying' (H-cal's flags cluster in adjacent slices, so the dispersion alone may exceed its null).
+
+Concentration of flags over T patients (decision R; null = flags drawn from pi, pi redrawn by H-eval patient):
+             cell     m  primary  flags  patients_flagged  dispersion  dispersion_null_median  dispersion_null_pct  dispersion_p  top5_share  top5_null_median  top5_null_p95  top5_p  above_null_band  above_null_band_expected
+   e1_copy single  52.5    False     35                25     356.490                  99.602              223.036         0.016       0.371             0.371          0.486   0.625                2                     1.000
+   e1_copy single 105.0    False     35                25     230.331                 102.473              218.015         0.039       0.371             0.371          0.457   0.570                3                     1.087
+    e1_copy multi  52.5     True     16                10     892.601                  89.743              255.286         0.002       0.688             0.438          0.625   0.015                4                     0.858
+    e1_copy multi 105.0     True     16                10     539.488                  90.881              210.856         0.002       0.688             0.438          0.562   0.007                4                     0.842
+   e2_full single  52.5    False     31                24     225.529                  97.018              230.361         0.052       0.387             0.419          0.548   0.737                3                     0.933
+   e2_full single 105.0    False     31                24     167.162                 100.926              210.975         0.100       0.387             0.387          0.516   0.682                3                     1.101
+    e2_full multi  52.5     True     12                 9     219.841                  83.218              280.345         0.094       0.667             0.583          0.750   0.226                2                     0.742
+    e2_full multi 105.0     True     12                 9     162.618                  89.518              245.784         0.148       0.667             0.500          0.667   0.181                2                     0.767
+e2_flagged single  52.5    False     45                33     226.520                 104.565              229.157         0.052       0.289             0.378          0.489   0.960                4                     1.127
+e2_flagged single 105.0    False     45                33     172.163                 106.408              206.976         0.087       0.289             0.356          0.467   0.940                3                     1.196
+ e2_flagged multi  52.5    False     20                15     232.765                  91.158              269.319         0.072       0.500             0.450          0.600   0.494                3                     0.958
+ e2_flagged multi 105.0    False     20                15     157.981                  95.723              221.902         0.137       0.500             0.450          0.600   0.372                3                     0.945
+
+Margin to the second-best patient and source-slice rarity, flags against H-eval chance flags (decision U; AUC = P(query > H-eval)); source slices against all other T slices (H3, slice level):
+             cell  primary  flags_q  flags_h  margin_median_q  margin_median_h  margin_auc  margin_auc_low  margin_auc_high  rarity_median_q  rarity_median_h  rarity_auc  rarity_auc_low  rarity_auc_high  source_slices  rarity_vs_t_auc  rarity_vs_t_auc_low  rarity_vs_t_auc_high
+   e1_copy single    False       35       50            0.109            0.119       0.509           0.346            0.677            0.200            0.154       0.554           0.385            0.714             30            0.348                0.260                 0.455
+    e1_copy multi     True       16       29            0.086            0.095       0.453           0.220            0.664            0.227            0.182       0.665           0.467            0.824             13            0.437                0.349                 0.530
+   e2_full single    False       31       45            0.150            0.171       0.480           0.317            0.637            0.424            0.407       0.572           0.415            0.721             31            0.340                0.262                 0.431
+    e2_full multi     True       12        8            0.100            0.075       0.531           0.155            0.800            0.629            0.557       0.635           0.400            0.896              9            0.565                0.387                 0.719
+e2_flagged single    False       45       64            0.134            0.138       0.466           0.325            0.599            0.495            0.465       0.562           0.444            0.674             45            0.500                0.387                 0.616
+ e2_flagged multi    False       20       23            0.069            0.022       0.722           0.498            0.808            0.629            0.547       0.559           0.361            0.727             17            0.563                0.406                 0.709
+
+H3, patient level: Spearman(patient rarity, exposure ratio), permutation p, interval with patients and flags resampled:
+             cell  primary   n    rho  rho_low  rho_high  p_permutation
+   e1_copy single    False 105 -0.094   -0.263     0.161          0.334
+    e1_copy multi     True 105  0.149   -0.043     0.283          0.124
+   e2_full single    False 105  0.003   -0.224     0.198          0.974
+    e2_full multi     True 105  0.023   -0.153     0.182          0.818
+e2_flagged single    False 105  0.135   -0.122     0.314          0.166
+ e2_flagged multi    False 105  0.084   -0.091     0.239          0.390
+
+H1: Spearman(span, lesion credits) per size bin, query set (rho_s) vs H-eval (rho_h); H1 holds if the weighted difference's interval is above 0 (decision W):
+              bin  lesions3d  credited_s  credited_h  rho_s  rho_h  difference  difference_low  difference_high          method
+         12-19 px        479        12.0        24.0  0.053  0.097      -0.044          -0.117            0.077   slice_linking
+         20-39 px        321        19.0        17.0  0.107  0.124      -0.016          -0.096            0.050   slice_linking
+         40-79 px        128         7.0         9.0  0.074 -0.027       0.101          -0.064            0.185   slice_linking
+         >= 80 px         90         4.0         8.0  0.073  0.257      -0.185          -0.356            0.085   slice_linking
+         weighted       1018         NaN         NaN    NaN    NaN      -0.029          -0.090            0.050   slice_linking
+all (plain rho_s)       1018        42.0         NaN  0.100    NaN         NaN             NaN              NaN   slice_linking
+         12-19 px        451        12.0        23.0  0.046  0.119      -0.072          -0.152            0.080 connectivity_26
+         20-39 px        297        18.0        18.0  0.071  0.120      -0.050          -0.120            0.024 connectivity_26
+         40-79 px        113         8.0         8.0  0.071 -0.055       0.126          -0.029            0.219 connectivity_26
+         >= 80 px         79         4.0         9.0  0.228  0.246      -0.018          -0.197            0.198 connectivity_26
+         weighted        940         NaN         NaN    NaN    NaN      -0.037          -0.098            0.051 connectivity_26
+all (plain rho_s)        940        42.0         NaN  0.097    NaN         NaN             NaN              NaN connectivity_26
+
+Most exposed patients (primary cells, by the lower bound of the ratio):
+         cell patient_id  observed  groups  heldout_nn  expected   ratio  ratio_low  ratio_high  n_lesions3d  max_lesions_per_slice  rarity
+e1_copy multi   Mets_099         3       1           0     0.013 224.164        0.0     728.890            6                      3   0.829
+e1_copy multi   Mets_185         3       1           6     0.244  12.308        0.0      65.213            4                      1   1.296
+e1_copy multi   Mets_107         2       2          12     0.480   4.171        0.0      17.426           48                      4   0.762
+e1_copy multi   Mets_265         2       1           2     0.094  21.359        0.0     111.536           13                      2   0.617
+e1_copy multi   Mets_059         1       1           5     0.210   4.766        0.0      25.088           22                      3   0.636
+e1_copy multi   Mets_094         1       1           1     0.050  20.083        0.0     172.903            3                      1   0.794
+e1_copy multi   Mets_134         1       1           4     0.198   5.059        0.0      28.737           89                      9   1.069
+e1_copy multi   Mets_173         1       1           8     0.324   3.082        0.0      16.012            7                      2   0.978
+e1_copy multi   Mets_230         1       1           0     0.009 112.082        0.0     359.580            1                      1   1.060
+e1_copy multi   Mets_271         1       1           8     0.327   3.054        0.0      36.150           17                      3   0.886
+e2_full multi   Mets_323         3       1           3     0.143  20.965        0.0      76.286           22                      3   0.505
+e2_full multi   Mets_107         2       1          14     0.568   3.523        0.0      12.313           48                      4   0.762
+e2_full multi   Mets_059         1       1           9     0.364   2.748        0.0      11.659           22                      3   0.636
+e2_full multi   Mets_134         1       1          18     0.721   1.386        0.0       5.297           89                      9   1.069
+e2_full multi   Mets_167         1       1           0     0.009 115.257        0.0     383.956            6                      1   0.799
+e2_full multi   Mets_173         1       1           1     0.075  13.288        0.0      57.785            7                      2   0.978
+e2_full multi   Mets_249         1       1           5     0.208   4.799        0.0      68.527            7                      2   0.865
+e2_full multi   Mets_265         1       1           2     0.096  10.372        0.0      56.232           13                      2   0.617
+e2_full multi   Mets_319         1       1           1     0.071  14.050        0.0      93.773           14                      2   0.822
+e2_full multi   Mets_005         0       0           5     0.198   0.000        0.0       0.000            3                      1   0.699
+
+Reading (decision U, primary cells): UNDETERMINED
+  e1_copy multi: undetermined (dispersion beyond null True, margin AUC above 0.5 False, margin AUC below 0.5 False, source-rarity AUC below 0.5 False)
+  e2_full multi: undetermined (dispersion beyond null False, margin AUC above 0.5 False, margin AUC below 0.5 False, source-rarity AUC below 0.5 False)

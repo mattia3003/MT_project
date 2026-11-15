@@ -22,10 +22,10 @@ import pandas as pd
 
 from memtk import config, lesionmatch
 from memtk.calibration import load_frozen
-from memtk.e5.analyze import (Scored, analyze_scored, draw_figures, heldout, informative_areas, load_scored,
-                              review_text, write_tables)
+from memtk.audit import Scored, heldout, load_scored, query_table
+from memtk.e5.analyze import analyze_scored, draw_figures, informative_areas, review_text, write_tables
 from memtk.e5.common import audit_config, audit_hash, check_prepared, drop_only_t
-from memtk.e5.score import query_table, score_query
+from memtk.e5.score import score_query
 from memtk.io import slice_images
 from memtk.sets import SliceSet, load_planted, load_set
 from memtk.stages import refuse_overwrite

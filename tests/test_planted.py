@@ -5,8 +5,8 @@ import pandas as pd
 import pytest
 
 from memtk.lesions import attach_or_drop
-from memtk.planted import (add_lesion, choose_bases, lesion_centroid, morph, planted_key, provenance, rotate,
-                           rotate_labels, shift, shift_direction, variants_of)
+from memtk.planted import (add_lesion, choose_bases, lesion_centroid, morph, planted_key, provenance, relocate_lesions,
+                           rotate, rotate_labels, shift, shift_direction, variants_of)
 
 VARIANT_PARAMS = {"shift_small_px": 2, "shift_large_px": 5, "rotate_deg": 5, "rotate_threshold": 0.5,
                   "morph_px": 1, "add_min_gap_px": 3, "add_max_tries": 50}
@@ -183,3 +183,20 @@ def test_bases_repeat_with_a_seed_and_fail_without_enough_patients():
     assert first.equals(choose_bases(table, BASE_PARAMS, np.random.default_rng(11))[0])
     with pytest.raises(ValueError):
         choose_bases(table, {**BASE_PARAMS, "patients_multi": 3}, np.random.default_rng(0))
+
+
+def test_relocate_lesions_keeps_shapes_and_lands_on_drawn_positions():
+    labels = np.zeros((40, 40), dtype=np.int32)
+    labels[2:6, 2:5] = 1                      # 12 px
+    labels[30:32, 30:33] = 2                  # 6 px
+    positions = np.array([[10.0, 10.0], [25.0, 25.0], [12.0, 11.0]])
+    out = relocate_lesions(labels, positions, np.random.default_rng(0), min_gap=2, max_tries=50)
+    assert out is not None
+    assert [(out == n).sum() for n in (1, 2)] == [12, 6]
+    for n in (1, 2):
+        centre = np.argwhere(out == n).mean(axis=0)
+        assert any((np.abs(centre - pos) <= 0.5).all() for pos in positions)
+    gap = np.min(np.abs(np.argwhere(out == 1)[:, None, :] - np.argwhere(out == 2)[None, :, :]).max(axis=2))
+    assert gap > 2                            # more than min_gap background pixels apart
+    assert relocate_lesions(labels, np.array([[10.0, 10.0]]), np.random.default_rng(0), 2, 20) is None  # no room
+

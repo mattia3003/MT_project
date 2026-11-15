@@ -654,6 +654,24 @@ move the old ones, with the reason, to the process log.
   affects the slice span of H1 and any 3D-level explanation (E6, E7). *Source: read-only check,
   T label maps and `volumes/<pid>/seg.nii.gz`, scipy 26-connected labelling, 2026-11-03;
   `results/stanford_brainmets/e0b/lesions/overview.png`.*
+  *Resolved by decision W (2026-11-15):* slice-to-slice one-to-one linking by overlap gives 1,565
+  3D lesions in T, none holding two separate pieces in a slice (26-connectivity: 1,446, of which
+  1,428 contain a lesion ≥ 4 px and 38 join neighbouring metastases); median span 3 slices under
+  both. A merge splits a chain rather than joining two, so linking gives more, shorter lesions where
+  metastases touch. *Source: `memtk.lesions3d` on T, read-only check, 2026-11-15 (E6 + E7 step 1);
+  the per-lesion table is written by E6 `reference`.* Of these, 1,018 (linking) and 940
+  (26-connectivity) contain an informative lesion (≥ 12 px); their span has a median of 4 slices
+  (quartiles 3 / 6, max 43) under both, and 52 26-connected lesions (705 2D lesions) are split by
+  linking. *Source: `results/stanford_brainmets/e6/reference/review.txt`.*
+- **How unusual T's slices are, on the detectors' own scales** (E6 `reference`, 2026-11-15; T
+  only). Slice rarity = 1 − the best score against T slices of *other* patients. Whole-mask (E1):
+  quartiles 0.16 / 0.26 / 0.39; 10 T slices have an identical whole mask (after a shift of up to
+  3 px) in another patient. Configuration (E2 C, 3,172 slices with an informative lesion): quartiles
+  0.40 / 0.53 / 0.68, bimodal. Patient rarity (5 features, k = 5) is highest for a patient with one
+  very large lesion and for the two patients with 100+ 3D lesions. H-eval's nearest neighbours,
+  the data behind π_p, name 82 of 105 T patients for E1 multi-lesion masks (393 masks) and 69 for E2
+  (272); hence the smoothing of decision R. *Source: `results/stanford_brainmets/e6/reference/
+  review.txt`, `reference.png`.*
 - **Synthetic masks: smaller lesions, more two-lesion masks, no large lesions.** Real lesion
   slices against the main audit (S main = `mask_class` clean or minor, 35,920 masks):
 
@@ -882,6 +900,65 @@ move the old ones, with the reason, to the process log.
 
   *Source: `results/stanford_brainmets/e5/rehearse/null/review.txt`, `positive/review.txt`,
   `rates.csv`, `auc.csv`, `h2.csv`.*
+- **The E6 analysis separates planted patient copies from chance on mock sets, before S is read**
+  (E6 `rehearse`, 2026-11-15; decisions R, U, V, W fixed beforehand). The code that will analyse S
+  was run on E5's two mock sets, against H-eval:
+  - *Null* (H-cal, never trained on): reading "undetermined", not "patient copying". The margin to
+    the second-best patient is like that of H-eval's chance flags (AUC 0.45 [0.22, 0.66] for E1
+    multi-lesion copies, 0.53 [0.16, 0.80] for E2 full multi), and so is the source slices' rarity;
+    no H3 or H1 effect.
+  - *Positive* (H-cal + 294 planted copies of 20 patients): reading "patient copying". Planted flags
+    sit much further from the second-best patient than chance flags (AUC 0.88 [0.81, 0.94] and 0.95
+    [0.88, 0.99]); every planted flag names its base patient; 7–9 base patients per cell have an
+    exposure ratio clearly above 1 and no other patient does.
+  - *Why the margin rule is needed:* on the null case the flags' dispersion over patients already
+    exceeds its multinomial null (E1 multi), because a held-out patient's adjacent slices are
+    near-duplicates and match the same training patient together. S's masks are independent, but a
+    generator that places lesions where training lesions typically are would also shift the flags
+    away from π_p. Concentration alone therefore does not show copying; the margin does.
+  - *Why H1 needs the held-out reference:* the experiment plan's plain Spearman of slice span and
+    copies per 3D lesion is positive in both mocks (0.10 and 0.23) without any duplication effect: a
+    lesion spanning more slices offers more slices to match. Decision W compares it with H-eval's.
+  - *Power:* with 5–9 copies per patient, only patients with a modest expected share stand out on
+    their own (7–9 of 14–20 base patients per cell).
+  - *Placement mocks* (step 3b): H-cal masks with every lesion moved, shape and size kept, to the
+    position of a random T lesion (`placement`) or of a random T lesion inside S's central pixel
+    area (`placement_compact`). Neither reads "patient copying": their margins are no larger than
+    chance (compact, E1 multi-lesion: AUC 0.33 [0.19, 0.49], i.e. *smaller* than chance). Neither
+    reads "typical placement" either: the source slices are not clearly more typical than chance
+    picks (AUC 0.41 [0.29, 0.54]). So the reading guards against mistaking placement for copying,
+    but recognises placement only weakly.
+  - *Exploratory, placement and E5:* the compact mock raises E5's *single-lesion* rates above
+    H-eval (E1 copy +5.4 points [+1.9, +9.4], E2 full +5.8 [+1.6, +10.0]) but not clearly the
+    multi-lesion ones (E1 +1.2 [−3.4, +6.9]); S shows the opposite (multi-lesion excess only). Pure
+    compact placement of real lesion shapes therefore does not reproduce E5's pattern by itself.
+    Caveat: the mock keeps H-cal's lesion sizes and counts, which differ from S's (smaller lesions,
+    more two-lesion masks).
+
+  *Source: `results/stanford_brainmets/e6/rehearse/{null,positive,placement,placement_compact}/
+  review.txt`, `margins.csv`, `concentration.csv`, `h1.csv`, `e5_rates.csv` (placement mocks).*
+- **E7: the match reports name the true source of planted copies; the explanation is faithful**
+  (E7 `planted`, 2026-11-15; decisions X, Y, Z fixed beforehand; S not read).
+  - *Correctness* (thesis-plan criteria, all pass): of the gated planted copies E2 flags, the report
+    names the base patient for 100% of P1, P2 and P4, 99.0% of P6-add and 91.9% of P6-remove
+    (criterion ≥ 90%), and the right lesions for 99.0% of P6-add and 81.1% of P6-remove (≥ 80%).
+    Reported only: P3 (5 px) 95.8%, P5 (1 px boundary change) 88–97%; for P5 the named slice is the
+    base slice ±2 in only about 60%, because an eroded or dilated lesion fits a neighbouring slice of
+    the same patient better (as in E4).
+  - *Faithfulness by deletion* (106 planted multi-lesion copies): removing the lesion the report
+    ranks first lowers the whole-mask score against the named slice by 0.33 against 0.15 for the
+    last-ranked lesion (paired Wilcoxon p < 0.001), and makes the mask lose its flag or its source
+    patient in a full re-match 23 times against 6 (exact McNemar p 0.001). The drop in C itself
+    hardly differs (0.43 vs 0.41): in exact copies every lesion pair scores about 1, so C counts each
+    copied lesion equally (the plan's ΔC test alone would say little here, which is why decision Y
+    added the two other measures). On H-eval only 7 chance flags qualify.
+  - *Taxonomy* (rules fixed on the planted variants): exact 100/100 P1, shifted 100/100 P2 and 91/96
+    P3, partial 99/100 P6-add and 30/37 P6-remove, deformed for P5; P4 (5° rotation) splits into
+    exact 51 and deformed 36, because rotating a small lesion by 5° often leaves its pixels unchanged.
+  - *Limitation:* no human rater checked the reports (moved to the master thesis, as planned).
+
+  *Source: `results/stanford_brainmets/e7/planted/review.txt`, `correctness.csv`, `criteria.csv`,
+  `deletion_summary.csv`, `taxonomy_confusion.csv`, `report_<variant>.png`.*
 - **E5 main audit: synthetic multi-lesion masks are closer to training masks than held-out masks
   are; single-lesion masks are not** (E5 `analyze`, 2026-11-15; S scored once; every analysis
   choice fixed beforehand, decisions L–Q). Main set: 35,920 masks (E1-scorable 35,920; E2-scorable
@@ -1017,6 +1094,17 @@ move the old ones, with the reason, to the process log.
   configurations but not exact boundaries would be undercounted. P5's recall by lesion size
   (E4 `validate`) quantifies this: 0% at 12–19 px, 85% at ≥ 80 px (section 3). *Source:
   `docs/e4-plan.md` (decision K), `results/stanford_brainmets/e4/plant/area_change.csv`.*
+- **E2's shape factor drops for some lesions shifted by exactly 1 px** (found 2026-11-15, E6 step 2;
+  a property of the frozen detector, not changed). E2 aligns two lesions on their centroids rounded
+  to the nearest pixel, and `np.rint` rounds halves to even, so a lesion whose centroid lies on a
+  half pixel (even width) is compared one pixel out of alignment after an odd shift. On T, a 1 px
+  shift lowers the shape factor of 3.9% of the 4,469 informative lesions (8% at 12–19 px, 0% at
+  ≥ 80 px), to a median of 0.57 for those; position and size are unaffected. E4 tested shifts of 2
+  and 5 px (P2, P3), where the rounding is consistent, so this was not visible there. Consequence:
+  a copy shifted by 1 px can be missed when it consists of small even-width lesions; S rates are
+  lower bounds for such copies, as for boundary noise above. *Source: read-only check of each
+  informative T lesion against itself shifted 1 px (`lesionmatch.shape_factor`), 2026-11-15; process
+  log, E6 + E7 step 2.*
 
 - **The chance rate at the frozen thresholds is about 7%, not 5%, on H-eval** (E4, 2026-11-04).
   The thresholds are 95th percentiles of 25 H-cal patients; on the other 26 held-out patients
@@ -1089,7 +1177,11 @@ move the old ones, with the reason, to the process log.
       missed by both detectors by construction). 2026-11-03, updated 2026-11-04.
       *P6's expected class: resolved 2026-11-04 by decision J* (caught = flagged and the right
       source patient; incompleteness shown with `all_copied`; see section 2).
-- [ ] **3D lesion identity for H1 (E6).** 26-connected 3D linking merges neighbouring metastases
+- [x] **3D lesion identity for H1 (E6).** *Resolved 2026-11-15 in E6 + E7 planning (decision W,
+      `docs/e6-e7-plan.md`): slice-to-slice one-to-one linking by overlap (Hungarian on pixel IoU)
+      of all components of the masks as saved; 26-connectivity as a sensitivity. Rejected: excluding
+      the merged 3D lesions, which removes the long lesions H1 is about.* The question as recorded:
+      26-connected 3D linking merges neighbouring metastases
       for 2.7% of T's 3D lesions, holding 10.3% of the 2D lesions (section 3). Options: link 2D
       lesions slice to slice by overlap (one-to-one), or keep 26-connectivity and re-run H1
       without the merged 3D lesions as a sensitivity. Decide when E6 is planned; noted in
@@ -1117,20 +1209,25 @@ move the old ones, with the reason, to the process log.
       1 produces. See "Synthetic lesion positions" in section 3. *Source:
       `results/stanford_brainmets/e0b/stats/centroid_density_amibekk_v1.png`.*
 
-- [ ] **How a match report presents a flag whose nearest neighbour and strongest lesion pair name
-      different patients (E7).** Seen in E4 for 4 P6 masks (section 3). Options: show both in
-      Panel A/C and let the verdict line name the strongest pair's patient when it differs; and
-      decide which one the E7 correctness check scores. Decide when E7 is planned; noted in
-      `docs/experiment-plan.md`, E7 "Carried over from E4". 2026-11-04.
+- [x] **How a match report presents a flag whose nearest neighbour and strongest lesion pair name
+      different patients (E7).** *Resolved 2026-11-15 (decision X, `docs/e6-e7-plan.md`): every
+      report shows both; the verdict line names the decision-J source and adds the strongest-pair
+      patient when it differs; the correctness check scores the decision-J source (as E4 "caught"),
+      "either names the base" secondary.* Seen in E4 for 4 P6 masks (section 3). 2026-11-04.
 - [ ] **Is the E5 multi-lesion excess copying of patients or typical lesion placement (E6)?** The
       excess is diffuse (96 source patients) and configuration-level (section 3, E5 exploratory).
-      E6's exposure ratio against the H-eval expectation per patient and the rarity test separate
-      the two; analyse the multi-lesion stratum and chained groups. Decide the details when E6 is
-      planned; noted in `docs/experiment-plan.md`, E6 "Carried over from E5". 2026-11-15.
-- [ ] **Which S flags get match reports (E7).** About 7–10% of S is flagged at chance (thousands
-      of masks); the top flags by score are small single blobs. Options: reports for flags of
-      over-exposed patients (E6), for multi-lesion flags above chance, or a stratified sample with
-      the chance rate stated. Decide when E7 is planned. 2026-11-15.
+      *Method fixed 2026-11-15 (decisions R and U, `docs/e6-e7-plan.md`); the answer comes from E6
+      `exposure`.* The exposure ratio alone cannot separate the two: S places lesions centrally
+      (section 3), so central-lesion patients would exceed π\_p without copying. Fixed reading from
+      three pieces on the primary cells (E1 copy multi, E2 full multi): concentration against a
+      multinomial null; the margin to the second-best patient and the rarity of the source slice,
+      each against H-eval chance flags (copying: larger margins; placement: more typical sources).
+      Noted in `docs/experiment-plan.md`, E6. 2026-11-15.
+- [x] **Which S flags get match reports (E7).** *Resolved 2026-11-15 (decision X): one report per
+      chained group for the near-exact and E2 beyond-held-out masks, the top flag per detector of
+      the 5 most over-exposed patients (E6), and a seeded 10 S multi-lesion flags and 10 H-eval
+      chance flags as contrast; each states its chance rate.* About 7–10% of S is flagged at chance;
+      the top flags by score are small single blobs. 2026-11-15.
 - [ ] **E8 go/no-go on the chance-expected count.** The fixed rule (≥ 20 strong groups) is met
       (53) but has no chance baseline (section 4); about 17 E2 multi-lesion masks are above their
       chance expectation. Decide when E8 is planned. 2026-11-15.
@@ -1146,6 +1243,13 @@ move the old ones, with the reason, to the process log.
 - **E5 RQ2 cross-tabulation and H2** (results, RQ2): `rq2_crosstab.csv`, `h2.csv`.
 - **E5 rehearsal** (methods, how the audit was validated before S): `results/stanford_brainmets/
   e5/rehearse/{null,positive}/review.txt`.
+- **E6 rehearsal** (methods, how the copying-vs-placement reading was validated before S):
+  `results/stanford_brainmets/e6/rehearse/positive/margins.png` next to `null/margins.png` (margin of
+  planted vs chance flags), `exposure_sorted.png` (observed vs expected flags per patient).
+- **E7 example match reports on planted copies** (methods or results, RQ3b; the report format with
+  a known answer): `results/stanford_brainmets/e7/planted/report_P6-add.png` (an added novel lesion,
+  "configuration copy, not every lesion"), `report_P4.png` (E1 and E2 name different slices); the
+  correctness table `correctness.csv` and the deletion summary `deletion_summary.csv`.
 - **E5 example matches** (results or discussion, with the chance caveat): `near_exact.png`,
   `groups_top.png` in `results/amibekk_v1/e5/analyze/`.
 - **E4 planted variants** (methods): rows picked by hand from

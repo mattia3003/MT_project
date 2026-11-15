@@ -25,6 +25,6 @@ E5 check: pool 'amibekk_v1' against 'stanford_brainmets', seed 2026
 [PASS] every analyze table reproduced from the raw tables (same seed): 10 tables
 [PASS] outcome reading reproduced: memorization beyond chance
 [PASS] no H-eval slice is near-exact or beyond the held-out maximum (by construction)
-[PASS] unit tests (pytest) pass: 151 passed in 11.96s
+[PASS] unit tests (pytest) pass: 157 passed in 12.77s
 
 26 passed, 0 failed

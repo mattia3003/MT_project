@@ -1,0 +1,9 @@
+variant,deformed,exact,partial,shifted
+P1,0,100,0,0
+P2,0,0,0,100
+P3,5,0,0,91
+P4,36,51,0,5
+P5-dilate,40,0,2,0
+P5-erode,28,1,1,0
+P6-add,1,0,99,0
+P6-remove,6,0,30,1

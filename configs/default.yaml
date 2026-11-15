@@ -217,6 +217,82 @@ audit:
   # copies plus E2 multi-lesion masks with C above the held-out maximum reaches this
   e8_min_strong: 20
 
+# E6 (docs/e6-e7-plan.md): patient exposure, copying vs placement, rarity (H3), duplication (H1).
+# Every value set by the user on 2026-11-15 in the planning session, before E6 read S's tables;
+# `e6_exposure.py exposure` refuses while one is null. S comes only from E5's stored tables (set main).
+exposure:
+  # Decision R: one decision-J source patient per flag; pi_p = share of H-eval scorable masks of the
+  # stratum whose NN (the detector's own) is p, smoothed toward p's share of T lesion slices:
+  # (n_p + m * w_p) / (N + m); concentration against a multinomial null with pi redrawn by H-eval patient
+  classes: [e1_copy, e2_full, e2_flagged]
+  primary:
+    classes: [e1_copy, e2_full]
+    strata: [multi]
+  expected:
+    baseline: H-eval
+    smoothing_m: 52.5
+    smoothing_m_sensitivity: 105
+  top_k: 5
+  # Decision U: margin to the second-best patient and source-slice rarity, S flags vs H-eval chance
+  # flags (AUC, two-level bootstrap). Reading on the primary cells: "patient copying" if the dispersion
+  # is above this percentile of its null and the margin AUC interval lies above 0.5; "typical
+  # placement" if the margin AUC interval lies wholly below 0.5 (added 2026-11-15 by the user after
+  # the placement mock, before E6 read S), or reaches 0.5 or below with the rarity AUC interval below
+  # 0.5; otherwise "undetermined"
+  reading:
+    dispersion_percentile: 95
+    auc_null: 0.5
+  # Decision V: slice rarity = 1 - best score against other patients' T slices (E1 and E2 scale);
+  # patient rarity = mean distance to the k nearest other patients on z-scored features (counts and
+  # areas log1p); H3 Spearman with a permutation p and a bootstrap-over-patients interval
+  rarity:
+    patient_k: 5
+    log1p: [n_lesions3d, volume_px, median_area_px, max_lesions_per_slice]
+    features: [n_lesions3d, volume_px, median_area_px, max_lesions_per_slice, position_spread]
+    permutations: 10000
+  # Decision W: 3D lesions by slice-to-slice one-to-one linking (Hungarian on IoU) of the masks as
+  # saved, 26-connectivity as sensitivity; H1 = bin-weighted mean of rho_S - rho_H, Spearman(span,
+  # lesion credits) within bins of the 3D lesion's largest area (lower edges, px), against H-eval
+  lesions3d:
+    main: slice_linking
+    sensitivity: connectivity_26
+  h1_size_bins_px: [12, 20, 40, 80]
+  # Placement mock for `rehearse` (step 3b, approved by the user 2026-11-15): H-cal masks with every
+  # lesion moved (shape and size kept) to the position of a random T lesion; the compact variant
+  # draws only T lesions inside S's central pixel area (E0b: synthetic centroids fill rows 40-85,
+  # cols 55-105; report-notes section 3, "Synthetic lesion positions"). Tests decision U's
+  # "typical placement" branch on data
+  placement_mock:
+    compact_rows: [40, 85]
+    compact_cols: [55, 105]
+    max_tries: 200
+
+# E7 (docs/e6-e7-plan.md): match reports, deletion test, correctness on planted copies.
+# Every value set by the user on 2026-11-15 in the planning session; `e7_reports.py reports` refuses
+# while one is null.
+reports:
+  # Decision X: one report per chained group: near-exact and E2 beyond-held-out masks; the top flag
+  # per detector of the most over-exposed patients (E6, primary cells); seeded random contrasts.
+  # Correctness scores the decision-J source; the verdict adds the strongest-pair patient if different
+  selection:
+    strong_tiers: true
+    top_exposed_patients: 5
+    random_s_multi: 10
+    random_heval: 10
+  # Decision Y: delete the top vs the smallest contributor (paired lesions, s > 0) of E2-flagged
+  # multi-lesion masks; measures: delta C, flag and source kept after a full re-match, delta E1 score
+  deletion:
+    min_paired: 2
+    planted_controls: [P1, P2, P4]
+  # Decision Z: thesis-plan criteria on planted copies flagged by E2 (gated); P3, P5 reported only
+  correctness:
+    slice_window: 2
+    patient_min: 0.90
+    patient_variants: [P1, P2, P4, P6-add, P6-remove]
+    lesions_min: 0.80
+    lesion_variants: [P6-add, P6-remove]
+  taxonomy: rule_based     # optional, first to cut; rules fixed on the planted variants
+
 real_datasets:
   stanford_brainmets:
     root: data/StanfordSkullStripped_1mm

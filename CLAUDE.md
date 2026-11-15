@@ -48,9 +48,14 @@ Reference docs (read the relevant one before starting work):
   placement is E6's question. The near-exact count and the E8 rule lack a chance baseline
   (report-notes section 4). E5 check 26/26. Open items moved to `docs/experiment-plan.md`
   (E6, E7, E8 "Carried over from E5").
-- No active working plan until E6 + E7 are planned: the next one is `docs/e6-e7-plan.md`; read
-  `docs/experiment-plan.md` E6 and E7 including their "Carried over" notes first. E8 gets its own
-  plan, its go/no-go based on the chance-expected count (E8 "Carried over from E5").
+- `docs/e6-e7-plan.md`: E6 + E7 plan, ACTIVE (planned 2026-11-15). Decisions R (exposure ratio,
+  π_p from H-eval NN, smoothed), U (copying vs placement: concentration, margin and source rarity
+  against H-eval chance flags, pre-stated reading), V (rarity, H3), W (3D lesions by slice-to-slice
+  linking; H1 against H-eval), X (report selection; NN and strongest pair both shown), Y (deletion
+  test with re-match and Dice, not ΔC alone), Z (planted correctness, rule-based taxonomy). Analysis
+  fixed in config `exposure:` / `reports:` before S's tables are read; rehearse on E5 mocks and
+  planted copies first. E8 gets its own plan, its go/no-go based on the chance-expected count (E8
+  "Carried over from E5").
 This file is a summary. If it disagrees with the docs, the docs win; flag the mismatch.
 
 ## Data
@@ -114,12 +119,9 @@ This file is a summary. If it disagrees with the docs, the docs win; flag the mi
 - Data use is authorized: all results, including match reports showing real masks, may go in
   the written report (use pseudonymous patient IDs).
 - Fixed during the work: the informative-lesion bound 12 px (decision G), stratified thresholds
-  (H), the E4 go/no-go criteria (K), the E5 analysis (L-Q, locked). Still open, to decide when
-  E6 + E7 are planned (`docs/experiment-plan.md` E6/E7 "Carried over" notes, report-notes
-  section 5): 3D lesion identity for H1 (slice-to-slice linking vs 26-connectivity + sensitivity);
-  how a match report shows a flag whose nearest neighbour and strongest pair name different
-  patients, and which one the E7 correctness check scores; which S flags get match reports (most
-  flags are chance matches); the E8 go/no-go on the chance-expected count.
+  (H), the E4 go/no-go criteria (K), the E5 analysis (L-Q, locked), the E6 + E7 analysis (R, U-Z,
+  `docs/e6-e7-plan.md`). Still open: the E8 go/no-go on the chance-expected count (report-notes
+  section 5).
 - Environment: `requirements-lock.txt` pins only what the project needs (direct dependencies
   in `pyproject.toml` plus what they require; Python 3.11.9, Windows), at the versions that
   produced E0; install with `pip install --no-deps -r requirements-lock.txt` (monai 1.6.0
@@ -182,10 +184,10 @@ can this be detected and explained using generated outputs alone?
   vs smallest contributor deletion; correct source patient for >= 90% of planted copies and
   correct lesions for >= 80% of planted partial copies (P6). No human rater (master thesis).
 - Hypotheses: H1 (RQ1) copy rate exceeds the held-out rate, and copies concentrate on lesions
-  spanning many adjacent training slices (3D lesion labelling, 26-connectivity; Spearman of
-  copies vs slice span, also within lesion-size bins; caution: 26-connected linking merges
-  neighbouring metastases for 2.7% of T's 3D lesions = 10.3% of 2D lesions, decide slice-to-slice
-  tracking or a sensitivity when E6 is planned, see experiment-plan E6). H2 (RQ2) at equal false-positive rate
+  spanning many adjacent training slices (3D lesion labelling; Spearman of copies vs slice span
+  within lesion-size bins, against the same on H-eval; caution: 26-connected linking merges
+  neighbouring metastases for 2.7% of T's 3D lesions = 10.3% of 2D lesions; decided 2026-11-15,
+  decision W: slice-to-slice one-to-one linking, 26-connectivity as sensitivity). H2 (RQ2) at equal false-positive rate
   on held-out masks, lesion-level matching flags more than whole-mask Dice. H3 (RQ3a)
   memorization concentrates in rare configurations (Spearman of exposure vs rarity).
 - RQ4 (optional, exploratory, E8, only if >= ~20 flagged masks and time remains): is the paired

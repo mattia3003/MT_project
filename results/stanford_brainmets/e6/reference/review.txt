@@ -1,0 +1,25 @@
+E6 reference: 'stanford_brainmets' (T and stored H-eval tables only; no S)
+T: 3804 lesion slices of 105 patients; left out: {'no lesion of at least the minimum area': 19}
+
+3D lesions (decision W), on the model-space masks as saved:
+  slice_linking: 1565 3D lesions, 1545 with an E0b lesion, 1018 informative (>= 12 px); holding two pieces in one slice: 0; span of informative ones median 4, quartiles 3 / 6, max 43
+  connectivity_26: 1446 3D lesions, 1428 with an E0b lesion, 940 informative (>= 12 px); holding two pieces in one slice: 38; span of informative ones median 4, quartiles 3 / 6, max 43
+  E0b 2D lesions: 6101 (4469 informative); 52 connectivity_26 lesions are split into several slice_linking lesions, holding 705 2D lesions
+
+Slice rarity (decision V; 1 - best score against other patients' T slices):
+  rarity_e1: 3804 slices, quartiles 0.160 / 0.257 / 0.391; rarity 0 (an identical slice in another patient): 10
+  rarity_e2: 3172 slices, quartiles 0.398 / 0.531 / 0.681; rarity 0 (an identical slice in another patient): 0
+
+Patient rarity (mean distance to the 5 nearest other patients), the five rarest:
+patient_id  n_lesions3d  volume_px  median_area_px  max_lesions_per_slice  position_spread   rarity
+  Mets_274            1      13960           410.0                      1         0.030064 2.288270
+  Mets_266          102      20565            26.0                     13         0.328911 1.839535
+  Mets_311            2       5372           169.5                      2         0.095595 1.587473
+  Mets_120          160       9284            11.0                     12         0.303658 1.442887
+  Mets_016            6      15544           139.5                      4         0.307572 1.398781
+
+Held-out nearest neighbours (the counts behind pi_p, decision R):
+  e1 multi: 393 of 393 scorable H-eval masks have a nearest neighbour; 82 of 105 T patients named; largest share 0.041
+  e1 single: 696 of 696 scorable H-eval masks have a nearest neighbour; 88 of 105 T patients named; largest share 0.050
+  e2 multi: 272 of 272 scorable H-eval masks have a nearest neighbour; 69 of 105 T patients named; largest share 0.088
+  e2 single: 634 of 634 scorable H-eval masks have a nearest neighbour; 88 of 105 T patients named; largest share 0.074

@@ -18,7 +18,6 @@ from __future__ import annotations
 
 import json
 from collections.abc import Callable
-from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
@@ -27,11 +26,11 @@ from matplotlib.figure import Figure
 from scipy.stats import mannwhitneyu
 
 from memtk import calibration, config, lesionmatch
-from memtk.audit import (CLASSES, auc, auc_bootstrap, beyond_max, cell_rates, chain_groups, class_flags,
-                         copied_area_share, excess_test, holm, interval, one_sided_p)
+from memtk.audit import (CLASSES, Scored, auc, auc_bootstrap, beyond_max, cell_rates, chained, class_flags,
+                         copied_area_share, excess_test, heldout, holm, interval, load_scored, one_sided_p,
+                         sources)
 from memtk.calibration import STRATA
 from memtk.e5.common import audit_config, audit_hash, score_marker
-from memtk.e5.score import query_table
 from memtk.ids import lesion_id, parse_slice_key
 from memtk.io import LabelStack, read_table, slice_images
 from memtk.plotting import draw_labels, hide_unused, lesion_colors, save, tile_figure, zoom_window
@@ -106,39 +105,6 @@ def run_analyze(cfg: dict, dataset: str | None = None, pool: str | None = None, 
 
 
 # --- scored sets ------------------------------------------------------------------------------
-
-@dataclass
-class Scored:
-    """A scored set: `meta` (one row per slice: key, cluster, mask_class, scheme, n_lesions,
-    l1_area) and the class table of each variant (`main` and decision O)."""
-    name: str
-    meta: pd.DataFrame
-    classes: dict[str, pd.DataFrame]
-
-    def table(self, variant: str) -> pd.DataFrame:
-        """The class table of a variant joined with `meta` (one row per slice)."""
-        return self.classes[variant].drop(columns=["patient_id"]).merge(
-            self.meta.drop(columns=["n_lesions"]), on="key", how="left", validate="one_to_one")
-
-
-def load_scored(name: str, score_dir: Path, variants: list[str]) -> Scored:
-    """A query set scored by `score_query` (its `queries.csv` and class tables)."""
-    return Scored(name, read_table(score_dir / "queries.csv"),
-                  {v: read_table(score_dir / f"classes_{v}.csv") for v in ["main", *variants]})
-
-
-def heldout(cfg: dict, dataset: str, heval: SliceSet, variants: list[str]) -> Scored:
-    """H-eval as a scored set (the baseline): its slices clustered by patient, the main class table
-    from E4 and one per variant from `prepare`."""
-    meta = query_table(heval, heval.patients, ["clean"] * len(heval.keys), ["H-eval"] * len(heval.keys))
-    e4_dir, e5_dir = (config.output_dir(cfg, dataset) / e for e in ("e4", "e5"))
-    require(e4_dir / "heval_classes.csv", "e4_validate.py validate")
-    classes = {"main": read_table(e4_dir / "heval_classes.csv")}
-    for v in variants:
-        require(e5_dir / f"heval_classes_{v}.csv", "e5_audit.py prepare")
-        classes[v] = read_table(e5_dir / f"heval_classes_{v}.csv")
-    return Scored("H-eval", meta, classes)
-
 
 def informative_areas(t: SliceSet, bound: int) -> pd.Series:
     """Area of every informative T lesion (>= the bound), by lesion ID (for the copied-area share)."""
@@ -364,31 +330,7 @@ def h2_table(qt: pd.DataFrame, ht: pd.DataFrame, tau_star: dict, draws: int, rng
     return pd.DataFrame(rows)
 
 
-# --- sources and groups -----------------------------------------------------------------------
-
-def sources(t: pd.DataFrame, cls: str) -> pd.Series:
-    """The source slice of each slice a class flags (decision J): E1 copy -> E1 nearest neighbour;
-    E2 full -> E2 nearest neighbour; E2 partial -> the strongest-pair slice; E2 flagged -> by its
-    class. Indexed like `t`, flagged rows only."""
-    on, flag = class_flags(t, cls)
-    d = t[on & flag]
-    if cls == "e1_copy":
-        return d["e1_nn"]
-    return pd.Series(np.where(d["e2_class"] == "full", d["e2_nn"], d["e2_strongest_train"]), index=d.index)
-
-
-def chained(src: pd.Series, max_gap: int) -> pd.Series:
-    """Decision N: the group of each source slice (chained within max_gap slices of one patient),
-    labelled `<patient>:z<first z>`."""
-    if not len(src):
-        return pd.Series(dtype=str)
-    parsed = [parse_slice_key(k) for k in src]
-    patients, z = [p for p, _ in parsed], [zz for _, zz in parsed]
-    g = chain_groups(patients, z, max_gap)
-    first = pd.DataFrame({"g": g, "p": patients, "z": z}).groupby("g").agg(p=("p", "first"), z=("z", "min"))
-    labels = {i: f"{r.p}:z{r.z}" for i, r in first.iterrows()}
-    return pd.Series([labels[i] for i in g], index=src.index)
-
+# --- groups -----------------------------------------------------------------------------------
 
 def groups_table(qt: pd.DataFrame, ht: pd.DataFrame, sets: dict, max_gap: int) -> tuple[pd.DataFrame, dict]:
     """Decision N, per set and class (and for H-eval): flags, distinct source slices, chained

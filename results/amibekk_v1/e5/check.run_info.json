@@ -1,8 +1,8 @@
 {
-  "timestamp": "2026-11-15T14:12:22",
+  "timestamp": "2026-11-15T16:37:04",
   "script": "C:\\Master thesis\\MT_project\\src\\memtk\\e5\\check.py",
   "argv": [
-    "scripts\\e5_audit.py",
+    "scripts/e5_audit.py",
     "check"
   ],
   "seed": 2026,
@@ -196,6 +196,92 @@
         ]
       },
       "e8_min_strong": 20
+    },
+    "exposure": {
+      "classes": [
+        "e1_copy",
+        "e2_full",
+        "e2_flagged"
+      ],
+      "primary": {
+        "classes": [
+          "e1_copy",
+          "e2_full"
+        ],
+        "strata": [
+          "multi"
+        ]
+      },
+      "expected": {
+        "baseline": "H-eval",
+        "smoothing_m": 52.5,
+        "smoothing_m_sensitivity": 105
+      },
+      "top_k": 5,
+      "reading": {
+        "dispersion_percentile": 95,
+        "auc_null": 0.5
+      },
+      "rarity": {
+        "patient_k": 5,
+        "log1p": [
+          "n_lesions3d",
+          "volume_px",
+          "median_area_px",
+          "max_lesions_per_slice"
+        ],
+        "features": [
+          "n_lesions3d",
+          "volume_px",
+          "median_area_px",
+          "max_lesions_per_slice",
+          "position_spread"
+        ],
+        "permutations": 10000
+      },
+      "lesions3d": {
+        "main": "slice_linking",
+        "sensitivity": "connectivity_26"
+      },
+      "h1_size_bins_px": [
+        12,
+        20,
+        40,
+        80
+      ]
+    },
+    "reports": {
+      "selection": {
+        "strong_tiers": true,
+        "top_exposed_patients": 5,
+        "random_s_multi": 10,
+        "random_heval": 10
+      },
+      "deletion": {
+        "min_paired": 2,
+        "planted_controls": [
+          "P1",
+          "P2",
+          "P4"
+        ]
+      },
+      "correctness": {
+        "slice_window": 2,
+        "patient_min": 0.9,
+        "patient_variants": [
+          "P1",
+          "P2",
+          "P4",
+          "P6-add",
+          "P6-remove"
+        ],
+        "lesions_min": 0.8,
+        "lesion_variants": [
+          "P6-add",
+          "P6-remove"
+        ]
+      },
+      "taxonomy": "rule_based"
     },
     "real_datasets": {
       "stanford_brainmets": {

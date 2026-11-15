@@ -534,3 +534,125 @@ in full, with what replaced them.
   closed: `docs/e5-plan.md` marked reference only with a "Carried forward" table; "Carried over
   from E5" notes added to E6, E7 and E8 in `docs/experiment-plan.md`; CLAUDE.md says no active
   plan until E6 + E7 are planned. *Source: `results/amibekk_v1/e5/check_report.txt`.*
+
+## 2026-11-15: E6 + E7 planned
+
+- **E6 + E7 planned together in `docs/e6-e7-plan.md`** (as suggested on 2026-11-04: shared tables,
+  decisions and deadline; the E7 work on planted copies runs in parallel to E6, only the E7 reports
+  on S wait for E6). The user set decisions R and U–Z in the planning session, in one round of
+  questions (copying vs placement evidence, source of π_p, 3D lesion identity, report selection),
+  before any E6 or E7 code existed; the other values were approved with the plan. Pointers updated in
+  CLAUDE.md (active plan, open decisions), `docs/experiment-plan.md` (E6 and E7 status) and
+  report-notes section 5 (three questions resolved, one with its method fixed).
+  - *Read-only queries while planning* (inline scripts, not in the repo; T and held-out tables only,
+    no statistic of S computed, so no E6 result was previewed before its analysis was fixed):
+    multi-lesion E1 nearest-neighbour assignments, H-eval 393 masks from 26 patients, H-cal 303, 94
+    of 105 T patients covered by H-cal ∪ H-eval, max share 5.2% (`e3/e1_hcal.csv`,
+    `e4/heval_classes.csv`), which led to the smoothed π_p of decision R; 62 T patients with
+    multi-lesion slices (1,220 of 3,823; real `slices.csv`); H-eval multi-lesion chance flags E1 copy
+    29, E2 full 8, E2 flagged 23 (`heval_classes.csv`); largest T slice lesion area 873 px, so the
+    H1 sampling-filter step is moot; the E1 margin is already stored in every E1 table; E5's mock
+    scored sets (`processed_data/model_space/stanford_brainmets/e5/rehearse/`) are in S's format and
+    reusable for an E6 rehearsal; planted set 737 masks (`planted_outcomes.csv`).
+  - *Changed against the experiment plan by reasoning, not data:* the exposure ratio alone cannot
+    separate copying from placement (S places lesions centrally, E0b), so decision U adds margin and
+    source rarity against H-eval chance flags; the deletion test as written (ΔC against the source
+    slice) nearly follows from C being a sum of pair scores, so decision Y adds a full re-match and
+    the whole-mask Dice change.
+- **E6 + E7 step 1: shared helpers to the library, `memtk/lesions3d.py`, config `exposure:` /
+  `reports:`.**
+  - *Moved unchanged* (E6 and E7 read the same scored sets): `Scored`, `load_scored`, `heldout`,
+    `sources`, `chained` from `e5.analyze` and `query_table` from `e5.score` (needed by `heldout`;
+    not in the plan's list) → `audit`. `e5.analyze`, `e5.score`, `e5.rehearse`, `e5.check` and
+    `tests/test_e5_analyze.py` import them from there. pytest 151 and E5 check 26/26 after the move
+    (the check rewrote `results/amibekk_v1/e5/check_report.txt`; run again after the config change:
+    26/26, since `exposure:` and `reports:` are outside the hashed `audit:` section).
+  - *New:* `memtk/lesions3d.py` (slice-to-slice linking, 26-connected components, per-lesion table,
+    2D → 3D map) and `ids.lesion3d_id` (`<patient_id>/D<n>`); `tests/test_lesions3d.py` (5 tests),
+    one test in `tests/test_ids.py`; pytest 157. Config sections `exposure:` and `reports:` with the
+    values of decisions R, U–Z.
+  - *Read-only check on T* (inline script, not in the repo; T volumes only): 26-connectivity on the
+    masks as saved gives 1,446 3D lesions, of which 1,428 contain a lesion ≥ 4 px (the recorded count;
+    the other 18 consist only of 1–3 px components) and 38 hold two pieces in one slice (the recorded
+    merged count); slice-to-slice linking gives 1,565 chains, none with two pieces in a slice, median
+    span 3 slices under both, max 43; 17 s for 105 volumes.
+  - Pylance flagged the renumbering in `components_26` (scipy's label array typed as int or float);
+    fixed by an explicit int array and `np.unique(..., return_index=True)`, clearer than the first
+    `pd.unique` version. No ignores.
+  *Source: `docs/e6-e7-plan.md` (status, step 1), `results/amibekk_v1/e5/check_report.txt`.*
+- **E6 + E7 step 2: `memtk/exposure.py`, E6 `reference` (no S).** New `src/memtk/exposure.py`,
+  `src/memtk/e6/` (`common`, `reference`), `scripts/e6_exposure.py`, `tests/test_exposure.py` (11
+  tests; pytest 168).
+  - *Found while testing:* the slice-rarity test first used a 4×4 lesion shifted by 1 px and got an
+    E2 shape factor of 0.6, not 1: `lesionmatch` centres crops on `np.rint` of the centroid, which
+    rounds halves to even (11.5 → 12, 12.5 → 12), so an even-width lesion moved by an odd number of
+    pixels is compared one pixel out of alignment. Read-only check on T (inline script, not in the
+    repo; each informative T lesion against itself shifted 1 px in columns): 3.9% of 4,469 lesions
+    affected (8% at 12–19 px, 3% at 20–39, 2% at 40–79, 0% at ≥ 80 px), shape factor median 0.57
+    for those. The frozen detector is not changed (E3–E5 depend on it); the test uses a 2 px shift.
+    E4's P2 (2 px) could not reveal it.
+  - *First run* of `reference` (2 min 53 s), then two changes and a re-run with `--overwrite`: the
+    review now states the 19 T slices without a lesion ≥ 4 px (left out by `sets.load_set`, as in
+    E1–E5; first noticed as "3,804 of 3,823 slices" in the rarity table), and Pylance fixes
+    (`slice_rarity` builds its rows by reindexing instead of a per-key loop; `pd.Index` for
+    `get_indexer`; test assertions on dicts). Every table byte-identical to the first run
+    (compared in the scratchpad).
+  - *As built, against the plan:* `reference` does not store H-eval margins and chance-flag sources;
+    the shared analysis function of step 3 computes them, so mock sets and S go through one code path.
+  *Source: `results/stanford_brainmets/e6/reference/review.txt`, `reference.png`.*
+- **E6 + E7 step 3: E6 `rehearse` (no S).** New `src/memtk/e6/exposure.py` (the one analysis:
+  `analyze_query`, `draw_figures`), `src/memtk/e6/rehearse.py`, loaders in `e6.common` (`load_query`,
+  `load_heval`, `load_reference`), `tests/test_e6_exposure.py` (3 tests; pytest 171).
+  - *Changed before the first run:* `exposure.exposure_table` drew the query set's flags as one
+    multinomial (independent flags, right for S), but E5's mock sets are clustered by patient (H-cal),
+    so it now resamples the flags by their clusters (`resample_sums`), as the held-out side already was.
+  - *Runs:* first run complete (13 s). Changes after it, each followed by a re-run with `--overwrite`:
+    the positive-case check counted all 20 base patients in every cell, now only those whose planted
+    copies are flagged in the cell (with the planted flags naming their base); H1 bins in size order
+    (`order` argument of `exposure.h1_table`; values unchanged); exposure and rarity figures with
+    symlog axes from 0; Pylance fixes (one helper `cell_exposure` per cell and smoothing instead of a
+    loop that left variables possibly unbound; array arguments; bin labels from an array). Readings
+    and tables unchanged by these rewrites (same random draws in the same order).
+  *Source: `results/stanford_brainmets/e6/rehearse/null/review.txt`, `positive/review.txt`.*
+- **E6 + E7 step 3b: placement mock, readable E6 figures** (at the user's request: decision U's
+  "typical placement" branch had only a unit test, and the null and positive rehearsal figures
+  looked alike). The user also asked for a report-synthesis document and a project walkthrough
+  after E8; added to the schedule in `docs/experiment-plan.md`.
+  - *New:* `planted.relocate_lesions` (+1 test in `tests/test_planted.py`; pytest 172), config
+    `exposure.placement_mock`, `rehearse` cases `placement` and `placement_compact` (built from
+    H-cal, scored with `calibration.run_frozen`, written in E5's layout to
+    `<output_root>/stanford_brainmets/e6/rehearse/`), E5's rates and AUCs on them (exploratory,
+    `e5_rates.csv`, `e5_auc.csv`; `e6.rehearse` imports `e5.analyze.rates_table` and `auc_table`).
+  - *First test failure:* the relocation test expected the moved lesion's *rounded* centroid on the
+    drawn position; with `np.rint` (halves to even) the exact centroid is within half a pixel but
+    the rounded one can tip over (the same rounding as in E2's crops, step 2). Docstring and test
+    now state the half-pixel guarantee.
+  - *Figures redesigned* (the old ones plotted ratios of tiny counts, so most patients sat at 0 in
+    both cases, and margins only against H-eval's median line, so half of the null case's flags lay
+    above it by definition): observed vs expected flags per patient with each patient's chance range
+    and the planted base patients of the cell ringed; margins and source rarity of query and H-eval
+    flags as side-by-side boxes (`flag_details.csv` now has H-eval's flags, column `set`);
+    observed / expected flags per fifth of the patients by rarity. Runs: first run, then two re-runs
+    with `--overwrite` for figure-only changes (lighter chance bars; rings only for patients flagged
+    in the cell). Tables unchanged.
+  *Source: `results/stanford_brainmets/e6/rehearse/{placement,placement_compact}/review.txt`.*
+- **Decision U amended by the user** (2026-11-15, after step 3b, before E6 read S): margins wholly
+  below chance (margin AUC interval below 0.5) also read "typical placement". `e6.exposure.cell_reading`
+  (+1 assertion in `tests/test_e6_exposure.py`), the config comment and `docs/e6-e7-plan.md`
+  (decision U) changed; `rehearse` re-run with `--overwrite`: readings null undetermined, positive
+  patient copying, placement undetermined, placement_compact mixed (E1 copy multi typical placement).
+  Tables unchanged except the reading. *Source: `results/stanford_brainmets/e6/rehearse/*/review.txt`.*
+- **E6 + E7 step 4: E7 `planted` (no S).** New `src/memtk/reports.py`, `src/memtk/e7/` (`common`,
+  `planted`), `scripts/e7_reports.py`, `tests/test_reports.py` (8 tests; pytest 180). Pseudonyms
+  P001–P105 written to `<output_root>/stanford_brainmets/e7/pseudonyms.csv` on first use.
+  - *Runs:* first run complete (29 s), criteria PASS. Changes after it, each followed by a re-run
+    with `--overwrite` (no S involved; these are the rules fixed on the planted copies):
+    the taxonomy called 91 of 96 flagged P3 masks (5 px shifts) "partial", because "partial" was "a
+    pair below tau_L"; now "a lesion without a partner", which gives P3 "shifted"; the "lesions"
+    share is shown only for the P6 variants it is defined for; the verdict said "1 not matched ->
+    full copy" for a mask E2 calls full while one pair stays below tau_L, now "configuration copy
+    ... not every lesion", and it separates "without a partner (novel)" from "paired but not closer
+    than chance"; report layout (wider figure, two-line titles, wrapped verdict, lesion-ID columns
+    sized to the IDs). Pylance: dicts instead of `.at` lookups, a covariant `Sequence` in the test
+    helper, one `# pyright: ignore` for scipy's Wilcoxon result (`pvalue` missing from the stub).
+  *Source: `results/stanford_brainmets/e7/planted/review.txt`.*

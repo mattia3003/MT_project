@@ -1,10 +1,11 @@
-"""Unit tests for the E5 analysis rules in memtk.e5.analyze on small constructed class tables: the
-analysis sets (decision L), the source slice of each flag (decision J), chained group labels
-(decision N) and the mechanical outcome reading (decision M)."""
+"""Unit tests for the E5 analysis rules on small constructed class tables: the analysis sets
+(decision L) and the mechanical outcome reading (decision M) in memtk.e5.analyze, and the source
+slice of each flag (decision J) and chained group labels (decision N), now in memtk.audit."""
 
 import pandas as pd
 
-from memtk.e5.analyze import chained, outcome, sources, subsets
+from memtk.audit import chained, sources
+from memtk.e5.analyze import outcome, subsets
 
 SETS = {"main": ["clean", "minor"], "noisy": ["noisy"]}
 

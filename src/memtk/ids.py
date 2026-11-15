@@ -4,6 +4,8 @@
   synthetic samples their sample ID (the full file stem), e.g. `Mets_005/z127`, `file_2_1033`.
 - Lesion ID: `<slice key>/L<n>`, n = the lesion's number within its slice (L1 = largest), e.g.
   `Mets_005/z127/L1`, `file_2_1033/L2`.
+- 3D lesion ID (real volumes only, E6): `<patient_id>/D<n>`, n = the 3D lesion's number within
+  the patient's volume in order of first appearance (lowest z first), e.g. `Mets_005/D3`.
 
 IDs are unique within one source (a dataset or pool); every table also has a `source` column, so
 (source, lesion_id) is unique across all data. IDs are for reading and joining, not for sorting:
@@ -45,6 +47,13 @@ def lesion_id(key: str, label: int) -> str:
     if int(label) < 1:
         raise ValueError(f"Lesion numbers start at 1, got {label}")
     return f"{key}/L{int(label)}"
+
+
+def lesion3d_id(patient_id: str, number: int) -> str:
+    """ID of 3D lesion number `number` (from 1) of a patient's volume: `<patient_id>/D<number>`."""
+    if int(number) < 1:
+        raise ValueError(f"3D lesion numbers start at 1, got {number}")
+    return f"{_check_part(str(patient_id), 'patient ID')}/D{int(number)}"
 
 
 def parse_lesion_id(lid: str) -> tuple[str, int]:

@@ -10,6 +10,11 @@ position, inside the base's brain, apart from the base lesions). Every planted m
 labelled with attach-or-drop like a real mask, and each planted lesion is traced to the lesion it
 comes from (`provenance`), which E7 uses to check whether its explanations name the right
 lesions. Pure functions on arrays; the `plant` stage of `scripts/e4_validate.py` reads and writes.
+
+Also the opposite construction, for E6's placement mock (`docs/e6-e7-plan.md`, step 3b): a mask
+whose lesions keep their shape and size but are moved to positions drawn from a given list
+(`relocate_lesions`), so they sit where training lesions typically are without copying any
+patient's configuration.
 """
 
 from __future__ import annotations
@@ -252,3 +257,34 @@ def variants_of(base_key: str, base_labels: np.ndarray, brain: np.ndarray, donor
     else:
         skipped["P6-add"] = f"no held-out lesion fits after {len(tries)} tries"
     return planted, skipped
+
+
+# --- placement mock (E6) ---
+
+def relocate_lesions(labels: np.ndarray, positions: np.ndarray, rng: np.random.Generator, min_gap: int,
+                     max_tries: int) -> np.ndarray | None:
+    """A label map whose lesions keep their pixel shape, size and number, each moved by whole pixels
+    so that its centroid lands within half a pixel of a position drawn from `positions` ((n, 2) array
+    of row, col). Lesions
+    are placed largest first (label 1 first), each wholly inside the image and more than `min_gap`
+    background pixels from those already placed (so none merges or becomes a stray). Returns None
+    if a lesion finds no place in `max_tries` draws."""
+    out = np.zeros_like(labels)
+    occupied = np.zeros(labels.shape, dtype=bool)
+    for n in np.unique(labels[labels > 0]):
+        pixels = np.argwhere(labels == n)
+        offsets = pixels - np.rint(pixels.mean(axis=0)).astype(int)
+        for _ in range(max_tries):
+            target = offsets + np.rint(positions[rng.integers(len(positions))]).astype(int)
+            if (target < 0).any() or (target >= np.array(labels.shape)).any():
+                continue
+            region = np.zeros(labels.shape, dtype=bool)
+            region[target[:, 0], target[:, 1]] = True
+            if occupied.any() and (grow(occupied, min_gap) & region).any():
+                continue
+            out[region] = n
+            occupied |= region
+            break
+        else:
+            return None
+    return out

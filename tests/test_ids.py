@@ -2,7 +2,7 @@
 
 import pytest
 
-from memtk.ids import lesion_id, parse_lesion_id, parse_slice_key, sample_key, slice_key
+from memtk.ids import lesion3d_id, lesion_id, parse_lesion_id, parse_slice_key, sample_key, slice_key
 
 
 def test_real_slice_key_and_lesion_id_round_trip():
@@ -45,3 +45,11 @@ def test_invalid_numbers_and_strings_are_refused():
             parse_lesion_id(bad)
     with pytest.raises(ValueError):
         parse_slice_key("file_2_1033")
+
+
+def test_lesion3d_id_names_patient_and_number():
+    assert lesion3d_id("Mets_005", 3) == "Mets_005/D3"
+    with pytest.raises(ValueError):
+        lesion3d_id("Mets_005", 0)
+    with pytest.raises(ValueError):
+        lesion3d_id("Mets/005", 1)

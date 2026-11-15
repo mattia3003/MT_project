@@ -22,7 +22,7 @@ import numpy as np
 import pandas as pd
 
 from memtk import calibration, config, lesionmatch
-from memtk.audit import class_table
+from memtk.audit import class_table, query_table
 from memtk.e4.common import gate_status
 from memtk.e5.common import audit_config, audit_hash, check_prepared, drop_only_t, score_marker, variant_frozen
 from memtk.io import MaskStack, read_table
@@ -91,18 +91,6 @@ def run_score(cfg: dict, dataset: str | None = None, pool: str | None = None, ov
 
 
 # --- scoring ----------------------------------------------------------------------------------
-
-def query_table(q: SliceSet, clusters: np.ndarray | Sequence[str], mask_class: Sequence[str],
-                scheme: Sequence[str]) -> pd.DataFrame:
-    """One row per query slice: `key`, `cluster` (the bootstrap unit: the sample itself for S,
-    the patient for real slices), `mask_class`, `scheme` (naming scheme or source set),
-    `n_lesions` (lesions >= the minimum area) and `l1_area` (area of the largest lesion, strays
-    included: the size used for near-exact copies and the size-confound check)."""
-    flat = q.labels.reshape(len(q.labels), -1)
-    return pd.DataFrame({"key": q.keys, "cluster": list(clusters), "mask_class": list(mask_class),
-                         "scheme": list(scheme), "n_lesions": flat.max(axis=1).astype(int),
-                         "l1_area": (flat == 1).sum(axis=1).astype(int)})
-
 
 def score_query(q: SliceSet, drop_labels: np.ndarray, meta: pd.DataFrame, t: SliceSet, t_drop: SliceSet,
                 e3: dict, e5: dict, variants: Sequence[str], out_dir: Path) -> pd.DataFrame:
