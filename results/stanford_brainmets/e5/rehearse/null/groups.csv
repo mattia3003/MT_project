@@ -1,0 +1,9 @@
+set,class,flags,source_slices,groups,patients
+query main,e1_copy,51,43,40,30
+query main,e2_full,43,40,38,28
+query main,e2_partial,22,21,19,15
+query main,e2_flagged,65,61,57,40
+H-eval,e1_copy,79,69,61,42
+H-eval,e2_full,53,49,42,32
+H-eval,e2_partial,34,31,31,22
+H-eval,e2_flagged,87,78,70,43

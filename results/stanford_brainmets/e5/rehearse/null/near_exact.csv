@@ -1,0 +1,3 @@
+set,near_exact,near_exact_groups,beyond_heldout_e2,beyond_heldout_e2_groups,e8_strong_groups,e8_eligible,e1_over_0.9_single,e1_over_0.9_single_rate,e1_over_0.9_multi,e1_over_0.9_multi_rate
+query main,0,0,0,0,0,False,43,0.06268221574344024,0,0.0
+H-eval,0,0,0,0,0,False,56,0.08045977011494253,0,0.0

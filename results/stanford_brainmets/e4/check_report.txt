@@ -15,6 +15,6 @@ E4 check: dataset 'stanford_brainmets', seed 2026
 [PASS] per-mask outcomes (caught by decision J) reproduced from the stored tables: 737 planted masks
 [PASS] gate.csv reproduced (values, pass, accepted): 10 criteria
 [PASS] verdict reproduced and equal to the logged and stored one: ACCEPTED (logged ACCEPTED, gate.csv ACCEPTED)
-[PASS] unit tests (pytest) pass: 128 passed in 12.79s
+[PASS] unit tests (pytest) pass: 151 passed in 12.43s
 
 16 passed, 0 failed

@@ -19,15 +19,16 @@ import numpy as np
 import pandas as pd
 import yaml
 from matplotlib import patheffects
-from matplotlib.colors import to_rgba
 from matplotlib.figure import Figure
 
 from memtk import calibration, config, lesionmatch
-from memtk.e4.common import STREAMS, load_frozen, slice_images, streams
+from memtk.calibration import load_frozen
+from memtk.e4.common import STREAMS, streams
 from memtk.ids import lesion_id, parse_lesion_id, parse_slice_key
-from memtk.io import LabelStackWriter, MaskStack
+from memtk.io import LabelStackWriter, MaskStack, slice_images
 from memtk.planted import VARIANTS, Planted, choose_bases, variants_of
-from memtk.plotting import HIGHLIGHT_COLOR, LESION_COLOR, LESION_COLORS, draw_box, hide_unused, save, show_slice, tile_figure
+from memtk.plotting import (HIGHLIGHT_COLOR, LESION_COLOR, LESION_COLORS, draw_box, draw_labels, fill, hide_unused, save,
+                            show_slice, tile_figure, zoom_window)
 from memtk.sets import SliceSet, load_set
 from memtk.stages import decided, pick, refuse_overwrite
 
@@ -36,7 +37,6 @@ SIZE_BINS = (12, 20, 40, 80)
 PARAM_COLUMNS = ("shift_row", "shift_col", "angle", "removed", "added", "tries")
 GRID_BASES = 12          # bases in the variants grid (half single-, half multi-lesion)
 SHEET_BASES = 20         # bases per variant sheet
-MARGIN, MIN_CROP = 6, 24  # px around the lesions in zoomed tiles; smallest zoomed window
 ORIGINAL_COLOR, PLANTED_COLOR, DONOR_COLOR = LESION_COLOR, HIGHLIGHT_COLOR, "orange"  # orange: the zoom box is yellow
 MORPH_VARIANTS = ("P4", "P5-erode", "P5-dilate")
 
@@ -252,18 +252,7 @@ def area_change(fate: pd.DataFrame) -> pd.DataFrame:
 
 
 # --- figures ----------------------------------------------------------------------------------
-
-def zoom_window(masks: list[np.ndarray]) -> tuple[slice, slice]:
-    """A square window around the pixels of all masks, MARGIN px wide on each side and at least
-    MIN_CROP px, kept inside the image."""
-    rows, cols = np.nonzero(np.any(masks, axis=0))
-    h, w = masks[0].shape
-    side = min(max(int(rows.max() - rows.min()), int(cols.max() - cols.min())) + 1 + 2 * MARGIN, h, w)
-    side = max(side, min(MIN_CROP, h, w))
-    r0 = int(np.clip(round((rows.min() + rows.max()) / 2 - side / 2), 0, h - side))
-    c0 = int(np.clip(round((cols.min() + cols.max()) / 2 - side / 2), 0, w - side))
-    return slice(r0, r0 + side), slice(c0, c0 + side)
-
+# `zoom_window`, `fill` and `draw_labels` moved to `memtk.plotting` on 2026-11-15 (E5 uses them).
 
 def describe(p: Planted) -> str:
     """A short caption of a planted mask's parameters."""
@@ -319,32 +308,6 @@ def variants_grid(ps: PlantedSet, images: dict, rng: np.random.Generator, path, 
             added = np.isin(p.labels, [n for n, c in source_colors(p).items() if c == DONOR_COLOR])
             fill(ax, [(gone[win], ORIGINAL_COLOR), (added[win], DONOR_COLOR)])
     return save(fig, path, title)
-
-
-def fill(ax, regions: list[tuple[np.ndarray, str]], alpha: float = 0.55) -> None:
-    """Fill boolean regions in their colours, half transparent, over what is drawn."""
-    overlay = np.zeros((*regions[0][0].shape, 4))
-    for region, color in regions:
-        overlay[region] = (*to_rgba(color)[:3], alpha)
-    ax.imshow(overlay, interpolation="nearest")
-
-
-def draw_labels(ax, image: np.ndarray, labels: np.ndarray, colors: dict[int, str], title: str) -> None:
-    """A slice with each lesion of `labels` filled and outlined in its colour and numbered."""
-    show_slice(ax, image, [], title)
-    regions = []
-    for n, color in colors.items():
-        lesion = labels == n
-        if not lesion.any():
-            continue
-        rgba = to_rgba(color)
-        regions.append((lesion, color))
-        ax.contour(lesion.astype(float), levels=[0.5], colors=[rgba], linewidths=0.6)
-        rows, cols = np.nonzero(lesion)
-        ax.text(cols.max() + 1, rows.min() - 0.5, f"L{n}", color=rgba, fontsize=5, fontweight="bold",
-                path_effects=[patheffects.withStroke(linewidth=1.5, foreground="black")])
-    if regions:
-        fill(ax, regions)
 
 
 def draw_change(ax, base: np.ndarray, p: Planted, win: tuple[slice, slice]) -> None:

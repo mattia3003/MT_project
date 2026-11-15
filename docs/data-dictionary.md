@@ -37,7 +37,9 @@ ID columns as text.
 | `e4_validate.py` | `plant` | ✅ | decision I (`validation.bases`, `validation.variants`), decision C, the frozen file (bound, minimum area), E0b lesion tables (T, H-eval), `brain_masks.npz`, real BRAVO volumes (figures) | `<output_root>/<dataset>/e4/` (planted set), `results/<dataset>/e4/plant/` (evidence for decision K) |
 | | `validate` | ✅ | decisions I (gate rule), J, K and `validation.accepted_deviation`, the frozen file (settings, thresholds), T and H-eval label maps, the planted set, real BRAVO volumes (figures) | `<output_root>/<dataset>/e4/` (detector tables of the planted set and H-eval, `heval_classes.csv`), `results/<dataset>/e4/validate/` (gate verdict) |
 | | `check` | ✅ | all E4 outputs, T and H-eval label maps, the frozen file | `results/<dataset>/e4/check_report.txt`, `check.run_info.json` |
-| `e5_audit.py` | — | planned | frozen thresholds, S | main audit tables |
+| `e5_audit.py` | `prepare` | ✅ | decisions O, P, Q (`audit:`), the frozen file, E3 H-cal tables and `sensitivity.csv`, E4 H-eval tables, T / H-cal / H-eval label maps and model-space `seg` volumes; never S | `configs/frozen/e5_<dataset>.yaml` + run log, `<output_root>/<dataset>/e5/` (drop-only T labels, H-eval under every variant), `results/<dataset>/e5/prepare/` |
+| | `rehearse` | ✅ | `prepare` outputs (same `audit:`), the frozen files, T, H-cal, H-eval, the E4 planted set; never S | `<output_root>/<dataset>/e5/rehearse/<case>/` (raw tables), `results/<dataset>/e5/rehearse/<case>/` (analysis) |
+| | `score`, `analyze`, `check` | planned (`docs/e5-plan.md`) | as above; S only in `score` | `<output_root>/<pool>/e5/`, `results/<pool>/e5/` |
 | `e6_exposure.py` | *tbd* | planned | E5 outputs | exposure, rarity, duplication |
 | `e7_reports.py` | *tbd* | planned | E5, E6 outputs, planted copies | match reports, deletion test |
 | `e8_paired_mri.py` | — | optional | E5 outputs, paired MRIs | paired-MRI similarity |
@@ -75,7 +77,13 @@ I amended: the rule a planted mask must meet to count in the gate, `keeps_base_l
 `false_positive_max` per class; read by `validate`, which refuses to run while it is `null`),
 `validation.accepted_deviation` (`criteria`: the failed gate criteria accepted by the user, by
 their name in `gate.csv`; `reason`; `null` = none; decided after a `validate` run and recorded
-as such). E4 and E5
+as such); E5 (`docs/e5-plan.md`, added 2026-11-15, every value fixed before `e5_audit.py score`,
+which hashes the section): `audit.sets` (decision L: `main` and `noisy` as lists of `mask_class`
+values), `audit.primary` (decision M: `classes`, `strata`, `adjust`, `alpha` of the primary
+family), `audit.size_bins_px` (bins of the largest informative lesion for the size-confound
+check), `audit.window` (decision N: `kind` chained, `max_gap`), `audit.sensitivity` (decision O:
+the variants scored on S), `audit.h2` (decision P), `audit.near_exact` (decision Q: `min_score`,
+`beyond`, `size_bins_px`), `audit.e8_min_strong` (the E8 exit rule). E4 and E5
 take detector settings and thresholds from the frozen file, not from these config sections;
 `real_datasets.<name>` (`root`, `image_file`, `mask_file`, `train_split`,
 `heldout_split`, `heldout_sets`); `synthetic_pools.<name>` (`dir`, `glob`, `image_channel`,
@@ -566,3 +574,96 @@ the planted set and its provenance reproduced from the seed; every P1 map equal 
 from T and added lesions from H-eval only; the per-mask outcomes, `gate.csv` and the verdict
 reproduced from the stored detector tables; the unit tests. Exit code 1 on any failure. Run log:
 `check.run_info.json`.
+
+---
+
+## 8. E5: main audit (`e5_audit.py`; `docs/e5-plan.md`)
+
+Every value E5 uses is fixed before `score` reads S: the config section `audit:` (decisions
+L–Q) and the E5 file below. Variants (decision O): `percentile_99`, `sigma_0.08`, `bound_10`,
+`bound_25`, `drop_only`; `main` = the frozen E3 settings and thresholds. Read every CSV here with
+`memtk.io.read_table`: the ID columns of the detector tables (`query`, `nn`, `train`, lesion IDs,
+...) are in `memtk.io.ID_COLUMNS` since 2026-11-15, because S sample IDs such as `1033` look
+numeric.
+
+### E5 file: `configs/frozen/e5_<dataset>.yaml`
+
+Written by `prepare` from T, H-cal and H-eval only. In git. Read by `score` and `analyze` (through
+`memtk.calibration.load_frozen(cfg, dataset, "e5")`), which record its SHA-256. Do not edit by
+hand; `prepare` refuses to run once S has been scored. Run log next to it:
+`e5_<dataset>.run_info.json`.
+
+| Key | Content |
+| --- | --- |
+| `dataset`, `written`, `inputs` | Identity; inputs are always T, H-cal, H-eval |
+| `e3_frozen_sha256`, `audit_sha256` | The frozen E3 file and the `audit:` section it was made with |
+| `variants.<name>` | `kind` (percentile, sigma, bound, drop_only), `rerun` (detectors run again on S and H-eval: none for percentile; lesion for sigma and bound; both for drop-only), `settings` (`percentile`, `informative_bound_px`, `sigma_px`, `prefilter_px`, `candidate_min_s`, `attach_gap`: 0 for drop-only, null = as E0b), `thresholds` (tau_D, tau_L, tau_C per stratum, re-derived on H-cal: equal to E3 `sensitivity.csv`, drop-only equal to the frozen ones), `hcal_chance_rates` (per stratum: e1_copy, e2_full, e2_partial, e2_flagged) |
+| `h2` | Decision P: `matched_rate` (E2 flagged's H-cal rate per stratum), `tau_D_star` (per stratum), `hcal_rate_at_tau_D_star` |
+| `near_exact` | Decision Q: `min_score`, `size_bins_px`, `e1_maxima` (per stratum and bin lower edge, `lower` = −1 for the whole stratum: `max`, `slices`; H-cal and H-eval together), `e2_C_maxima` (per stratum) |
+| `drop_only_labels` | Per real set: `slices`, `changed_at_gap_0` (H-cal and H-eval must be 0) |
+
+### Pre-S tables: `<output_root>/<dataset>/e5/`
+
+Written by `prepare`. Not in git (regenerated by `prepare` until S is scored).
+
+| File | Content |
+| --- | --- |
+| `labels_drop_only_T.npz` | Label stack of T at attach gap 0 (drop-only), by slice key; the reference of the drop-only variant |
+| `heval_classes_<variant>.csv` | H-eval per slice under a variant, columns as E4's `heval_classes.csv` (main = E4's file) |
+| `e1_heval_drop_only.csv` | E1 of H-eval against the drop-only T, columns as E4's `e1_heval.csv` |
+| `e2_heval_<variant>_*` | E2 of H-eval for the variants that re-run it (sigma, bound, drop-only): the four tables of `memtk.lesionmatch.save_tables` |
+| `prepare.run_info.json` | Run log (inputs T, H-cal, H-eval; the frozen E3 file's and the `audit:` section's SHA-256) |
+
+### `results/<dataset>/e5/prepare/`
+
+Written by `prepare`. In git.
+
+| File | Content |
+| --- | --- |
+| `review.txt` | The drop-only check, the sensitivity thresholds, H-cal chance rates per variant, tau_D*, the held-out maxima, H-eval rates per variant, what to look at |
+| `thresholds.csv` | Per `variant`, `detector`, `threshold`, `stratum`: `value` (re-derived on H-cal), `e3_value` (E3 `sensitivity.csv`, or the frozen value for drop-only), `equal` |
+| `heldout_maxima.csv` | Per `set` (H-cal, H-eval, held-out = both), `score` (`e1`, `e2_C`), `stratum`, `lower` (size-bin lower edge of the largest lesion; −1 = whole stratum): `max`, `slices` |
+| `heval_rates.csv` | Per `variant` (main and decision O), `class`, `stratum` (single, multi, all): `slices`, `patients`, `flagged`, `rate`, `ci_low`, `ci_high` (bootstrap by patient), `hcal_rate` |
+| `drop_only.csv` | Per real set: `slices`, `reproduces_e0b_at_gap` (the configured gap gives the E0b label maps), `changed_at_gap_0`, `changed_keys` |
+| `run_info.json` | Run log (as above) |
+
+### Raw tables of a scored query set: `<output_root>/<dataset>/e5/rehearse/<case>/` (and later `<output_root>/<pool>/e5/`)
+
+Written by `memtk.e5.score.score_query`: by `rehearse` for the mock query sets (`null` = H-cal;
+`positive` = H-cal + the gated planted copies P1, P2, P4) and, with the same layout, by `score`
+for S. Not in git. No rates are computed here.
+
+| File | Content |
+| --- | --- |
+| `queries.csv` | One row per query slice: `key`, `cluster` (bootstrap unit: the sample for S and planted masks, the patient for real slices), `mask_class`, `scheme` (naming scheme for S; `H-cal` / `planted` for mock sets), `n_lesions` (≥ the minimum area), `l1_area` (largest lesion, strays included) |
+| `classes_<variant>.csv` | One row per query under `main` or a variant of decision O: the columns of E4's `heval_classes.csv` (`patient_id` = the cluster) |
+| `e1_main.csv`, `e1_drop_only.csv` | E1 tables (columns as E4's `e1_<set>.csv`) |
+| `e2_<variant>_*` | The four E2 tables (`lesionmatch.save_tables`) of `main` and of every variant that runs E2 again (sigma, bound, drop-only) |
+| `rehearse.run_info.json` | Run log (inputs T, H-cal, H-eval, planted; SHA-256 of the frozen E3 file, the E5 file and `audit:`) |
+
+### Analysis of a scored query set: `results/<dataset>/e5/rehearse/<case>/` (and later `results/<pool>/e5/analyze/`)
+
+Written by `memtk.e5.analyze` (via `rehearse`; later `analyze` for S). In git. "Query" = the
+scored set (mock or S), always compared with H-eval (main: E4's tables; variants: `prepare`'s).
+Excess intervals resample the query set by `cluster` and H-eval by patient, independently
+(`calibration.bootstrap_draws` draws, seeded).
+
+| File | Content |
+| --- | --- |
+| `review.txt` | Query set, scoring log, rates, the primary family with Holm, excess per variant, the size-confound check, AUC, RQ2, H2, groups, near-exact copies, and the mechanical OUTCOME line with the E8 exit count; `rehearse` adds what was expected and (positive case) the planted-copy recovery |
+| `rates.csv` | Per `set` (main, noisy, main+noisy; decision L), `variant`, `class` (`e1_copy`, `e2_full`, `e2_partial`, `e2_flagged`), `stratum` (single, multi, all): `n_s`, `flagged_s`, `rate_s` with `rate_s_low` / `rate_s_high`, `n_h`, `flagged_h`, `rate_h` with interval, `excess`, `excess_low`, `excess_high`, `p` (one-sided bootstrap), `excess_count` (n_s × excess) with interval, `primary` (decision M family), `p_holm`, `beyond_chance` |
+| `sensitivity.csv` | The rows of `rates.csv` for the main set, single and multi, every variant (decision O) |
+| `auc.csv` | Per `score` (`e1_score`, `e2_C`, `e2_strongest_s`) and `stratum`: `n_s`, `n_h`, `auc`, `auc_low`, `auc_high` (two-level bootstrap), `mann_whitney_p` (one-sided; treats slices as independent) |
+| `rates_by_size.csv` | Per `class`, `stratum` and `bin` (size range of the largest lesion, or `standardised`): the `rates.csv` measures per bin; the `standardised` row compares the query set with H-eval reweighted to the query set's (stratum ×) size mix: `rate_s`, `rate_h`, `excess` with interval, `p` |
+| `rates_by_scheme.csv` | Per `scheme`, `class`, `stratum`: the `rates.csv` measures against all of H-eval |
+| `rq2_crosstab.csv` | Per `set` (query, H-eval), on the informative subset: `e1_copy`, `e2_class`, `slices`, `share` |
+| `h2.csv` | Per `comparison` ((i) E2 full vs E1 copy; (ii) E2 flagged vs E1 at tau_D*) and E2 `stratum` (all = H-eval standardised to the query set's mix): `n_s`, `n_h`, `rate_s_e2`, `rate_h_e2`, `excess_e2`, `rate_s_e1`, `rate_h_e1`, `excess_e1`, `difference` (E2 − E1 excess) with `difference_low` / `difference_high`, `p`, `h2_holds`, discordant counts `s_e2_only`, `s_e1_only`, `h_e2_only`, `h_e1_only` |
+| `groups.csv` | Per `set` (query set by analysis set; H-eval) and `class`: `flags`, `source_slices`, `groups` (chained ±2, decision N), `patients` |
+| `near_exact.csv` | Per `set`: `near_exact` and `near_exact_groups` (decision Q), `beyond_heldout_e2` and its groups, `e8_strong_groups` (groups of both together) and `e8_eligible`, the plain count and rate of E1 score > 0.9 per stratum |
+| `flagged.csv` | One row per flagged query (E1 copy or E2 full / partial), main variant, per analysis set: `set`, `key`, `mask_class`, `scheme`, `cluster`, `n_lesions`, `stratum_e1`, `n_informative`, `stratum_e2`, `l1_area`, `e1_score`, `e1_copy`, `e1_nn`, `e1_nn_patient`, `e1_group`, `e2_class`, `e2_C`, `e2_nn`, `e2_nn_patient`, `e2_strongest_s`, `e2_strongest_train`, `e2_strongest_patient`, `e2_source` (decision J's slice), `e2_source_patient`, `e2_group`, `e2_n_kept`, `e2_all_copied`, `copied_area_share` (E2 flags), `near_exact`, `beyond_heldout_e2`. Groups are `<patient>:z<first z>` within the set. Read by E6, E7, E8 |
+| `score_distributions.png` | E1 score, E2 C and strongest pair of the query set and H-eval per stratum, with the frozen thresholds |
+| `rates_forest.png` | Excess with intervals per class, set, variant and stratum (primary cells red) |
+| `copied_area.png` | Copied-area share of the E2-flagged queries by class and stratum (if any) |
+| `near_exact.png` | Near-exact copies (highest E1 first, up to 12) next to their source slice (if any) |
+| `groups_top.png` | One query per largest E2 group next to its source slice (if any) |
+| `run_info.json` | Run log (as above) |

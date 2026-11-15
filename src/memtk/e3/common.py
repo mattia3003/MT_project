@@ -8,7 +8,7 @@ import pandas as pd
 
 from memtk import config
 from memtk.io import read_table
-from memtk.lesionmatch import LesionMatch
+from memtk.lesionmatch import LesionMatch, load_tables
 from memtk.stages import decided, require
 
 
@@ -18,10 +18,7 @@ def load_hcal_tables(cfg: dict, dataset: str) -> tuple[pd.DataFrame, LesionMatch
     d = config.output_dir(cfg, dataset) / "e3"
     require(d / "e1_hcal.csv", "calibrate")
     e1 = read_table(d / "e1_hcal.csv")
-    e2 = LesionMatch(read_table(d / "e2_hcal_queries.csv"), read_table(d / "e2_hcal_lesions.csv"),
-                     pd.read_parquet(d / "e2_hcal_slice_pairs.parquet"),
-                     pd.read_parquet(d / "e2_hcal_lesion_pairs.parquet"),
-                     float(cfg["detectors"]["lesion"]["candidate_min_s"]))
+    e2 = load_tables(d, "hcal", float(cfg["detectors"]["lesion"]["candidate_min_s"]))
     return e1, e2, dict(zip(e1["query"], e1["patient_id"]))
 
 

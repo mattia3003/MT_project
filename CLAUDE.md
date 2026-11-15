@@ -38,10 +38,15 @@ Reference docs (read the relevant one before starting work):
   patient), K (go/no-go criteria; P5 reported only), the accepted deviation, stages, check 16/16.
   Its open items moved to `docs/experiment-plan.md` (E5, E7 "Carried over from E4") and
   report-notes.
-- No active working plan until E5 is planned: the next one is `docs/e5-plan.md` (main audit,
-  E5 alone); read `docs/experiment-plan.md` E5 including its "Carried over from E1-E3" and
-  "Carried over from E4" notes first. Suggested grouping of the rest (experiment-plan,
-  "Plan documents for E5-E8"): E5 alone, E6 + E7 in one plan, E8 alone.
+- `docs/e5-plan.md`: E5 plan, ACTIVE (from 2026-11-15). S is scored once, so every analysis
+  choice is fixed there and in config `audit:` before `score` runs (lock: `analyze` refuses if
+  `audit:` or the frozen files changed). Decisions L-Q (2026-11-15): L noisy masks scored by both
+  detectors, separate rows; M primary = excess over H-eval for E1 copy and E2 full x single/multi,
+  Holm-adjusted bootstrap p; N chained +-2 grouping by source patient; O sensitivities on S:
+  99th pct, sigma 0.08, bound 10/25, drop-only (frozen thresholds valid: H-cal/H-eval have no
+  strays); P H2 matched on H-cal (tau_D*); Q near-exact = E1 >= 0.9 and above the held-out max
+  per stratum x size bin. Next plans: E6 + E7 in one plan, E8 alone (experiment-plan,
+  "Plan documents for E5-E8").
 This file is a summary. If it disagrees with the docs, the docs win; flag the mismatch.
 
 ## Data

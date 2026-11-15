@@ -18,6 +18,7 @@ import pandas as pd
 from matplotlib.figure import Figure
 
 from memtk import calibration, config, lesionmatch, wholemask
+from memtk.calibration import STRATA, lesion_slices, thresholds
 from memtk.e3.bound import EDGES
 from memtk.e3.common import lesion_settings
 from memtk.plotting import save
@@ -32,7 +33,6 @@ PERCENTILE_ALT = 99
 # its slices and the multi-lesion stratum rests on at least MIN_MULTI_PATIENTS patients
 FLAG_RANGE = (0.025, 0.10)
 MIN_MULTI_PATIENTS = 12
-STRATA = ("single", "multi")
 
 
 # --- stages -----------------------------------------------------------------------------------
@@ -85,10 +85,7 @@ def run_calibrate(cfg: dict, dataset: str | None = None, pool: str | None = None
 
     data_dir.mkdir(parents=True, exist_ok=True)
     e1.to_csv(data_dir / "e1_hcal.csv", index=False)
-    e2.queries.to_csv(data_dir / "e2_hcal_queries.csv", index=False)
-    e2.lesions.to_csv(data_dir / "e2_hcal_lesions.csv", index=False)
-    e2.slice_pairs.to_parquet(data_dir / "e2_hcal_slice_pairs.parquet", index=False)
-    e2.lesion_pairs.to_parquet(data_dir / "e2_hcal_lesion_pairs.parquet", index=False)
+    lesionmatch.save_tables(e2, data_dir, "hcal")
     config.write_run_info(data_dir, cfg, script=__file__, filename="calibrate.run_info.json",
                           extra={"stage": "calibrate", "inputs": ["T", "H-cal"], "settings_px": settings,
                                  "informative_bound_px": bound})
@@ -113,48 +110,8 @@ def run_calibrate(cfg: dict, dataset: str | None = None, pool: str | None = None
 
 
 # --- thresholds -------------------------------------------------------------------------------
-
-def lesion_slices(e2: lesionmatch.LesionMatch, patients: dict) -> pd.DataFrame:
-    """One row per H-cal slice with an informative lesion: patient, stratum (by informative
-    lesions), the strongest single lesion pair over all candidate slices and the configuration
-    score C of the nearest neighbour (both 0 without a candidate; C does not depend on tau_L)."""
-    q = e2.queries[e2.queries["n_informative"] > 0].copy()
-    strongest = e2.slice_pairs.groupby("query")["best_pair_s"].max()
-    q["strongest_s"] = q["query"].map(strongest).fillna(0.0)
-    q["C"] = q["query"].map(e2.slice_scores(e2.candidate_min_s).groupby("query")["C"].max()).fillna(0.0)
-    q["patient_id"] = q["query"].map(patients)
-    q["stratum"] = calibration.stratum(q["n_informative"].to_numpy())
-    return q.set_index("query")
-
-
-def threshold_rows(detector: str, name: str, scores: pd.DataFrame, pooled_col: str, stratum_col: str,
-                   percentile: float, draws: int, rng: np.random.Generator) -> list[dict]:
-    """Rows for one threshold: pooled (from `pooled_col`) and per stratum (from `stratum_col`),
-    each with its bootstrap interval (skipped when draws is 0), slices, patients and the share of
-    the slices that the pooled threshold flags (score >= threshold)."""
-    pooled = calibration.percentile_threshold(scores[pooled_col].to_numpy(), percentile)
-    rows = []
-    for stratum, d, col in [("all", scores, pooled_col), *((s, scores[scores["stratum"] == s], stratum_col)
-                                                           for s in STRATA)]:
-        value = calibration.percentile_threshold(d[col].to_numpy(), percentile) if len(d) else np.nan
-        low, high = (calibration.bootstrap_interval(d[col].to_numpy(), d["patient_id"].to_numpy(), percentile,
-                                                    draws, rng) if draws and len(d) else (np.nan, np.nan))
-        rows.append({"detector": detector, "threshold": name, "stratum": stratum, "value": value,
-                     "ci_low": low, "ci_high": high, "slices": len(d), "patients": d["patient_id"].nunique(),
-                     "flagged_at_pooled": float((d[pooled_col].fillna(0) >= pooled).mean()) if len(d) else np.nan})
-    return rows
-
-
-def thresholds(e1: pd.DataFrame, e2: lesionmatch.LesionMatch, patients: dict, percentile: float, draws: int,
-               rng: np.random.Generator) -> pd.DataFrame:
-    """tau_D, tau_L and tau_C at `percentile`, pooled and per stratum, with intervals (skipped
-    when draws is 0)."""
-    les = lesion_slices(e2, patients)
-    rows = threshold_rows("whole_mask", "tau_D", e1, "score", "score", percentile, draws, rng)
-    rows += threshold_rows("lesion", "tau_L", les, "strongest_s", "strongest_s", percentile, draws, rng)
-    rows += threshold_rows("lesion", "tau_C", les, "C", "C", percentile, draws, rng)
-    return pd.DataFrame(rows)
-
+# `lesion_slices`, `threshold_rows` and `thresholds` moved to `memtk.calibration` on 2026-11-15
+# (E5 `prepare` re-derives the sensitivity thresholds with them).
 
 def stratum_threshold(table: pd.DataFrame, name: str, slices: pd.DataFrame) -> pd.Series:
     """Each slice's threshold `name` under stratified thresholds (by its stratum), by query."""

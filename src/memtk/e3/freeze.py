@@ -15,13 +15,10 @@ import pandas as pd
 import yaml
 
 from memtk import config
-from memtk.calibration import frozen_threshold
-from memtk.e3.calibrate import STRATA, lesion_slices, thresholds
+from memtk.calibration import THRESHOLDS, chance_rates_at, frozen_thresholds, shortcut_problems, thresholds
 from memtk.e3.common import lesion_settings, load_hcal_tables
 from memtk.io import read_table
 from memtk.stages import decided, refuse_overwrite, require
-
-DETECTORS = {"whole_mask": ("tau_D",), "lesion": ("tau_L", "tau_C")}
 
 
 # --- stages -----------------------------------------------------------------------------------
@@ -33,7 +30,7 @@ def run_freeze(cfg: dict, dataset: str | None = None, pool: str | None = None, o
     name, _ = config.real_dataset(cfg, dataset)
     path = config.frozen_file(cfg, name)
     refuse_overwrite([path], overwrite)
-    strata = {d: str(decided(cfg, f"calibration.strata.{d}", "e3_calibrate.py calibrate")) for d in DETECTORS}
+    strata = {d: str(decided(cfg, f"calibration.strata.{d}", "e3_calibrate.py calibrate")) for d in THRESHOLDS}
     table_path = config.results_dir(cfg, name, "e3") / "calibrate" / "thresholds.csv"
     require(table_path, "calibrate")
     percentile = float(cfg["calibration"]["percentile"])
@@ -99,53 +96,5 @@ def compare_tables(recomputed: pd.DataFrame, stored: pd.DataFrame, tol: float = 
     bad = merged[~np.isclose(merged["value_new"], merged["value_stored"], atol=tol, rtol=0)]
     return [f"{r.detector} {r.threshold} {r.stratum}: {r.value_new} vs {r.value_stored}" for r in bad.itertuples()]
 
-
-def frozen_thresholds(table: pd.DataFrame, strata: dict) -> tuple[dict, dict]:
-    """Per detector and threshold, the single and multi values (both the pooled value when the
-    detector is pooled, decision H) and their bootstrap intervals."""
-    values, intervals = {}, {}
-    for detector, names in DETECTORS.items():
-        values[detector], intervals[detector] = {}, {}
-        for name in names:
-            rows = table[(table["detector"] == detector) & (table["threshold"] == name)].set_index("stratum")
-            source = {s: (s if strata[detector] == "stratified" else "all") for s in STRATA}
-            values[detector][name] = {s: float(rows.loc[src, "value"]) for s, src in source.items()}
-            intervals[detector][name] = {s: [float(rows.loc[src, "ci_low"]), float(rows.loc[src, "ci_high"])]
-                                         for s, src in source.items()}
-    return values, intervals
-
-
-def shortcut_problems(values: dict, settings: dict) -> list[str]:
-    """Conditions under which the E2 shortcuts stay exact and the classes are meaningful: every
-    tau_L >= the candidate cut and above the largest score possible at the prefilter distance
-    (s <= position factor there), every tau_C above 0."""
-    problems = []
-    tau_L, tau_C = min(values["lesion"]["tau_L"].values()), min(values["lesion"]["tau_C"].values())
-    at_prefilter = float(np.exp(-settings["prefilter_px"] ** 2 / (2 * settings["sigma_px"] ** 2)))
-    if tau_L < settings["candidate_min_s"]:
-        problems.append(f"tau_L {tau_L:.3f} is below the candidate cut {settings['candidate_min_s']}")
-    if tau_L <= at_prefilter:
-        problems.append(f"tau_L {tau_L:.3f} does not exceed the largest score at the prefilter distance {at_prefilter:.4f}")
-    if tau_C <= 0:
-        problems.append(f"tau_C {tau_C} is not above 0")
-    return problems
-
-
-def chance_rates_at(e1: pd.DataFrame, e2, patients: dict, values: dict) -> dict:
-    """The share of H-cal slices (all chance) that the frozen thresholds flag, per stratum: E1
-    copies, E2 full and partial copies and either."""
-    rates = {}
-    e1_flag = e1["score"] >= frozen_threshold({"thresholds": values}, "whole_mask", "tau_D", e1["n_lesions"].to_numpy())
-    les = lesion_slices(e2, patients)
-    tau_L = pd.Series(frozen_threshold({"thresholds": values}, "lesion", "tau_L", les["n_informative"].to_numpy()),
-                      index=les.index)
-    tau_C = pd.Series(frozen_threshold({"thresholds": values}, "lesion", "tau_C", les["n_informative"].to_numpy()),
-                      index=les.index)
-    classes = e2.summary(tau_L, tau_C).set_index("query")["class"].reindex(les.index)
-    for s in STRATA:
-        c = classes[les["stratum"] == s]
-        rates[s] = {"e1_copy": round(float(e1_flag[e1["stratum"] == s].mean()), 4),
-                    "e2_full": round(float((c == "full").mean()), 4),
-                    "e2_partial": round(float((c == "partial").mean()), 4),
-                    "e2_flagged": round(float((c != "novel").mean()), 4)}
-    return rates
+# `frozen_thresholds`, `shortcut_problems` and `chance_rates_at` moved to `memtk.calibration` on
+# 2026-11-15 (E5 `prepare` uses them for the sensitivity thresholds).

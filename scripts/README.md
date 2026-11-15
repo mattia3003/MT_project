@@ -39,7 +39,9 @@ Status: ✅ implemented · ⏳ planned
 | `e4_validate.py plant` | ✅ | decision I (`validation.bases`, `validation.variants`), decision C, the frozen file (bound, minimum area), E0b lesion tables (T, H-eval), brain masks, real BRAVO volumes (figures) | `<output_root>/<dataset>/e4/` (planted label maps, `planted.csv`, `planted_lesions.csv`); `results/<dataset>/e4/plant/`: bases, variant summary, lesion fate and area change by size, variants grid, one sheet per variant, area-change figure, proposal (`review.txt`) → **decision K**; no detector runs |
 | `e4_validate.py validate` | ✅ | decisions I (gate rule), J, K, `validation.accepted_deviation`, frozen file, T, H-eval, planted set | `<output_root>/<dataset>/e4/` (E1 and E2 tables of the planted set and H-eval, `heval_classes.csv`: E5's baseline); `results/<dataset>/e4/validate/`: per-mask outcomes, recall per variant with intervals, false positives per stratum, RQ2 counts, `gate.csv`, figures, `review.txt` ending in PASS / ACCEPTED / FAIL (E5 runs on PASS or ACCEPTED) |
 | `e4_validate.py check` | ✅ | all E4 outputs, T and H-eval, the frozen file | `results/<dataset>/e4/check_report.txt` (PASS/FAIL: decisions, run logs reading only T, H-eval and the planted set, frozen file unchanged, planted set reproduced from the seed, P1 = bases, bases from T and added lesions from H-eval, gate and verdict reproduced from the stored tables, unit tests; exit code 1 on any failure) |
-| `e5_audit.py` | ⏳ | validated config, S | main audit tables |
+| `e5_audit.py prepare` | ✅ | decisions O, P, Q (`audit:`), frozen file, E3 H-cal tables and `sensitivity.csv`, E4 H-eval tables, T / H-cal / H-eval label maps and `seg` volumes; never S | `configs/frozen/e5_<dataset>.yaml` (sensitivity thresholds re-derived on H-cal and equal to E3's, tau_D* for H2, held-out maxima for near-exact copies, drop-only check; read by `score` and `analyze`); `<output_root>/<dataset>/e5/` (drop-only T labels, H-eval under every variant); `results/<dataset>/e5/prepare/` (`review.txt`, thresholds, maxima, H-eval rates per variant); refuses once S has been scored |
+| `e5_audit.py rehearse` | ✅ | `prepare` outputs (same `audit:`), frozen files, T, H-cal, H-eval, E4 planted set; never S | the scoring and analysis code that will run on S, on mock query sets: `null` (H-cal: no excess expected) and `positive` (H-cal + planted P1, P2, P4: excess, right source patients, near-exact copies expected); `<output_root>/<dataset>/e5/rehearse/<case>/` (raw tables), `results/<dataset>/e5/rehearse/<case>/` (every table and figure `analyze` will write, `review.txt` with the outcome reading) |
+| `e5_audit.py score`, `analyze`, `check` | ⏳ planned (`docs/e5-plan.md`) | as above; S only in `score` | `score` (S once, raw tables only), `analyze` (rates, tests, groups, near-exact, `flagged.csv`), `check` |
 | `e6_exposure.py` | ⏳ | E5 outputs | patient exposure, rarity, duplication |
 | `e7_reports.py` | ⏳ | E5, E6 outputs, planted copies | match reports, deletion test, correctness |
 | `e8_paired_mri.py` | ⏳ (optional) | E5 outputs, paired MRIs | paired-MRI similarity |
@@ -99,6 +101,14 @@ the production stage)
 .venv\Scripts\python.exe scripts\e4_validate.py validate         # needs K: both detectors on planted set + H-eval, gate verdict
 .venv\Scripts\python.exe scripts\e4_validate.py check            # consistency checks of all E4 outputs (exit code 1 on failure)
 ```
+
+**E5: main audit, S scored once** (every analysis choice fixed first: `audit:` in the config,
+decisions L–Q, and the E5 file from `prepare`; see `docs/e5-plan.md`)
+```powershell
+.venv\Scripts\python.exe scripts\e5_audit.py prepare             # no S: sensitivity thresholds, tau_D*, held-out maxima, H-eval per variant
+.venv\Scripts\python.exe scripts\e5_audit.py rehearse            # no S: the S code on mock sets (H-cal; H-cal + planted copies), a few min
+```
+`prepare` refuses to run once S has been scored, even with `--overwrite`.
 
 **Look at one slice** (after `lesions`): full-size picture with its lesion table, written to
 `results/<dataset|pool>/e0b/views/<key>.png`

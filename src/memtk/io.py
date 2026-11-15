@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from pathlib import Path
 
 import nibabel as nib
@@ -10,11 +10,17 @@ import numpy as np
 import pandas as pd
 from nibabel.dataobj_images import DataobjImage
 
-from memtk.config import resolve_path
+from memtk.config import output_dir, resolve_path
+from memtk.ids import parse_slice_key
 
 # Columns that hold IDs. They must stay text: a sample ID such as `1033` would otherwise be read as
-# a number and no longer match its key.
-ID_COLUMNS = ("source", "key", "lesion_id", "patient_id", "sample_id", "set", "filename")
+# a number and no longer match its key. The detector tables (E1, E2 and the class tables) name
+# slices, lesions and patients in the columns from `query` on (added 2026-11-15: E5 queries are
+# synthetic samples with numeric-looking IDs).
+ID_COLUMNS = ("source", "key", "lesion_id", "patient_id", "sample_id", "set", "filename",
+              "query", "nn", "nn_patient", "runner_up_patient", "query_lesion", "best_train_lesion", "train",
+              "train_lesion", "strongest_train", "strongest_patient", "base_key", "e1_nn", "e1_nn_patient",
+              "e2_nn", "e2_nn_patient", "e2_strongest_train", "e2_strongest_patient")
 
 
 def read_table(path: str | Path) -> pd.DataFrame:
@@ -49,6 +55,21 @@ def load_real(real_dir: Path, pid: str) -> tuple[np.ndarray, np.ndarray]:
     vol_dir = real_dir / "volumes" / pid
     return (np.asanyarray(load_image(vol_dir / "bravo.nii.gz").dataobj),
             np.asanyarray(load_image(vol_dir / "seg.nii.gz").dataobj))
+
+
+def slice_images(cfg: dict, dataset: str, keys: Iterable[str]) -> dict[str, np.ndarray]:
+    """The model-space BRAVO slice of each real slice key (figure backgrounds only), one volume
+    read per patient. Moved from `memtk.e4.common` on 2026-11-15 (E5 needs it)."""
+    by_patient: dict[str, list[tuple[str, int]]] = {}
+    for key in set(keys):
+        patient, z = parse_slice_key(key)
+        by_patient.setdefault(patient, []).append((key, z))
+    real_dir = output_dir(cfg, dataset)
+    images = {}
+    for patient, items in by_patient.items():
+        bravo, _ = load_real(real_dir, patient)
+        images.update({key: bravo[:, :, z] for key, z in items})
+    return images
 
 
 def list_patients(dataset_cfg: dict, split: str) -> list[str]:

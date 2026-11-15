@@ -500,6 +500,51 @@ move the old ones, with the reason, to the process log.
   the frozen thresholds are unchanged since both E4 stages ran (SHA-256); every E4 run log lists
   only T, H-eval and the planted set as inputs; the bases are T slices and every added lesion
   comes from H-eval. *Source: `results/stanford_brainmets/e4/check_report.txt`.*
+- **E5 analysis fixed before S is scored (decisions L–Q, set by the user on 2026-11-15, before any
+  E5 code ran).** S is scored once; every analysis choice is in `docs/e5-plan.md` and the config
+  section `audit:`, which `score` hashes together with the frozen files, and `analyze` refuses to
+  run if they changed (the lock). An analysis added after `score` is labelled exploratory.
+  - *L, audit sets:* main = clean and minor masks (35,920); noisy masks (1,241) scored by both
+    detectors and reported as separate rows (noisy; main + noisy). Rejected: E1 only on noisy
+    masks (the experiment plan's wording): specks lower whole-mask Dice, while E2 sees the lesions
+    without them, so E2 is the better test of whether the exclusion hides copies.
+  - *M, RQ1 tests:* primary family = the excess (S rate − H-eval rate) of E1 copy and E2 full,
+    single and multi (4 cells), one-sided bootstrap p, Holm-adjusted, beyond chance at adjusted
+    p < 0.05. Secondary, with intervals only: E2 partial and flagged, AUC (with the Mann–Whitney p
+    and the caveat that it treats slices as independent), rates by size of the largest informative
+    lesion with a size × stratum-standardised H-eval rate (size-confound check), rates per naming
+    scheme, the estimated excess count, every sensitivity variant. The outcome reading of the
+    experiment plan is applied mechanically: beyond chance if a primary cell is; "rare but real" if
+    none is but a near-exact copy exists; otherwise a validated negative. Rejected: a 95% interval
+    rule per cell without correction (four looks at one question); one pooled endpoint (hides that
+    the strata have different chance rates).
+  - *N, adjacent slices:* per source patient (decision J's source slice), source z sorted and
+    chained while consecutive z differ by ≤ 2; one lesion copied across many slices is one group.
+    Rejected: fixed 5-slice windows (a long lesion counts several times, depending on where a window
+    starts).
+  - *O, sensitivity runs on S in the same run:* 99th percentile, σ 0.08, bounds 10 and 25 px (the
+    E3 alternatives) and drop-only (attach gap 0) with the frozen thresholds; each compared with
+    H-eval at the same setting. Rejected: fewer variants (σ and bound sensitivity would stay
+    H-cal-only).
+  - *P, H2 at equal false-positive rate:* (i) E2 full vs E1 copy at the frozen thresholds; (ii) E2
+    flagged vs E1 at τ_D\*, the H-cal E1 percentile that flags E2 flagged's H-cal rate per stratum
+    (7.43% / 8.66%), fixed before S. H2 holds if the interval of the difference of excesses (E2 −
+    E1) is above 0; (ii) is the main comparison. Rejected: the frozen thresholds only.
+  - *Q, near-exact copies:* E1 score ≥ 0.9 and above the highest H-cal ∪ H-eval E1 score in the
+    same stratum and size bin of the largest lesion (the reason is in section 4: Dice > 0.9 occurs
+    by chance for single lesions). Rejected: the plan's plain Dice > 0.9; multi-lesion only.
+  - Also fixed: the copied-area share is descriptive; the optional area-weighted C is not run; E8
+    is eligible if the grouped count of near-exact copies plus E2 multi-lesion masks with C above
+    the held-out maximum is ≥ 20 (at chance about 7–10% of S is flagged, so "about 20 flagged
+    masks" says nothing).
+
+  *Source: `docs/e5-plan.md` (decisions L–Q), `configs/default.yaml` (`audit:`), 2026-11-15.*
+- **Intervals for S against H-eval: S masks resampled independently, H-eval by patient.** S
+  masks are independent samples; H-eval slices are clustered (adjacent slices are
+  near-duplicates). The two sets are resampled independently in each draw, and the statistic
+  (excess, AUC, difference of excesses) is taken per draw. Implemented exactly as a multinomial
+  over cluster types, so 20,000 independent masks cost as little as 26 patients. *Source:
+  `docs/e5-plan.md` (decision M), `src/memtk/audit.py` (`resample_sums`), 2026-11-15.*
 
 ## 3. Findings
 
@@ -791,6 +836,45 @@ move the old ones, with the reason, to the process log.
   own (incomplete) slice does. The one P4 miss is different: both detectors rank the base slice
   first, but its 13 px lesion shrank to 12 px with shape overlap 0.67 (s 0.61), not closer than
   chance. *Source: `results/stanford_brainmets/e4/validate/misses.png`, `planted_outcomes.csv`.*
+- **Real masks have (almost) no attached strays, so the drop-only re-run changes S, not the
+  calibration** (2026-11-15). Stray pixels attached at gap 2: H-cal 0 and H-eval 0 slices; T 4
+  slices with 10 px (of 280,410 lesion px); S main 4,481 masks. Real masks have no speck noise,
+  so their label maps are the same at gap 0, and the frozen thresholds (H-cal against T) stay valid
+  for the drop-only variant: no re-calibration is needed. *Source: read-only query of
+  `slices.csv` (`n_strays`, `stray_px`) of `stanford_brainmets` and `amibekk_v1` (E5 planning);
+  confirmed by E5 `prepare` (`results/stanford_brainmets/e5/prepare/drop_only.csv`: T changes in
+  4 slices, H-cal and H-eval in none; drop-only thresholds re-derived on H-cal equal the frozen
+  ones).*
+- **A held-out lesion at the bound can match a training lesion exactly by chance** (E5 `prepare`,
+  2026-11-15). H-cal `Mets_316/z88` has a single 12 px lesion that is pixel-identical, at the same
+  position, to lesion L1 of training slice `Mets_249/z101` (another patient): lesion score 1.0,
+  C = 1.0. The next highest single-lesion C on H-cal is 0.85. The same thing happens with E1 (two
+  H-eval single lesions of 4 and 8 px at Dice 1.00, E4). Consequence: no single-lesion mask can
+  be "beyond the held-out maximum" of E2 C, so that strong-evidence tier exists for multi-lesion
+  masks only (held-out maximum 0.508); the E8 eligibility rule already counts only that tier.
+  *Source: `results/stanford_brainmets/e5/prepare/heldout_maxima.csv`, `review.txt`; slice from a
+  read-only check of the stored H-cal E2 tables.*
+- **The E5 analysis behaves as intended on mock query sets, before S is read** (E5 `rehearse`,
+  2026-11-15). The exact code that will score and analyse S was run on two sets made from real
+  data:
+  - *Null case* (H-cal, 989 slices, never trained on): it reproduces its own chance rates (E1 copy
+    single 35/686 = 5.1%), no primary cell is beyond chance (Holm-adjusted p 0.52–1.0), no
+    near-exact copy, mechanical reading "validated negative".
+  - *Positive case* (H-cal + 294 planted copies P1, P2, P4 of E4 with known source): all four
+    primary cells beyond chance; P1 and P2 flagged by both detectors with the right source patient
+    in 100 of 100 each, P4 in 93 of 94; 257 near-exact copies (0 on H-eval); the 80 E2 groups name
+    all 20 base patients; reading "memorization beyond chance".
+  - *Why the patient bootstrap matters:* on the null case the multi-lesion E1 scores give a
+    one-sided Mann–Whitney p of 0.004 (slices treated as independent), while the AUC interval with
+    patients resampled, [0.40, 0.74], covers 0.5. Neighbouring slices of one patient are
+    near-duplicates; slice-level tests overstate the evidence. This is why decision M reports the
+    Mann–Whitney p only as secondary.
+  - *H2 needs partial copies:* on the positive case, H2 comparison (ii) does not hold: exact,
+    shifted and rotated whole copies are caught by both detectors alike. Lesion-level matching can
+    only flag more than whole-mask Dice if S contains incomplete copies (as E4's P6 showed).
+
+  *Source: `results/stanford_brainmets/e5/rehearse/null/review.txt`, `positive/review.txt`,
+  `rates.csv`, `auc.csv`, `h2.csv`.*
 
 ## 4. Limitations and assumptions
 
@@ -897,6 +981,25 @@ move the old ones, with the reason, to the process log.
   from a novel mask by any output-only method; whether S contains such "drifted" partial copies
   is described in E5/E7 from the stored lesion pairs, not validated. *Source: discussion,
   2026-11-04; frozen thresholds.*
+- **A whole-mask Dice above 0.9 is not evidence of copying for single-lesion masks** (2026-11-15).
+  Held-out masks, never trained on, reach these maximum E1 scores against T (H-cal / H-eval), by
+  stratum and size of the largest lesion:
+
+  | Largest lesion | Single, H-cal | Single, H-eval | Multi, H-cal | Multi, H-eval |
+  | --- | --- | --- | --- | --- |
+  | 4–11 px | 1.000 | 1.000 | 0.714 | 0.759 |
+  | 12–19 px | 0.973 | 0.960 | 0.778 | 0.815 |
+  | 20–39 px | 0.933 | 0.967 | 0.807 | 0.828 |
+  | 40–79 px | 0.933 | 0.933 | 0.793 | 0.803 |
+  | ≥ 80 px | 0.909 | 0.962 | 0.855 | 0.679 |
+
+  8% of H-eval single-lesion slices (6.3% of H-cal) score above 0.9; no held-out multi-lesion
+  slice does. The experiment plan called Dice > 0.9 copies "unambiguous"; at 128×128 that holds
+  only for multi-lesion masks. Hence decision Q (section 2): near-exact = above the held-out
+  maximum of the same stratum and size bin; a single lesion under 12 px can never be called
+  near-exact. *Source: read-only query of `processed_data/model_space/stanford_brainmets/e3/
+  e1_hcal.csv`, `e4/e1_heval.csv` with `slices.csv` (`largest_lesion_px`), E5 planning; fixed by
+  E5 `prepare`.*
 
 ## 5. Open questions
 

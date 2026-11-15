@@ -20,13 +20,15 @@ All candidate pairs are stored; tau_L and tau_C are applied afterwards (`LesionM
 `LesionMatch.summary`; one value each, or one per query slice for stratified thresholds), so
 thresholds and sensitivity analyses need no recomputation. Used by E3
 (H-cal), E4 (planted copies) and E5 (S); the stages pass the settings from `detectors.lesion`
-and `calibration`, converted to pixels.
+and `calibration`, converted to pixels. The four result tables are stored and read back under
+one naming rule (`save_tables`, `load_tables`).
 """
 
 from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -34,6 +36,7 @@ from scipy.optimize import linear_sum_assignment
 from scipy.spatial import KDTree
 
 from memtk.ids import lesion_id
+from memtk.io import read_table
 
 # Query slices scored at once: bounds the number of lesion pairs held in memory
 BLOCK = 1000
@@ -251,6 +254,26 @@ LESION_COLUMNS = ["query", "query_lesion", "area", "best_train_lesion", "best_s"
                   "best_position", "best_size"]
 SLICE_COLUMNS = ["query", "train", "train_idx", "n_query", "n_train", "n_matched", "best_pair_s"]
 PAIR_COLUMNS = ["query", "train", "query_lesion", "train_lesion", "distance", "shape", "position", "size", "s"]
+
+
+def save_tables(e2: LesionMatch, directory: str | Path, tag: str) -> None:
+    """Store the four tables of an E2 result in `directory` as `e2_<tag>_queries.csv`,
+    `e2_<tag>_lesions.csv`, `e2_<tag>_slice_pairs.parquet` and `e2_<tag>_lesion_pairs.parquet`
+    (the pair tables can hold millions of rows)."""
+    d = Path(directory)
+    d.mkdir(parents=True, exist_ok=True)
+    e2.queries.to_csv(d / f"e2_{tag}_queries.csv", index=False)
+    e2.lesions.to_csv(d / f"e2_{tag}_lesions.csv", index=False)
+    e2.slice_pairs.to_parquet(d / f"e2_{tag}_slice_pairs.parquet", index=False)
+    e2.lesion_pairs.to_parquet(d / f"e2_{tag}_lesion_pairs.parquet", index=False)
+
+
+def load_tables(directory: str | Path, tag: str, candidate_min_s: float) -> LesionMatch:
+    """An E2 result rebuilt from the four tables `save_tables` wrote (IDs read as text)."""
+    d = Path(directory)
+    return LesionMatch(read_table(d / f"e2_{tag}_queries.csv"), read_table(d / f"e2_{tag}_lesions.csv"),
+                       pd.read_parquet(d / f"e2_{tag}_slice_pairs.parquet"),
+                       pd.read_parquet(d / f"e2_{tag}_lesion_pairs.parquet"), candidate_min_s)
 
 
 def _concat(parts: list[pd.DataFrame], columns: list[str]) -> pd.DataFrame:

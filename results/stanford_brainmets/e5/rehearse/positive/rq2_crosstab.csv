@@ -1,0 +1,12 @@
+set,e1_copy,e2_class,slices,share
+query,False,full,51,0.04509283819628647
+query,False,novel,747,0.6604774535809018
+query,False,partial,19,0.016799292661361626
+query,True,full,284,0.251105216622458
+query,True,novel,27,0.023872679045092837
+query,True,partial,3,0.002652519893899204
+H-eval,False,full,35,0.03863134657836645
+H-eval,False,novel,775,0.8554083885209713
+H-eval,False,partial,34,0.037527593818984545
+H-eval,True,full,18,0.019867549668874173
+H-eval,True,novel,44,0.04856512141280353

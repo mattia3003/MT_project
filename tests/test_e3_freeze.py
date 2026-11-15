@@ -4,7 +4,8 @@ under which the E2 shortcuts would not be exact."""
 import pandas as pd
 import pytest
 
-from memtk.e3.freeze import compare_tables, frozen_thresholds, shortcut_problems
+from memtk.calibration import frozen_thresholds, shortcut_problems
+from memtk.e3.freeze import compare_tables
 
 SETTINGS = {"sigma_px": 6.4, "prefilter_px": 25.6, "candidate_min_s": 0.1}
 

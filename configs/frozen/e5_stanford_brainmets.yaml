@@ -1,0 +1,263 @@
+# E5 values for 'stanford_brainmets' fixed before S is scored, written by 'e5_audit.py prepare' from T, H-cal and
+# H-eval only. Do not edit by hand: 'score' and 'analyze' read this file and record its hash.
+dataset: stanford_brainmets
+written: '2026-11-15T11:41:27'
+inputs:
+- T
+- H-cal
+- H-eval
+e3_frozen_sha256: 3ea3b5de05891e35716550d965e6fb4f4581a348c6023bd2061babfaaa36bb0c
+audit_sha256: f726517bc091805c97a7464634d2697847d82c563c6ec713a0800e30eb10e3bc
+variants:
+  percentile_99:
+    kind: percentile
+    rerun: []
+    settings:
+      percentile: 99.0
+      informative_bound_px: 12
+      sigma_px: 6.4
+      prefilter_px: 25.6
+      candidate_min_s: 0.1
+      attach_gap: null
+    thresholds:
+      whole_mask:
+        tau_D:
+          single: 0.9473684210526316
+          multi: 0.7927702702702702
+      lesion:
+        tau_L:
+          single: 0.7954164237189049
+          multi: 0.865598371992391
+        tau_C:
+          single: 0.7659109778920099
+          multi: 0.4688847058163256
+    hcal_chance_rates:
+      single:
+        e1_copy: 0.0117
+        e2_full: 0.0116
+        e2_partial: 0.0066
+        e2_flagged: 0.0182
+      multi:
+        e1_copy: 0.0132
+        e2_full: 0.013
+        e2_partial: 0.013
+        e2_flagged: 0.026
+  sigma_0.08:
+    kind: sigma
+    rerun:
+    - lesion
+    settings:
+      percentile: 95.0
+      informative_bound_px: 12
+      sigma_px: 10.24
+      prefilter_px: 25.6
+      candidate_min_s: 0.1
+      attach_gap: null
+    thresholds:
+      whole_mask:
+        tau_D:
+          single: 0.9047125074096029
+          multi: 0.7291393985246831
+      lesion:
+        tau_L:
+          single: 0.7885576811118732
+          multi: 0.8558350586021053
+        tau_C:
+          single: 0.756624079064526
+          multi: 0.476892751530622
+    hcal_chance_rates:
+      single:
+        e1_copy: 0.051
+        e2_full: 0.0512
+        e2_partial: 0.0281
+        e2_flagged: 0.0792
+      multi:
+        e1_copy: 0.0528
+        e2_full: 0.0519
+        e2_partial: 0.0433
+        e2_flagged: 0.0952
+  bound_10:
+    kind: bound
+    rerun:
+    - lesion
+    settings:
+      percentile: 95.0
+      informative_bound_px: 10
+      sigma_px: 6.4
+      prefilter_px: 25.6
+      candidate_min_s: 0.1
+      attach_gap: null
+    thresholds:
+      whole_mask:
+        tau_D:
+          single: 0.9047125074096029
+          multi: 0.7291393985246831
+      lesion:
+        tau_L:
+          single: 0.7474991345964925
+          multi: 0.8267311268978192
+        tau_C:
+          single: 0.714560538693463
+          multi: 0.4076418966578746
+    hcal_chance_rates:
+      single:
+        e1_copy: 0.051
+        e2_full: 0.0513
+        e2_partial: 0.0256
+        e2_flagged: 0.0769
+      multi:
+        e1_copy: 0.0528
+        e2_full: 0.0526
+        e2_partial: 0.0338
+        e2_flagged: 0.0865
+  bound_25:
+    kind: bound
+    rerun:
+    - lesion
+    settings:
+      percentile: 95.0
+      informative_bound_px: 25
+      sigma_px: 6.4
+      prefilter_px: 25.6
+      candidate_min_s: 0.1
+      attach_gap: null
+    thresholds:
+      whole_mask:
+        tau_D:
+          single: 0.9047125074096029
+          multi: 0.7291393985246831
+      lesion:
+        tau_L:
+          single: 0.713313760259396
+          multi: 0.7777122394073472
+        tau_C:
+          single: 0.7031730880636099
+          multi: 0.3818839478660802
+    hcal_chance_rates:
+      single:
+        e1_copy: 0.051
+        e2_full: 0.0502
+        e2_partial: 0.0205
+        e2_flagged: 0.0708
+      multi:
+        e1_copy: 0.0528
+        e2_full: 0.0531
+        e2_partial: 0.0265
+        e2_flagged: 0.0796
+  drop_only:
+    kind: drop_only
+    rerun:
+    - whole_mask
+    - lesion
+    settings:
+      percentile: 95.0
+      informative_bound_px: 12
+      sigma_px: 6.4
+      prefilter_px: 25.6
+      candidate_min_s: 0.1
+      attach_gap: 0
+    thresholds:
+      whole_mask:
+        tau_D:
+          single: 0.9047125074096029
+          multi: 0.7291393985246831
+      lesion:
+        tau_L:
+          single: 0.7393993563963939
+          multi: 0.8157835150964992
+        tau_C:
+          single: 0.7193049930881258
+          multi: 0.406164455871013
+    hcal_chance_rates:
+      single:
+        e1_copy: 0.051
+        e2_full: 0.0512
+        e2_partial: 0.0231
+        e2_flagged: 0.0743
+      multi:
+        e1_copy: 0.0528
+        e2_full: 0.0519
+        e2_partial: 0.0346
+        e2_flagged: 0.0866
+h2:
+  rule: 'E2 flagged vs E1 at tau_D*: the H-cal E1 percentile flagging E2 flagged''s
+    H-cal rate'
+  matched_rate:
+    single: 0.0743
+    multi: 0.0866
+  tau_D_star:
+    single: 0.8971529111644658
+    multi: 0.6994583042973287
+  hcal_rate_at_tau_D_star:
+    single: 0.0743
+    multi: 0.0891
+near_exact:
+  min_score: 0.9
+  size_bins_px:
+  - 4
+  - 12
+  - 20
+  - 40
+  - 80
+  e1_maxima:
+  - stratum: multi
+    lower: 4
+    max: 0.7586206896551724
+    slices: 53
+  - stratum: multi
+    lower: 12
+    max: 0.8148148148148148
+    slices: 150
+  - stratum: multi
+    lower: 20
+    max: 0.8275862068965517
+    slices: 266
+  - stratum: multi
+    lower: 40
+    max: 0.8031496062992126
+    slices: 142
+  - stratum: multi
+    lower: 80
+    max: 0.8550185873605948
+    slices: 85
+  - stratum: single
+    lower: 4
+    max: 1.0
+    slices: 282
+  - stratum: single
+    lower: 12
+    max: 0.972972972972973
+    slices: 250
+  - stratum: single
+    lower: 20
+    max: 0.9666666666666668
+    slices: 376
+  - stratum: single
+    lower: 40
+    max: 0.9333333333333332
+    slices: 231
+  - stratum: single
+    lower: 80
+    max: 0.9622641509433962
+    slices: 243
+  - stratum: multi
+    lower: -1
+    max: 0.8550185873605948
+    slices: 696
+  - stratum: single
+    lower: -1
+    max: 1.0
+    slices: 1382
+  e2_C_maxima:
+    multi: 0.5075263679996314
+    single: 1.0
+drop_only_labels:
+  T:
+    slices: 3804
+    changed_at_gap_0: 4
+  H-cal:
+    slices: 989
+    changed_at_gap_0: 0
+  H-eval:
+    slices: 1089
+    changed_at_gap_0: 0

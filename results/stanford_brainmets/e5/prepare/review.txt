@@ -1,0 +1,97 @@
+E5 prepare: dataset 'stanford_brainmets' (T, H-cal and H-eval only; S never read)
+
+Sets: T 3804, H-cal 989, H-eval 1089 slices.
+
+Drop-only label maps (attach gap 0) from the masks as saved; the configured gap reproduces E0b for every slice; held-out sets unchanged, so the frozen thresholds apply:
+   set  slices  reproduces_e0b_at_gap  changed_at_gap_0                                        changed_keys
+     T    3804                   3804                 4 Mets_120/z37 Mets_120/z93 Mets_240/z79 Mets_266/z48
+ H-cal     989                    989                 0                                                    
+H-eval    1089                   1089                 0                                                    
+
+Sensitivity thresholds re-derived on H-cal (stratified as frozen), every one equal to E3 sensitivity.csv (drop-only: to the frozen thresholds):
+threshold      tau_D         tau_L         tau_C       
+stratum       single  multi single  multi single  multi
+variant                                                
+percentile_99  0.947  0.793  0.795  0.866  0.766  0.469
+sigma_0.08     0.905  0.729  0.789  0.856  0.757  0.477
+bound_10       0.905  0.729  0.747  0.827  0.715  0.408
+bound_25       0.905  0.729  0.713  0.778  0.703  0.382
+drop_only      0.905  0.729  0.739  0.816  0.719  0.406
+
+H-cal chance rates per variant:
+  percentile_99: {'single': {'e1_copy': 0.0117, 'e2_full': 0.0116, 'e2_partial': 0.0066, 'e2_flagged': 0.0182}, 'multi': {'e1_copy': 0.0132, 'e2_full': 0.013, 'e2_partial': 0.013, 'e2_flagged': 0.026}}
+  sigma_0.08: {'single': {'e1_copy': 0.051, 'e2_full': 0.0512, 'e2_partial': 0.0281, 'e2_flagged': 0.0792}, 'multi': {'e1_copy': 0.0528, 'e2_full': 0.0519, 'e2_partial': 0.0433, 'e2_flagged': 0.0952}}
+  bound_10: {'single': {'e1_copy': 0.051, 'e2_full': 0.0513, 'e2_partial': 0.0256, 'e2_flagged': 0.0769}, 'multi': {'e1_copy': 0.0528, 'e2_full': 0.0526, 'e2_partial': 0.0338, 'e2_flagged': 0.0865}}
+  bound_25: {'single': {'e1_copy': 0.051, 'e2_full': 0.0502, 'e2_partial': 0.0205, 'e2_flagged': 0.0708}, 'multi': {'e1_copy': 0.0528, 'e2_full': 0.0531, 'e2_partial': 0.0265, 'e2_flagged': 0.0796}}
+  drop_only: {'single': {'e1_copy': 0.051, 'e2_full': 0.0512, 'e2_partial': 0.0231, 'e2_flagged': 0.0743}, 'multi': {'e1_copy': 0.0528, 'e2_full': 0.0519, 'e2_partial': 0.0346, 'e2_flagged': 0.0866}}
+
+H2 (decision P): tau_D* {'single': 0.8972, 'multi': 0.6995} flags {'single': 0.0743, 'multi': 0.0891} of H-cal (target E2 flagged {'single': 0.0743, 'multi': 0.0866}).
+
+Near-exact (decision Q): highest held-out E1 score (H-cal and H-eval) by size of the largest lesion:
+stratum        multi  single
+whole stratum  0.855   1.000
+4-11 px        0.759   1.000
+12-19 px       0.815   0.973
+20-39 px       0.828   0.967
+40-79 px       0.803   0.933
+>= 80 px       0.855   0.962
+per set, whole stratum:
+stratum   multi  single
+set                    
+H-cal     0.855     1.0
+H-eval    0.828     1.0
+held-out  0.855     1.0
+Highest held-out E2 C(q, NN) per stratum (beyond-held-out tier): {'multi': 0.508, 'single': 1.0}. A held-out single-lesion slice already reaches C = 1, so no single-lesion mask can be beyond it (the E8 rule counts the multi-lesion tier only).
+
+H-eval rates per variant (the baseline; main = E4), bootstrap by patient, H-cal rate beside:
+      variant      class stratum  slices  flagged  rate             ci  hcal_rate
+         main    e1_copy  single     696       50 0.072 [0.045, 0.097]      0.051
+         main    e1_copy   multi     393       29 0.074 [0.048, 0.116]      0.053
+         main    e2_full  single     634       45 0.071 [0.049, 0.095]      0.051
+         main    e2_full   multi     272        8 0.029 [0.014, 0.054]      0.052
+         main e2_partial  single     634       19 0.030 [0.015, 0.047]      0.023
+         main e2_partial   multi     272       15 0.055 [0.012, 0.088]      0.035
+         main e2_flagged  single     634       64 0.101 [0.076, 0.131]      0.074
+         main e2_flagged   multi     272       23 0.085 [0.044, 0.106]      0.087
+percentile_99    e1_copy  single     696        9 0.013 [0.004, 0.026]      0.012
+percentile_99    e1_copy   multi     393        6 0.015 [0.006, 0.034]      0.013
+percentile_99    e2_full  single     634       18 0.028 [0.016, 0.043]      0.012
+percentile_99    e2_full   multi     272        2 0.007 [0.000, 0.029]      0.013
+percentile_99 e2_partial  single     634        5 0.008 [0.002, 0.015]      0.007
+percentile_99 e2_partial   multi     272        3 0.011 [0.000, 0.022]      0.013
+percentile_99 e2_flagged  single     634       23 0.036 [0.022, 0.054]      0.018
+percentile_99 e2_flagged   multi     272        5 0.018 [0.005, 0.042]      0.026
+   sigma_0.08    e1_copy  single     696       50 0.072 [0.045, 0.098]      0.051
+   sigma_0.08    e1_copy   multi     393       29 0.074 [0.050, 0.112]      0.053
+   sigma_0.08    e2_full  single     634       44 0.069 [0.046, 0.095]      0.051
+   sigma_0.08    e2_full   multi     272        7 0.026 [0.000, 0.071]      0.052
+   sigma_0.08 e2_partial  single     634       11 0.017 [0.008, 0.027]      0.028
+   sigma_0.08 e2_partial   multi     272       23 0.085 [0.024, 0.123]      0.043
+   sigma_0.08 e2_flagged  single     634       55 0.087 [0.061, 0.115]      0.079
+   sigma_0.08 e2_flagged   multi     272       30 0.110 [0.038, 0.144]      0.095
+     bound_10    e1_copy  single     696       50 0.072 [0.045, 0.098]      0.051
+     bound_10    e1_copy   multi     393       29 0.074 [0.047, 0.112]      0.053
+     bound_10    e2_full  single     660       47 0.071 [0.050, 0.093]      0.051
+     bound_10    e2_full   multi     314        9 0.029 [0.009, 0.056]      0.053
+     bound_10 e2_partial  single     660       16 0.024 [0.012, 0.039]      0.026
+     bound_10 e2_partial   multi     314       17 0.054 [0.013, 0.082]      0.034
+     bound_10 e2_flagged  single     660       63 0.095 [0.070, 0.124]      0.077
+     bound_10 e2_flagged   multi     314       26 0.083 [0.036, 0.105]      0.086
+     bound_25    e1_copy  single     696       50 0.072 [0.046, 0.097]      0.051
+     bound_25    e1_copy   multi     393       29 0.074 [0.048, 0.113]      0.053
+     bound_25    e2_full  single     500       36 0.072 [0.041, 0.100]      0.050
+     bound_25    e2_full   multi      65        5 0.077 [0.000, 0.148]      0.053
+     bound_25 e2_partial  single     500        6 0.012 [0.004, 0.022]      0.020
+     bound_25 e2_partial   multi      65        0 0.000 [0.000, 0.000]      0.026
+     bound_25 e2_flagged  single     500       42 0.084 [0.052, 0.114]      0.071
+     bound_25 e2_flagged   multi      65        5 0.077 [0.000, 0.153]      0.080
+    drop_only    e1_copy  single     696       50 0.072 [0.046, 0.096]      0.051
+    drop_only    e1_copy   multi     393       29 0.074 [0.048, 0.114]      0.053
+    drop_only    e2_full  single     634       45 0.071 [0.048, 0.096]      0.051
+    drop_only    e2_full   multi     272        8 0.029 [0.014, 0.056]      0.052
+    drop_only e2_partial  single     634       19 0.030 [0.015, 0.046]      0.023
+    drop_only e2_partial   multi     272       15 0.055 [0.011, 0.085]      0.035
+    drop_only e2_flagged  single     634       64 0.101 [0.075, 0.131]      0.074
+    drop_only e2_flagged   multi     272       23 0.085 [0.043, 0.106]      0.087
+
+Look at: the drop-only table (only T may change), the near-exact limits (a single lesion under 12 px can never be near-exact), and the H-eval rates per variant. Next: 'e5_audit.py rehearse' (no S).

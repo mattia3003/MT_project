@@ -408,3 +408,87 @@ in full, with what replaced them.
   report generator built on the E4 planted copies before S), E8 alone (optional, own go/no-go).
   Recorded in `docs/experiment-plan.md` ("Plan documents for E5–E8"), with the E4 milestone and
   the E4 criteria item marked done there; pointer in CLAUDE.md.
+
+## 2026-11-15: E5 planned; step 1 (library and config)
+
+- **E5 planned in `docs/e5-plan.md`** (E5 alone, as suggested on 2026-11-04). The user set
+  decisions L–Q in the planning session, in two rounds of questions, before any E5 code existed
+  (values and rejected options in report-notes section 2); the secondary analyses, the cut of
+  the area-weighted C and the E8 exit rule were approved with the plan. Pointers updated in
+  CLAUDE.md (active plan) and `docs/experiment-plan.md` (E5 status line).
+  - *Read-only queries while planning* (inline scripts, not in the repo), whose results changed
+    the plan: stray counts per set (`slices.csv`, real and pool: H-cal and H-eval 0, T 4 slices,
+    S main 4,481), which removed the drop-only re-calibration the E1–E3 carry-over asked about;
+    held-out E1 maxima by stratum and size bin (`e3/e1_hcal.csv`, `e4/e1_heval.csv`), which
+    replaced the plan's "Dice > 0.9 is unambiguous" with decision Q; S main strata (E1 19,117 /
+    16,803; E2 19,911 / 6,006 / 10,003 without an informative lesion), informative lesion sizes
+    (median S main 24, H-eval 22, T 28 px), main masks per naming scheme, and the E2 maxima on
+    H-eval (`heval_classes.csv`: C 0.952 / 0.488).
+- **E5 step 1: shared helpers to the library, `memtk/audit.py`, config `audit:`.**
+  - *Moved unchanged* (E5 needs them): `e4.common.load_frozen` → `calibration.load_frozen`
+    (`config.frozen_file` now takes the experiment, default "e3", for the coming
+    `e5_<dataset>.yaml`); `e4.validate.run_detectors` → `calibration.run_frozen`;
+    `e4.common.slice_images` → `io.slice_images`; `e4.validate.heval_classes`, `fp_flags`,
+    `share_row` → `audit.class_table`, `audit.class_flags`, `audit.share_row` (renamed: they now
+    serve S too). E4 modules import them from there.
+  - *Verified:* pytest 128 before, 141 after (13 new tests: `tests/test_audit.py` 11,
+    `tests/test_sets.py` 2); E3 check 16/16 and E4 check 16/16 re-run (their check reports and run
+    logs rewritten); the E4 check rebuilds the gate from stored tables and never calls
+    `run_frozen`, so it was spot-checked separately: on 60 random H-eval slices it reproduces the
+    stored `heval_classes.csv` (scores equal to 1e-16, every other column identical; inline
+    script, not in the repo).
+  - *New:* `memtk/audit.py` (cluster bootstrap of column sums as an exact multinomial over
+    cluster types, intervals, one-sided p, excess test, Holm, standardised rate, AUC and its
+    two-level bootstrap, chained groups, copied-area share, held-out maxima and `beyond_max`);
+    `sets.load_pool` (S label maps by `mask_class`, uint8 to keep ~36,000 maps at ~0.6 GB; the
+    detectors use only `labels > 0` and the lesion numbers) and `sets.relabel` (drop-only);
+    config section `audit:` with the values of L–Q.
+  - Pylance flagged five issues in the new code (a parameter reassigned with another type,
+    pandas-stub complaints on `Series.map` / `Index.map` with a Series, `itertuples` scalars);
+    each fixed by a clearer rewrite (`reindex`, plain lists), no ignores.
+  *Source: `docs/e5-plan.md` (status, step 1), `results/stanford_brainmets/e3/check_report.txt`,
+  `results/stanford_brainmets/e4/check_report.txt`.*
+- **E5 step 2: `prepare` (no S).** New `scripts/e5_audit.py`, `src/memtk/e5/common.py`,
+  `src/memtk/e5/prepare.py`, `tests/test_e5_common.py` (4 tests).
+  - *Refactor first:* `prepare` re-derives the sensitivity thresholds, so E3's threshold code moved
+    unchanged to `memtk.calibration` (`lesion_slices`, `threshold_rows`, `thresholds`, `STRATA`
+    from `e3.calibrate`; `frozen_thresholds`, `shortcut_problems`, `chance_rates_at` from
+    `e3.freeze`, its `DETECTORS` as `THRESHOLDS`); `lesionmatch.save_tables` / `load_tables`
+    replace four copies of the E2 table naming in E3 and E4. pytest 142 and E3 / E4 check 16/16
+    after this refactor, before any E5 code ran.
+  - *Bug prevented:* `io.read_table` kept only `key`, `sample_id` and a few other columns as text,
+    not the detector tables' `query`, `nn`, `train` or lesion-ID columns. Real keys
+    (`Mets_005/z127`) survive either way, but an S sample ID such as `1033` would have been read
+    back from `e2_*_queries.csv` as the number 1033 and no longer matched its key. `ID_COLUMNS`
+    extended, with a test in `tests/test_io.py`.
+  - *Run:* first run complete; every check inside the stage passed (the configured gap
+    reproduces every E0b label map; gap 0 changes 4 T slices and no H-cal or H-eval slice; every
+    sensitivity threshold equals E3 `sensitivity.csv`; drop-only thresholds equal the frozen
+    ones; the E2 shortcuts stay exact under every variant). Re-run once with `--overwrite` (no S
+    yet) after two review-text changes: size bins labelled as ranges, and a note that the E2
+    beyond-held-out tier is empty for single-lesion masks. Values unchanged. A third run without
+    `--overwrite` refused, as intended.
+  - *Read-only check after the run* (inline script): the single-lesion E2 C maximum of 1.0 is H-cal
+    `Mets_316/z88`, a 12 px lesion pixel-identical and at the same position as the L1 of T
+    `Mets_249/z101` (another patient); the next highest are 0.85 and 0.82 (18 and 15 px lesions
+    of the same patient).
+  - pytest 146; Pylance clean on every changed file.
+  *Source: `results/stanford_brainmets/e5/prepare/review.txt`, `configs/frozen/e5_stanford_brainmets.yaml`.*
+- **E5 step 3: `rehearse` (no S).** New `src/memtk/e5/score.py` (`score_query`: the one scoring
+  function), `src/memtk/e5/analyze.py` (`analyze_scored`: the one analysis function, every table,
+  test and figure of decisions L–Q), `src/memtk/e5/rehearse.py`, `tests/test_e5_analyze.py` (4
+  tests); `audit.cell_rates` (+1 test). Built as functions of any query set so that the `score`
+  and `analyze` stages run on S exactly the code rehearsed here.
+  - *Refactor:* E4's figure helpers `zoom_window`, `fill`, `draw_labels` (`e4.plant`) and
+    `lesion_colors` (`e4.validate`) moved unchanged to `memtk.plotting`; `load_planted` from
+    `e4.common` to `memtk.sets` (E7 will need it too). E4 check 16/16 afterwards.
+  - *Fixed before the first run:* `audit.auc_bootstrap` used one `einsum` over draws × S clusters ×
+    H clusters, which for S (about 26,000 masks) would have built an intermediate of about 400 MB
+    per block; now `(ws @ wins) * wh`. `standardized_rate` returns NaN quietly where a resample
+    holds no slice of the weighted cells (a test warning showed it).
+  - *Runs:* first run complete on both cases. One change after it: with no noisy masks in the mock
+    sets, every table repeated "main" as "main+noisy"; `subsets` now forms main + noisy only when
+    both parts exist. Re-run with `--overwrite`; values unchanged.
+  - Results in `docs/e5-plan.md` (status, step 3) and report-notes section 3.
+  - pytest 151; Pylance clean.
+  *Source: `results/stanford_brainmets/e5/rehearse/null/review.txt`, `positive/review.txt`.*

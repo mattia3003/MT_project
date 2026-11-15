@@ -18,14 +18,16 @@ import numpy as np
 import pandas as pd
 from matplotlib.figure import Figure
 
-from memtk import calibration, config, lesionmatch, wholemask
-from memtk.e4.common import load_frozen, load_planted, slice_images
-from memtk.e4.plant import SIZE_BINS, draw_labels, zoom_window
+from memtk import calibration, config
+from memtk.audit import class_flags, class_table, share_row
+from memtk.calibration import load_frozen, run_frozen
+from memtk.e4.plant import SIZE_BINS
 from memtk.ids import parse_slice_key
-from memtk.lesionmatch import LesionMatch
+from memtk.io import slice_images
+from memtk.lesionmatch import LesionMatch, save_tables
 from memtk.planted import VARIANTS
-from memtk.plotting import LESION_COLORS, hide_unused, save, tile_figure
-from memtk.sets import SliceSet, load_set
+from memtk.plotting import draw_labels, hide_unused, lesion_colors, save, tile_figure, zoom_window
+from memtk.sets import SliceSet, load_planted, load_set
 from memtk.stages import decided, pick, refuse_overwrite, require
 
 DETECTORS = {"e1": "e1_caught", "e2": "e2_caught", "any": "any_caught", "both": "both_caught"}
@@ -64,12 +66,12 @@ def run_validate(cfg: dict, dataset: str | None = None, pool: str | None = None,
 
     t, heval = load_set(cfg, name, "T"), load_set(cfg, name, "H-eval")
     planted, planted_labels = load_planted(cfg, name)
-    e1_p, e2_p, e2c_p = run_detectors(planted_labels, planted["key"].tolist(), t, frozen)
-    e1_h, e2_h, e2c_h = run_detectors(heval.labels, heval.keys, t, frozen)
+    e1_p, e2_p, e2c_p = run_frozen(planted_labels, planted["key"].tolist(), t, frozen)
+    e1_h, e2_h, e2c_h = run_frozen(heval.labels, heval.keys, t, frozen)
     t_labels = dict(zip(t.keys, t.labels))
     l1_area = {k: int((t_labels[k] == 1).sum()) for k in planted["base_key"].unique()}
     outcomes = planted_outcomes(planted, e1_p, e2c_p, l1_area)
-    hc = heval_classes(heval, e1_h, e2_h, e2c_h)
+    hc = class_table(heval, e1_h, e2_h, e2c_h)
 
     validation = validation_table(outcomes, draws, rng)
     groups = group_recall(outcomes)
@@ -81,10 +83,7 @@ def run_validate(cfg: dict, dataset: str | None = None, pool: str | None = None,
     data_dir.mkdir(parents=True, exist_ok=True)
     for tag, e1, e2 in (("planted", e1_p, e2_p), ("heval", e1_h, e2_h)):
         e1.to_csv(data_dir / f"e1_{tag}.csv", index=False)
-        e2.queries.to_csv(data_dir / f"e2_{tag}_queries.csv", index=False)
-        e2.lesions.to_csv(data_dir / f"e2_{tag}_lesions.csv", index=False)
-        e2.slice_pairs.to_parquet(data_dir / f"e2_{tag}_slice_pairs.parquet", index=False)
-        e2.lesion_pairs.to_parquet(data_dir / f"e2_{tag}_lesion_pairs.parquet", index=False)
+        save_tables(e2, data_dir, tag)
     hc.to_csv(data_dir / "heval_classes.csv", index=False)
     run_extra = {"stage": "validate", "inputs": ["T", "H-eval", "planted"], "frozen_sha256": frozen_hash,
                  "verdict": verdict}
@@ -126,20 +125,7 @@ def run_validate(cfg: dict, dataset: str | None = None, pool: str | None = None,
     print(f"\n{text}\nWrote {data_dir}\nWrote {out}")
 
 
-# --- detectors --------------------------------------------------------------------------------
-
-def run_detectors(labels: np.ndarray, keys: list[str], t: SliceSet,
-                  frozen: dict) -> tuple[pd.DataFrame, LesionMatch, pd.DataFrame]:
-    """E1 (masks with a lesion only) and E2 of a stack of label maps against T with the frozen
-    settings; the E1 table with its frozen classes, the E2 results, and the E2 classes."""
-    wm, les = calibration.frozen_settings(frozen)
-    n_lesions = labels.reshape(len(labels), -1).max(axis=1)
-    scorable = n_lesions > 0
-    e1 = wholemask.match(labels[scorable], t.labels, t.patients, [k for k, s in zip(keys, scorable) if s],
-                         t.keys, **wm)
-    e2 = lesionmatch.match(labels, keys, t.labels, t.keys, **les)
-    return calibration.e1_classes(e1, n_lesions[scorable], frozen), e2, calibration.e2_classes(e2, frozen)
-
+# --- outcomes ---------------------------------------------------------------------------------
 
 def planted_outcomes(planted: pd.DataFrame, e1: pd.DataFrame, e2c: pd.DataFrame, l1_area: dict) -> pd.DataFrame:
     """One row per planted mask: identity, strata, `gated` (decision I's gate rule; P6-remove
@@ -172,33 +158,7 @@ def planted_outcomes(planted: pd.DataFrame, e1: pd.DataFrame, e2c: pd.DataFrame,
     return out
 
 
-def heval_classes(heval: SliceSet, e1: pd.DataFrame, e2: LesionMatch, e2c: pd.DataFrame) -> pd.DataFrame:
-    """One row per H-eval slice: patient, E1 strata, score, nearest neighbour and copy flag; E2
-    stratum (by informative lesions; "none" without one), class, C, nearest neighbour and
-    strongest pair. Every flag is a false positive."""
-    out = pd.DataFrame({"key": heval.keys, "patient_id": heval.patients})
-    a = e1.set_index("query")
-    out["n_lesions"] = out["key"].map(a["n_lesions"])
-    out["stratum_e1"] = out["key"].map(a["stratum"])
-    for col in ("score", "nn", "nn_patient", "copy"):
-        out[f"e1_{col}"] = out["key"].map(a[col])
-    out["n_informative"] = out["key"].map(e2.queries.set_index("query")["n_informative"]).fillna(0).astype(int)
-    out["stratum_e2"] = np.where(out["n_informative"] == 0, "none", calibration.stratum(out["n_informative"].to_numpy()))
-    b = e2c.set_index("query")
-    out["e2_class"] = out["key"].map(b["class"]).fillna("none")
-    for col in ("C", "nn", "nn_patient", "strongest_s", "strongest_train", "n_kept", "all_copied"):
-        out[f"e2_{col}"] = out["key"].map(b[col])
-    return out
-
-
 # --- tables -----------------------------------------------------------------------------------
-
-def share_row(flags: pd.Series, patients: pd.Series, draws: int, rng: np.random.Generator) -> dict:
-    """Count, share and bootstrap-by-patient interval of a boolean column."""
-    low, high = calibration.bootstrap_share(flags.to_numpy(), patients.to_numpy(), draws, rng)
-    return {"count": int(flags.sum()), "share": float(flags.mean()) if len(flags) else np.nan,
-            "ci_low": low, "ci_high": high}
-
 
 def validation_table(outcomes: pd.DataFrame, draws: int, rng: np.random.Generator) -> pd.DataFrame:
     """Per variant, subset (`gated` = the masks the criteria count; `all` = every planted mask,
@@ -245,16 +205,6 @@ def group_recall(outcomes: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def fp_flags(hc: pd.DataFrame, cls: str) -> tuple[pd.Series, pd.Series]:
-    """The H-eval slices a false-positive class is counted on, and which of them it flags."""
-    if cls == "e1_copy":
-        on = hc["stratum_e1"].notna()
-        return on, hc["e1_copy"].eq(True)
-    on = hc["stratum_e2"] != "none"
-    wanted = {"e2_full": ["full"], "e2_partial": ["partial"], "e2_flagged": ["full", "partial"]}[cls]
-    return on, hc["e2_class"].isin(wanted)
-
-
 def fp_table(hc: pd.DataFrame, frozen: dict, criteria: dict, draws: int, rng: np.random.Generator) -> pd.DataFrame:
     """False positives on H-eval per class and stratum (single, multi, all): slices, patients,
     flagged, rate with its bootstrap-by-patient interval, the H-cal chance rate at the same
@@ -262,7 +212,7 @@ def fp_table(hc: pd.DataFrame, frozen: dict, criteria: dict, draws: int, rng: np
     limits = criteria.get("false_positive_max", {})
     rows = []
     for cls in FP_CLASSES:
-        on, flag = fp_flags(hc, cls)
+        on, flag = class_flags(hc, cls)
         stratum_col = "stratum_e1" if cls == "e1_copy" else "stratum_e2"
         for stratum in (*STRATA, "all"):
             sel = on & ((hc[stratum_col] == stratum) | (stratum == "all"))
@@ -391,11 +341,6 @@ def factors_figure(e2: LesionMatch, outcomes: pd.DataFrame, path, title: str):
         ax.set_ylim(-0.02, 1.02)
         ax.set_title(factor, fontsize=9)
     return save(fig, path, title)
-
-
-def lesion_colors(labels: np.ndarray) -> dict[int, str]:
-    """One colour per lesion number."""
-    return {n: LESION_COLORS[(n - 1) % len(LESION_COLORS)] for n in range(1, int(labels.max()) + 1)}
 
 
 def misses_figure(misses: pd.DataFrame, labels: dict, images: dict, rng: np.random.Generator, path, title: str):

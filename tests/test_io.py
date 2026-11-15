@@ -68,6 +68,16 @@ def test_read_table_keeps_numeric_looking_ids_as_text(tmp_path):
     assert table["centroid_row_brain"].isna().tolist() == [False, True, False]
 
 
+def test_read_table_keeps_detector_table_ids_as_text(tmp_path):
+    """E5 queries are synthetic samples: `query` and the lesion IDs must survive a round trip."""
+    path = tmp_path / "e2_s_lesions.csv"
+    pd.DataFrame({"query": ["1033", "007"], "query_lesion": ["1033/L1", "007/L1"],
+                  "best_train_lesion": ["Mets_005/z127/L1", None], "best_s": [0.9, None]}).to_csv(path, index=False)
+    table = read_table(path)
+    assert table["query"].tolist() == ["1033", "007"]
+    assert table["best_s"].dtype.kind == "f"
+
+
 def test_wrong_shape_and_duplicate_keys_are_refused(tmp_path):
     writer = MaskStackWriter((4, 4))
     with pytest.raises(ValueError):

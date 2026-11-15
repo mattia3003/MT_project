@@ -170,6 +170,53 @@ validation:
       it into calibration. Every recall criterion passes. E5 compares S with the measured H-eval rates,
       not with 5%.
 
+# --- E5: main audit, S scored once (docs/e5-plan.md) ------------------------------------------
+# Every value is fixed before `e5_audit.py score` runs: `score` hashes this section and the frozen
+# files (e3_, e5_<dataset>.yaml) and `analyze` refuses to run if they changed (the lock). An analysis
+# added after `score` is exploratory. Bootstrap draws: calibration.bootstrap_draws.
+
+audit:
+  # Decision L, decided 2026-11-15 by the user while planning E5: the main audit is the clean and minor
+  # masks (E0b qc stage); noisy masks are scored by both detectors (not E1 only: E2 sees the lesions
+  # without the specks) and reported as separate rows (noisy, main + noisy); failed MRIs and
+  # edge-flagged masks stay in
+  sets:
+    main: [clean, minor]
+    noisy: [noisy]
+  # Decision M, decided 2026-11-15: the primary family is the excess over H-eval (S iid, H-eval by
+  # patient) of these classes x strata, one-sided bootstrap p, Holm-adjusted; everything else
+  # secondary with intervals only (AUC, partial / flagged, by size, standardised, per naming scheme)
+  primary:
+    classes: [e1_copy, e2_full]
+    strata: [single, multi]
+    adjust: holm
+    alpha: 0.05
+  size_bins_px: [12, 20, 40, 80]   # secondary: bins of the largest informative lesion (size-confound check)
+  # Decision N, decided 2026-11-15: per source patient, source slices sorted by z form one group
+  # while consecutive z differ by at most max_gap (not fixed 5-slice windows)
+  window:
+    kind: chained
+    max_gap: 2
+  # Decision O, decided 2026-11-15: sensitivity variants scored on S in the same single run (E3
+  # sensitivity settings; drop-only = attach gap 0 with the frozen thresholds: H-cal and H-eval have
+  # no strays, so their label maps and the thresholds are unchanged)
+  sensitivity: [percentile_99, sigma_0.08, bound_10, bound_25, drop_only]
+  # Decision P, decided 2026-11-15: H2 at equal false-positive rate, (i) E2 full vs E1 copy at the
+  # frozen thresholds, (ii) E2 flagged vs E1 at tau_D* = the H-cal E1 percentile flagging E2 flagged's
+  # H-cal rate per stratum (fixed by `prepare`); H2 holds if the interval of the difference of
+  # excesses (E2 - E1) is above 0
+  h2: matched_on_hcal
+  # Decision Q, decided 2026-11-15: near-exact = E1 score >= min_score and above the highest H-cal and
+  # H-eval E1 score in its stratum and size bin of the largest lesion (fixed by `prepare`); held-out
+  # single-lesion masks reach 0.93-1.0 by chance, so Dice > 0.9 alone is not unambiguous
+  near_exact:
+    min_score: 0.9
+    beyond: heldout_max
+    size_bins_px: [4, 12, 20, 40, 80]
+  # E8 exit rule, approved with the plan 2026-11-15: E8 is eligible if the grouped count of near-exact
+  # copies plus E2 multi-lesion masks with C above the held-out maximum reaches this
+  e8_min_strong: 20
+
 real_datasets:
   stanford_brainmets:
     root: data/StanfordSkullStripped_1mm

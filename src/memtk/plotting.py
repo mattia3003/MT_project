@@ -27,6 +27,8 @@ LESION_COLORS = ["red", "lime", "magenta", "royalblue", "white", "mediumpurple",
 # One colour per data set in charts
 SET_COLORS = {"T": "tab:blue", "H-cal": "tab:green", "H-eval": "tab:olive", "H": "tab:green",
               "S main": "tab:red", "S all": "tab:gray"}
+# Zoomed tiles (`zoom_window`): px around the lesions, smallest window
+ZOOM_MARGIN, ZOOM_MIN_CROP = 6, 24
 
 
 def tile_figure(n_rows: int, n_cols: int, tile: float = 2.2) -> tuple[Figure, np.ndarray]:
@@ -111,3 +113,48 @@ def lesion_sheet(items: list[tuple[str, np.ndarray, LesionLabels, np.ndarray, tu
         draw_lesions(ax, image, res, brain, box, tile_title)
     hide_unused(axes, len(items))
     return save(fig, path, title)
+
+
+# --- zoomed label maps (moved from `memtk.e4.plant` / `e4.validate` on 2026-11-15; E4 and E5) ---
+
+def zoom_window(masks: list[np.ndarray]) -> tuple[slice, slice]:
+    """A square window around the pixels of all masks, ZOOM_MARGIN px wide on each side and at
+    least ZOOM_MIN_CROP px, kept inside the image."""
+    rows, cols = np.nonzero(np.any(masks, axis=0))
+    h, w = masks[0].shape
+    side = min(max(int(rows.max() - rows.min()), int(cols.max() - cols.min())) + 1 + 2 * ZOOM_MARGIN, h, w)
+    side = max(side, min(ZOOM_MIN_CROP, h, w))
+    r0 = int(np.clip(round((rows.min() + rows.max()) / 2 - side / 2), 0, h - side))
+    c0 = int(np.clip(round((cols.min() + cols.max()) / 2 - side / 2), 0, w - side))
+    return slice(r0, r0 + side), slice(c0, c0 + side)
+
+
+def fill(ax, regions: list[tuple[np.ndarray, str]], alpha: float = 0.55) -> None:
+    """Fill boolean regions in their colours, half transparent, over what is drawn."""
+    overlay = np.zeros((*regions[0][0].shape, 4))
+    for region, color in regions:
+        overlay[region] = (*to_rgba(color)[:3], alpha)
+    ax.imshow(overlay, interpolation="nearest")
+
+
+def lesion_colors(labels: np.ndarray) -> dict[int, str]:
+    """One colour per lesion number of a label map (LESION_COLORS, repeating)."""
+    return {n: LESION_COLORS[(n - 1) % len(LESION_COLORS)] for n in range(1, int(labels.max()) + 1)}
+
+
+def draw_labels(ax, image: np.ndarray, labels: np.ndarray, colors: dict[int, str], title: str) -> None:
+    """A slice with each lesion of `labels` filled and outlined in its colour and numbered."""
+    show_slice(ax, image, [], title)
+    regions = []
+    for n, color in colors.items():
+        lesion = labels == n
+        if not lesion.any():
+            continue
+        rgba = to_rgba(color)
+        regions.append((lesion, color))
+        ax.contour(lesion.astype(float), levels=[0.5], colors=[rgba], linewidths=0.6)
+        rows, cols = np.nonzero(lesion)
+        ax.text(cols.max() + 1, rows.min() - 0.5, f"L{n}", color=rgba, fontsize=5, fontweight="bold",
+                path_effects=[patheffects.withStroke(linewidth=1.5, foreground="black")])
+    if regions:
+        fill(ax, regions)

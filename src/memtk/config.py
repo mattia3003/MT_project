@@ -81,9 +81,10 @@ def split_file(cfg: dict, dataset_name: str) -> Path:
     return resolve_path(cfg["splits_dir"]) / f"{dataset_name}_seed{cfg['seed']}.csv"
 
 
-def frozen_file(cfg: dict, dataset_name: str) -> Path:
-    """Frozen E3 threshold file for a real dataset: `<frozen_dir>/e3_<dataset>.yaml`."""
-    return resolve_path(cfg["frozen_dir"]) / f"e3_{dataset_name}.yaml"
+def frozen_file(cfg: dict, dataset_name: str, experiment: str = "e3") -> Path:
+    """Frozen file of an experiment for a real dataset: `<frozen_dir>/<experiment>_<dataset>.yaml`
+    (E3 thresholds; E5 values fixed before S is scored)."""
+    return resolve_path(cfg["frozen_dir"]) / f"{experiment}_{dataset_name}.yaml"
 
 
 def add_config_arg(parser: argparse.ArgumentParser) -> None:

@@ -18,13 +18,15 @@ import numpy as np
 import pandas as pd
 
 from memtk import calibration, checks, config
-from memtk.e4.common import gate_status, load_frozen, load_planted
+from memtk.audit import class_table
+from memtk.calibration import load_frozen
+from memtk.e4.common import gate_status
 from memtk.e4.plant import planted_lesion_table, planted_table, plant_set
-from memtk.e4.validate import fp_table, gate_table, gate_verdict, heval_classes, planted_outcomes
+from memtk.e4.validate import fp_table, gate_table, gate_verdict, planted_outcomes
 from memtk.ids import parse_lesion_id
 from memtk.io import read_table
-from memtk.lesionmatch import LesionMatch
-from memtk.sets import load_set
+from memtk.lesionmatch import LesionMatch, load_tables
+from memtk.sets import load_planted, load_set
 
 DECISION_KEYS = ["validation.bases", "validation.variants", "validation.gate", "validation.caught",
                  "validation.criteria"]
@@ -103,7 +105,7 @@ def run_check(cfg: dict, dataset: str | None = None, pool: str | None = None) ->
     stored_out = read_table(out / "validate" / "planted_outcomes.csv")
     report.add("per-mask outcomes (caught by decision J) reproduced from the stored tables",
                outcomes[CAUGHT].equals(stored_out[CAUGHT].astype(bool)), f"{len(outcomes)} planted masks")
-    hc = heval_classes(heval, read_table(data_dir / "e1_heval.csv"), e2_h, calibration.e2_classes(e2_h, frozen))
+    hc = class_table(heval,read_table(data_dir / "e1_heval.csv"), e2_h, calibration.e2_classes(e2_h, frozen))
     criteria = cfg["validation"]["criteria"]
     fp = fp_table(hc, frozen, criteria, 1, np.random.default_rng(cfg["seed"]))
     verdict, gate = gate_verdict(gate_table(outcomes, fp, criteria), config.value(cfg, "validation.accepted_deviation"))
@@ -131,10 +133,7 @@ def run_check(cfg: dict, dataset: str | None = None, pool: str | None = None) ->
 
 def stored_match(data_dir, tag: str, frozen: dict) -> LesionMatch:
     """The E2 results of one set (`planted` or `heval`) rebuilt from the four tables `validate` stored."""
-    return LesionMatch(read_table(data_dir / f"e2_{tag}_queries.csv"), read_table(data_dir / f"e2_{tag}_lesions.csv"),
-                       pd.read_parquet(data_dir / f"e2_{tag}_slice_pairs.parquet"),
-                       pd.read_parquet(data_dir / f"e2_{tag}_lesion_pairs.parquet"),
-                       float(frozen["detectors"]["lesion"]["candidate_min_s"]))
+    return load_tables(data_dir, tag, float(frozen["detectors"]["lesion"]["candidate_min_s"]))
 
 
 def same_gate(gate: pd.DataFrame, stored: pd.DataFrame, tol: float = 1e-9) -> bool:
