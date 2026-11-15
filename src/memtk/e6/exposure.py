@@ -1,7 +1,12 @@
-"""E6 analysis (`docs/e6-e7-plan.md`, decisions R, U, V, W): a scored query set against H-eval and
-the E6 reference tables. `analyze_query` (tables and the reading) and `draw_figures` are the one
-analysis: `rehearse` runs them on E5's mock sets first, and the `exposure` stage (step 5) runs them
-unchanged on S, so the analysis of S is the analysis rehearsed. Nothing here is tuned; every choice
+"""E6 stage `exposure` (`docs/e6-e7-plan.md`, step 5) and the analysis it runs (decisions R, U, V,
+W): a scored query set against H-eval and the E6 reference tables. The stage reads S only from E5's
+stored tables (set main, decision L), refuses if E5's lock changed (the hashes in
+`score.complete.json`) or if `rehearse` ran with another `exposure:` section, and writes
+`results/<pool>/e6/exposure/`.
+
+`analyze_query` (tables and the reading) and `draw_figures` are the one analysis: `rehearse` runs
+them on mock sets first, and the `exposure` stage runs them unchanged on S, so the analysis of S is
+the analysis rehearsed. Nothing here is tuned; every choice
 comes from the `exposure:` section.
 
 Per cell (class x stratum, decision R): exposure ratios per T patient (and under the sensitivity
@@ -15,26 +20,69 @@ primary cells.
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 from matplotlib.figure import Figure
 
-from memtk import calibration, lesionmatch
+from memtk import calibration, config, lesionmatch
 from memtk.audit import auc, auc_bootstrap, chained, interval, sources
-from memtk.calibration import STRATA
-from memtk.e6.common import QuerySet, Reference
+from memtk.calibration import STRATA, load_frozen
+from memtk.e5.common import audit_config, lock_unchanged
+from memtk.e6.common import QuerySet, Reference, exposure_config, load_heval, load_query, load_reference
 from memtk.exposure import (concentration_test, credit_counts, credit_draws, e2_margins, exposure_table,
-                            h1_table, lesion_credits, patient_of_keys, spearman_test)
+                            h1_table, lesion_credits, patient_of_keys, span_rates, spearman_test)
 from memtk.ids import parse_slice_key
 from memtk.plotting import save
+from memtk.stages import refuse_overwrite, require
 
 # Per class: (stratum column, nearest-neighbour patient column of the held-out masks, E1 or E2 scale)
 CELL_COLUMNS = {"e1_copy": ("stratum_e1", "e1_nn_patient", "e1"), "e2_full": ("stratum_e2", "e2_nn_patient", "e2"),
                 "e2_partial": ("stratum_e2", "e2_nn_patient", "e2"), "e2_flagged": ("stratum_e2", "e2_nn_patient", "e2")}
 TOP_PATIENTS = 10
+# H1 rates figure (descriptive, added 2026-11-15 after the S run): 3D lesions grouped by slice span
+SPAN_GROUPS = ((1, 2), (3, 4), (5, 7), (8, 12), (13, None))
 MAX_GAP = 2   # chained groups (E5 decision N)
+
+
+# --- stages -----------------------------------------------------------------------------------
+
+def run_exposure(cfg: dict, dataset: str | None = None, pool: str | None = None, overwrite: bool = False) -> None:
+    """The E6 analysis of S (set main) against H-eval, exactly as rehearsed. Needs E5 `score` (its
+    lock unchanged), E6 `reference` and `rehearse` (made with the current `exposure:` section).
+    Writes `results/<pool>/e6/exposure/`."""
+    name, _ = config.real_dataset(cfg, dataset)
+    pool_name, _ = config.synthetic_pool(cfg, pool)
+    score_dir = config.output_dir(cfg, pool_name) / "e5"
+    out = config.results_dir(cfg, pool_name, "e6") / "exposure"
+    refuse_overwrite([out], overwrite)
+    now = lock_unchanged(cfg, name, pool_name)
+    exp = exposure_config(cfg)
+    audit = audit_config(cfg)
+    e3, _ = load_frozen(cfg, name)
+    rehearsed = config.results_dir(cfg, name, "e6") / "rehearse" / "positive" / "run_info.json"
+    require(rehearsed, "e6_exposure.py rehearse")
+    if json.loads(rehearsed.read_text(encoding="utf-8"))["config"].get("exposure") != cfg["exposure"]:
+        raise SystemExit("The exposure: section changed since 'rehearse' ran; run 'e6_exposure.py rehearse --overwrite' "
+                         "first, so S is analysed with the rehearsed analysis.")
+    draws, rng = int(cfg["calibration"]["bootstrap_draws"]), np.random.default_rng(cfg["seed"])
+    cut = float(e3["detectors"]["lesion"]["candidate_min_s"])
+    ref = load_reference(cfg, name)
+    h = load_heval(cfg, name, cut)
+    q = load_query("S", score_dir, audit["sets"]["main"], cut)
+    print(f"E6 analysis of S ({len(q.table)} masks, set main) against H-eval ...")
+    tables, reading = analyze_query(q, h, ref, e3, exp, draws, rng)
+    write_tables(tables, out)
+    draw_figures(tables, ref, exp, f"E6 exposure ({pool_name})", out)
+    header = (f"E6 exposure: pool '{pool_name}' against '{name}' (S from E5's stored tables, set main; E5's lock "
+              f"unchanged; the analysis rehearsed on mock sets, decisions R, U, V, W)")
+    text = review_text(header, tables, reading)
+    (out / "review.txt").write_text(text, encoding="utf-8")
+    config.write_run_info(out, cfg, script=__file__, extra={"stage": "exposure", "inputs": ["T", "H-eval tables",
+                                                            "S tables (E5)", "E6 reference"], **now, "reading": reading})
+    print(f"\n{text}\nWrote {out}")
 
 
 # --- analysis ---------------------------------------------------------------------------------
@@ -91,7 +139,7 @@ def analyze_query(q: QuerySet, h: QuerySet, ref: Reference, e3: dict, exp: dict,
         "concentration": pd.DataFrame(conc_rows),
         "margins": pd.DataFrame(margin_rows),
         "h3": pd.DataFrame(h3_rows),
-        "h1": h1_tables(q, h, ref, e3, exp, draws, rng),
+        **dict(zip(("h1", "h1_rates"), h1_tables(q, h, ref, e3, exp, draws, rng))),
         "flag_details": pd.concat(details, ignore_index=True)[["set", "cell", "key", "cluster", "source",
                                                                "source_patient", "margin", "source_rarity"]],
     }
@@ -175,18 +223,20 @@ def overall_reading(readings: dict[str, dict]) -> dict:
 
 
 def h1_tables(q: QuerySet, h: QuerySet, ref: Reference, e3: dict, exp: dict, draws: int,
-              rng: np.random.Generator) -> pd.DataFrame:
+              rng: np.random.Generator) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Decision W for both 3D lesion methods: lesion credits of the query set and H-eval (pairs
-    s >= tau_L over every stored slice pair), Spearman(span, credits) per size bin and weighted."""
+    s >= tau_L over every stored slice pair), Spearman(span, credits) per size bin and weighted; and
+    the same credits as rates per span group (`span_rates`, descriptive)."""
     edges = [int(b) for b in exp["h1_size_bins_px"]]
-    parts = []
+    order = [calibration.bin_label(e, edges) for e in edges]
+    parts, rate_parts = [], []
     for method in (exp["lesions3d"]["main"], exp["lesions3d"]["sensitivity"]):
         les = ref.lesions3d[(ref.lesions3d["method"] == method) & ref.lesions3d["informative"]].reset_index(drop=True)
         ids = pd.Index(les["lesion3d_id"])
         of = ref.lesion_map.set_index("lesion_id")[f"lesion3d_id_{method}"]
         lowers = calibration.area_bins(les["largest_informative_px"].to_numpy(), edges).to_numpy(dtype=float)
         bins = np.array([calibration.bin_label(int(lo), edges) for lo in lowers])
-        counts, boot = {}, {}
+        counts, boot, n_queries = {}, {}, {}
         for name, qs in (("q", q), ("h", h)):
             scorable = qs.table[qs.table["n_informative"] > 0]
             tau = pd.Series(calibration.frozen_threshold(e3, "lesion", "tau_L", scorable["n_informative"].to_numpy()),
@@ -195,18 +245,21 @@ def h1_tables(q: QuerySet, h: QuerySet, ref: Reference, e3: dict, exp: dict, dra
             credits = lesion_credits(pairs, tau, of)
             counts[name] = credit_counts(credits, ids)
             clusters = pd.Series(scorable["cluster"].to_numpy(), index=scorable["key"].to_numpy())
+            n_queries[name] = len(clusters)
             if clusters.nunique() == len(clusters):
                 boot[name] = credit_draws(credits, ids, draws, rng, n_queries=len(clusters))
             else:
                 boot[name] = credit_draws(credits, ids, draws, rng, clusters=clusters)
-        table = h1_table(les["span"].to_numpy(), bins, counts["q"], counts["h"], boot["q"], boot["h"],
-                         order=[calibration.bin_label(e, edges) for e in edges])
+        table = h1_table(les["span"].to_numpy(), bins, counts["q"], counts["h"], boot["q"], boot["h"], order=order)
+        for name, label in (("q", "query"), ("h", "H-eval")):
+            rate_parts.append(span_rates(les["span"].to_numpy(), bins, counts[name], boot[name], n_queries[name],
+                                         SPAN_GROUPS, order).assign(set=label, method=method))
         plain = spearman_test(les["span"].to_numpy(), counts["q"], 1000, draws, rng)
         table = pd.concat([table, pd.DataFrame([{"bin": "all (plain rho_s)", "lesions3d": len(les),
                                                  "credited_s": int((counts["q"] > 0).sum()), "rho_s": plain["rho"]}])],
                           ignore_index=True)
         parts.append(table.assign(method=method))
-    return pd.concat(parts, ignore_index=True)
+    return pd.concat(parts, ignore_index=True), pd.concat(rate_parts, ignore_index=True)
 
 
 def top_patients(exposure: pd.DataFrame, ref: Reference, primary: list[tuple[str, str]], m: float) -> pd.DataFrame:
@@ -245,6 +298,10 @@ def draw_figures(tables: dict[str, pd.DataFrame], ref: Reference, exp: dict, pre
                   f"{prefix}: flags by patient-rarity group (fifths of the 105 patients, most typical left). "
                   f"Bar = observed / expected flags of the group; 1 = as chance predicts (H3)")
     h1_figure(tables["h1"], out / "h1_span.png", f"{prefix}: Spearman(span, lesion credits) per size bin (H1)")
+    h1_rates_figure(tables["h1_rates"], exp["lesions3d"]["main"], out / "h1_rates.png",
+                    f"{prefix}: matches per 3D lesion by how many training slices it spans, relative to the size "
+                    f"bin's average (1 = average). H1: the query line (red) climbs more steeply than H-eval's (grey). "
+                    f"Descriptive view of the tested H1, added after the S run")
 
 
 def exposure_figure(exposure: pd.DataFrame, cells: list[str], m: float, path: Path, title: str,
@@ -320,6 +377,27 @@ def rarity_figure(exposure: pd.DataFrame, h3: pd.DataFrame, ref: Reference, cell
         ax.set_ylabel("observed / expected flags", fontsize=8)
         r = h3.set_index("cell").loc[cell]
         ax.set_title(f"{cell}: Spearman rho {r['rho']:.2f} [{r['rho_low']:.2f}, {r['rho_high']:.2f}]", fontsize=9)
+    return save(fig, path, title)
+
+
+def h1_rates_figure(rates: pd.DataFrame, method: str, path: Path, title: str) -> Path:
+    """Per size bin, the query set's and H-eval's matches per 3D lesion by span group, relative to the
+    bin's average, with intervals (3D lesions by `method`)."""
+    d = rates[rates["method"] == method]
+    bins = list(dict.fromkeys(d["bin"]))
+    fig = Figure(figsize=(4 * max(len(bins), 1), 3.8))
+    for ax, b in zip(np.atleast_1d(fig.subplots(1, max(len(bins), 1))), bins):
+        for (label, color, dx) in (("query", "tab:red", -0.08), ("H-eval", "0.45", 0.08)):
+            g = d[(d["bin"] == b) & (d["set"] == label)]
+            x = np.arange(len(g)) + dx
+            ax.errorbar(x, g["relative"], yerr=[g["relative"] - g["relative_low"], g["relative_high"] - g["relative"]],
+                        fmt="o-", ms=4, lw=1, capsize=2, color=color, label=label)
+            ax.set_xticks(np.arange(len(g)), [f"{s}\n({n})" for s, n in zip(g["span"], g["lesions3d"])], fontsize=7)
+        ax.axhline(1, color="k", lw=0.8)
+        ax.set_title(f"lesions {b}", fontsize=9)
+        ax.set_xlabel("slice span (3D lesions)", fontsize=8)
+        ax.set_ylabel("matches per lesion / bin average", fontsize=8)
+        ax.legend(fontsize=7)
     return save(fig, path, title)
 
 

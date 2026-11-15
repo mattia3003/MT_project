@@ -656,3 +656,82 @@ in full, with what replaced them.
     sized to the IDs). Pylance: dicts instead of `.at` lookups, a covariant `Sequence` in the test
     helper, one `# pyright: ignore` for scipy's Wilcoxon result (`pvalue` missing from the stub).
   *Source: `results/stanford_brainmets/e7/planted/review.txt`.*
+- **E6 + E7 step 5: E6 `exposure` on S, one run** (2026-11-15, after the user committed steps 0–4).
+  `run_exposure` added to `src/memtk/e6/exposure.py` (refuses if E5's lock changed or `rehearse` ran
+  with another `exposure:` section) and to `scripts/e6_exposure.py`. Before the run: one syntax error
+  from a script edit (a `\n` written as a line break), fixed; pytest 180, Pylance clean. The analysis
+  code was unchanged since the last `rehearse`. Run: 16 s, exit 0, no re-run. Results in report-notes
+  section 3 and `docs/e6-e7-plan.md` (status, step 5).
+  - *Read-only checks after the run* (not part of the fixed analysis): the H1 weighted rows of the
+    four rehearsal cases (all intervals cover 0); the source slices of the top E1 multi-lesion
+    patient `Mets_230` (`flag_details.csv`).
+  *Source: `results/amibekk_v1/e6/exposure/review.txt`, `run_info.json`.*
+- **E6 + E7 step 6: E7 `reports` on S.** New `src/memtk/e7/reports.py` and the stage in
+  `scripts/e7_reports.py`; `reports.pair_colors` (source lesions in their query partner's colour,
+  the to-do of step 4); E5's lock check moved from E6 `exposure` to `e5.common.lock_unchanged`
+  (used by both). pytest 180, then 181 (+1 verdict test); Pylance: report rows looked up as plain
+  dicts of `iterrows` rows (the stubs type `.loc[key]` as Series or DataFrame).
+  - *First run* (6 min 57 s, exit 0; nothing S-derived changed afterwards). After reading the
+    reports, report text only was changed: the verdict now starts with the whole-mask match when E1
+    flags the mask (E1-only flags, e.g. the exposed patients' and some near-exact masks, read only
+    "no lesion-level match"), and missing margins print "-"; MRI slices cached. `planted` re-run with
+    `--overwrite` (its tables byte-identical to before, compared in the scratchpad), then `reports`
+    re-run with `--overwrite` (6 min 53 s).
+  - *Read-only checks after the run:* report 02's mask against its E1 nearest neighbour (E2 shape
+    0.39 after a 1 px diagonal shift: the rounding found in step 2); the count of S main masks with
+    an informative lesion and E1 score 1.0 (4; 2 E2-novel).
+  *Source: `results/amibekk_v1/e7/reports/review.txt`, `run_info.json`.*
+- **Three changes at the user's request after step 6** (2026-11-15):
+  - *Patient names:* reports use the dataset's IDs (`Mets_xxx`, already pseudonymous) instead of
+    P001–P105; `e7.common.pseudonyms` replaced by `patient_name` (identity), the column
+    `source_pseudonym` renamed `source_patient`, `<output_root>/stanford_brainmets/e7/pseudonyms.csv`
+    deleted; decision X amended; CLAUDE.md and the experiment plan say the dataset IDs count as
+    pseudonymous.
+  - *H1 as rates* (`exposure.span_rates`, `e6.exposure.h1_rates_figure`, `h1_rates.csv` / `.png`):
+    descriptive, from the same credits and bootstrap draws as the tested H1 (no new random draws).
+    E6 `rehearse` and `exposure` re-run with `--overwrite`: every existing table byte-identical
+    (compared in the scratchpad), only the new files added.
+  - *Patient profiles* (`reports.profile_tables`, `draw_patient_profile`, `e7.reports.patient_profiles`;
+    `patients/<patient>.png`, `patient_profiles.csv`) for the 3 most exposed patients per primary
+    cell (6 patients). E7 `planted` and `reports` re-run with `--overwrite`: every table identical
+    except the two with patient names (`reports.csv`, `report_index.csv`), whose other columns are
+    identical and whose verdicts differ only in the names (checked in the scratchpad); then one more
+    `reports` run for profile layout (whole-number slice ticks, no empty space for one lesion).
+  - Tests +3 (`span_rates`, `profile_tables`, the E1 verdict part earlier): pytest 183; Pylance clean
+    (profile rows drawn from `to_dict("records")`, the top slice by `argmax`).
+  *Source: `results/amibekk_v1/e6/exposure/h1_rates.png`, `results/amibekk_v1/e7/reports/patients/`.*
+- **Report and profile figures refined** (2026-11-15, at the user's request): lesions outlined, not
+  filled, in report and profile tiles (`plotting.draw_labels(filled=False)`; E4/E5 figures keep the
+  default fill), a whole-slice tile of the named training slice with the zoom window as a box
+  (`reports.overview_tile`), and the largest 2D area next to each 3D lesion in the profiles
+  (`profile_tables` keeps `area`). E7 `planted` and `reports` re-run with `--overwrite`: every table
+  byte-identical except `patient_profiles.csv` (new `area` column). One test updated (toy lesion
+  table needs `area`); pytest 183. Pylance then flagged `np.stack` of plain `np.ndarray` lists in
+  three places, including a line in `tests/test_exposure.py` that had been clean since step 2 (the
+  same construct elsewhere is not flagged): a numpy-stub overload false alarm, one-line
+  `# pyright: ignore[reportCallIssue]` each with the reason.
+  *Source: `results/amibekk_v1/e7/reports/patients/Mets_058.png`, `reports/50_exposed_e1_copy_multi.png`.*
+- **E6 + E7 step 7: checks; plan closed** (2026-11-15). New `src/memtk/e6/check.py`,
+  `src/memtk/e7/check.py` and their `check` stages. Refactors first: `differing_tables` moved from
+  `e5.check` to `checks` (E5 check re-run: 26/26); `e7.reports` split into `deletion_tables`,
+  `profile_data`, `profile_table` so the check recomputes exactly what `reports` wrote.
+  - *E6 check:* first run 17/18. The `reference` run log predates `exposure.placement_mock` (added in
+    step 3b), and the log check compared the whole `exposure:` section; `reference` uses only
+    `exposure.lesions3d` and `exposure.rarity`, so the check now compares those keys
+    (`REFERENCE_KEYS`; the reference tables themselves are reproduced by the check). Second run 18/18
+    (~4 min).
+  - *E7 check:* 14/14 at the first run (~8 min).
+  - *Scratch test* (not in the repo): a damaged copy (one margin AUC +0.001, one taxonomy label
+    changed, one profile row removed) was reported as `margins.margin_auc`, `taxonomy.taxonomy` and
+    `patient_profiles` by `checks.differing_tables`.
+  - Plan closed: `docs/e6-e7-plan.md` marked reference only, with a "Carried forward" table; E8
+    "Carried over from E6 + E7" in `docs/experiment-plan.md`; report-notes sections 4 (four
+    limitations) and 5 (E8 context, the master-thesis question); CLAUDE.md: no active plan until the
+    E8 go/no-go.
+  *Source: `results/amibekk_v1/e6/check_report.txt`, `results/amibekk_v1/e7/check_report.txt`.*
+- **E8 decided: go, lean and exploratory** (the user, 2026-11-15, after the E6 + E7 close; not started
+  in this session). A "Ready for planning" brief added to `docs/experiment-plan.md`, E8 (proposed
+  design, the choices to settle, every input file and the code to reuse; inputs checked to exist:
+  pool `brain_masks.npz`, `masks_raw.npz`, `qc.csv` with `mri_failed` (82 main masks), scikit-image
+  0.26 for SSIM). CLAUDE.md points the next session at it; report-notes section 5 marks the go/no-go
+  resolved.

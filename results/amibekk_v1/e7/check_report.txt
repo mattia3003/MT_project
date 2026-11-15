@@ -1,0 +1,18 @@
+E7 check: pool 'amibekk_v1' against 'stanford_brainmets', seed 2026
+
+[PASS] all E7 decisions (X, Y, Z) are set and implemented (reports:)
+[PASS] 'planted' outputs made with the current config values: seed, reports, lesions.attach_gap
+[PASS] 'reports' outputs made with the current config values: seed, reports, exposure, calibration.bootstrap_draws
+[PASS] 'reports' ran after 'planted': 2026-11-15T22:21:50 vs 2026-11-15T22:14:27
+[PASS] 'planted' never read S: ['T', 'H-eval', 'planted']
+[PASS] E5's lock unchanged since S was scored, and as recorded by 'reports'
+[PASS] the planted correctness criteria pass (decision Z): 7 of 7
+[PASS] every planted table reproduced: 6 tables
+[PASS] the report selection reproduced (decision X, same seed): 76 reports
+[PASS] every report's verdict and taxonomy reproduced
+[PASS] every report figure exists: 76 figures
+[PASS] deletion test, taxonomy and patient profiles on S reproduced: 4 tables
+[PASS] every patient profile figure exists: 6 patients
+[PASS] unit tests (pytest) pass: 183 passed in 13.68s
+
+14 passed, 0 failed

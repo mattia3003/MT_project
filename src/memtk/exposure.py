@@ -276,6 +276,36 @@ def credit_draws(credits: pd.DataFrame, lesions: pd.Index, draws: int, rng: np.r
     return out
 
 
+def span_rates(span: np.ndarray, bins: np.ndarray, counts: np.ndarray, count_draws: np.ndarray, n_queries: int,
+               groups: Sequence[tuple[int, int | None]], order: Sequence[str], level: float = 0.95) -> pd.DataFrame:
+    """H1 shown as rates (descriptive, added 2026-11-15 after the S run): per size bin (in `order`) and
+    span group (lowest, highest span; None = open), the 3D lesions, their mean credits per 1,000
+    scorable queries with an interval from `count_draws`, and that rate relative to the size bin's mean
+    rate (1 = the bin's average; the shape H1 is about) with its interval."""
+    span = np.asarray(span)
+    rows = []
+    for b in order:
+        in_bin = bins == b
+        if not in_bin.any():
+            continue
+        bin_rate = counts[in_bin].mean()
+        bin_draws = count_draws[:, in_bin].mean(axis=1)
+        for lo, hi in groups:
+            sel = in_bin & (span >= lo) & ((span <= hi) if hi is not None else True)
+            if not sel.any():
+                continue
+            rate, draws_ = counts[sel].mean(), count_draws[:, sel].mean(axis=1)
+            with np.errstate(invalid="ignore", divide="ignore"):
+                rel_draws = draws_ / bin_draws
+            low, high = interval(draws_ * 1000 / n_queries, level)
+            rel_low, rel_high = interval(rel_draws, level)
+            rows.append({"bin": b, "span": f"{lo}-{hi}" if hi is not None else f">= {lo}", "lesions3d": int(sel.sum()),
+                         "rate_per_1000": rate * 1000 / n_queries, "rate_low": low, "rate_high": high,
+                         "relative": rate / bin_rate if bin_rate > 0 else np.nan, "relative_low": rel_low,
+                         "relative_high": rel_high})
+    return pd.DataFrame(rows)
+
+
 def h1_table(span: np.ndarray, bins: np.ndarray, c_s: np.ndarray, c_h: np.ndarray, c_s_draws: np.ndarray,
              c_h_draws: np.ndarray, level: float = 0.95, order: Sequence[str] | None = None) -> pd.DataFrame:
     """Decision W: per size bin, Spearman(span, credits) of the query set (rho_s) and the held-out

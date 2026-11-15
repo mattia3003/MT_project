@@ -46,9 +46,11 @@ Status: ✅ implemented · ⏳ planned
 | `e5_audit.py check` | ✅ | all E5 outputs, the frozen files, `audit:` | `results/<pool>/e5/check_report.txt` (PASS/FAIL: decisions, run logs in order with S read by `score` only, the lock, one complete score run, `prepare` values and every `analyze` table reproduced with the same seed, unit tests; exit code 1 on any failure) |
 | `e6_exposure.py reference` | ✅ | decisions R, V, W (`exposure:`), the frozen E3 file, T label maps, `lesions.csv`, model-space `seg` volumes, E4 `heval_classes.csv`; never S | `<output_root>/<dataset>/e6/`: 3D lesions of T (both methods) and the 2D → 3D map, slice rarity (E1, E2), patient features and rarity, T slice shares, H-eval nearest-neighbour counts; `results/<dataset>/e6/reference/` (`review.txt`, `reference.png`); ~3 min |
 | `e6_exposure.py rehearse` | ✅ | `reference` outputs, E5's mock sets (null: H-cal; positive: H-cal + planted P1, P2, P4), H-cal and T (placement mocks: lesions moved to T lesion positions, built and scored here), E4 H-eval tables, the frozen E3 file; never S | `<output_root>/<dataset>/e6/rehearse/<case>/` (placement mocks); `results/<dataset>/e6/rehearse/<case>/`: exposure, concentration, margins, H3, H1, flag details, top patients, figures, `review.txt` ending in the reading of decision U (placement mocks also E5's rates, exploratory); ~45 s |
-| `e6_exposure.py exposure`, `check` | ⏳ planned (`docs/e6-e7-plan.md`) | E5's S tables, E6 reference tables; config `exposure:` (decisions R–W) | the same analysis on S; consistency checks |
-| `e7_reports.py planted` | ✅ | decisions X, Y, Z (`reports:`), E4's planted set and tables, E4's H-eval tables and `fp_heval.csv`, T and H-eval label maps, the frozen E3 file; never S | `results/<dataset>/e7/planted/`: report table with verdicts, correctness per variant and the criteria, deletion test (planted controls, H-eval chance flags), taxonomy confusion, one example report per variant; `<output_root>/<dataset>/e7/pseudonyms.csv`; ~30 s |
-| `e7_reports.py reports`, `check` | ⏳ planned (`docs/e6-e7-plan.md`) | E5's S tables, E6 `exposure`; config `reports:` | match reports on S, deletion test on S; consistency checks |
+| `e6_exposure.py exposure` | ✅ | E5's S tables (set main; refuses if E5's lock changed), E6 reference tables, `rehearse` made with the current `exposure:` | `results/<pool>/e6/exposure/`: the rehearsed analysis on S, `review.txt` ending in the reading; ~15 s |
+| `e6_exposure.py check` | ✅ | all E6 outputs, T, H-eval tables, E5's S tables | `results/<pool>/e6/check_report.txt` (PASS/FAIL; reproduces every reference and exposure table; exit code 1 on any failure); ~4 min |
+| `e7_reports.py planted` | ✅ | decisions X, Y, Z (`reports:`), E4's planted set and tables, E4's H-eval tables and `fp_heval.csv`, T and H-eval label maps, the frozen E3 file; never S | `results/<dataset>/e7/planted/`: report table with verdicts, correctness per variant and the criteria, deletion test (planted controls, H-eval chance flags), taxonomy confusion, one example report per variant; ~30 s |
+| `e7_reports.py reports` | ✅ | E5's S tables and `flagged.csv` (lock unchanged), E6 `exposure`, the planted criteria passed, E4 H-eval tables; config `reports:` | `results/<pool>/e7/reports/`: 76 match reports (`reports/`), `report_index.csv`, patient profiles of the most exposed patients (`patients/`, `patient_profiles.csv`), deletion test on S, taxonomy S vs H-eval, `review.txt`; ~7 min |
+| `e7_reports.py check` | ✅ | all E7 outputs, the planted set, T, H-eval, E5's S tables | `results/<pool>/e7/check_report.txt` (PASS/FAIL; reproduces every planted table, the selection, verdicts, deletion test, taxonomy and profiles on S; exit code 1 on any failure); ~8 min |
 | `e8_paired_mri.py` | ⏳ (optional) | E5 outputs, paired MRIs | paired-MRI similarity |
 
 ## Commands
@@ -127,11 +129,15 @@ decisions R, U, V, W; S only from E5's stored tables; see `docs/e6-e7-plan.md`)
 ```powershell
 .venv\Scripts\python.exe scripts\e6_exposure.py reference         # no S: 3D lesions, slice/patient rarity, H-eval NN counts, ~3 min
 .venv\Scripts\python.exe scripts\e6_exposure.py rehearse          # no S: the E6 analysis on mock sets (null, positive, 2 placement mocks), ~45 s
+.venv\Scripts\python.exe scripts\e6_exposure.py exposure          # the rehearsed analysis on S (E5's stored tables; E5's lock checked), ~15 s
+.venv\Scripts\python.exe scripts\e6_exposure.py check             # consistency checks of all E6 outputs (exit code 1 on failure), ~4 min
 ```
 
 **E7: match reports** (every choice in `reports:`, decisions X, Y, Z; built on planted copies before S)
 ```powershell
 .venv\Scripts\python.exe scripts\e7_reports.py planted           # no S: reports, correctness, deletion test, taxonomy on planted copies, ~30 s
+.venv\Scripts\python.exe scripts\e7_reports.py reports           # match reports, deletion test, taxonomy on S (needs E6 exposure, planted passed), ~7 min
+.venv\Scripts\python.exe scripts\e7_reports.py check             # consistency checks of all E7 outputs (exit code 1 on failure), ~8 min
 ```
 
 **Look at one slice** (after `lesions`): full-size picture with its lesion table, written to

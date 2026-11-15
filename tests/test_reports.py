@@ -9,7 +9,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from memtk.reports import ReportData, contributors, correctness_row, deletion_summary, taxonomy, verdict, without
+from memtk.reports import (ReportData, contributors, correctness_row, deletion_summary, profile_tables, taxonomy,
+                           verdict, without)
 
 
 def data(pairs: Sequence[tuple[str, str, float, float, float, float]], e2_class: str = "full", n_query: int = 2,
@@ -19,7 +20,7 @@ def data(pairs: Sequence[tuple[str, str, float, float, float, float]], e2_class:
     p["contribution"] = p["s"] / max(n_query, n_train)
     p["kept"] = p["s"] >= 0.8
     return ReportData("q", "multi", e2_class, float(p["s"].sum()) / max(n_query, n_train), source, source,
-                      float(p["s"].max()) if len(p) else 0.0, strongest, 0.8, source, (0, 0), 0.8, 0.4,
+                      float(p["s"].max()) if len(p) else 0.0, strongest, 0.8, source, (0, 0), 0.8, 0.4, 0.9,
                       n_query, n_train, p)
 
 
@@ -94,3 +95,23 @@ def test_deletion_summary_favours_the_top_contributor():
     s = deletion_summary(d)
     assert s["C_drop_top"] > s["C_drop_small"] and s["e1_drop_top"] > s["e1_drop_small"]
     assert s["flips_top"] == 2 and s["flips_small"] == 0 and s["mcnemar_p"] == pytest.approx(0.25)
+
+
+def test_verdict_names_a_whole_mask_match_before_the_lesion_level_reading():
+    d = data([("q/L1", "Mets_001/z10/L1", 0.8, 0.9, 0.9, 0.65)], e2_class="novel", n_query=1, n_train=1)
+    d.e1_score, d.e1_nn, d.tau_D = 0.91, "Mets_002/z4", 0.73
+    text = verdict(d, name, None)
+    assert text.startswith("Matches P002, slice 4 as a whole closer than chance (E1 0.91 >= 0.73).")
+    assert text.endswith("(E2: novel)")
+
+
+def test_profile_tables_count_flags_per_slice_and_matches_per_lesion():
+    lesion_map = pd.DataFrame({"lesion_id": ["P/z1/L1", "P/z2/L1", "P/z2/L2", "Q/z1/L1"],
+                               "patient_id": ["P", "P", "P", "Q"], "z": [1, 2, 2, 1], "area": [20, 25, 12, 30],
+                               "d3": ["P/D1", "P/D1", "P/D2", "Q/D1"]})
+    credits = pd.DataFrame({"query": ["a", "b", "b", "c"], "train_lesion": ["P/z1/L1", "P/z1/L1", "P/z2/L2", "Q/z1/L1"]})
+    slices, lesions = profile_tables("P", lesion_map, "d3", credits, pd.Series(["P/z2", "P/z2", "Q/z1"]),
+                                     pd.Series(["P/z1"]))
+    assert slices.to_dict("list") == {"z": [1, 2], "e1_flags": [0, 2], "e2_flags": [1, 0]}
+    assert lesions.set_index("lesion_id")["credits"].to_dict() == {"P/z1/L1": 2, "P/z2/L1": 0, "P/z2/L2": 1}
+

@@ -142,8 +142,10 @@ def lesion_colors(labels: np.ndarray) -> dict[int, str]:
     return {n: LESION_COLORS[(n - 1) % len(LESION_COLORS)] for n in range(1, int(labels.max()) + 1)}
 
 
-def draw_labels(ax, image: np.ndarray, labels: np.ndarray, colors: dict[int, str], title: str) -> None:
-    """A slice with each lesion of `labels` filled and outlined in its colour and numbered."""
+def draw_labels(ax, image: np.ndarray, labels: np.ndarray, colors: dict[int, str], title: str,
+                filled: bool = True) -> None:
+    """A slice with each lesion of `labels` outlined in its colour and numbered; filled as well unless
+    `filled` is False (outlines only leave the image under the lesion visible; E7 reports)."""
     show_slice(ax, image, [], title)
     regions = []
     for n, color in colors.items():
@@ -152,9 +154,9 @@ def draw_labels(ax, image: np.ndarray, labels: np.ndarray, colors: dict[int, str
             continue
         rgba = to_rgba(color)
         regions.append((lesion, color))
-        ax.contour(lesion.astype(float), levels=[0.5], colors=[rgba], linewidths=0.6)
+        ax.contour(lesion.astype(float), levels=[0.5], colors=[rgba], linewidths=0.6 if filled else 1.0)
         rows, cols = np.nonzero(lesion)
         ax.text(cols.max() + 1, rows.min() - 0.5, f"L{n}", color=rgba, fontsize=5, fontweight="bold",
                 path_effects=[patheffects.withStroke(linewidth=1.5, foreground="black")])
-    if regions:
+    if regions and filled:
         fill(ax, regions)

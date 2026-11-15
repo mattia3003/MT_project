@@ -1,12 +1,8 @@
 """Helpers shared by the E7 stages: the `reports:` config section (decisions X, Y, Z) checked, the
-pseudonyms reports show instead of patient IDs, and the H-eval chance rate of each class and stratum.
+name reports show for a patient, and the H-eval chance rate of each class and stratum.
 """
 
 from __future__ import annotations
-
-from collections.abc import Callable
-
-import pandas as pd
 
 from memtk import config
 from memtk.io import read_table
@@ -24,22 +20,11 @@ def reports_config(cfg: dict) -> dict:
     return rep
 
 
-def pseudonyms(cfg: dict, dataset: str) -> Callable[[str], str]:
-    """Pseudonym of each T patient (P001, P002, ... in order of patient ID), kept in
-    `<output_root>/<dataset>/e7/pseudonyms.csv` (not in git; written on first use). Patients outside
-    T are shown as "held-out patient"."""
-    path = config.output_dir(cfg, dataset) / "e7" / "pseudonyms.csv"
-    if not path.exists():
-        patients = read_table(config.output_dir(cfg, dataset) / "patients.csv")
-        t = sorted(patients.loc[patients["set"] == "T", "patient_id"])
-        path.parent.mkdir(parents=True, exist_ok=True)
-        pd.DataFrame({"patient_id": t, "pseudonym": [f"P{i:03d}" for i in range(1, len(t) + 1)]}).to_csv(path, index=False)
-    table = read_table(path).set_index("patient_id")["pseudonym"].to_dict()
-
-    def name_of(patient: str) -> str:
-        return table.get(patient, "held-out patient")
-
-    return name_of
+def patient_name(patient: str) -> str:
+    """The name a report shows for a patient: the dataset's own ID (e.g. `Mets_230`). The dataset's
+    IDs are already pseudonymous, so reports use them as every other table does (decision X amended
+    2026-11-15; first P001-P105 pseudonyms, dropped as a second naming scheme)."""
+    return patient
 
 
 def chance_rates(cfg: dict, dataset: str) -> dict[tuple[str, str], float]:

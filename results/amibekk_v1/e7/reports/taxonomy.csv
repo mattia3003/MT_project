@@ -1,0 +1,11 @@
+set,stratum,taxonomy,count,share
+S,single,deformed,1339,0.6541279921836834
+S,single,partial,665,0.3248656570591109
+S,single,shifted,43,0.021006350757205666
+S,multi,deformed,214,0.5023474178403756
+S,multi,partial,212,0.49765258215962443
+H-eval,single,deformed,42,0.65625
+H-eval,single,partial,19,0.296875
+H-eval,single,shifted,3,0.046875
+H-eval,multi,partial,20,0.8695652173913043
+H-eval,multi,deformed,3,0.13043478260869565

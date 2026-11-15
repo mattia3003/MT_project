@@ -44,9 +44,11 @@ ID columns as text.
 | | `check` | ✅ | all E5 outputs, the frozen files, `audit:`, T, H-cal, H-eval, E3 and E4 tables | `results/<pool>/e5/check_report.txt`, `check.run_info.json` |
 | `e6_exposure.py` | `reference` | ✅ | decisions R, V, W (`exposure:`), the frozen E3 file (settings), T label maps, `lesions.csv`, model-space `seg` volumes, E4 `heval_classes.csv`; never S | `<output_root>/<dataset>/e6/` (`lesions3d.csv`, `lesion_map.csv`, `rarity_slices.csv`, `patients.csv`, `heldout_nn.csv`), `results/<dataset>/e6/reference/` |
 | | `rehearse` | ✅ | decisions R, U, V, W, `exposure.placement_mock`, the frozen E3 file (thresholds, settings), the E6 reference tables, E5's mock sets (`<output_root>/<dataset>/e5/rehearse/<case>/`), H-cal and T label maps and T `lesions.csv` (placement mocks), E4 H-eval tables, the planted table; never S | `<output_root>/<dataset>/e6/rehearse/<case>/` (placement mocks, E5's layout), `results/<dataset>/e6/rehearse/<case>/` (layout below) |
-| | `exposure`, `check` | planned (`docs/e6-e7-plan.md`) | E5's S tables, E6 reference tables | `results/<pool>/e6/exposure/` (same layout as the rehearsal) |
-| `e7_reports.py` | `planted` | ✅ | decisions X, Y, Z (`reports:`), the frozen E3 file, E4's planted set and its tables (`planted_outcomes.csv`, `e1_planted.csv`, `e2_planted_*`, `planted_lesions.csv`), E4's H-eval tables and `fp_heval.csv`, T and H-eval label maps, real BRAVO volumes (figures); never S | `<output_root>/<dataset>/e7/pseudonyms.csv`, `results/<dataset>/e7/planted/` |
-| | `reports`, `check` | planned (`docs/e6-e7-plan.md`) | E5's S tables, E6 `exposure`, the E7 pseudonyms | match reports on S, deletion test on S |
+| | `exposure` | ✅ | E5's S tables (`<output_root>/<pool>/e5/`: `queries.csv`, `classes_main.csv`, `e1_main.csv`, `e2_main_*`; set main) with E5's lock unchanged, the E6 reference tables, E4 H-eval tables, the `rehearse` run log (same `exposure:`) | `results/<pool>/e6/exposure/` (same layout as the rehearsal, without `e5_rates.csv`, `e5_auc.csv`) |
+| | `check` | ✅ | all E6 outputs, T, H-eval tables, E5's S tables | `results/<pool>/e6/check_report.txt`, `check.run_info.json` |
+| `e7_reports.py` | `planted` | ✅ | decisions X, Y, Z (`reports:`), the frozen E3 file, E4's planted set and its tables (`planted_outcomes.csv`, `e1_planted.csv`, `e2_planted_*`, `planted_lesions.csv`), E4's H-eval tables and `fp_heval.csv`, T and H-eval label maps, real BRAVO volumes (figures); never S | `results/<dataset>/e7/planted/` |
+| | `reports` | ✅ | decisions X, Y, Z, E5's S tables (set main; lock unchanged) and `flagged.csv`, E6 `exposure` tables, E6 reference tables, E7 `planted` criteria (must pass), E4 H-eval tables and `fp_heval.csv`, pool `labels.npz`, `synthetic_index.csv` and sample files, T and H-eval label maps, real BRAVO volumes | `results/<pool>/e7/reports/` |
+| | `check` | ✅ | all E7 outputs, the planted set, T, H-eval, E5's S tables | `results/<pool>/e7/check_report.txt`, `check.run_info.json` |
 | `e8_paired_mri.py` | — | optional | E5 outputs, paired MRIs | paired-MRI similarity |
 
 E1 (whole-mask detector) and E2 (lesion-level detector) have no scripts: they are `memtk`
@@ -728,7 +730,7 @@ Written by `reference`. In git.
 | `reference.png` | Slice span of the informative 3D lesions per method; slice rarity (E1, E2); patient rarity against the number of 3D lesions |
 | `run_info.json` | Run log |
 
-### Analysis of a query set: `results/<dataset>/e6/rehearse/<case>/` (and later `results/<pool>/e6/exposure/`)
+### Analysis of a query set: `results/<dataset>/e6/rehearse/<case>/` and `results/<pool>/e6/exposure/`
 
 Written by `rehearse` (cases `null`: H-cal; `positive`: H-cal + planted P1, P2, P4; `placement`,
 `placement_compact`: H-cal with every lesion moved to a random T lesion's position, step 3b) with
@@ -746,6 +748,8 @@ Written by `rehearse` (cases `null`: H-cal; `positive`: H-cal + planted P1, P2, 
 | `flag_details.csv` | flag per cell, of the query set and of H-eval | `set` (`query`, `H-eval`), `cell`, `key`, `cluster`, `source`, `source_patient`, `margin` (to the second-best patient on the cell's scale), `source_rarity`; read by E7 (Panel C) |
 | `top_patients.csv` | primary cell × the 10 most exposed patients (by `ratio_low`) | the `exposure.csv` columns with the patient's features from `patients.csv` |
 | `review.txt` | — | the tables above and the reading of decision U per primary cell and overall; in the positive case also the recovery of the planted copies' base patients |
+| `h1_rates.csv` | 3D method × size bin × span group × set (query, H-eval) | `bin`, `span`, `lesions3d`, `rate_per_1000` (mean credits per 3D lesion per 1,000 scorable masks) with `rate_low`, `rate_high`, `relative` (to the size bin's mean rate) with `relative_low`, `relative_high`, `set`, `method` (descriptive view of H1, added after the S run) |
+| `h1_rates.png` | — | per size bin, the relative rate by span group, query set (red) and H-eval (grey), with intervals (slice-linking 3D lesions) |
 | `exposure_sorted.png` | — | per primary cell, each T patient's observed against expected flags, with its 95% chance range (grey bar) and the diagonal; red = ratio interval above 1; ringed = planted base patients (positive case) |
 | `margins.png` | — | margin and source rarity of the query flags and the H-eval chance flags as side-by-side boxes with every flag as a dot; AUC in the titles |
 | `rarity_exposure.png` | — | observed / expected flags per fifth of the patients by rarity (H3), Spearman ρ in the titles |
@@ -757,11 +761,6 @@ Written by `rehearse` (cases `null`: H-cal; `positive`: H-cal + planted P1, P2, 
 
 Every E7 choice is in the config section `reports:` (decisions X, Y, Z). The report generator is
 built and checked on E4's planted copies (`planted`) before any report on S is drawn.
-
-### Pseudonyms: `<output_root>/<dataset>/e7/pseudonyms.csv`
-
-Written on first use by `memtk.e7.common.pseudonyms`. Not in git. One row per T patient:
-`patient_id`, `pseudonym` (`P001` ... `P105` in order of patient ID). Reports show only pseudonyms.
 
 ### `results/<dataset>/e7/planted/`
 
@@ -777,3 +776,27 @@ Written by `planted`. In git.
 | `taxonomy_confusion.csv` | variant | gated, E2-flagged masks per taxonomy category (exact, shifted, deformed, partial) |
 | `report_<variant>.png` | variant | one example match report (Panel A images, Panels B and C as text, verdict) |
 | `review.txt`, `run_info.json` | — | the tables above with the criteria verdict; run log |
+
+### `results/<pool>/e7/reports/`
+
+Written by `reports`. In git.
+
+| File | One row per | Columns / content |
+| --- | --- | --- |
+| `report_index.csv` | report drawn (decision X) | `report` (file name), `set` (`S`, `H-eval`), `key`, `reason` (near-exact, beyond held-out, exposed <cell>, random S flag, H-eval chance flag), `group` (chained, E5 decision N), `e1_score`, `e2_class`, `C`, `source`, `source_patient`, `taxonomy`, `verdict` (patients named by their dataset IDs) |
+| `reports/<nn>_<reason>.png` | report | the match report (Panel A: lesions outlined, source lesions in their query partner's colour, the named training slice whole with the zoom as a box, the overlay; Panels B and C as text; the verdict) |
+| `deletion.csv`, `deletion_summary.csv` | S E2-flagged multi-lesion mask with ≥ `min_paired` contributing pairs / set (S, H-eval chance flags) | as in `results/<dataset>/e7/planted/` |
+| `taxonomy.csv` | set × stratum × category | `set`, `stratum`, `taxonomy`, `count`, `share` (every E2-flagged mask of S, main set, and of H-eval) |
+| `patient_profiles.csv` | 2D lesion of a profiled patient (the 3 most exposed per primary cell of E6; descriptive, added after the S run) | `lesion_id`, `z`, `area`, `lesion3d_id` (slice linking), `credits` (S masks with a lesion pair ≥ tau_L to this lesion), `e1_flags`, `e2_flags` (S flags naming the lesion's slice), `patient_id` |
+| `patients/<patient_id>.png` | profiled patient | the patient-level report: 3D lesions over their slices (labelled with span and largest area) with the S matches per lesion and slice, S flags per slice, the most-matched slice whole (zoom as a box) and zoomed next to up to 4 of its S masks, lesions outlined |
+| `review.txt`, `run_info.json` | — | reasons, the report list with verdicts, the deletion test, the taxonomy shares S vs H-eval; run log with E5's hashes |
+
+### `results/<pool>/e6/check_report.txt` and `results/<pool>/e7/check_report.txt`
+
+Written by the `check` stages. In git. One PASS/FAIL line per check (E6: decisions R, U, V, W; run
+logs of `reference`, `rehearse`, `exposure` in order with S read by `exposure` only; E5's lock; every
+reference and exposure table and the reading reproduced; the rehearsal readings; the unit tests. E7:
+decisions X, Y, Z; run logs of `planted`, `reports`; E5's lock; the planted criteria and every planted
+table; on S the selection, every verdict and taxonomy, the deletion test, taxonomy and profile tables
+reproduced and every figure present; the unit tests). Exit code 1 on any failure. Run log:
+`check.run_info.json`.

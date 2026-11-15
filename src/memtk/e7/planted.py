@@ -24,7 +24,7 @@ import pandas as pd
 
 from memtk import config, lesionmatch
 from memtk.calibration import load_frozen
-from memtk.e7.common import chance_rates, class_rate, pseudonyms, reports_config
+from memtk.e7.common import chance_rates, class_rate, patient_name, reports_config
 from memtk.ids import parse_slice_key
 from memtk.io import read_table, slice_images
 from memtk.reports import (FLAGGED, ReportData, contributors, correctness_row, deletion_effects, deletion_summary,
@@ -50,7 +50,7 @@ def run_planted(cfg: dict, dataset: str | None = None, pool: str | None = None, 
     cut = float(e3["detectors"]["lesion"]["candidate_min_s"])
     bound = int(e3["informative_bound_px"])
     rng = np.random.default_rng(cfg["seed"])
-    name_of, chance = pseudonyms(cfg, name), chance_rates(cfg, name)
+    name_of, chance = patient_name, chance_rates(cfg, name)
 
     t, heval = load_set(cfg, name, "T"), load_set(cfg, name, "H-eval")
     planted, planted_labels = load_planted(cfg, name)
@@ -159,7 +159,8 @@ def run_deletion(reports: list[ReportData], labels_of: dict[str, np.ndarray], mi
     chosen = [(d, c) for d in reports if d.source and (c := contributors(d.pairs, min_paired)) is not None]
     if not chosen:
         return pd.DataFrame()
-    return deletion_effects([d.key for d, _ in chosen], np.stack([labels_of[d.key] for d, _ in chosen]),
+    stacked = np.stack([labels_of[d.key] for d, _ in chosen])  # pyright: ignore[reportCallIssue]  # numpy stub: np.stack overloads mis-resolve here
+    return deletion_effects([d.key for d, _ in chosen], stacked,
                             [c[0] for _, c in chosen], [c[1] for _, c in chosen], [d.source for d, _ in chosen],
                             [d.source_patient for d, _ in chosen], t, e3)
 

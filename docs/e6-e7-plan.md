@@ -1,5 +1,12 @@
 # E6 + E7 plan: patient exposure (`scripts/e6_exposure.py`) and match reports (`scripts/e7_reports.py`)
 
+> **Closed 2026-11-15. Reference only, no longer updated.** E6 and E7 are done: every analysis choice
+> fixed in `exposure:` / `reports:` and rehearsed on mock sets (null, positive, two placement mocks) or
+> checked on the planted copies before S's tables were read; E6 check 18/18, E7 check 14/14. Results:
+> the E1 multi-lesion excess reads as typical placement, E2 full multi undetermined; H1 supported, H3
+> not; no exact lesion-level copy in S; the planted correctness criteria pass and the explanations are
+> faithful. Open items were carried forward on 2026-11-15 (see "Carried forward" at the end).
+
 Working plan for E6 and E7, kept in the repo so work can resume from here. The experiments are
 specified in `docs/experiment-plan.md` (E6 and E7, including their "Carried over" notes); this file
 records how they are implemented, stage by stage, and what has been decided. Update the status table
@@ -23,14 +30,20 @@ to E6; only the E7 reports on S wait for E6.
 | 3 | E6 `rehearse` (no S): the exposure analysis on E5's null and positive mock sets; the user reviews | rehearsal | ✅ 2026-11-15 (user review of `results/stanford_brainmets/e6/rehearse/{null,positive}/` pending). The analysis is one function (`e6.exposure.analyze_query` + `draw_figures`) that `exposure` will run on S unchanged; `e6.common` loads a scored set (`load_query`, `load_heval`) and the reference (`load_reference`); `exposure_table` now resamples flags by their clusters (mock sets are clustered by patient); 3 tests (pytest 171). **Null** (H-cal, 989 slices): reading *undetermined* (not *patient copying*): margin AUC 0.45 [0.22, 0.66] (E1 copy multi) and 0.53 [0.16, 0.80] (E2 full multi), source-rarity AUC intervals cover 0.5, H3 ρ 0.15 / 0.02 with intervals covering 0, H1 weighted difference −0.03 [−0.09, 0.05]; the E1 copy multi dispersion is beyond its null (893 vs 95th pct 255) because H-cal's flags come in adjacent-slice runs of one patient: the margin rule is what keeps it from reading as copying. **Positive** (H-cal + 294 planted): reading *patient copying* in both primary cells: margin AUC 0.88 [0.81, 0.94] and 0.95 [0.88, 0.99], dispersion far beyond null; every planted flag names its base patient; 7–9 base patients per cell have a ratio interval above 1 and no other patient does (5–9 copies per patient are visible only for patients with a modest expected share). Seen on the way: the plain Spearman(span, credits) of the plan is positive in both mocks (0.10, 0.23) without any duplication effect, which is why H1 is judged against H-eval (decision W). Not exercised by a mock: the *typical placement* branch (unit test only) |
 | 3b | Placement mock (added 2026-11-15 at the user's request): H-cal masks with every lesion moved to the position of a random T lesion (variant *placement*) or of a random T lesion inside S's central area (variant *placement_compact*, box from E0b); scored with the frozen detectors and analysed by E6 (and, exploratory, by the E5 rates) inside `rehearse`. Tests the untested *typical placement* branch of decision U and whether placement alone produces an E5-style multi-lesion excess. Also: the E6 figures redesigned so the null and positive cases differ visibly (observed vs expected flags per patient; flags by rarity group; margins of query and H-eval flags side by side) | rehearsal | ✅ 2026-11-15 (user review pending; one decision open, below). `planted.relocate_lesions` (+1 test, pytest 172); config `exposure.placement_mock`; `rehearse` builds, scores and analyses both mocks (989 masks each, none left out; positions from 6,101 T lesions, compact: 2,401). **Neither placement mock reads "patient copying"** (the flaw that would have mattered most is ruled out): *placement* E1 copy multi margin AUC 0.43 [0.24, 0.58], E2 full multi 0.42 [0.12, 0.66]; *placement_compact* 0.33 [0.19, 0.49] and 0.45 [0.12, 0.78]. **But both read "undetermined", not "typical placement"**: the source-rarity criterion stays inside its interval (compact E1 multi 0.41 [0.29, 0.54]), although the compact mock's E1 multi margins are clearly *smaller* than chance. Exploratory: the compact mock gives an E5-style excess for *single*-lesion masks (E1 copy +5.4 points [+1.9, +9.4], E2 full +5.8 [+1.6, +10.0]) and not a clear one for multi-lesion masks (E1 +1.2 [−3.4, +6.9]); S shows the opposite pattern (multi only). Figures redesigned (`flag_details.csv` now holds H-eval's flags too). **Decision U amended by the user** (margins wholly below chance also read "typical placement"; see decision U): rehearse re-run, readings null undetermined, positive patient copying, placement undetermined, placement_compact mixed (E1 multi typical placement) |
 | 4 | `memtk/reports.py` + tests; E7 `planted` (no S): reports, correctness, deletion test on planted copies | library + production | ✅ 2026-11-15 (user review of `results/stanford_brainmets/e7/planted/` pending): `memtk/reports.py` (8 tests; pytest 180), `e7.common`, `e7.planted`, `scripts/e7_reports.py`; ~30 s. 698 planted masks with an informative lesion, 679 gated, 597 of them flagged by E2. **Correctness criteria PASS** (decision Z): source patient P1, P2, P4 100%, P6-add 99.0%, P6-remove 91.9% (min 90%); lesions P6-add 99.0%, P6-remove 81.1% (min 80%); reported only: P3 95.8%, P5-dilate 88.1%, P5-erode 96.7% (slice within ±2: 62% / 60%, the eroded lesion fits a neighbouring slice better, as in E4). **Deletion test** (decision Y), 106 planted multi-lesion controls: C drops 0.43 (top) vs 0.41 (smallest), the whole-mask score 0.33 vs 0.15 (Wilcoxon p < 0.001), flips 23 vs 6 (McNemar p 0.001): faithful by both added measures; in exact copies every pair has s ≈ 1, so the "top" contributor is a tie broken by lesion number (L1 = largest), and ΔC hardly separates them. H-eval chance flags: only 7 multi-lesion masks qualify (ΔC 0.21 vs 0.08). **Taxonomy** (rules fixed here): P1 exact 100/100, P2 shifted 100/100, P3 shifted 91/96, P4 exact 51 / deformed 36 (a 5° rotation leaves many small lesions pixel-identical), P5 deformed, P6-add partial 99/100, P6-remove partial 30/37. Changed on the planted results (before S): "partial" = a lesion without a partner (first: a pair below tau_L, which called 5 px shifts partial); verdict wording ("configuration copy ... not every lesion" when E2 says full but not every pair passes tau_L; "without a partner (novel)" vs "paired but not closer than chance"); report layout. To do for S reports: colour lesions by pair (now each slice's own numbering) |
-| 5 | E6 `exposure` (S tables): exposure, concentration, margins, rarity, H3, H1, the reading | analysis | ⬜ |
-| 6 | E7 `reports` (S tables): selected reports, deletion test on S, taxonomy | analysis | ⬜ |
-| 7 | E6 and E7 `check`; close the plan; carry items forward (E8 plan) | consistency checks + docs | ⬜ |
+| 5 | E6 `exposure` (S tables): exposure, concentration, margins, rarity, H3, H1, the reading | analysis | ✅ 2026-11-15, one run (16 s; E5's lock unchanged, `rehearse` made with the current `exposure:`), S main 35,920 masks. **Reading: mixed.** *E1 copy multi* (2,662 flags, the cell with E5's largest excess): **typical placement**: margins smaller than chance (AUC 0.36 [0.24, 0.495]) and source slices more typical than chance picks (0.42 [0.34, 0.498]; against all T slices 0.23), although the flags are concentrated (dispersion 7,910 vs null 95th pct 2,027; 20 patients above their chance range, about 2 expected). *E2 full multi* (357 flags; only 8 H-eval chance flags): **undetermined** (margin AUC 0.55 [0.27, 0.72], rarity 0.62 [0.49, 0.81]). **H3** not supported (ρ 0.03 [−0.21, 0.25] and 0.00 [−0.20, 0.21]). **H1 holds** by the pre-stated rule: weighted ρ_S − ρ_H +0.086 [+0.041, +0.163] (slice linking), +0.077 [+0.030, +0.163] (26-connectivity), carried by the 20–39 and 40–79 px bins (+0.15, +0.41), reversed at ≥ 80 px (−0.18); no mock shows it (all four weighted intervals cover 0). Secondary: E2 flagged multi margin AUC 0.74 [0.54, 0.80] (partial flags' margin is on C, not on their strongest-pair source) |
+| 6 | E7 `reports` (S tables): selected reports, deletion test on S, taxonomy | analysis | ✅ 2026-11-15 (user review of `results/amibekk_v1/e7/reports/` pending). `e7.reports` (`run_reports`: refuses unless E5's lock is unchanged, E6 `exposure` ran and the planted criteria passed), E5's lock check moved to `e5.common.lock_unchanged` (E6 `exposure` uses it too); lesions coloured by pair; ~7 min. **76 reports**: 30 near-exact, 19 beyond the held-out E2 maximum, 4 + 3 from the most exposed patients (the rest of the top 5 were already reported in a strong-tier group), 10 random S multi-lesion flags, 10 H-eval chance flags. **Taxonomy** of every E2-flagged mask, S vs H-eval: no *exact* copy anywhere; multi-lesion S flags are *deformed* (every lesion has a partner, none identical) in 50% against 13% of H-eval's chance flags, *partial* 50% vs 87%; single-lesion flags alike (deformed 65% vs 66%, partial 33% vs 30%, shifted 2% vs 5%). **Deletion test** (224 S multi-lesion masks): C drops 0.29 (top) vs 0.16 (smallest), the whole-mask score 0.16 vs −0.04 (Wilcoxon p < 0.001 both); the flip measure is confounded on S (most masks have 2 lesions, so either deletion makes them single-lesion, with stricter thresholds: 224 vs 203 flips). After the first run (report text only; classifications unchanged): the verdict now begins with the whole-mask match when E1 flags the mask (E1-only flags read only "no lesion-level match"), missing margins print "-"; `planted` re-run (tables identical) and `reports` re-run. Seen in report 02: a 16 px lesion pixel-identical to a T lesion after a 1 px diagonal shift gets E2 shape 0.39 (the rounding of step 2); 2 of the 4 S masks identical to a T mask after a shift are E2-novel for this reason (E1 catches all 4) |
+| 7 | E6 and E7 `check`; close the plan; carry items forward (E8 plan) | consistency checks + docs | ✅ 2026-11-15: `e6.check` (18/18: decisions; run logs in order with S read by `exposure` only; E5's lock; every reference table reproduced from T and H-eval, ~3 min; the four rehearsal readings as expected; every `exposure` table and the reading reproduced with the same seed; pytest) and `e7.check` (14/14: decisions; run logs; E5's lock; the planted criteria; every planted table reproduced; on S the selection, every verdict and taxonomy, the deletion test, taxonomy and profile tables reproduced, every figure present; pytest; ~8 min). Refactors for the checks: `differing_tables` moved from `e5.check` to `checks` (E5 check 26/26 after); `e7.reports` split into `deletion_tables`, `profile_data`, `profile_table` (shared with the check). First E6 check 17/18: the `reference` log predates `exposure.placement_mock`, which `reference` does not use; the check now compares only the keys `reference` depends on. A damaged copy (one AUC +0.001, one taxonomy label, one row removed) was reported as `margins.margin_auc`, `taxonomy.taxonomy`, `patient_profiles` (scratch test). Plan closed |
 
-**Next: start here.** The user reviews E7 `planted` (`results/stanford_brainmets/e7/planted/`). Then
-step 5: the `exposure` stage (`analyze_query` on E5's S tables in
-`processed_data/model_space/amibekk_v1/e5/`, set main; the first time E6 reads S). After E8: report
-synthesis and project walkthrough (`docs/experiment-plan.md`, schedule).
+**Done after step 6, at the user's request (2026-11-15):** reports name patients by their dataset IDs
+(decision X amended), H1 also shown as rates per span group (`h1_rates.png`, descriptive), patient
+profiles of the most exposed patients (`patients/`, descriptive). Then (also at the user's request):
+lesions outlined instead of filled in report and profile tiles (the MRI under the lesion stays
+visible; measuring the MRI is E8's question), a whole-slice tile with the zoom as a box (where in the
+brain), the largest 2D area next to each 3D lesion in the profiles.
+
+**Next: start here.** The user reviews the E7 reports and patient profiles on S
+(`results/amibekk_v1/e7/reports/`). Then step 7: `e6_exposure.py check` and `e7_reports.py check`, close the plan, carry items forward (E8). After E8: report synthesis and project
+walkthrough (`docs/experiment-plan.md`, schedule).
 
 **Milestone:** 24 Nov 2026, results for RQ3a, H1, H3 and RQ3b. Schedule: step 1 on 16 Nov; step 2 on
 17 Nov; step 3 and the start of step 4 on 18 Nov; step 5 and the rest of step 4 on 19 Nov; step 6 on
@@ -223,15 +236,21 @@ the user on 2026-11-15, in the planning session, before any code of E6 or E7 ran
     synthetic-only and training-only.
   - *B:* the paired lesions with their shape, position and size factors and contribution to C; the
     strongest-pair slice when it differs from the NN; the copied-area share.
-  - *C:* source pseudonym and z, the slices of its chained group and of the same 3D lesions (W), the
+  - *C:* source patient and z, the slices of its chained group and of the same 3D lesions (W), the
     margin to the second-best patient (U), the exposure ratio (R), the chance rate
     (`fp_heval.csv`), whether the score is beyond the held-out maximum (Q).
 - **Verdict line**, from rules: names the decision-J source; adds the strongest-pair patient when it
-  differs ("the strongest single lesion points to P0xx"); says "configuration match", not "copy", when
+  differs ("the strongest single lesion points to Mets_xxx"); says "configuration match", not "copy", when
   no lesion pair reaches τ_L (E5: C and the best pair diverge for multi-lesion masks).
 - **Correctness** scores the decision-J source (consistent with E4 "caught"); "either source names the
   base" is reported as secondary.
-- **Pseudonyms** P001–P105 by sorted patient ID; the mapping stays in `processed_data/` (not in git).
+- **Patient names:** the dataset's IDs (`Mets_xxx`), already pseudonymous. *Amended 2026-11-15 by the
+  user:* first P001–P105 pseudonyms, dropped because a second naming scheme made the reports harder to
+  cross-check against every other table.
+- **Patient profiles** (added 2026-11-15 at the user's request, after the S run; descriptive): for the 3
+  most exposed patients per primary cell (E6), their 3D lesions over the slices they span with the S
+  matches per lesion and slice, the S flags per slice and the most-matched slice next to its S masks:
+  the patient-level view of H1 and RQ3b.
 - Rejected: the top 50 by score (mostly small single blobs, E5 `near_exact.png`); the strong tiers
   only (no picture of a typical or a chance flag); a stratified random sample only (few strong cases).
 
@@ -324,7 +343,7 @@ config, loading E5's tables and the E6 reference tables).
 3. **`exposure`** (step 5; reads E5's S tables; needs every `exposure:` value).
    - `results/amibekk_v1/e6/exposure/`: `exposure.csv` (per patient and cell: o_p, π_p, r_p with
      interval, groups), `concentration.csv`, `margins.csv`, `rarity_h3.csv` (slice level), `h3.csv`
-     (patient level), `h1.csv`, `top_patients.csv` (the 10 most exposed, pseudonymous: lesion count,
+     (patient level), `h1.csv`, `top_patients.csv` (the 10 most exposed, by dataset ID: lesion count,
      sizes, locations, slices); figures below; `review.txt` ending with the reading (U).
 4. **`check`** (step 7). Exit code 1 on any failure: every `exposure:` value set; `rehearse` ran before
    `exposure`; every table reproduced with the seed; the E5 hashes unchanged; pytest passes.
@@ -373,7 +392,16 @@ config, loading E5's tables and the E6 reference tables).
 - After E6 `exposure` and E7 `reports`: `audit:` and the frozen files unchanged; both `check` stages
   exit 0.
 
-## Carried forward
+## Carried forward (2026-11-15)
 
-(Filled when the plan closes: open items moved to `docs/experiment-plan.md` E8, report-notes, and the
-E8 plan.)
+| Item (first noted) | Moved to |
+| --- | --- |
+| E8 go/no-go (decided 2026-11-15 by the user after the close: go, lean; planning brief in `docs/experiment-plan.md`, E8): the fixed rule (≥ 20 strong groups) lacks a chance baseline (E5); E6 reads the E1 multi-lesion excess as typical placement, while single cases are striking (`Mets_230`: 77 whole-mask flags against 1.5 expected along one 18-slice metastasis; the synthetic MRI of report 50 shows a lesion inside the mask). The outlined report tiles show the MRI but do not measure it: that is E8's question | `docs/experiment-plan.md`, E8 "Carried over from E6 + E7"; report-notes section 5 |
+| Limitations: E2's rounding with 1 px shifts (2 of 4 identical S masks missed by E2, caught by E1); the deletion test's flip measure confounded on S (two-lesion masks become single-lesion); E2 full multi underpowered in E6 (8 H-eval chance flags); H1's held-out reference sparse (58 credited 3D lesions); no human rater of the reports | report-notes section 4 (already there, or added with this closing) |
+| Report synthesis and project walkthrough (user, 2026-11-15) | `docs/experiment-plan.md`, schedule (25–26 Nov) |
+| Placement vs copying, more definitively: a position-only generator as a null model, and training-data attribution for the most exposed patients (`Mets_230`, `Mets_058`), on retrained models | master thesis (RQ-M2, RQ-M3); report-notes section 5 |
+
+Done before closing: decisions R, U–Z set before the stages that read S, two amendments recorded (U
+after the placement mock; X patient names), the rehearsals and the planted checks before S, both checks
+pass, the docs (data dictionary, module reference, scripts README, architecture) describe every stage
+and file.

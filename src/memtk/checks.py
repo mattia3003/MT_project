@@ -13,6 +13,7 @@ anything indexable by key, so tests can run them on small hand-built data.
 from __future__ import annotations
 
 import json
+import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -28,7 +29,7 @@ from tqdm import tqdm
 from memtk import qc
 from memtk.config import resolve_path, value
 from memtk.ids import parse_lesion_id
-from memtk.io import list_patients, load_image, patient_files
+from memtk.io import list_patients, load_image, patient_files, read_table
 from memtk.lesions import attach_or_drop, count_components, label_components
 from memtk.plotting import save
 from memtk.synthetic import list_pool_files, load_sample, read_legacy_exclusions
@@ -435,3 +436,29 @@ def check_run_logs(report: CheckReport, cfg: dict, logs: dict[str, tuple[Path, l
             report.add(f"'{stage}' ran after '{previous[0]}'", str(info["timestamp"]) >= previous[1],
                        f"{info['timestamp']} vs {previous[1]}")
         previous = (stage, str(info["timestamp"]))
+
+
+def differing_tables(tables: dict[str, pd.DataFrame], stored_dir: Path, tol: float = 1e-9) -> list[str]:
+    """The names of recomputed tables (`<name>.csv` in `stored_dir`) that differ from the stored ones:
+    each is written and read back the same way, then compared column by column (numbers within `tol`,
+    NaN equal to NaN, the rest as text); `<name>.<column>` names the first differing column. Moved from
+    `memtk.e5.check` on 2026-11-15 (E5, E6 and E7 checks use it)."""
+    differ = []
+    with tempfile.TemporaryDirectory() as tmp:
+        for name, table in tables.items():
+            table.to_csv(Path(tmp) / f"{name}.csv", index=False)
+            a, b = read_table(Path(tmp) / f"{name}.csv"), read_table(stored_dir / f"{name}.csv")
+            if list(a.columns) != list(b.columns) or len(a) != len(b):
+                differ.append(name)
+                continue
+            for col in a.columns:
+                x, y = a[col], b[col]
+                if pd.api.types.is_numeric_dtype(x) and pd.api.types.is_numeric_dtype(y):
+                    same = np.allclose(x.to_numpy(float), y.to_numpy(float), atol=tol, rtol=0, equal_nan=True)
+                else:
+                    same = x.astype(str).equals(y.astype(str))
+                if not same:
+                    differ.append(f"{name}.{col}")
+                    break
+    return differ
+

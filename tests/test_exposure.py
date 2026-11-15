@@ -9,7 +9,7 @@ import pytest
 
 from memtk.exposure import (concentration_test, credit_counts, credit_draws, e2_margins, expected_shares,
                             exposure_table, h1_table, knn_rarity, lesion_credits, rowwise_spearman, slice_rarity,
-                            spearman_test)
+                            span_rates, spearman_test)
 from memtk.lesionmatch import LesionMatch
 from memtk.sets import SliceSet
 
@@ -72,7 +72,7 @@ def blob(row: int, col: int, size: int = 4) -> np.ndarray:
 def test_slice_rarity_ignores_the_patients_own_slices():
     # A has the same lesion on two slices; B has it 2 px away; C has a distant lesion. (2 px, not 1:
     # E2 centres crops on the rounded centroid, and a 4 px lesion moved by 1 px rounds differently)
-    labels = np.stack([blob(10, 10), blob(10, 10), blob(10, 12), blob(25, 25)])
+    labels = np.stack([blob(10, 10), blob(10, 10), blob(10, 12), blob(25, 25)])  # pyright: ignore[reportCallIssue]  # numpy stub: np.stack overloads mis-resolve here
     t = SliceSet("T", ["A/z1", "A/z2", "B/z1", "C/z1"], np.array(["A", "A", "B", "C"]), labels, {})
     wm = {"top_k_dice": 5, "top_k_centroid": 5, "max_shift": 2}
     les = {"min_area": 4, "sigma_px": 6.4, "prefilter_px": 25.6, "candidate_min_s": 0.1}
@@ -132,3 +132,14 @@ def test_h1_table_difference_is_positive_when_only_the_query_set_rises_with_span
     rows = table.set_index("bin").to_dict("index")
     assert rows["weighted"]["difference"] > 0.5 and rows["weighted"]["difference_low"] > 0
     assert rows["small"]["rho_s"] == pytest.approx(1.0)
+
+
+def test_span_rates_relative_to_the_bin_average():
+    span = np.array([1, 1, 4, 4, 9, 9], dtype=float)
+    bins = np.array(["a"] * 6)
+    groups, order = ((1, 2), (3, 5), (6, None)), ["a"]
+    flat = span_rates(span, bins, np.full(6, 2.0), np.full((20, 6), 2.0), 1000, groups, order)
+    assert flat["relative"].to_numpy() == pytest.approx([1, 1, 1]) and flat["rate_per_1000"].iloc[0] == pytest.approx(2.0)
+    rising = span_rates(span, bins, span, np.broadcast_to(span, (20, 6)), 1000, groups, order)
+    assert rising["relative"].is_monotonic_increasing and rising["span"].tolist() == ["1-2", "3-5", ">= 6"]
+

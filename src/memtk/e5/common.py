@@ -15,7 +15,7 @@ import numpy as np
 
 from memtk import config
 from memtk.audit import CLASSES
-from memtk.calibration import STRATA
+from memtk.calibration import STRATA, load_frozen
 from memtk.io import LabelStack
 from memtk.sets import SliceSet
 from memtk.stages import decided, require
@@ -93,6 +93,23 @@ def score_marker(cfg: dict, pool: str) -> Path:
     """The file `score` writes when S has been scored completely; once it exists, nothing fixed
     before S (the E5 file, `audit:`) may change."""
     return config.output_dir(cfg, pool) / "e5" / "score.complete.json"
+
+
+def lock_unchanged(cfg: dict, dataset: str, pool: str) -> dict:
+    """The SHA-256 of the `audit:` section and both frozen files, after checking that they equal those
+    `score` recorded (E5's lock); stops otherwise. For every stage that reads S's tables after E5
+    (`analyze`, E6 `exposure`, E7 `reports`)."""
+    marker = score_marker(cfg, pool)
+    require(marker, "e5_audit.py score")
+    _, e3_hash = load_frozen(cfg, dataset)
+    _, e5_hash = load_frozen(cfg, dataset, "e5")
+    scored_with = json.loads(marker.read_text(encoding="utf-8"))
+    now = {"audit_sha256": audit_hash(cfg), "frozen_sha256": e3_hash, "e5_sha256": e5_hash}
+    changed = [k for k, v in now.items() if scored_with[k] != v]
+    if changed:
+        raise SystemExit(f"Changed since E5 scored S: {', '.join(changed)} (E5's lock, docs/e5-plan.md); restore the "
+                         f"recorded version.")
+    return now
 
 
 def refuse_after_score(cfg: dict, pool: str, stage: str) -> None:

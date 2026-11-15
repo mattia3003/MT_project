@@ -48,14 +48,22 @@ Reference docs (read the relevant one before starting work):
   placement is E6's question. The near-exact count and the E8 rule lack a chance baseline
   (report-notes section 4). E5 check 26/26. Open items moved to `docs/experiment-plan.md`
   (E6, E7, E8 "Carried over from E5").
-- `docs/e6-e7-plan.md`: E6 + E7 plan, ACTIVE (planned 2026-11-15). Decisions R (exposure ratio,
-  π_p from H-eval NN, smoothed), U (copying vs placement: concentration, margin and source rarity
-  against H-eval chance flags, pre-stated reading), V (rarity, H3), W (3D lesions by slice-to-slice
-  linking; H1 against H-eval), X (report selection; NN and strongest pair both shown), Y (deletion
-  test with re-match and Dice, not ΔC alone), Z (planted correctness, rule-based taxonomy). Analysis
-  fixed in config `exposure:` / `reports:` before S's tables are read; rehearse on E5 mocks and
-  planted copies first. E8 gets its own plan, its go/no-go based on the chance-expected count (E8
-  "Carried over from E5").
+- `docs/e6-e7-plan.md`: E6 + E7 plan, CLOSED 2026-11-15 (reference only, not updated). Decisions R
+  (exposure ratio, π_p from H-eval NN, smoothed), U (copying vs placement from concentration, margin
+  and source rarity against H-eval chance flags; amended after a placement mock: margins below chance
+  also read "typical placement"), V (rarity, H3), W (3D lesions by slice-to-slice linking; H1 against
+  H-eval), X (report selection; NN and strongest pair both shown; patients named by dataset ID), Y
+  (deletion test with re-match and Dice, not ΔC alone), Z (planted correctness, rule-based taxonomy).
+  Analysis fixed in config `exposure:` / `reports:` before S's tables were read; rehearsed on mock
+  sets (null, positive, two placement mocks) and planted copies first. E6 check 18/18, E7 check 14/14.
+  Results: E1 multi-lesion excess reads as typical placement (E2 full multi undetermined); H1
+  supported, H3 not; no exact lesion-level copy in S; planted correctness criteria pass. Open items
+  moved to `docs/experiment-plan.md` (E8) and report-notes.
+- E8: GO, lean and exploratory (decided by the user 2026-11-15). Next session: plan it in
+  `docs/e8-plan.md` (not yet written). Start by reading `docs/experiment-plan.md` E8 in full: its
+  "Carried over from E5" and "from E6 + E7" notes and the "Ready for planning" brief (proposed design,
+  the choices to settle with the user, every input file and the code to reuse). After E8: report
+  synthesis and project walkthrough (schedule in `docs/experiment-plan.md`).
 This file is a summary. If it disagrees with the docs, the docs win; flag the mismatch.
 
 ## Data
@@ -117,7 +125,8 @@ This file is a summary. If it disagrees with the docs, the docs win; flag the mi
 - CONFIRMED by the previous author: the standard 105/51 split was used unchanged (no test
   patients in training).
 - Data use is authorized: all results, including match reports showing real masks, may go in
-  the written report (use pseudonymous patient IDs).
+  the written report. The dataset's patient IDs (`Mets_xxx`) are already pseudonymous and are used
+  as they are everywhere, reports included (decided 2026-11-15; a second P001-style naming was dropped).
 - Fixed during the work: the informative-lesion bound 12 px (decision G), stratified thresholds
   (H), the E4 go/no-go criteria (K), the E5 analysis (L-Q, locked), the E6 + E7 analysis (R, U-Z,
   `docs/e6-e7-plan.md`). Still open: the E8 go/no-go on the chance-expected count (report-notes
@@ -158,7 +167,7 @@ original weights = Branch A fallback); the preliminary toolkit is reused in the 
 
 Timeline: full draft to supervisor by 30 Nov 2026, submission 9 Dec 2026. Milestones:
 E0 + mask QC by 31 Oct (done 3 Nov); E1-E3 (bound + thresholds frozen) by 9 Nov (done 3 Nov); E4 gate by 13 Nov (done 4 Nov, ACCEPTED);
-E5 by 17 Nov (done 15 Nov); E6/E7 by 24 Nov; E8 (optional RQ4) last, if time. If behind, cut: E8 (moves to
+E5 by 17 Nov (done 15 Nov); E6/E7 by 24 Nov (done 15 Nov); E8 (optional RQ4) last, if time (decided 2026-11-15: go, lean; plan and run 16–22 Nov). If behind, cut: E8 (moves to
 the master thesis), then optional small-lesion agreement (E2/E7) (null model already dropped),
 then E7 taxonomy, then the lesion-level part of
 the E7 correctness check (keep source-patient correctness + deletion test). Never cut E4.

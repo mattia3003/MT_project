@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-11-15T16:37:04",
+  "timestamp": "2026-11-15T22:30:07",
   "script": "C:\\Master thesis\\MT_project\\src\\memtk\\e5\\check.py",
   "argv": [
     "scripts/e5_audit.py",
@@ -248,7 +248,18 @@
         20,
         40,
         80
-      ]
+      ],
+      "placement_mock": {
+        "compact_rows": [
+          40,
+          85
+        ],
+        "compact_cols": [
+          55,
+          105
+        ],
+        "max_tries": 200
+      }
     },
     "reports": {
       "selection": {

@@ -1,0 +1,22 @@
+E6 check: pool 'amibekk_v1' against 'stanford_brainmets', seed 2026
+
+[PASS] all E6 decisions (R, U, V, W) are set and implemented (exposure:)
+[PASS] 'reference' outputs made with the current config values: seed, exposure.lesions3d, exposure.rarity, lesions.attach_gap
+[PASS] 'rehearse' outputs made with the current config values: seed, exposure, calibration.bootstrap_draws, lesions.attach_gap
+[PASS] 'rehearse' ran after 'reference': 2026-11-15T21:10:59 vs 2026-11-15T17:00:46
+[PASS] 'exposure' outputs made with the current config values: seed, exposure, calibration.bootstrap_draws, lesions.attach_gap
+[PASS] 'exposure' ran after 'rehearse': 2026-11-15T21:11:26 vs 2026-11-15T21:10:59
+[PASS] 'reference' never read S: ['T', 'H-eval tables']
+[PASS] 'rehearse' never read S: ['T', 'H-cal', 'H-eval tables', 'planted', 'E6 reference']
+[PASS] 'exposure' read S only from E5's stored tables: ['T', 'H-eval tables', 'S tables (E5)', 'E6 reference']
+[PASS] E5's lock unchanged since S was scored, and as recorded by 'exposure'
+[PASS] every reference table reproduced (3D lesions, 2D -> 3D map, rarity, patients, H-eval NN): 5 tables
+[PASS] rehearsal 'null' reads not patient copying (decision U): {'e1_copy multi': 'undetermined', 'e2_full multi': 'undetermined'}
+[PASS] rehearsal 'positive' reads patient copying (decision U): {'e1_copy multi': 'patient copying', 'e2_full multi': 'patient copying'}
+[PASS] rehearsal 'placement' reads not patient copying (decision U): {'e1_copy multi': 'undetermined', 'e2_full multi': 'undetermined'}
+[PASS] rehearsal 'placement_compact' reads not patient copying (decision U): {'e1_copy multi': 'typical placement', 'e2_full multi': 'undetermined'}
+[PASS] every exposure table reproduced from E5's stored tables (same seed): 8 tables
+[PASS] the reading reproduced: mixed
+[PASS] unit tests (pytest) pass: 183 passed in 13.10s
+
+18 passed, 0 failed

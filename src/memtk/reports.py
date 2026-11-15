@@ -32,11 +32,12 @@ import numpy as np
 import pandas as pd
 from matplotlib import patheffects
 from matplotlib.figure import Figure
+from matplotlib.ticker import MaxNLocator
 from scipy.stats import binomtest, wilcoxon
 
 from memtk import calibration, lesionmatch, wholemask
 from memtk.ids import parse_lesion_id, parse_slice_key
-from memtk.plotting import draw_labels, fill, lesion_colors, save, show_slice, zoom_window
+from memtk.plotting import draw_box, draw_labels, fill, lesion_colors, save, show_slice, zoom_window
 from memtk.sets import SliceSet
 
 # Taxonomy (decision Z): factor levels that count as "the same" (fixed on the planted variants)
@@ -62,6 +63,7 @@ class ReportData:
     e1_shift: tuple[int, int]
     tau_L: float
     tau_C: float
+    tau_D: float              # E1 threshold of the query's E1 stratum (NaN without one)
     n_query: int              # informative lesions of the query
     n_train: int              # informative lesions of the source slice
     pairs: pd.DataFrame       # Hungarian pairs with the source: lesion IDs, factors, s, contribution, kept
@@ -102,24 +104,39 @@ def report_data(row: pd.Series, e1_row: pd.Series | None, e2: lesionmatch.Lesion
     pairs["kept"] = pairs["s"] >= tau_L
     pairs = pairs.sort_values("s", ascending=False).reset_index(drop=True)
     shift = (0, 0) if e1_row is None else (int(e1_row["shift_row"]), int(e1_row["shift_col"]))
+    e1_stratum = row.get("stratum_e1")
+    tau_D = (float(frozen["thresholds"]["whole_mask"]["tau_D"][e1_stratum]) if e1_stratum in ("single", "multi")
+             else np.nan)
     return ReportData(key, str(row["stratum_e2"]), str(row["e2_class"]), float(row["e2_C"]), nn, source,
                       float(row["e2_strongest_s"]) if pd.notna(row["e2_strongest_s"]) else 0.0, strongest,
                       float(row["e1_score"]) if pd.notna(row["e1_score"]) else np.nan,
-                      row["e1_nn"] if isinstance(row["e1_nn"], str) else "", shift, tau_L, tau_C, n_inf, n_train,
-                      pairs)
+                      row["e1_nn"] if isinstance(row["e1_nn"], str) else "", shift, tau_L, tau_C, tau_D, n_inf,
+                      n_train, pairs)
 
 
 # --- verdict ----------------------------------------------------------------------------------
 
 def slice_name(key: str, name_of: Callable[[str], str]) -> str:
-    """`<pseudonym>, slice <z>` for a real slice key."""
+    """`<patient name>, slice <z>` for a real slice key (`name_of` gives the name shown)."""
     patient, z = parse_slice_key(key)
     return f"{name_of(patient)}, slice {z}"
 
 
 def verdict(d: ReportData, name_of: Callable[[str], str], chance_rate: float | None) -> str:
-    """Decision X: the rule-based verdict line of a report."""
-    if d.e2_class not in FLAGGED or not d.source:
+    """Decision X: the rule-based verdict line of a report: the whole-mask (E1) match when it reaches
+    tau_D, then the lesion-level (E2) reading."""
+    e1 = ""
+    if d.e1_nn and d.e1_score >= d.tau_D:
+        e1 = (f"Matches {slice_name(d.e1_nn, name_of)} as a whole closer than chance (E1 {d.e1_score:.2f} >= "
+              f"{d.tau_D:.2f}). ")
+    return e1 + lesion_verdict(d, name_of, chance_rate)
+
+
+def lesion_verdict(d: ReportData, name_of: Callable[[str], str], chance_rate: float | None) -> str:
+    """The lesion-level (E2) part of the verdict line (decision X)."""
+    if d.n_query == 0:
+        text = "No informative lesion: not scored by E2"
+    elif d.e2_class not in FLAGGED or not d.source:
         text = "No lesion-level match closer than chance (E2: novel)"
     elif d.n_kept:
         unpaired = d.n_query - int((d.pairs["contribution"] > 0).sum())
@@ -156,21 +173,31 @@ def draw_report(d: ReportData, labels_of: Callable[[list[str]], dict], images_of
     extra = [k for k in dict.fromkeys([d.e1_nn, d.strongest_train]) if k and k != d.source]
     keys = [d.key, *([d.source] if d.source else []), *extra]
     labels, images = labels_of(keys), images_of(keys)
-    n_img = 1 + (2 if d.source else 0) + len(extra)
+    overview = d.source or (extra[0] if extra else "")
+    n_img = 1 + (2 if d.source else 0) + len(extra) + (1 if overview else 0)
     width = max(2.8 * n_img, 12.0)
     fig = Figure(figsize=(width, 6.0))
     grid = fig.add_gridspec(2, n_img, height_ratios=[1, 0.75])
     window = zoom_window([labels[k] > 0 for k in keys])
 
-    def tile(i: int, key: str, caption: str) -> None:
+    def tile(i: int, key: str, caption: str, colors: dict[int, str] | None = None) -> None:
         ax = fig.add_subplot(grid[0, i])
-        draw_labels(ax, images[key][window], labels[key][window], lesion_colors(labels[key]), caption)
+        draw_labels(ax, images[key][window], labels[key][window], colors or lesion_colors(labels[key]), caption,
+                    filled=False)
 
-    tile(0, d.key, f"A  query\n{d.key}")
+    q_colors = lesion_colors(labels[d.key])
+    s_colors = pair_colors(d.pairs, q_colors, labels[d.source]) if d.source else None
+    tile(0, d.key, f"A  query\n{d.key}", q_colors)
     i = 1
     if d.source:
-        tile(i, d.source, f"source (named)\n{slice_name(d.source, name_of)}")
+        tile(i, d.source, f"source (named), partners in the query's colours\n{slice_name(d.source, name_of)}", s_colors)
         i += 1
+    if overview:
+        overview_tile(fig.add_subplot(grid[0, i]), images[overview], labels[overview],
+                      s_colors if overview == d.source else None, window,
+                      f"where in the brain\n{slice_name(overview, name_of)} (box = zoom)")
+        i += 1
+    if d.source:
         ax = fig.add_subplot(grid[0, i])
         q, s = labels[d.key][window] > 0, labels[d.source][window] > 0
         show_slice(ax, images[d.key][window], [], "overlay: green both,\nred query only, blue source only")
@@ -187,6 +214,23 @@ def draw_report(d: ReportData, labels_of: Callable[[list[str]], dict], images_of
     ax.text(0, 1, panel_text(d, name_of, context, verdict_line, chars), va="top", ha="left", family="monospace",
             fontsize=7, transform=ax.transAxes)
     return save(fig, path, title)
+
+
+def overview_tile(ax, image: np.ndarray, labels: np.ndarray, colors: dict[int, str] | None,
+                  window: tuple[slice, slice], caption: str) -> None:
+    """A whole real slice with its lesions outlined and the zoom window of the other tiles as a box:
+    where in the brain the zoomed tiles are."""
+    draw_labels(ax, image, labels, colors or lesion_colors(labels), caption, filled=False)
+    draw_box(ax, (window[0].start, window[0].stop - 1, window[1].start, window[1].stop - 1))
+
+
+def pair_colors(pairs: pd.DataFrame, q_colors: dict[int, str], t_labels: np.ndarray) -> dict[int, str]:
+    """Colours for the source slice's lesions: each paired lesion in the colour of its query partner,
+    every other lesion grey, so the same metastasis has the same colour in both tiles."""
+    colors = {n: "darkgray" for n in range(1, int(t_labels.max()) + 1)}
+    for p in pairs.itertuples():
+        colors[parse_lesion_id(str(p.train_lesion))[1]] = q_colors[parse_lesion_id(str(p.query_lesion))[1]]
+    return colors
 
 
 def draw_pair_lines(ax, pairs: pd.DataFrame, q_labels: np.ndarray, t_labels: np.ndarray,
@@ -276,9 +320,9 @@ def deletion_effects(keys: Sequence[str], labels: np.ndarray, top: Sequence[int]
     lesion removed. One row per query."""
     wm, les = calibration.frozen_settings(frozen)
     t_index = {k: i for i, k in enumerate(t.keys)}
-    versions = {"before": labels,
-                "top": np.stack([without(m, n) for m, n in zip(labels, top)]),
-                "small": np.stack([without(m, n) for m, n in zip(labels, smallest)])}
+    top_removed = np.stack([without(m, n) for m, n in zip(labels, top)])  # pyright: ignore[reportCallIssue]  # numpy stub: np.stack overloads mis-resolve here
+    small_removed = np.stack([without(m, n) for m, n in zip(labels, smallest)])  # pyright: ignore[reportCallIssue]  # numpy stub: np.stack overloads mis-resolve here
+    versions = {"before": labels, "top": top_removed, "small": small_removed}
     out = pd.DataFrame({"key": list(keys), "source": list(sources), "top_lesion": list(top),
                         "small_lesion": list(smallest)})
     for name, stack in versions.items():
@@ -336,3 +380,68 @@ def taxonomy(d: ReportData) -> str:
     if counted["shape"].min() >= SAME_SHAPE and counted["size"].min() >= SAME_SIZE:
         return "exact" if counted["position"].min() >= SAME_POSITION else "shifted"
     return "deformed"
+
+
+# --- patient profile (descriptive, added 2026-11-15 after the S run) ---------------------------
+
+def profile_tables(patient: str, lesion_map: pd.DataFrame, lesion3d_col: str, credits: pd.DataFrame,
+                   e1_sources: pd.Series, e2_sources: pd.Series) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """A patient's view of the matches (E7 patient-level report): per slice z of the patient's lesion
+    slices, the query flags whose source is that slice (`e1_flags`: E1 copies by their nearest
+    neighbour; `e2_flags`: E2 full or partial by decision J's source); and per (3D lesion, z) the
+    query masks with a lesion pair >= tau_L to that 3D lesion's 2D lesion on that slice (`credits`:
+    `query`, `train_lesion`). `lesion_map` holds the patient's 2D lesions (`area`) with their 3D lesion
+    in `lesion3d_col`."""
+    lm = lesion_map[lesion_map["patient_id"] == patient]
+    slices = pd.DataFrame({"z": sorted(lm["z"].unique())})
+    for col, src in (("e1_flags", e1_sources), ("e2_flags", e2_sources)):
+        z = [parse_slice_key(k)[1] for k in src if k.startswith(f"{patient}/z")]
+        slices[col] = slices["z"].map(pd.Series(z, dtype=int).value_counts()).fillna(0).astype(int)
+    per_lesion = credits[credits["train_lesion"].isin(lm["lesion_id"])].groupby("train_lesion")["query"].nunique()
+    lesions = lm[["lesion_id", "z", "area", lesion3d_col]].rename(columns={lesion3d_col: "lesion3d_id"}).copy()
+    lesions["credits"] = lesions["lesion_id"].map(per_lesion).fillna(0).astype(int)
+    return slices, lesions
+
+
+def draw_patient_profile(patient: str, lesions3d: pd.DataFrame, slices: pd.DataFrame, lesions: pd.DataFrame,
+                         examples: list[tuple[str, str]], labels_of: Callable[[list[str]], dict],
+                         images_of: Callable[[list[str]], dict], path: Path, title: str) -> Path:
+    """A patient-level report: (top) the patient's 3D lesions as bars over the slices they span,
+    labelled with their span and largest 2D area, with a red dot on each slice sized by the query masks
+    matching that lesion there (lesion pairs >= tau_L); (middle) query flags per slice, E1 and E2;
+    (bottom) the most-matched slice whole (where in the brain, the zoom as a box), zoomed, and next to
+    some of the query masks matched to it (`examples`: query key, slice key), lesions outlined."""
+    fig = Figure(figsize=(13, 8.5))
+    grid = fig.add_gridspec(3, 6, height_ratios=[1.2, 0.8, 1.1])
+    ax = fig.add_subplot(grid[0, :])
+    order = lesions3d.sort_values("z_first").to_dict("records")
+    for i, r in enumerate(order):
+        ax.plot([r["z_first"] - 0.4, r["z_last"] + 0.4], [i, i], color="0.75", lw=6, solid_capstyle="butt")
+        hits = lesions[(lesions["lesion3d_id"] == r["lesion3d_id"]) & (lesions["credits"] > 0)]
+        hits = hits.groupby("z")["credits"].sum()
+        ax.scatter(hits.index.to_numpy(), np.full(len(hits), i), s=8 + 6 * hits.to_numpy(), color="tab:red", zorder=3)
+    largest = lesions.groupby("lesion3d_id")["area"].max()
+    ax.set_yticks(range(len(order)), [f"{str(r['lesion3d_id']).split('/')[-1]} ({r['span']} sl., max "
+                                      f"{int(largest.get(r['lesion3d_id'], 0))} px)" for r in order], fontsize=7)
+    ax.set_ylim(-0.8, len(order) - 0.2)
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+    ax.set_ylabel("3D lesions", fontsize=8)
+    ax.set_title("3D lesions over their slices (grey); red dot = query masks matching that lesion on that slice "
+                 "(size = count)", fontsize=9)
+    ax2 = fig.add_subplot(grid[1, :], sharex=ax)
+    ax2.bar(slices["z"] - 0.2, slices["e1_flags"], width=0.4, color="tab:blue", label="E1 whole-mask flags")
+    ax2.bar(slices["z"] + 0.2, slices["e2_flags"], width=0.4, color="tab:orange", label="E2 flags (full or partial)")
+    ax2.set_xlabel("slice z", fontsize=8)
+    ax2.set_ylabel("flags naming the slice", fontsize=8)
+    ax2.legend(fontsize=7)
+    keys = [examples[0][1], *[q for q, _ in examples]][:5] if examples else []
+    if keys:
+        labels, images = labels_of(keys), images_of(keys)
+        window = zoom_window([labels[k] > 0 for k in keys])
+        overview_tile(fig.add_subplot(grid[2, 0]), images[keys[0]], labels[keys[0]], None, window,
+                      f"where in the brain\n{keys[0]} (box = zoom)")
+        for j, k in enumerate(keys):
+            a = fig.add_subplot(grid[2, j + 1])
+            caption = f"training slice (zoom)\n{k}" if j == 0 else f"query\n{k}"
+            draw_labels(a, images[k][window], labels[k][window], lesion_colors(labels[k]), caption, filled=False)
+    return save(fig, path, title)

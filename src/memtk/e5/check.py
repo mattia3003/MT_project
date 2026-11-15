@@ -5,7 +5,8 @@ settings, in that order, with S read by `score` only; the lock (the `audit:` sec
 file and the E5 file unchanged since `score`, and S scored once and completely); the `prepare`
 values reproduced (sensitivity thresholds, tau_D*, held-out maxima, drop-only identity); every
 `analyze` table and the outcome reading reproduced from the raw tables with the same seed; the unit
-tests. Writes `results/<pool>/e5/check_report.txt`; exit code 1 on any failure.
+tests. Writes `results/<pool>/e5/check_report.txt`; exit code 1 on any failure. (`differing_tables` moved
+to `memtk.checks` on 2026-11-15.)
 """
 
 from __future__ import annotations
@@ -13,8 +14,6 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
-import tempfile
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -22,7 +21,7 @@ import pandas as pd
 from memtk import calibration, checks, config, lesionmatch
 from memtk.calibration import load_frozen
 from memtk.audit import heldout, load_scored
-from memtk.e5.analyze import analyze_scored, informative_areas, write_tables
+from memtk.e5.analyze import analyze_scored, informative_areas
 from memtk.e5.common import audit_config, audit_hash, score_marker
 from memtk.e5.prepare import heldout_maxima, tau_d_star
 from memtk.io import read_table
@@ -120,7 +119,7 @@ def run_check(cfg: dict, dataset: str | None = None, pool: str | None = None) ->
                                      lesionmatch.load_tables(pool_dir, "main", float(e3["detectors"]["lesion"]["candidate_min_s"])),
                                      informative_areas(t, int(e3["informative_bound_px"])), e3, e5, audit,
                                      int(cfg["calibration"]["bootstrap_draws"]), np.random.default_rng(cfg["seed"]))
-    differ = differing_tables(tables, analyze_dir)
+    differ = checks.differing_tables(tables, analyze_dir, TOL)
     report.add("every analyze table reproduced from the raw tables (same seed)", not differ,
                ", ".join(differ) if differ else f"{len(tables)} tables")
     report.add("outcome reading reproduced", reading == info["analyze"].get("reading"), reading["reading"])
@@ -140,29 +139,3 @@ def run_check(cfg: dict, dataset: str | None = None, pool: str | None = None) ->
     print(f"\n{text}\nWrote {out / 'check_report.txt'}")
     if not report.all_passed:
         raise SystemExit(1)
-
-
-# --- checks -----------------------------------------------------------------------------------
-
-def differing_tables(tables: dict[str, pd.DataFrame], stored_dir: Path) -> list[str]:
-    """The names of recomputed tables that differ from the stored CSV of the same name: each is
-    written and read back the same way, then compared (numbers within TOL, NaN equal to NaN, the
-    rest as text)."""
-    differ = []
-    with tempfile.TemporaryDirectory() as tmp:
-        write_tables(tables, Path(tmp))
-        for name in tables:
-            a, b = read_table(Path(tmp) / f"{name}.csv"), read_table(stored_dir / f"{name}.csv")
-            if list(a.columns) != list(b.columns) or len(a) != len(b):
-                differ.append(name)
-                continue
-            for col in a.columns:
-                x, y = a[col], b[col]
-                if pd.api.types.is_numeric_dtype(x) and pd.api.types.is_numeric_dtype(y):
-                    same = np.allclose(x.to_numpy(float), y.to_numpy(float), atol=TOL, rtol=0, equal_nan=True)
-                else:
-                    same = x.astype(str).equals(y.astype(str))
-                if not same:
-                    differ.append(f"{name}.{col}")
-                    break
-    return differ

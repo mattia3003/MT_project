@@ -13,8 +13,9 @@ data flows between them, and how the code is organised. The details live in two 
 E4 (the gate) done (`docs/e4-plan.md`): gate ACCEPTED with a recorded deviation, check 16/16. E5
 (the main audit) done (`docs/e5-plan.md`): S scored once with every analysis choice fixed and
 locked beforehand; "memorization beyond chance" in multi-lesion masks only, check 26/26. E6 and
-E7 are in progress, planned together in `docs/e6-e7-plan.md` (decisions R, U–Z); E6's `reference` and
-`rehearse` and E7's `planted` stages are done.*
+E7 are in progress, planned together in `docs/e6-e7-plan.md` (decisions R, U–Z); E6 and E7 done
+(checks 18/18 and 14/14; plan closed): the E1 multi-lesion excess reads as typical placement, H1
+supported, no exact lesion-level copy. E8 awaits its go/no-go.*
 
 The diagrams are [Mermaid](https://mermaid.js.org/): GitHub renders them; in VS Code install
 *Markdown Preview Mermaid Support* (`bierner.markdown-mermaid`) and open the Markdown preview.
