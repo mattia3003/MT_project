@@ -1,0 +1,5 @@
+set,near_exact,near_exact_groups,beyond_heldout_e2,beyond_heldout_e2_groups,e8_strong_groups,e8_eligible,e1_over_0.9_single,e1_over_0.9_single_rate,e1_over_0.9_multi,e1_over_0.9_multi_rate
+query main,39,31,29,23,53,True,1766,0.09237851127268923,3,0.00017853954650955185
+query noisy,0,0,1,1,1,False,3,0.008064516129032258,0,0.0
+query main+noisy,39,31,30,24,53,True,1769,0.090769151829237,3,0.00016976007243096425
+H-eval,0,0,0,0,0,False,56,0.08045977011494253,0,0.0

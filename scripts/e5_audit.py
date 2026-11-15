@@ -15,19 +15,31 @@ Stages, run in this order (see docs/e5-plan.md):
              null case = H-cal (no excess expected); positive case = H-cal + the planted copies P1, P2,
              P4 of E4 (excess, right source patients, near-exact copies expected)
              -> <output_root>/<dataset>/e5/rehearse/<case>/, results/<dataset>/e5/rehearse/<case>/
-  score      (planned) S scored once, every variant; raw tables only
-  analyze    (planned) every table and figure, flagged.csv, the outcome reading
-  check      (planned) consistency checks of all E5 outputs
+  score      (needs the E4 gate PASS/ACCEPTED, prepare, rehearse) S scored once: the main and noisy
+             masks, main and every sensitivity variant; raw tables only, no rate shown; writes a
+             completion marker, after which score and prepare refuse to run (the lock)
+             -> <output_root>/<pool>/e5/
+  analyze    (needs score) every table and figure of decisions L-Q on S against H-eval, flagged.csv,
+             the mechanical outcome reading and the E8 exit count; refuses unless audit: and both
+             frozen files are those score recorded (the lock)
+             -> results/<pool>/e5/analyze/
+  check      consistency checks of all E5 outputs: decisions, run logs in order (S read by score only),
+             the lock (hashes unchanged since score; one complete score run), prepare values and every
+             analyze table reproduced (same seed), the unit tests; exit code 1 on any failure
+             -> results/<pool>/e5/check_report.txt
 
 Examples (from the repository root):
   .venv\\Scripts\\python.exe scripts\\e5_audit.py prepare
   .venv\\Scripts\\python.exe scripts\\e5_audit.py rehearse
+  .venv\\Scripts\\python.exe scripts\\e5_audit.py score
+  .venv\\Scripts\\python.exe scripts\\e5_audit.py analyze
+  .venv\\Scripts\\python.exe scripts\\e5_audit.py check
 """
 
 import argparse
 
 from memtk import config
-from memtk.e5 import prepare, rehearse
+from memtk.e5 import analyze, check, prepare, rehearse, score
 from memtk.stages import add_stage
 
 
@@ -39,6 +51,12 @@ def main() -> None:
                                  "drop-only check, H-eval under every variant (no S)", prepare.run_prepare)
     add_stage(stages, "rehearse", "the scoring and analysis code run on mock query sets: H-cal (null) and H-cal + "
                                   "planted copies (positive); no S", rehearse.run_rehearse)
+    add_stage(stages, "score", "S scored once (main + noisy, every variant); raw tables only; locks the analysis",
+              score.run_score)
+    add_stage(stages, "analyze", "every table and figure on S against H-eval, flagged.csv, the outcome reading "
+                                 "(needs score; checks the lock)", analyze.run_analyze)
+    add_stage(stages, "check", "consistency checks of all E5 outputs (exit code 1 on any failure)", check.run_check,
+              overwrite=False)
 
     args = parser.parse_args()
     options = {k: v for k, v in vars(args).items() if k not in ("stage", "run", "config")}

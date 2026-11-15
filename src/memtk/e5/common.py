@@ -11,10 +11,14 @@ import hashlib
 import json
 from pathlib import Path
 
+import numpy as np
+
 from memtk import config
 from memtk.audit import CLASSES
 from memtk.calibration import STRATA
-from memtk.stages import decided
+from memtk.io import LabelStack
+from memtk.sets import SliceSet
+from memtk.stages import decided, require
 
 REVIEW = "docs/e5-plan.md (decisions L-Q)"
 # Variant kinds of decision O and what each one re-runs: re-thresholding needs no detector run;
@@ -65,6 +69,24 @@ def parse_variant(name: str) -> tuple[str, float]:
         raise SystemExit(f"audit.sensitivity: unknown variant '{name}' (percentile_<p>, sigma_<fraction>, "
                          f"bound_<px> or drop_only)")
     return kind, number
+
+
+def check_prepared(cfg: dict, e5: dict, e3_hash: str) -> None:
+    """Stop unless the E5 file was made with the current `audit:` section and frozen E3 file."""
+    if e5["audit_sha256"] != audit_hash(cfg):
+        raise SystemExit("The audit: section changed since 'prepare' ran; run 'e5_audit.py prepare --overwrite' first "
+                         "(only possible before S is scored).")
+    if e5["e3_frozen_sha256"] != e3_hash:
+        raise SystemExit("The frozen E3 file changed since 'prepare' ran; run 'e5_audit.py prepare --overwrite' first "
+                         "(only possible before S is scored).")
+
+
+def drop_only_t(cfg: dict, dataset: str, t: SliceSet) -> SliceSet:
+    """T with its drop-only label maps (written by `prepare`): the reference of the drop-only variant."""
+    path = config.output_dir(cfg, dataset) / "e5" / "labels_drop_only_T.npz"
+    require(path, "e5_audit.py prepare")
+    stack = LabelStack(path)
+    return SliceSet("T", t.keys, t.patients, np.stack([stack[k] for k in t.keys]), dict(t.left_out))
 
 
 def score_marker(cfg: dict, pool: str) -> Path:

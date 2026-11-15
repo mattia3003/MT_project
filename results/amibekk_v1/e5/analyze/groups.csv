@@ -1,0 +1,17 @@
+set,class,flags,source_slices,groups,patients
+query main,e1_copy,4278,1180,455,99
+query main,e2_full,1739,789,365,86
+query main,e2_partial,734,354,174,50
+query main,e2_flagged,2473,1030,400,87
+query noisy,e1_copy,54,45,38,29
+query noisy,e2_full,10,10,10,9
+query noisy,e2_partial,3,3,3,3
+query noisy,e2_flagged,13,13,13,12
+query main+noisy,e1_copy,4332,1186,456,99
+query main+noisy,e2_full,1749,793,364,86
+query main+noisy,e2_partial,737,355,174,50
+query main+noisy,e2_flagged,2486,1033,400,87
+H-eval,e1_copy,79,69,61,42
+H-eval,e2_full,53,49,42,32
+H-eval,e2_partial,34,31,31,22
+H-eval,e2_flagged,87,78,70,43

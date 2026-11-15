@@ -1,24 +1,93 @@
-"""E5 scoring (`docs/e5-plan.md`): both detectors on a query set against T, under the main settings
-and every sensitivity variant of decision O, with settings and thresholds from the frozen E3 file
-and the E5 file. Raw tables only: no rate is computed here.
+"""E5 stage `score` (`docs/e5-plan.md`, step 4) and the scoring it runs: both detectors on a query
+set against T, under the main settings and every sensitivity variant of decision O, with settings
+and thresholds from the frozen E3 file and the E5 file. Raw tables only: no rate is computed or
+printed here.
 
-`score_query` is the one function that scores: the `score` stage (step 4) runs it once on S, and
-`rehearse` runs it on mock query sets first, so the code run on S is the code rehearsed.
+`score_query` is the one function that scores: `score` runs it once on S (the main and noisy
+masks, decision L), and `rehearse` ran it on mock query sets first, so the code run on S is the code
+rehearsed. `score` is the only E5 stage that reads S. It refuses to run again once it has completed
+(the completion marker), and it records the SHA-256 of the `audit:` section and both frozen files,
+which `analyze` checks (the lock).
 """
 
 from __future__ import annotations
 
+import json
 import time
 from collections.abc import Sequence
+from datetime import datetime
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
-from memtk import calibration, lesionmatch
+from memtk import calibration, config, lesionmatch
 from memtk.audit import class_table
-from memtk.e5.common import variant_frozen
-from memtk.sets import SliceSet
+from memtk.e4.common import gate_status
+from memtk.e5.common import audit_config, audit_hash, check_prepared, drop_only_t, score_marker, variant_frozen
+from memtk.io import MaskStack, read_table
+from memtk.sets import SliceSet, load_pool, load_set, relabel
+from memtk.stages import require
+from memtk.synthetic import name_scheme
+
+
+# --- stages -----------------------------------------------------------------------------------
+
+def run_score(cfg: dict, dataset: str | None = None, pool: str | None = None, overwrite: bool = False) -> None:
+    """Score S once: the main and noisy masks of the pool (decision L) against T, main and every
+    variant (decision O). Needs the E4 gate (PASS or ACCEPTED), `prepare` and `rehearse` made with
+    the current `audit:` section and frozen files. Writes `<output_root>/<pool>/e5/` (raw tables,
+    `score.complete.json`); refuses once that marker exists. `--overwrite` only replaces the tables
+    of a run that stopped before its marker (log such a re-run in docs/process-log.md)."""
+    name, _ = config.real_dataset(cfg, dataset)
+    pool_name, pool_cfg = config.synthetic_pool(cfg, pool)
+    if pool_cfg.get("trained_on") != name:
+        raise SystemExit(f"Pool '{pool_name}' was trained on '{pool_cfg.get('trained_on')}', not on '{name}'.")
+    data_dir = config.output_dir(cfg, pool_name) / "e5"
+    marker = score_marker(cfg, pool_name)
+    if marker.exists():
+        raise SystemExit(f"S has already been scored ({marker}); E5 scores S once. Run 'e5_audit.py analyze'.")
+    if (data_dir / "queries.csv").exists() and not overwrite:
+        raise SystemExit(f"{data_dir} holds tables of a run that did not complete; pass --overwrite to score again "
+                         f"and record the re-run in docs/process-log.md.")
+    verdict = gate_status(cfg, name)
+    if verdict not in ("PASS", "ACCEPTED"):
+        raise SystemExit(f"The E4 gate is {verdict}; E5 runs only on PASS or ACCEPTED.")
+    audit = audit_config(cfg)
+    e3, e3_hash = calibration.load_frozen(cfg, name)
+    e5, e5_hash = calibration.load_frozen(cfg, name, "e5")
+    check_prepared(cfg, e5, e3_hash)
+    rehearsed = config.output_dir(cfg, name) / "e5" / "rehearse" / "positive" / "rehearse.run_info.json"
+    require(rehearsed, "e5_audit.py rehearse")
+    if json.loads(rehearsed.read_text(encoding="utf-8")).get("e5_sha256") != e5_hash:
+        raise SystemExit("'rehearse' ran with another E5 file; run 'e5_audit.py rehearse --overwrite' first.")
+    hashes = {"audit_sha256": audit_hash(cfg), "frozen_sha256": e3_hash, "e5_sha256": e5_hash}
+
+    t = load_set(cfg, name, "T")
+    t_drop = drop_only_t(cfg, name, t)
+    classes = [*audit["sets"]["main"], *audit["sets"]["noisy"]]
+    s = load_pool(cfg, pool_name, classes)
+    pool_dir = config.output_dir(cfg, pool_name)
+    mask_class = read_table(pool_dir / "qc.csv").set_index("key")["mask_class"]
+    raw = MaskStack(pool_dir / "masks_raw.npz")
+    min_area = int(e3["min_lesion_area"])
+    print(f"Drop-only label maps of {len(s.keys)} synthetic masks (from the masks as saved) ...")
+    drop = relabel(np.stack([raw[k] for k in s.keys]), min_area, 0)
+    meta = query_table(s, s.keys, mask_class.loc[s.keys].tolist(), [name_scheme(k) for k in s.keys])
+    print(f"Scoring S: {len(s.keys)} masks ({meta['mask_class'].value_counts().to_dict()}), main and "
+          f"{len(audit['sensitivity'])} variants. No rate is computed or shown here.")
+    start = time.perf_counter()
+    log = score_query(s, drop, meta, t, t_drop, e3, e5, list(audit["sensitivity"]), data_dir)
+    log.to_csv(data_dir / "score_log.csv", index=False)
+    run_extra = {"stage": "score", "inputs": ["T", "S"], "pool": pool_name, **hashes, "verdict_e4": verdict,
+                 "left_out": s.left_out}
+    config.write_run_info(data_dir, cfg, script=__file__, filename="score.run_info.json", extra=run_extra)
+    marker.write_text(json.dumps({"completed": datetime.now().isoformat(timespec="seconds"), **hashes,
+                                  "queries": len(s.keys), "by_mask_class": meta["mask_class"].value_counts().to_dict(),
+                                  "variants": ["main", *audit["sensitivity"]],
+                                  "minutes": round((time.perf_counter() - start) / 60, 1)}, indent=2), encoding="utf-8")
+    print(f"\nScoring log:\n{log.to_string(index=False)}\nLeft out: {s.left_out}\nWrote {data_dir}\n"
+          f"S is scored; '{marker.name}' locks the E5 file and audit:. Next: 'e5_audit.py analyze'.")
 
 
 # --- scoring ----------------------------------------------------------------------------------

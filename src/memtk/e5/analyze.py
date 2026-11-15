@@ -1,9 +1,10 @@
-"""E5 analysis (`docs/e5-plan.md`, decisions L-Q): a scored query set against the held-out baseline
-H-eval, from the raw tables `score_query` wrote. Every choice comes from the `audit:` section and the
-E5 file; nothing here is tuned.
+"""E5 stage `analyze` (`docs/e5-plan.md`, step 5) and the analysis it runs: a scored query set
+against the held-out baseline H-eval, from the raw tables `score_query` wrote. Every choice comes
+from the `audit:` section and the E5 file; nothing here is tuned. The stage refuses to run unless
+`score` completed with the same `audit:` section and frozen files (the lock).
 
-`analyze_scored` is the one function that analyses: the `analyze` stage (step 5) runs it on S, and
-`rehearse` runs it on mock query sets first, so the analysis of S is the analysis rehearsed.
+`analyze_scored` (tables) and `draw_figures` are the one analysis: `analyze` runs them on S, and
+`rehearse` ran them on mock query sets first, so the analysis of S is the analysis rehearsed.
 
 Tables (decision): rates and excess with the Holm-adjusted primary family (M); AUC with the
 Mann-Whitney p (M, secondary); rates by size of the largest lesion with an H-eval rate
@@ -15,6 +16,7 @@ rate (P); chained adjacent-slice groups (N); near-exact copies and the beyond-he
 
 from __future__ import annotations
 
+import json
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -24,19 +26,83 @@ import pandas as pd
 from matplotlib.figure import Figure
 from scipy.stats import mannwhitneyu
 
-from memtk import calibration, lesionmatch
+from memtk import calibration, config, lesionmatch
 from memtk.audit import (CLASSES, auc, auc_bootstrap, beyond_max, cell_rates, chain_groups, class_flags,
                          copied_area_share, excess_test, holm, interval, one_sided_p)
 from memtk.calibration import STRATA
-from memtk.ids import parse_slice_key
-from memtk.io import read_table
+from memtk.e5.common import audit_config, audit_hash, score_marker
+from memtk.e5.score import query_table
+from memtk.ids import lesion_id, parse_slice_key
+from memtk.io import LabelStack, read_table, slice_images
 from memtk.plotting import draw_labels, hide_unused, lesion_colors, save, tile_figure, zoom_window
+from memtk.sets import SliceSet, load_set
+from memtk.stages import refuse_overwrite, require
+from memtk.synthetic import load_sample
 
 STRATUM_COL = {"e1_copy": "stratum_e1", "e2_full": "stratum_e2", "e2_partial": "stratum_e2", "e2_flagged": "stratum_e2"}
 SCORES = (("e1_score", "stratum_e1", ("whole_mask", "tau_D"), "E1 score (best Dice over shifts)"),
           ("e2_C", "stratum_e2", ("lesion", "tau_C"), "E2 configuration score C(q, NN)"),
           ("e2_strongest_s", "stratum_e2", ("lesion", "tau_L"), "E2 strongest lesion pair s"))
 MAX_EXAMPLES = 12    # pairs per example sheet
+
+
+# --- stages -----------------------------------------------------------------------------------
+
+def run_analyze(cfg: dict, dataset: str | None = None, pool: str | None = None, overwrite: bool = False) -> None:
+    """Analyse S as scored by `score` (step 5): every table and figure of decisions L-Q, `flagged.csv`
+    and the outcome reading, with H-eval as the baseline. Refuses unless `score` completed and the
+    `audit:` section and both frozen files are those `score` recorded (the lock). Writes
+    `results/<pool>/e5/analyze/`."""
+    name, _ = config.real_dataset(cfg, dataset)
+    pool_name, pool_cfg = config.synthetic_pool(cfg, pool)
+    data_dir = config.output_dir(cfg, pool_name) / "e5"
+    out = config.results_dir(cfg, pool_name, "e5") / "analyze"
+    marker = score_marker(cfg, pool_name)
+    require(marker, "e5_audit.py score")
+    refuse_overwrite([out], overwrite)
+    audit = audit_config(cfg)
+    e3, e3_hash = calibration.load_frozen(cfg, name)
+    e5, e5_hash = calibration.load_frozen(cfg, name, "e5")
+    scored_with = json.loads(marker.read_text(encoding="utf-8"))
+    now = {"audit_sha256": audit_hash(cfg), "frozen_sha256": e3_hash, "e5_sha256": e5_hash}
+    changed = [k for k, v in now.items() if scored_with[k] != v]
+    if changed:
+        raise SystemExit(f"Changed since S was scored: {', '.join(changed)}. The analysis is fixed before S (the lock, "
+                         f"docs/e5-plan.md); restore the recorded version. An analysis added after scoring is "
+                         f"exploratory and does not belong in this stage.")
+    draws, rng = int(cfg["calibration"]["bootstrap_draws"]), np.random.default_rng(cfg["seed"])
+    variants = list(audit["sensitivity"])
+
+    t, heval = load_set(cfg, name, "T"), load_set(cfg, name, "H-eval")
+    h = heldout(cfg, name, heval, variants)
+    s = load_scored("S", data_dir, variants)
+    e2_main = lesionmatch.load_tables(data_dir, "main", float(e3["detectors"]["lesion"]["candidate_min_s"]))
+    print(f"Analysing S ({len(s.meta)} masks) against H-eval ...")
+    tables, reading = analyze_scored(s, h, e2_main, informative_areas(t, int(e3["informative_bound_px"])), e3, e5,
+                                     audit, draws, rng)
+    write_tables(tables, out)
+
+    pool_labels = LabelStack(config.output_dir(cfg, pool_name) / "labels.npz")
+    t_labels = dict(zip(t.keys, t.labels))
+    files = read_table(config.output_dir(cfg, pool_name) / "synthetic_index.csv").set_index("sample_id")["filename"]
+    pool_dir = config.resolve_path(pool_cfg["dir"])
+
+    def labels_of(keys):
+        return {k: t_labels[k] if k in t_labels else pool_labels[k] for k in keys}
+
+    def images_of(keys):
+        real = slice_images(cfg, name, [k for k in keys if k in t_labels])
+        return {k: real[k] if k in real else load_sample(pool_dir / files[k], pool_cfg)[0] for k in keys}
+
+    draw_figures(s, h, tables, e3, f"E5 analyze ({pool_name})", labels_of, images_of, out)
+    log = read_table(data_dir / "score_log.csv") if (data_dir / "score_log.csv").exists() else None
+    header = (f"E5 analyze: pool '{pool_name}' against '{name}' (S scored once, {scored_with['completed']}; the "
+              f"analysis fixed by decisions L-Q, hashes equal to those recorded by score)")
+    text = review_text(header, s, tables, reading, log)
+    (out / "review.txt").write_text(text, encoding="utf-8")
+    config.write_run_info(out, cfg, script=__file__, extra={"stage": "analyze", "inputs": ["T", "H-eval", "S tables"],
+                                                            **now, "reading": reading})
+    print(f"\n{text}\nWrote {out}")
 
 
 # --- scored sets ------------------------------------------------------------------------------
@@ -59,6 +125,28 @@ def load_scored(name: str, score_dir: Path, variants: list[str]) -> Scored:
     """A query set scored by `score_query` (its `queries.csv` and class tables)."""
     return Scored(name, read_table(score_dir / "queries.csv"),
                   {v: read_table(score_dir / f"classes_{v}.csv") for v in ["main", *variants]})
+
+
+def heldout(cfg: dict, dataset: str, heval: SliceSet, variants: list[str]) -> Scored:
+    """H-eval as a scored set (the baseline): its slices clustered by patient, the main class table
+    from E4 and one per variant from `prepare`."""
+    meta = query_table(heval, heval.patients, ["clean"] * len(heval.keys), ["H-eval"] * len(heval.keys))
+    e4_dir, e5_dir = (config.output_dir(cfg, dataset) / e for e in ("e4", "e5"))
+    require(e4_dir / "heval_classes.csv", "e4_validate.py validate")
+    classes = {"main": read_table(e4_dir / "heval_classes.csv")}
+    for v in variants:
+        require(e5_dir / f"heval_classes_{v}.csv", "e5_audit.py prepare")
+        classes[v] = read_table(e5_dir / f"heval_classes_{v}.csv")
+    return Scored("H-eval", meta, classes)
+
+
+def informative_areas(t: SliceSet, bound: int) -> pd.Series:
+    """Area of every informative T lesion (>= the bound), by lesion ID (for the copied-area share)."""
+    rows = {}
+    for key, labels in zip(t.keys, t.labels):
+        areas = np.bincount(labels.ravel())
+        rows.update({lesion_id(key, n): int(a) for n, a in enumerate(areas) if n and a >= bound})
+    return pd.Series(rows, dtype=int)
 
 
 def subsets(table: pd.DataFrame, sets: dict) -> dict[str, pd.Series]:
@@ -141,7 +229,7 @@ def auc_table(qt: pd.DataFrame, ht: pd.DataFrame, draws: int, rng: np.random.Gen
     two-level bootstrap interval and the one-sided Mann-Whitney p (which treats slices as
     independent). E2 scores of slices without a candidate count as 0."""
     rows = []
-    for col, stratum_col, _, label in SCORES:
+    for col, stratum_col, _, _ in SCORES:
         for s in STRATA:
             a, b = qt[qt[stratum_col] == s], ht[ht[stratum_col] == s]
             if not len(a) or not len(b):
@@ -487,6 +575,34 @@ def examples_figure(rows: pd.DataFrame, source_col: str, labels_of: Callable, im
                     f"T {getattr(r, source_col)}")
     hide_unused(axes, 2 * len(rows))
     return save(fig, path, title)
+
+
+def draw_figures(q: Scored, h: Scored, tables: dict[str, pd.DataFrame], e3: dict, prefix: str, labels_of: Callable,
+                 images_of: Callable, out: Path) -> None:
+    """Every figure of an analysis (moved from `rehearse` on 2026-11-15, so S gets the figures that
+    were rehearsed): score distributions, the excess forest plot, the copied-area share, near-exact
+    copies and the largest E2 groups next to their source slices (the last three only when there
+    is something to show). `prefix` starts each title."""
+    qt, ht = q.table("main"), h.table("main")
+    score_figure(qt, ht, e3, q.name, out / "score_distributions.png",
+                 f"{prefix}: scores of {q.name} and of H-eval by stratum; dashed = frozen threshold")
+    forest_figure(tables["rates"], out / "rates_forest.png",
+                  f"{prefix}: excess rate over H-eval with 95% intervals per set, variant and stratum "
+                  f"(red = primary family)")
+    flagged = tables["flagged"]
+    main = flagged[flagged["set"] == "main"]
+    if main["e2_class"].isin(["full", "partial"]).any():
+        copied_area_figure(main, out / "copied_area.png", f"{prefix}: copied-area share of the E2-flagged masks (main set)")
+    near = main[main["near_exact"]].sort_values("e1_score", ascending=False)
+    if len(near):
+        examples_figure(near, "e1_nn", labels_of, images_of, out / "near_exact.png",
+                        f"{prefix}: near-exact copies (decision Q, highest E1 score first) next to their source slice")
+    e2 = main[main["e2_group"] != ""]
+    if len(e2):
+        top = e2["e2_group"].value_counts().head(MAX_EXAMPLES).index
+        rows = e2[e2["e2_group"].isin(top)].sort_values("e2_C", ascending=False).drop_duplicates("e2_group")
+        examples_figure(rows, "e2_source", labels_of, images_of, out / "groups_top.png",
+                        f"{prefix}: one mask per largest E2 group (decision N; highest C) next to its source slice")
 
 
 # --- review text ------------------------------------------------------------------------------

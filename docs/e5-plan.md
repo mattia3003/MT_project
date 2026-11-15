@@ -1,5 +1,11 @@
 # E5 plan: main audit, S scored once (`scripts/e5_audit.py`)
 
+> **Closed 2026-11-15. Reference only, no longer updated.** E5 is done: S scored once with every
+> analysis choice fixed beforehand (decisions L–Q, the lock), mechanical reading "memorization
+> beyond chance" in the multi-lesion stratum only, E5 check 26/26. This file stays as the record of
+> how E5 was built: decisions L–Q, the lock, the stages. Open items were carried forward on
+> 2026-11-15 (see "Carried forward" at the end); the next work is planned in `docs/e6-e7-plan.md`.
+
 Working plan for E5, kept in the repo so work can resume from here. The experiment is specified in
 `docs/experiment-plan.md` (E5, including its "Carried over from E1–E3" and "Carried over from E4"
 notes); this file records how it is implemented, stage by stage, and what has been decided. Update
@@ -20,16 +26,13 @@ outputs are frozen evidence that E6–E8 only read.
 | 1 | Shared helpers to the library; `memtk/audit.py` + `tests/test_audit.py`; config section `audit:` with the values of L–Q | refactor + library + config | ✅ 2026-11-15: `load_frozen`, `run_frozen` → `calibration` (`config.frozen_file` takes the experiment, for `e5_<dataset>.yaml`); `slice_images` → `io`; `heval_classes`, `fp_flags`, `share_row` → `audit` as `class_table`, `class_flags`, `share_row` (moved unchanged; `run_frozen` on 60 random H-eval slices reproduces the stored `heval_classes.csv` to 1e-16); `sets.load_pool`, `sets.relabel`; `memtk/audit.py` (cluster bootstrap as an exact multinomial over cluster types, excess test, Holm, AUC and its bootstrap, chained groups, copied-area share, standardised rate, held-out maxima); 13 tests (pytest 141); E3 check 16/16, E4 check 16/16; `audit:` in `configs/default.yaml` |
 | 2 | `prepare` (no S): drop-only real label maps, sensitivity thresholds, τ_D\*, held-out maxima, H-eval under every variant; `configs/frozen/e5_<dataset>.yaml` | production | ✅ 2026-11-15 (user review of `results/stanford_brainmets/e5/prepare/review.txt` pending): gap 0 changes only 4 T slices (H-cal, H-eval none), so drop-only uses the frozen thresholds (re-derived: equal); every sensitivity threshold re-derived on H-cal equals E3 `sensitivity.csv`; τ_D\* 0.897 / 0.700 (H-cal 7.43% / 8.91% flagged, target 7.43% / 8.66%: ties); held-out E1 maxima single 1.000 (4–11 px), 0.973, 0.967, 0.933, 0.962 (≥ 80 px), multi 0.855 overall; E2 C maxima single 1.000 (H-cal `Mets_316/z88`: a 12 px lesion pixel-identical to one of T `Mets_249/z101`, chance at the bound), multi 0.508, so the beyond-held-out tier exists for multi-lesion masks only (as the E8 rule assumes). Refactor in this step: E3's threshold helpers (`lesion_slices`, `threshold_rows`, `thresholds`, `frozen_thresholds`, `shortcut_problems`, `chance_rates_at`, `STRATA`) moved to `calibration`; `lesionmatch.save_tables` / `load_tables` (E3, E4, E5); `io.ID_COLUMNS` extended to the detector tables' ID columns (S sample IDs such as `1033` would otherwise be read back as numbers). pytest 146; E3 and E4 check 16/16 |
 | 3 | `rehearse` (no S): `score` and `analyze` code on mock S (null and positive case); the user reviews the tables and figures | rehearsal | ✅ 2026-11-15 (user review of `results/stanford_brainmets/e5/rehearse/{null,positive}/` pending). The scoring (`e5.score.score_query`) and the analysis (`e5.analyze.analyze_scored`) are single functions that `score` and `analyze` will call on S unchanged. **Null** (H-cal, 989 slices): H-cal reproduces its own chance rates (E1 copy single 35/686 = 5.1%), no primary cell beyond chance (Holm p 0.52–1.0), 0 near-exact, reading "validated negative". **Positive** (H-cal + 294 gated planted P1/P2/P4): all four primary cells beyond chance, P1 and P2 flagged 100/100 by both detectors with the right patient, P4 93/94; 257 near-exact copies (none on H-eval, by construction); 80 E2 groups naming all 20 base patients; reading "memorization beyond chance". Seen on the way: the multi-lesion E1 Mann–Whitney p is 0.004 on the null case while the patient-bootstrap AUC interval [0.40, 0.74] covers 0.5 (the decision M caveat, live); H2 (ii) does not hold on the positive case, since whole-mask copies are caught by both detectors (H2 needs partial copies). Refactor: E4's `zoom_window`, `fill`, `draw_labels`, `lesion_colors` → `plotting`; `load_planted` → `sets`; new `audit.cell_rates`; `audit.auc_bootstrap` avoids a draws × S × H intermediate. pytest 151; E4 check 16/16 |
-| 4 | `score`: S scored once, every variant of decision O; raw tables only, no rates printed | production (S) | ⬜ |
-| 5 | `analyze`: every table and figure, `flagged.csv`, the outcome reading | analysis | ⬜ |
-| 6 | `check`; close the plan; carry items forward to `docs/e6-e7-plan.md` (and the E8 exit counts) | consistency checks + docs | ⬜ |
+| 4 | `score`: S scored once, every variant of decision O; raw tables only, no rates printed | production (S) | ✅ 2026-11-15 13:48, one run, completed (16.7 min): 37,161 masks (clean 32,219, minor 3,701, noisy 1,241; 463 `no_lesion` left out), main + 5 variants; E2 scored 27,078 masks under main (bound 10: 29,917; bound 25: 15,458; drop-only: 26,857), 5.0 M lesion pairs under main (σ 0.08: 11.3 M). Marker `score.complete.json` with the three SHA-256. Structural check only (no rates): every class table has one row per mask in the same key order; 8,187 numeric-looking sample IDs read back as text. `analyze` stage built (not run) while S was scored; `rehearse` re-run after moving the figures into `analyze.draw_figures`: tables identical |
+| 5 | `analyze`: every table and figure, `flagged.csv`, the outcome reading | analysis | ✅ 2026-11-15, one run, hashes equal to `score.complete.json`. **Mechanical reading: "memorization beyond chance", carried by multi-lesion masks only**: E1 copy multi excess +8.5 points [+4.3, +11.1] (S 15.8% vs H-eval 7.4%; Holm p 0.004), E2 full multi +3.0 [+0.4, +4.6] (5.9% vs 2.9%; Holm p 0.036); single-lesion cells not beyond chance (+1.3, −0.2). H2 not supported (E1 shows more excess than E2 in every comparison). Near-exact 39 (31 groups), E2 beyond-held-out 29 (23 groups), E8 count 53 (eligible by the rule). Exploratory checks after the run (report-notes sections 3 and 4): E1 multi excess holds under every variant, E2 full multi only at bound 10 and drop-only; the near-exact count and the E8 rule have no chance baseline (with ~17× more S masks than held-out masks, exceeding the held-out maximum is expected by chance); copies spread over 96 patients. Interpretation (copying of patients vs typical lesion placement) is E6's question |
+| 6 | `check`; close the plan; carry items forward to `docs/e6-e7-plan.md` (and the E8 exit counts) | consistency checks + docs | ✅ 2026-11-15: E5 check 26/26 (decisions; run logs with current settings in order prepare → rehearse → score → analyze; S read by `score` only; the three hashes unchanged since `score`; one complete score run with every variant; sensitivity thresholds, τ_D\*, held-out maxima and the drop-only identity reproduced; every `analyze` table and the outcome reading reproduced from the raw tables with the same seed; pytest 151). The table comparison was shown to fail on a damaged copy (a changed excess, a changed group label, a missing row; scratch test). Plan closed |
 
-**Next: start here.** The user reviews the rehearsal (`results/stanford_brainmets/e5/rehearse/null/`
-and `positive/`: `review.txt`, the tables, the figures). Changes to the analysis are still allowed
-now (S unseen); after them, re-run `rehearse --overwrite`. Then step 4: the `score` stage, a thin
-wrapper that loads S (main + noisy, `sets.load_pool`) and its drop-only labels (from
-`masks_raw.npz`), checks the gate and the hashes, calls `score_query` once and writes the
-completion marker.
+**E5 done (2026-11-15), ahead of the 17 Nov milestone; plan closed the same day.** Next: plan E6
+and E7 together in `docs/e6-e7-plan.md` (`docs/experiment-plan.md`, E6 and E7, including their
+"Carried over from E5" notes).
 
 **Milestone:** 17 Nov 2026, main audit tables for RQ1 and RQ2. Realistic schedule: steps 0–1 on
 15–16 Nov, steps 2–3 on 17 Nov, steps 4–5 on 18 Nov, step 6 on 19 Nov: about two days past the
@@ -345,3 +348,20 @@ frozen files, the audit config and its hash, and the stored tables).
 - pytest passes; E3 and E4 `check` still pass after step 1.
 - The user views the `prepare` review and the `rehearse` tables and figures before `score` runs.
 - After `score`: nothing in `audit:` or the frozen files changes; `analyze` and `check` confirm it.
+
+## Carried forward (2026-11-15)
+
+The open items of this plan moved to the documents where they will be used:
+
+| Item (first noted) | Moved to |
+| --- | --- |
+| The multi-lesion excess: copying of (many) patients, or a generator that places lesions where training lesions typically are? Diffuse (2,662 E1 multi copies over 96 patients, top 5 = 17%), configuration-level (C, whole-mask overlap) but not lesion-level (multi strongest pair AUC 0.38). E6's exposure ratio against the H-eval expectation per patient, and rarity, separate the two | `docs/experiment-plan.md`, E6, "Carried over from E5"; report-notes section 3 |
+| E6 inputs: `results/amibekk_v1/e5/analyze/flagged.csv` (source slice and patient per detector, chained group, main and noisy sets) and every stored pair above threshold in `processed_data/model_space/amibekk_v1/e5/` (`e2_main_slice_pairs.parquet`, `e2_main_lesion_pairs.parquet`, `classes_main.csv`); H-eval NN assignments for π_p in `processed_data/model_space/stanford_brainmets/e4/heval_classes.csv`; count per patient and chained group, analyse the multi-lesion stratum separately | `docs/experiment-plan.md`, E6, "Carried over from E5" |
+| E7 inputs and examples: `flagged.csv`, `near_exact.png`, `groups_top.png`; NN and strongest pair can name different patients (E4); for S, a report should show both the configuration match (C) and the best lesion pair, since they diverge for multi-lesion masks | `docs/experiment-plan.md`, E7, "Carried over from E5" |
+| The near-exact count and the E8 rule have no chance baseline (exceeding the maximum of n held-out scores has probability 1 / (n + 1) per mask under exchangeability): about 68 expected vs 35 observed near-exact single-lesion masks; E2 multi beyond-held-out 29 observed vs about 12 expected. The E8 decision should rest on the expected count, not the raw 53 strong groups | `docs/experiment-plan.md`, E8 and schedule; report-notes section 4 |
+| H2 not supported; partial copies not above chance; noisy masks flagged less than H-eval | report-notes section 3 (results for RQ2) |
+| The detection limit (E4 P5): S rates are lower bounds for copies with about 1 px of boundary noise | already in report-notes section 4 |
+
+Done before closing: decisions L–Q set before S was scored and enforced by the lock; S scored once;
+the analysis run once on S; the E5 check passes; the docs (data dictionary, module reference,
+scripts README) describe every E5 stage and file.

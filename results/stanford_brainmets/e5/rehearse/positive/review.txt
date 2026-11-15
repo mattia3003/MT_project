@@ -5,12 +5,12 @@ Query set: 1283 slices by mask class {'clean': 1283}; schemes {'H-cal': 989, 'pl
 
 Scoring log:
       variant  seconds  e1_scored  e2_scored  lesion_pairs
-         main     10.8       1283     1131.0      194374.0
-percentile_99      0.3       1283        NaN           NaN
-   sigma_0.08     11.2       1283     1131.0      431477.0
+         main     11.2       1283     1131.0      194374.0
+percentile_99      0.4       1283        NaN           NaN
+   sigma_0.08     11.6       1283     1131.0      431477.0
      bound_10      8.0       1283     1184.0      229489.0
-     bound_25      1.9       1283      751.0       70384.0
-    drop_only     10.8       1283     1131.0      194381.0
+     bound_25      2.1       1283      751.0       70384.0
+    drop_only     11.4       1283     1131.0      194381.0
 
 Rates, main variant (query set by its clusters, H-eval by patient; 95% intervals):
  set      class stratum                              S         H-eval                  excess

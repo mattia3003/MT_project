@@ -1,0 +1,30 @@
+E5 check: pool 'amibekk_v1' against 'stanford_brainmets', seed 2026
+
+[PASS] all E5 decisions (L-Q) are set and implemented (audit:)
+[PASS] 'prepare' outputs made with the current config values: seed, audit, calibration.bootstrap_draws, lesions.attach_gap
+[PASS] 'rehearse' outputs made with the current config values: seed, audit, calibration.bootstrap_draws, lesions.attach_gap
+[PASS] 'rehearse' ran after 'prepare': 2026-11-15T13:38:04 vs 2026-11-15T11:41:27
+[PASS] 'score' outputs made with the current config values: seed, audit, calibration.bootstrap_draws, lesions.attach_gap
+[PASS] 'score' ran after 'rehearse': 2026-11-15T13:48:16 vs 2026-11-15T13:38:04
+[PASS] 'analyze' outputs made with the current config values: seed, audit, calibration.bootstrap_draws, lesions.attach_gap
+[PASS] 'analyze' ran after 'score': 2026-11-15T13:51:57 vs 2026-11-15T13:48:16
+[PASS] 'prepare' read only T, H-cal, H-eval (S never read): ['T', 'H-cal', 'H-eval']
+[PASS] 'rehearse' read only T, H-cal, H-eval, planted (S never read): ['T', 'H-cal', 'H-eval', 'planted']
+[PASS] 'score' read only T, S: ['T', 'S']
+[PASS] 'analyze' read only T, H-eval, S tables (S never read): ['T', 'H-eval', 'S tables']
+[PASS] S scored to completion (score.complete.json): C:\Master thesis\MT_project\processed_data\model_space\amibekk_v1\e5\score.complete.json
+[PASS] audit unchanged since S was scored (marker, score and analyze logs): now f726517bc091, marker f726517bc091
+[PASS] frozen unchanged since S was scored (marker, score and analyze logs): now 3ea3b5de0589, marker 3ea3b5de0589
+[PASS] e5 unchanged since S was scored (marker, score and analyze logs): now 4aed7f78238f, marker 4aed7f78238f
+[PASS] E5 file made with the current audit: section and frozen E3 file
+[PASS] one score run with every variant; each class table has one row per scored mask, in order: 37161 masks, variants ['main', 'percentile_99', 'sigma_0.08', 'bound_10', 'bound_25', 'drop_only']
+[PASS] sensitivity thresholds equal E3 (sensitivity.csv; drop-only: frozen) and the E5 file: 30 values
+[PASS] tau_D* (decision P) reproduced from the H-cal E1 table: {'single': 0.8972, 'multi': 0.6995}
+[PASS] held-out maxima (decision Q) reproduced: 12 E1 cells, E2 {'multi': 0.5075263679996314, 'single': 1.0}
+[PASS] drop-only: held-out label maps unchanged at gap 0 (frozen thresholds apply): T 4, H-cal 0, H-eval 0
+[PASS] every analyze table reproduced from the raw tables (same seed): 10 tables
+[PASS] outcome reading reproduced: memorization beyond chance
+[PASS] no H-eval slice is near-exact or beyond the held-out maximum (by construction)
+[PASS] unit tests (pytest) pass: 151 passed in 11.96s
+
+26 passed, 0 failed

@@ -41,7 +41,9 @@ Status: ✅ implemented · ⏳ planned
 | `e4_validate.py check` | ✅ | all E4 outputs, T and H-eval, the frozen file | `results/<dataset>/e4/check_report.txt` (PASS/FAIL: decisions, run logs reading only T, H-eval and the planted set, frozen file unchanged, planted set reproduced from the seed, P1 = bases, bases from T and added lesions from H-eval, gate and verdict reproduced from the stored tables, unit tests; exit code 1 on any failure) |
 | `e5_audit.py prepare` | ✅ | decisions O, P, Q (`audit:`), frozen file, E3 H-cal tables and `sensitivity.csv`, E4 H-eval tables, T / H-cal / H-eval label maps and `seg` volumes; never S | `configs/frozen/e5_<dataset>.yaml` (sensitivity thresholds re-derived on H-cal and equal to E3's, tau_D* for H2, held-out maxima for near-exact copies, drop-only check; read by `score` and `analyze`); `<output_root>/<dataset>/e5/` (drop-only T labels, H-eval under every variant); `results/<dataset>/e5/prepare/` (`review.txt`, thresholds, maxima, H-eval rates per variant); refuses once S has been scored |
 | `e5_audit.py rehearse` | ✅ | `prepare` outputs (same `audit:`), frozen files, T, H-cal, H-eval, E4 planted set; never S | the scoring and analysis code that will run on S, on mock query sets: `null` (H-cal: no excess expected) and `positive` (H-cal + planted P1, P2, P4: excess, right source patients, near-exact copies expected); `<output_root>/<dataset>/e5/rehearse/<case>/` (raw tables), `results/<dataset>/e5/rehearse/<case>/` (every table and figure `analyze` will write, `review.txt` with the outcome reading) |
-| `e5_audit.py score`, `analyze`, `check` | ⏳ planned (`docs/e5-plan.md`) | as above; S only in `score` | `score` (S once, raw tables only), `analyze` (rates, tests, groups, near-exact, `flagged.csv`), `check` |
+| `e5_audit.py score` | ✅ | the E4 gate (PASS / ACCEPTED), `prepare` and `rehearse` made with the current `audit:` and frozen files, T, S (pool `qc.csv`, `labels.npz`, `masks_raw.npz`; main and noisy masks) | `<output_root>/<pool>/e5/`: raw tables of S (main and every variant), `score_log.csv`, `score.complete.json`; no rate shown; runs once (the marker locks `prepare`, `audit:` and itself) |
+| `e5_audit.py analyze` | ✅ | `score` outputs and marker (the `audit:` section and both frozen files must equal those `score` recorded), H-eval baseline, T, pool labels and sample files (figures) | `results/<pool>/e5/analyze/`: every table and figure of the rehearsal, on S; `flagged.csv` (read by E6, E7, E8); `review.txt` ending in the mechanical outcome reading and the E8 exit count |
+| `e5_audit.py check` | ✅ | all E5 outputs, the frozen files, `audit:` | `results/<pool>/e5/check_report.txt` (PASS/FAIL: decisions, run logs in order with S read by `score` only, the lock, one complete score run, `prepare` values and every `analyze` table reproduced with the same seed, unit tests; exit code 1 on any failure) |
 | `e6_exposure.py` | ⏳ | E5 outputs | patient exposure, rarity, duplication |
 | `e7_reports.py` | ⏳ | E5, E6 outputs, planted copies | match reports, deletion test, correctness |
 | `e8_paired_mri.py` | ⏳ (optional) | E5 outputs, paired MRIs | paired-MRI similarity |
@@ -108,7 +110,14 @@ decisions L–Q, and the E5 file from `prepare`; see `docs/e5-plan.md`)
 .venv\Scripts\python.exe scripts\e5_audit.py prepare             # no S: sensitivity thresholds, tau_D*, held-out maxima, H-eval per variant
 .venv\Scripts\python.exe scripts\e5_audit.py rehearse            # no S: the S code on mock sets (H-cal; H-cal + planted copies), a few min
 ```
-`prepare` refuses to run once S has been scored, even with `--overwrite`.
+```powershell
+.venv\Scripts\python.exe scripts\e5_audit.py score               # S once (main + noisy, every variant), ~1 h; raw tables only
+.venv\Scripts\python.exe scripts\e5_audit.py analyze             # needs score: every table and figure, flagged.csv, the outcome reading
+.venv\Scripts\python.exe scripts\e5_audit.py check               # consistency checks of all E5 outputs (exit code 1 on failure; re-runs the analysis, a few min)
+```
+`prepare` and `score` refuse to run once S has been scored, even with `--overwrite`. `score
+--overwrite` only replaces the tables of a run that stopped before writing `score.complete.json`;
+record such a re-run in `docs/process-log.md`.
 
 **Look at one slice** (after `lesions`): full-size picture with its lesion table, written to
 `results/<dataset|pool>/e0b/views/<key>.png`

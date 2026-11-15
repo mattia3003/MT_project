@@ -1,0 +1,135 @@
+E5 analyze: pool 'amibekk_v1' against 'stanford_brainmets' (S scored once, 2026-11-15T13:48:16; the analysis fixed by decisions L-Q, hashes equal to those recorded by score)
+
+Query set: 37161 slices by mask class {'clean': 32219, 'minor': 3701, 'noisy': 1241}; schemes {'<n>': 8187, 'file_3_<n>': 5935, 'file_2_<n>': 5912, 'file_<n>': 5881, 'file_5_<n>': 5629, 'file_4_<n>': 5617}.
+
+Scoring log:
+      variant  seconds  e1_scored  e2_scored  lesion_pairs
+         main    257.6      37161    27078.0     4996525.0
+percentile_99     14.9      37161        NaN           NaN
+   sigma_0.08    270.2      37161    27078.0    11275666.0
+     bound_10    194.1      37161    29917.0     6348029.0
+     bound_25     26.0      37161    15458.0     1598646.0
+    drop_only    237.3      37161    26857.0     4956635.0
+
+Rates, main variant (query set by its clusters, H-eval by patient; 95% intervals):
+       set      class stratum                                 S         H-eval                  excess
+      main    e1_copy  single 0.085 [0.081, 0.088] (1616/19117) 0.072 (50/696) +0.013 [-0.014, +0.039]
+      main    e1_copy   multi 0.158 [0.153, 0.164] (2662/16803) 0.074 (29/393) +0.085 [+0.043, +0.111]
+      main    e2_full  single 0.069 [0.066, 0.073] (1382/19911) 0.071 (45/634) -0.002 [-0.027, +0.022]
+      main    e2_full   multi   0.059 [0.054, 0.066] (357/6006)  0.029 (8/272) +0.030 [+0.004, +0.046]
+      main e2_partial  single  0.033 [0.031, 0.036] (665/19911) 0.030 (19/634) +0.003 [-0.014, +0.018]
+      main e2_partial   multi    0.011 [0.009, 0.014] (69/6006) 0.055 (15/272) -0.044 [-0.074, +0.001]
+      main e2_flagged  single 0.103 [0.098, 0.107] (2047/19911) 0.101 (64/634) +0.002 [-0.026, +0.030]
+      main e2_flagged   multi   0.071 [0.065, 0.077] (426/6006) 0.085 (23/272) -0.014 [-0.037, +0.027]
+     noisy    e1_copy  single      0.005 [0.000, 0.013] (2/372) 0.072 (50/696) -0.066 [-0.093, -0.040]
+     noisy    e1_copy   multi     0.060 [0.044, 0.076] (52/869) 0.074 (29/393) -0.014 [-0.056, +0.017]
+     noisy    e2_full  single      0.014 [0.005, 0.024] (8/572) 0.071 (45/634) -0.057 [-0.083, -0.031]
+     noisy    e2_full   multi      0.003 [0.000, 0.008] (2/589)  0.029 (8/272) -0.026 [-0.051, -0.010]
+     noisy e2_partial  single      0.003 [0.000, 0.009] (2/572) 0.030 (19/634) -0.026 [-0.045, -0.011]
+     noisy e2_partial   multi      0.002 [0.000, 0.005] (1/589) 0.055 (15/272) -0.053 [-0.086, -0.009]
+     noisy e2_flagged  single     0.017 [0.007, 0.028] (10/572) 0.101 (64/634) -0.083 [-0.114, -0.055]
+     noisy e2_flagged   multi      0.005 [0.000, 0.012] (3/589) 0.085 (23/272) -0.079 [-0.102, -0.033]
+main+noisy    e1_copy  single 0.083 [0.079, 0.087] (1618/19489) 0.072 (50/696) +0.011 [-0.015, +0.037]
+main+noisy    e1_copy   multi 0.154 [0.148, 0.159] (2714/17672) 0.074 (29/393) +0.080 [+0.042, +0.105]
+main+noisy    e2_full  single 0.068 [0.064, 0.071] (1390/20483) 0.071 (45/634) -0.003 [-0.027, +0.020]
+main+noisy    e2_full   multi   0.054 [0.049, 0.060] (359/6595)  0.029 (8/272) +0.025 [-0.003, +0.041]
+main+noisy e2_partial  single  0.033 [0.030, 0.035] (667/20483) 0.030 (19/634) +0.003 [-0.013, +0.017]
+main+noisy e2_partial   multi    0.011 [0.008, 0.013] (70/6595) 0.055 (15/272) -0.045 [-0.075, -0.000]
+main+noisy e2_flagged  single 0.100 [0.096, 0.104] (2057/20483) 0.101 (64/634) -0.001 [-0.030, +0.026]
+main+noisy e2_flagged   multi   0.065 [0.059, 0.071] (429/6595) 0.085 (23/272) -0.020 [-0.042, +0.023]
+
+Primary family (decision M; Holm over 4 cells):
+  class stratum  excess  excess_low  excess_high      p  p_holm  beyond_chance
+e1_copy  single  0.0127     -0.0135       0.0387 0.1594  0.3188          False
+e1_copy   multi  0.0846      0.0429       0.1107 0.0010  0.0040           True
+e2_full  single -0.0016     -0.0272       0.0216 0.5602  0.5602          False
+e2_full   multi  0.0300      0.0040       0.0465 0.0120  0.0360           True
+
+Excess per sensitivity variant (main set; decision O):
+variant              main  percentile_99  sigma_0.08  bound_10  bound_25  drop_only
+class      stratum                                                                 
+e1_copy    single   0.013          0.005       0.013     0.013     0.013      0.015
+           multi    0.085          0.027       0.085     0.085     0.085      0.090
+e2_full    single  -0.002         -0.003       0.006     0.009     0.010      0.000
+           multi    0.030          0.003       0.031     0.031    -0.010      0.034
+e2_partial single   0.003          0.004       0.011     0.011     0.007      0.004
+           multi   -0.044         -0.006      -0.064    -0.042     0.002     -0.043
+e2_flagged single   0.002          0.001       0.018     0.020     0.017      0.004
+           multi   -0.014         -0.003      -0.033    -0.011    -0.009     -0.008
+
+Size-confound check (H-eval standardised to the query set's stratum x size mix):
+     class stratum  rate_s  rate_h  excess  excess_low  excess_high
+   e1_copy  single   0.085   0.075   0.010      -0.012        0.035
+   e1_copy   multi   0.158   0.068   0.090       0.046        0.108
+   e1_copy     all   0.119   0.072   0.047       0.023        0.063
+   e2_full  single   0.069   0.077  -0.008      -0.035        0.016
+   e2_full   multi   0.059   0.029   0.030       0.004        0.049
+   e2_full     all   0.067   0.066   0.001      -0.020        0.020
+e2_partial  single   0.033   0.036  -0.002      -0.026        0.016
+e2_partial   multi   0.011   0.049  -0.037      -0.058       -0.002
+e2_partial     all   0.028   0.039  -0.011      -0.028        0.006
+e2_flagged  single   0.103   0.113  -0.010      -0.042        0.018
+e2_flagged   multi   0.071   0.078  -0.007      -0.026        0.031
+e2_flagged     all   0.095   0.105  -0.010      -0.035        0.014
+
+AUC (P(query score > H-eval score); Mann-Whitney p treats slices as independent):
+         score stratum   n_s  n_h    auc  auc_low  auc_high  mann_whitney_p
+      e1_score  single 19117  696 0.5139   0.4714    0.5614          0.1063
+      e1_score   multi 16803  393 0.6745   0.5624    0.7666          0.0000
+          e2_C  single 19911  634 0.5396   0.4938    0.5905          0.0003
+          e2_C   multi  6006  272 0.6818   0.5335    0.7765          0.0000
+e2_strongest_s  single 19911  634 0.5149   0.4656    0.5660          0.1009
+e2_strongest_s   multi  6006  272 0.3778   0.3184    0.4947          1.0000
+
+RQ2 cross-tabulation (informative subset):
+   set  e1_copy e2_class  slices  share
+ query    False     full    1007  0.039
+ query    False    novel   20887  0.806
+ query    False  partial     615  0.024
+ query     True     full     732  0.028
+ query     True    novel    2557  0.099
+ query     True  partial     119  0.005
+H-eval    False     full      35  0.039
+H-eval    False    novel     775  0.855
+H-eval    False  partial      34  0.038
+H-eval     True     full      18  0.020
+H-eval     True    novel      44  0.049
+
+H2 (decision P; holds if the interval of E2 - E1 excess is above 0):
+                     comparison stratum   n_s  n_h  rate_s_e2  rate_h_e2  excess_e2  rate_s_e1  rate_h_e1  excess_e1  difference  difference_low  difference_high     p  h2_holds  s_e2_only  s_e1_only  h_e2_only  h_e1_only
+         (i) E2 full vs E1 copy  single 19911  634     0.0694     0.0710    -0.0016     0.1501     0.0899     0.0602     -0.0617         -0.0933          -0.0355 1.000     False        683       2289         28         40
+         (i) E2 full vs E1 copy   multi  6006  272     0.0594     0.0294     0.0300     0.0699     0.0184     0.0515     -0.0215         -0.0574           0.0089 0.930     False        324        387          7          4
+         (i) E2 full vs E1 copy     all 25917  906     0.0671     0.0613     0.0058     0.1315     0.0733     0.0582     -0.0524         -0.0803          -0.0285 1.000     False       1007       2676         35         44
+(ii) E2 flagged vs E1 at tau_D*  single 19911  634     0.1028     0.1009     0.0019     0.2060     0.1136     0.0924     -0.0905         -0.1326          -0.0484 1.000     False       1063       3117         43         51
+(ii) E2 flagged vs E1 at tau_D*   multi  6006  272     0.0709     0.0846    -0.0136     0.1277     0.0368     0.0909     -0.1046         -0.1370          -0.0384 0.996     False        370        711         22          9
+(ii) E2 flagged vs E1 at tau_D*     all 25917  906     0.0954     0.0971    -0.0017     0.1878     0.0958     0.0921     -0.0938         -0.1259          -0.0578 1.000     False       1433       3828         65         60
+
+Adjacent-slice groups (decision N, chained):
+             set      class  flags  source_slices  groups  patients
+      query main    e1_copy   4278           1180     455        99
+      query main    e2_full   1739            789     365        86
+      query main e2_partial    734            354     174        50
+      query main e2_flagged   2473           1030     400        87
+     query noisy    e1_copy     54             45      38        29
+     query noisy    e2_full     10             10      10         9
+     query noisy e2_partial      3              3       3         3
+     query noisy e2_flagged     13             13      13        12
+query main+noisy    e1_copy   4332           1186     456        99
+query main+noisy    e2_full   1749            793     364        86
+query main+noisy e2_partial    737            355     174        50
+query main+noisy e2_flagged   2486           1033     400        87
+          H-eval    e1_copy     79             69      61        42
+          H-eval    e2_full     53             49      42        32
+          H-eval e2_partial     34             31      31        22
+          H-eval e2_flagged     87             78      70        43
+
+Near-exact copies and the beyond-held-out tier (decision Q):
+             set  near_exact  near_exact_groups  beyond_heldout_e2  beyond_heldout_e2_groups  e8_strong_groups  e8_eligible  e1_over_0.9_single  e1_over_0.9_single_rate  e1_over_0.9_multi  e1_over_0.9_multi_rate
+      query main          39                 31                 29                        23                53         True                1766                   0.0924                  3                  0.0002
+     query noisy           0                  0                  1                         1                 1        False                   3                   0.0081                  0                  0.0000
+query main+noisy          39                 31                 30                        24                53         True                1769                   0.0908                  3                  0.0002
+          H-eval           0                  0                  0                         0                 0        False                  56                   0.0805                  0                  0.0000
+
+Flagged queries in flagged.csv: 5964.
+
+OUTCOME (mechanical reading): memorization beyond chance (beyond chance: e1_copy multi, e2_full multi); near-exact copies in the main set: 39. E8 exit count: 53 strong groups (eligible at >= 20: yes).

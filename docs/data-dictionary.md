@@ -39,7 +39,9 @@ ID columns as text.
 | | `check` | ✅ | all E4 outputs, T and H-eval label maps, the frozen file | `results/<dataset>/e4/check_report.txt`, `check.run_info.json` |
 | `e5_audit.py` | `prepare` | ✅ | decisions O, P, Q (`audit:`), the frozen file, E3 H-cal tables and `sensitivity.csv`, E4 H-eval tables, T / H-cal / H-eval label maps and model-space `seg` volumes; never S | `configs/frozen/e5_<dataset>.yaml` + run log, `<output_root>/<dataset>/e5/` (drop-only T labels, H-eval under every variant), `results/<dataset>/e5/prepare/` |
 | | `rehearse` | ✅ | `prepare` outputs (same `audit:`), the frozen files, T, H-cal, H-eval, the E4 planted set; never S | `<output_root>/<dataset>/e5/rehearse/<case>/` (raw tables), `results/<dataset>/e5/rehearse/<case>/` (analysis) |
-| | `score`, `analyze`, `check` | planned (`docs/e5-plan.md`) | as above; S only in `score` | `<output_root>/<pool>/e5/`, `results/<pool>/e5/` |
+| | `score` | ✅ | the E4 gate, `prepare` and `rehearse` outputs (same hashes), the frozen files, T and its drop-only labels, S: pool `qc.csv`, `labels.npz`, `masks_raw.npz` (main and noisy masks) | `<output_root>/<pool>/e5/` (raw tables, `score_log.csv`, `score.complete.json`) |
+| | `analyze` | ✅ | `score` outputs and marker (hashes must match), H-eval baseline (E4 and `prepare` class tables), T, pool `labels.npz`, `synthetic_index.csv` and sample files (figure backgrounds) | `results/<pool>/e5/analyze/` (layout as the rehearsal analysis above) |
+| | `check` | ✅ | all E5 outputs, the frozen files, `audit:`, T, H-cal, H-eval, E3 and E4 tables | `results/<pool>/e5/check_report.txt`, `check.run_info.json` |
 | `e6_exposure.py` | *tbd* | planned | E5 outputs | exposure, rarity, duplication |
 | `e7_reports.py` | *tbd* | planned | E5, E6 outputs, planted copies | match reports, deletion test |
 | `e8_paired_mri.py` | — | optional | E5 outputs, paired MRIs | paired-MRI similarity |
@@ -640,6 +642,9 @@ for S. Not in git. No rates are computed here.
 | `e1_main.csv`, `e1_drop_only.csv` | E1 tables (columns as E4's `e1_<set>.csv`) |
 | `e2_<variant>_*` | The four E2 tables (`lesionmatch.save_tables`) of `main` and of every variant that runs E2 again (sigma, bound, drop-only) |
 | `rehearse.run_info.json` | Run log (inputs T, H-cal, H-eval, planted; SHA-256 of the frozen E3 file, the E5 file and `audit:`) |
+| `score_log.csv` (S only) | Per run (main and every variant): `variant`, `seconds`, `e1_scored`, `e2_scored`, `lesion_pairs` |
+| `score.run_info.json` (S only) | Run log of `score` (inputs T and S, the pool, the three SHA-256, the E4 verdict, masks left out) |
+| `score.complete.json` (S only) | The completion marker: time, the SHA-256 of `audit:`, the frozen E3 file and the E5 file, queries, masks per mask class, variants, minutes. While it exists, `score` and `prepare` refuse to run (the lock), and `analyze` checks the hashes against it |
 
 ### Analysis of a scored query set: `results/<dataset>/e5/rehearse/<case>/` (and later `results/<pool>/e5/analyze/`)
 
@@ -666,4 +671,16 @@ Excess intervals resample the query set by `cluster` and H-eval by patient, inde
 | `copied_area.png` | Copied-area share of the E2-flagged queries by class and stratum (if any) |
 | `near_exact.png` | Near-exact copies (highest E1 first, up to 12) next to their source slice (if any) |
 | `groups_top.png` | One query per largest E2 group next to its source slice (if any) |
-| `run_info.json` | Run log (as above) |
+| `run_info.json` | Run log (as above; `analyze` also logs the three SHA-256 and the outcome reading) |
+
+### `results/<pool>/e5/check_report.txt`
+
+Written by `check`. In git. One PASS/FAIL line per check: decisions L–Q set and implemented; the
+run logs of `prepare`, `rehearse`, `score` and `analyze` made with today's `audit:`, seed,
+bootstrap draws and attach gap, in that order, with S read by `score` only; the lock (the `audit:`
+section, the frozen E3 file and the E5 file unchanged since `score`, in the marker and both logs;
+the E5 file made with them); one complete `score` run with every variant and one row per mask in
+every class table; the sensitivity thresholds, tau_D*, held-out maxima and drop-only identity
+reproduced; every `analyze` table and the outcome reading reproduced from the raw tables with the
+same seed; no H-eval slice near-exact; the unit tests. Exit code 1 on any failure. Run log:
+`check.run_info.json`.

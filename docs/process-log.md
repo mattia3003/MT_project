@@ -492,3 +492,45 @@ in full, with what replaced them.
   - Results in `docs/e5-plan.md` (status, step 3) and report-notes section 3.
   - pytest 151; Pylance clean.
   *Source: `results/stanford_brainmets/e5/rehearse/null/review.txt`, `positive/review.txt`.*
+- **E5 step 4: S scored once** (2026-11-15, completed 13:48, 16.7 min; the user committed and
+  pushed steps 0–3 first). Stage `score` added to `src/memtk/e5/score.py` (`run_score`); before it
+  ran, `check_prepared` and `drop_only_t` moved from `rehearse` to `e5.common`, `heldout` and
+  `informative_areas` to `e5.analyze` (shared with `analyze`), and `rehearse` was re-run: tables
+  identical to the committed rehearsal, only timings differ.
+  - *Run:* one run, no re-run, exit code 0, run in the background (32 GB RAM, 16.5 GB free at the
+    start). 37,161 masks (clean 32,219, minor 3,701, noisy 1,241; the 463 `no_lesion` masks left
+    out); main and the five variants of decision O. Per run (`score_log.csv`): main 258 s, 5.0 M
+    lesion pairs; percentile 99 15 s (re-threshold); σ 0.08 270 s, 11.3 M pairs; bound 10 194 s,
+    6.3 M; bound 25 26 s, 1.6 M; drop-only 237 s, 5.0 M. E2-scorable masks: 27,078 (main), 29,917
+    (bound 10), 15,458 (bound 25), 26,857 (drop-only: 221 fewer than main, masks whose only
+    informative lesion reaches 12 px through attached strays). No rate was computed or shown.
+  - *Structural check afterwards* (inline script; counts and IDs only): every class table has
+    37,161 rows in the key order of `queries.csv`; 8,187 numeric-looking sample IDs (scheme `<n>`)
+    are read back as text, which the `ID_COLUMNS` extension of step 2 made possible.
+  - *Meanwhile* (with the user's agreement that it could not affect the running process): the
+    `analyze` stage was written (`run_analyze`, not run), the figure code moved from `rehearse` to
+    `analyze.draw_figures`, and `rehearse` re-run once more: tables identical. `analyze` was called
+    once on purpose before the marker existed and refused, as intended.
+  *Source: `processed_data/model_space/amibekk_v1/e5/score_log.csv`, `score.complete.json`,
+  `score.run_info.json` (not in git).*
+- **E5 step 5: `analyze` run once on S** (2026-11-15, at the user's request after step 4; exit code
+  0; hashes equal to `score.complete.json`). Results in report-notes section 3, the near-exact
+  caveat in section 4, the status in `docs/e5-plan.md`.
+  - *Exploratory checks after the run* (inline scripts, nothing written, not part of the fixed
+    analysis; prompted by `near_exact.png`, where every example is a small single blob): (1) the
+    chance expectation of the near-exact count under exchangeability, P(a new score exceeds the
+    maximum of n held-out scores) = 1/(n + 1), summed over the cells of decision Q, from the cell
+    counts in `configs/frozen/e5_stanford_brainmets.yaml` and the S main class table; (2) the
+    excess intervals of the primary cells under every sensitivity variant
+    (`results/amibekk_v1/e5/analyze/sensitivity.csv`); (3) the spread of E1 multi-lesion copies
+    over source patients (`flagged.csv`).
+  *Source: `results/amibekk_v1/e5/analyze/review.txt`, `rates.csv`, `sensitivity.csv`, `flagged.csv`.*
+- **E5 step 6: `check`; E5 done** (milestone of 17 Nov met on 15 Nov). New `src/memtk/e5/check.py`
+  and stage `check` (reuses `checks.CheckReport` and `check_run_logs`, `prepare`'s `tau_d_star` and
+  `heldout_maxima`, and `analyze_scored`). First run 26/26. Because every check passed at once, a
+  scratch test confirmed that the table comparison can fail: a copy of the analysis folder with
+  one excess changed by 0.001, one group label changed and one row removed was reported as
+  `rates.excess`, `flagged.e2_group` and `near_exact` (scratchpad only, not in the repo). Plan
+  closed: `docs/e5-plan.md` marked reference only with a "Carried forward" table; "Carried over
+  from E5" notes added to E6, E7 and E8 in `docs/experiment-plan.md`; CLAUDE.md says no active
+  plan until E6 + E7 are planned. *Source: `results/amibekk_v1/e5/check_report.txt`.*

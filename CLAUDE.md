@@ -38,15 +38,19 @@ Reference docs (read the relevant one before starting work):
   patient), K (go/no-go criteria; P5 reported only), the accepted deviation, stages, check 16/16.
   Its open items moved to `docs/experiment-plan.md` (E5, E7 "Carried over from E4") and
   report-notes.
-- `docs/e5-plan.md`: E5 plan, ACTIVE (from 2026-11-15). S is scored once, so every analysis
-  choice is fixed there and in config `audit:` before `score` runs (lock: `analyze` refuses if
-  `audit:` or the frozen files changed). Decisions L-Q (2026-11-15): L noisy masks scored by both
-  detectors, separate rows; M primary = excess over H-eval for E1 copy and E2 full x single/multi,
-  Holm-adjusted bootstrap p; N chained +-2 grouping by source patient; O sensitivities on S:
-  99th pct, sigma 0.08, bound 10/25, drop-only (frozen thresholds valid: H-cal/H-eval have no
-  strays); P H2 matched on H-cal (tau_D*); Q near-exact = E1 >= 0.9 and above the held-out max
-  per stratum x size bin. Next plans: E6 + E7 in one plan, E8 alone (experiment-plan,
-  "Plan documents for E5-E8").
+- `docs/e5-plan.md`: E5 plan, CLOSED 2026-11-15 (reference only, not updated). S scored ONCE
+  with every analysis choice fixed beforehand in config `audit:` (decisions L-Q) and the E5 file
+  `configs/frozen/e5_stanford_brainmets.yaml`; `score.complete.json` locks both (prepare, score
+  refuse; analyze, check verify the hashes). NEVER change `audit:`, the E5 file or the E3 file;
+  any further analysis of S is exploratory and labelled so. Result: "memorization beyond chance"
+  in the multi-lesion stratum only (E1 copy +8.5, E2 full +3.0 points over H-eval), diffuse over
+  96 patients and configuration-level; whether that is patient copying or typical lesion
+  placement is E6's question. The near-exact count and the E8 rule lack a chance baseline
+  (report-notes section 4). E5 check 26/26. Open items moved to `docs/experiment-plan.md`
+  (E6, E7, E8 "Carried over from E5").
+- No active working plan until E6 + E7 are planned: the next one is `docs/e6-e7-plan.md`; read
+  `docs/experiment-plan.md` E6 and E7 including their "Carried over" notes first. E8 gets its own
+  plan, its go/no-go based on the chance-expected count (E8 "Carried over from E5").
 This file is a summary. If it disagrees with the docs, the docs win; flag the mismatch.
 
 ## Data
@@ -109,10 +113,13 @@ This file is a summary. If it disagrees with the docs, the docs win; flag the mi
   patients in training).
 - Data use is authorized: all results, including match reports showing real masks, may go in
   the written report (use pseudonymous patient IDs).
-- Decided during the work (not yet fixed): the informative-lesion bound (set in E3 from H-cal;
-  E0b `stats` gives what each candidate bound costs each set in `bound_impact_<pool>.csv`;
-  decision G in `docs/e1-e3-plan.md`), the threshold strata (decision H), and the E4 go/no-go
-  criteria (must be fixed before E4 runs; never tune on S).
+- Fixed during the work: the informative-lesion bound 12 px (decision G), stratified thresholds
+  (H), the E4 go/no-go criteria (K), the E5 analysis (L-Q, locked). Still open, to decide when
+  E6 + E7 are planned (`docs/experiment-plan.md` E6/E7 "Carried over" notes, report-notes
+  section 5): 3D lesion identity for H1 (slice-to-slice linking vs 26-connectivity + sensitivity);
+  how a match report shows a flag whose nearest neighbour and strongest pair name different
+  patients, and which one the E7 correctness check scores; which S flags get match reports (most
+  flags are chance matches); the E8 go/no-go on the chance-expected count.
 - Environment: `requirements-lock.txt` pins only what the project needs (direct dependencies
   in `pyproject.toml` plus what they require; Python 3.11.9, Windows), at the versions that
   produced E0; install with `pip install --no-deps -r requirements-lock.txt` (monai 1.6.0
@@ -149,7 +156,7 @@ original weights = Branch A fallback); the preliminary toolkit is reused in the 
 
 Timeline: full draft to supervisor by 30 Nov 2026, submission 9 Dec 2026. Milestones:
 E0 + mask QC by 31 Oct (done 3 Nov); E1-E3 (bound + thresholds frozen) by 9 Nov (done 3 Nov); E4 gate by 13 Nov (done 4 Nov, ACCEPTED);
-E5 by 17 Nov; E6/E7 by 24 Nov; E8 (optional RQ4) last, if time. If behind, cut: E8 (moves to
+E5 by 17 Nov (done 15 Nov); E6/E7 by 24 Nov; E8 (optional RQ4) last, if time. If behind, cut: E8 (moves to
 the master thesis), then optional small-lesion agreement (E2/E7) (null model already dropped),
 then E7 taxonomy, then the lesion-level part of
 the E7 correctness check (keep source-patient correctness + deletion test). Never cut E4.
@@ -245,6 +252,17 @@ can this be detected and explained using generated outputs alone?
   (`validation.accepted_deviation`), verdict ACCEPTED (`memtk.e4.common.gate_status`). E5 runs on
   PASS or ACCEPTED, reuses the stored H-eval tables, and compares S with the measured H-eval
   rates, not 5%.
+- E5 result (2026-11-15, `docs/e5-plan.md`, `results/amibekk_v1/e5/analyze/`): S main = 35,920
+  masks (+ 1,241 noisy). Primary family (excess over H-eval, Holm): E1 copy multi 15.8% vs 7.4%
+  (+8.5 points [4.3, 11.1], p_holm 0.004) and E2 full multi 5.9% vs 2.9% (+3.0 [0.4, 4.6],
+  p_holm 0.036) beyond chance; single-lesion masks at chance. Partial copies not above chance;
+  H2 not supported (E1 shows more excess than E2); noisy masks flagged less than H-eval.
+  Exploratory: E1 multi excess robust to every sensitivity variant, E2 multi not; copies diffuse
+  (96 source patients, top 5 = 17%) and configuration-level (multi strongest-pair AUC 0.38 <
+  0.5): patient copying vs typical lesion placement is E6's question. Near-exact count (39) and
+  E8 rule (53 strong groups) lack a chance baseline (S is ~17x held-out; ~68 single near-exact
+  and ~12 E2-multi beyond-max expected by chance). E6/E7 input: `flagged.csv` + S tables in
+  `processed_data/model_space/amibekk_v1/e5/` (see the data dictionary, section 8).
 - Count per patient and per lesion, not per slice (adjacent slices are near-duplicates).
 
 ## Master thesis (plan: retrain both models with fixed seeds, Branch B; compute is available)

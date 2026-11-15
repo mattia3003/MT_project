@@ -545,6 +545,13 @@ move the old ones, with the reason, to the process log.
   (excess, AUC, difference of excesses) is taken per draw. Implemented exactly as a multinomial
   over cluster types, so 20,000 independent masks cost as little as 26 patients. *Source:
   `docs/e5-plan.md` (decision M), `src/memtk/audit.py` (`resample_sums`), 2026-11-15.*
+- **E5 verified: S scored once, the analysis fixed before, reproducible** (2026-11-15). The E5 check
+  passes 26/26: the `audit:` section and both frozen files are unchanged since S was scored (SHA-256
+  in the completion marker and the run logs); `prepare` and `rehearse` read no synthetic data, and
+  `score` is the only stage that did, in one complete run; every `analyze` table and the outcome
+  reading are reproduced from the stored raw tables with the same seed. The scoring and analysis
+  code had been run first on mock query sets (H-cal; H-cal + planted copies) with the expected
+  results. *Source: `results/amibekk_v1/e5/check_report.txt`, `docs/e5-plan.md`.*
 
 ## 3. Findings
 
@@ -875,6 +882,51 @@ move the old ones, with the reason, to the process log.
 
   *Source: `results/stanford_brainmets/e5/rehearse/null/review.txt`, `positive/review.txt`,
   `rates.csv`, `auc.csv`, `h2.csv`.*
+- **E5 main audit: synthetic multi-lesion masks are closer to training masks than held-out masks
+  are; single-lesion masks are not** (E5 `analyze`, 2026-11-15; S scored once; every analysis
+  choice fixed beforehand, decisions L–Q). Main set: 35,920 masks (E1-scorable 35,920; E2-scorable
+  25,917). Pre-registered results:
+  - *Primary family (Holm over 4 cells):* E1 copy multi 15.8% (2,662 / 16,803) vs H-eval 7.4%,
+    excess +8.5 points [+4.3, +11.1], Holm p 0.004, beyond chance; E2 full multi 5.9% (357 / 6,006)
+    vs 2.9%, excess +3.0 [+0.4, +4.6], Holm p 0.036, beyond chance; E1 copy single 8.5% vs 7.2%,
+    +1.3 [−1.4, +3.9]; E2 full single 6.9% vs 7.1%, −0.2 [−2.7, +2.2]. Mechanical reading:
+    "memorization beyond chance", in the multi-lesion stratum only.
+  - *Size-confound check:* H-eval standardised to S's size mix gives the same excesses (E1 copy
+    multi +9.0, E2 full multi +3.0 points): the difference is not lesion size.
+  - *AUC* (patient bootstrap): multi-lesion E1 score 0.67 [0.56, 0.77], E2 C 0.68 [0.53, 0.78];
+    single-lesion 0.51–0.54 with intervals covering 0.5. Multi-lesion strongest single lesion pair
+    0.38 [0.32, 0.49]: S's best individual lesion match is *weaker* than held-out masks' while the
+    configuration as a whole is closer.
+  - *Partial copies:* not above chance (single 3.3% vs 3.0%; multi 1.1% vs 5.5%, below).
+  - *H2 not supported:* at equal false-positive rate, E1 shows more excess than E2 in every
+    comparison (e.g. (ii) all: difference of excesses −9.4 points [−12.6, −5.8]).
+  - *Noisy masks* (1,241) are flagged far less than H-eval (e.g. E2 flagged single 1.7% vs 10.1%):
+    excluding them hides no copies.
+  - *Groups:* E1 copy flags (main) 4,278 on 1,180 source slices, 455 chained groups, 99 source
+    patients; E2 flagged 2,473 / 1,030 / 400 / 87.
+  - *Near-exact copies* (decision Q): 39 (31 groups); E2 multi-lesion beyond the held-out C
+    maximum: 29 (23 groups); E8 strong groups 53 (rule: ≥ 20). See section 4 for why these counts
+    need a chance baseline.
+
+  *Source: `results/amibekk_v1/e5/analyze/review.txt`, `rates.csv`, `rates_by_size.csv`,
+  `auc.csv`, `h2.csv`, `groups.csv`, `near_exact.csv`.*
+- **E5, exploratory (after the run; not part of the fixed analysis): what the multi-lesion excess
+  looks like** (2026-11-15).
+  - *Robustness:* the E1 copy multi excess holds under every sensitivity variant (smallest at the
+    99th percentile, +2.7 [+0.7, +3.7]); the E2 full multi excess holds at bound 10 (+3.1) and
+    drop-only (+3.4) but not at σ 0.08 (+3.1 [−1.1, +5.6]), bound 25 (−1.0) or the 99th percentile
+    (+0.3).
+  - *Spread:* the 2,662 E1 multi-lesion copies name 96 source patients; the five most frequent
+    take 17%.
+  - *Reading, to be tested in E6:* the excess is diffuse (almost every training patient), shows in
+    whole-mask overlap and configuration score but not in the best single lesion pair, and fades
+    for E2 at stricter thresholds. That is compatible both with copying of many patients and with
+    a generator that places lesions where training lesions typically are (E0b: synthetic lesion
+    positions are compact). E6's exposure ratio (observed against the H-eval expectation per
+    patient) and rarity test separate the two; E5 alone does not.
+
+  *Source: `results/amibekk_v1/e5/analyze/sensitivity.csv`, `flagged.csv`; process log
+  2026-11-15.*
 
 ## 4. Limitations and assumptions
 
@@ -1000,6 +1052,21 @@ move the old ones, with the reason, to the process log.
   near-exact. *Source: read-only query of `processed_data/model_space/stanford_brainmets/e3/
   e1_hcal.csv`, `e4/e1_heval.csv` with `slices.csv` (`largest_lesion_px`), E5 planning; fixed by
   E5 `prepare`.*
+- **The near-exact count and the E8 rule (decision Q) have no chance baseline** (found after the E5
+  run, 2026-11-15; exploratory). "Above the highest held-out score" was meant as unambiguous, but S
+  has about 17× more masks than the held-out sets: if S came from the same distribution as the
+  held-out masks, a mask would still exceed the maximum of n held-out scores with probability
+  1 / (n + 1). Summed over decision Q's cells (exchangeability, approximate because of ties at
+  Dice 1.0), single-lesion cells expect about 68 masks above their maximum by chance against 35
+  observed; only 40–79 px single lesions exceed their expectation (24 vs 13.5). For the E2
+  beyond-held-out tier (multi-lesion): about 12 expected against 29 observed. So the 39 near-exact
+  copies are not by themselves evidence of copying, and the E8 rule (≥ 20 strong groups) would be
+  met by chance; the E8 decision should rest on the expected count, not the raw count. The
+  primary family (excess over H-eval) is not affected: its baseline is a rate, not a maximum.
+  The fixed definition was proposed by Claude in E5 planning and approved by the user; the gap is
+  recorded here rather than repaired, since S has been scored. *Source: process log 2026-11-15
+  (inline check from `configs/frozen/e5_stanford_brainmets.yaml` cell counts and the S class table);
+  `results/amibekk_v1/e5/analyze/near_exact.csv`, `near_exact.png`.*
 
 ## 5. Open questions
 
@@ -1055,9 +1122,32 @@ move the old ones, with the reason, to the process log.
       Panel A/C and let the verdict line name the strongest pair's patient when it differs; and
       decide which one the E7 correctness check scores. Decide when E7 is planned; noted in
       `docs/experiment-plan.md`, E7 "Carried over from E4". 2026-11-04.
+- [ ] **Is the E5 multi-lesion excess copying of patients or typical lesion placement (E6)?** The
+      excess is diffuse (96 source patients) and configuration-level (section 3, E5 exploratory).
+      E6's exposure ratio against the H-eval expectation per patient and the rarity test separate
+      the two; analyse the multi-lesion stratum and chained groups. Decide the details when E6 is
+      planned; noted in `docs/experiment-plan.md`, E6 "Carried over from E5". 2026-11-15.
+- [ ] **Which S flags get match reports (E7).** About 7–10% of S is flagged at chance (thousands
+      of masks); the top flags by score are small single blobs. Options: reports for flags of
+      over-exposed patients (E6), for multi-lesion flags above chance, or a stratified sample with
+      the chance rate stated. Decide when E7 is planned. 2026-11-15.
+- [ ] **E8 go/no-go on the chance-expected count.** The fixed rule (≥ 20 strong groups) is met
+      (53) but has no chance baseline (section 4); about 17 E2 multi-lesion masks are above their
+      chance expectation. Decide when E8 is planned. 2026-11-15.
 
 ## 6. Figure and table candidates
 
+- **E5 main results table** (results, RQ1): S vs H-eval rates and excess with intervals per class
+  and stratum, the primary family with Holm: `results/amibekk_v1/e5/analyze/rates.csv` (main set,
+  main variant) and the primary block of `review.txt`.
+- **E5 score distributions** (results, RQ1; planned deliverable): `results/amibekk_v1/e5/analyze/
+  score_distributions.png` (S vs H-eval, by stratum, frozen thresholds).
+- **E5 sensitivity forest plot** (results or appendix): `results/amibekk_v1/e5/analyze/rates_forest.png`.
+- **E5 RQ2 cross-tabulation and H2** (results, RQ2): `rq2_crosstab.csv`, `h2.csv`.
+- **E5 rehearsal** (methods, how the audit was validated before S): `results/stanford_brainmets/
+  e5/rehearse/{null,positive}/review.txt`.
+- **E5 example matches** (results or discussion, with the chance caveat): `near_exact.png`,
+  `groups_top.png` in `results/amibekk_v1/e5/analyze/`.
 - **E4 planted variants** (methods): rows picked by hand from
   `results/stanford_brainmets/e4/plant/variants_grid.png` or the `variant_<P>.png` sheets; with
   `area_change.png` for what 1 px of boundary change does to small lesions.

@@ -22,14 +22,13 @@ import pandas as pd
 
 from memtk import config, lesionmatch
 from memtk.calibration import load_frozen
-from memtk.e5.analyze import (Scored, analyze_scored, copied_area_figure, examples_figure, forest_figure, load_scored,
-                              review_text, score_figure, write_tables)
-from memtk.e5.common import audit_config, audit_hash
+from memtk.e5.analyze import (Scored, analyze_scored, draw_figures, heldout, informative_areas, load_scored,
+                              review_text, write_tables)
+from memtk.e5.common import audit_config, audit_hash, check_prepared, drop_only_t
 from memtk.e5.score import query_table, score_query
-from memtk.ids import lesion_id
-from memtk.io import LabelStack, read_table, slice_images
+from memtk.io import slice_images
 from memtk.sets import SliceSet, load_planted, load_set
-from memtk.stages import refuse_overwrite, require
+from memtk.stages import refuse_overwrite
 
 PLANTED_VARIANTS = ("P1", "P2", "P4")
 
@@ -84,7 +83,7 @@ def run_rehearse(cfg: dict, dataset: str | None = None, pool: str | None = None,
         tables, reading = analyze_scored(scored, h, lesionmatch.load_tables(data_dir, "main", cut), t_areas, e3, e5,
                                          audit, draws, rng)
         write_tables(tables, out)
-        figures(scored, h, tables, e3, case, labels_of, images_of, out)
+        draw_figures(scored, h, tables, e3, f"Rehearsal '{case}'", labels_of, images_of, out)
         extra = planted_recovery(tables["flagged"], scored, patient_of) if case == "positive" else ""
         header = (f"E5 rehearse, case '{case}': dataset '{name}', mock query set {q.name} (S never read); "
                   f"the code that will run on S.\n{EXPECTED[case]}")
@@ -105,41 +104,6 @@ EXPECTED = {
 
 # --- inputs -----------------------------------------------------------------------------------
 
-def check_prepared(cfg: dict, e5: dict, e3_hash: str) -> None:
-    """Stop unless the E5 file was made with the current `audit:` section and frozen E3 file."""
-    if e5["audit_sha256"] != audit_hash(cfg):
-        raise SystemExit("The audit: section changed since 'prepare' ran; run 'e5_audit.py prepare --overwrite' first.")
-    if e5["e3_frozen_sha256"] != e3_hash:
-        raise SystemExit("The frozen E3 file changed since 'prepare' ran; run 'e5_audit.py prepare --overwrite' first.")
-
-
-def drop_only_t(cfg: dict, dataset: str, t: SliceSet) -> SliceSet:
-    """T with its drop-only label maps (written by `prepare`)."""
-    path = config.output_dir(cfg, dataset) / "e5" / "labels_drop_only_T.npz"
-    require(path, "e5_audit.py prepare")
-    stack = LabelStack(path)
-    return SliceSet("T", t.keys, t.patients, np.stack([stack[k] for k in t.keys]), dict(t.left_out))
-
-
-def heldout(cfg: dict, dataset: str, heval: SliceSet, variants: list[str]) -> Scored:
-    """H-eval as a scored set: its slices clustered by patient, the main class table from E4 and
-    one per variant from `prepare`."""
-    meta = query_table(heval, heval.patients, ["clean"] * len(heval.keys), ["H-eval"] * len(heval.keys))
-    e4_dir, e5_dir = (config.output_dir(cfg, dataset) / e for e in ("e4", "e5"))
-    classes = {"main": read_table(e4_dir / "heval_classes.csv"),
-               **{v: read_table(e5_dir / f"heval_classes_{v}.csv") for v in variants}}
-    return Scored("H-eval", meta, classes)
-
-
-def informative_areas(t: SliceSet, bound: int) -> pd.Series:
-    """Area of every informative T lesion (>= the bound), by lesion ID (for the copied-area share)."""
-    rows = {}
-    for key, labels in zip(t.keys, t.labels):
-        areas = np.bincount(labels.ravel())
-        rows.update({lesion_id(key, n): int(a) for n, a in enumerate(areas) if n and a >= bound})
-    return pd.Series(rows, dtype=int)
-
-
 def mock_set(name: str, hcal: SliceSet, planted: pd.DataFrame | None,
              planted_labels: np.ndarray | None) -> tuple[SliceSet, pd.DataFrame]:
     """A mock query set and its meta table: H-cal slices (clustered by patient), plus the planted
@@ -155,7 +119,7 @@ def mock_set(name: str, hcal: SliceSet, planted: pd.DataFrame | None,
     return q, query_table(q, clusters, ["clean"] * len(keys), scheme)
 
 
-# --- rehearsal checks and figures -------------------------------------------------------------
+# --- rehearsal checks (the figures are `analyze.draw_figures`, shared with S) ------------------
 
 def planted_recovery(flagged: pd.DataFrame, scored: Scored, patient_of: dict) -> str:
     """Positive case: how many planted masks were flagged, whether the source patient each detector
@@ -179,28 +143,3 @@ def planted_recovery(flagged: pd.DataFrame, scored: Scored, patient_of: dict) ->
     return (f"\nRehearsal check, planted copies (decision J's source; base patient known):\n{table.to_string(index=False)}\n"
             f"E2 groups of planted masks: {groups.nunique()}, naming {len(recovered)} source patients; base patients: "
             f"{len(set(patient_of.values()))}, of them recovered: {len(recovered & set(patient_of.values()))}.\n")
-
-
-def figures(scored: Scored, h: Scored, tables: dict[str, pd.DataFrame], e3: dict, case: str, labels_of, images_of,
-            out) -> None:
-    """The figures `analyze` will draw for S, drawn for a mock set."""
-    qt, ht = scored.table("main"), h.table("main")
-    score_figure(qt, ht, e3, case, out / "score_distributions.png",
-                 f"Rehearsal '{case}': scores of the mock query set and of H-eval by stratum; dashed = frozen threshold")
-    forest_figure(tables["rates"], out / "rates_forest.png",
-                  f"Rehearsal '{case}': excess rate over H-eval with 95% intervals per set, variant and stratum "
-                  f"(red = primary family)")
-    flagged = tables["flagged"]
-    if flagged["e2_class"].isin(["full", "partial"]).any():
-        copied_area_figure(flagged, out / "copied_area.png",
-                           f"Rehearsal '{case}': copied-area share of the E2-flagged queries")
-    near = flagged[flagged["near_exact"]].sort_values("e1_score", ascending=False)
-    if len(near):
-        examples_figure(near, "e1_nn", labels_of, images_of, out / "near_exact.png",
-                        f"Rehearsal '{case}': near-exact copies (decision Q) next to their source slice")
-    e2 = flagged[flagged["e2_group"] != ""]
-    if len(e2):
-        top = e2["e2_group"].value_counts().head(12).index
-        rows = e2[e2["e2_group"].isin(top)].sort_values("e2_C", ascending=False).drop_duplicates("e2_group")
-        examples_figure(rows, "e2_source", labels_of, images_of, out / "groups_top.png",
-                        f"Rehearsal '{case}': one query per largest E2 group (decision N) next to its source slice")
