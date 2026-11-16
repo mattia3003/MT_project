@@ -1,0 +1,35 @@
+E8 select (amibekk_v1): the image pairs `paired` will measure (decisions AA, AB, AD). No MRI read.
+
+Group A: 56 masks from 41 source patients
+  near-exact: 30
+  beyond held-out: 19
+  exposed e1_copy multi: 4
+  exposed e2_full multi: 3
+B pool: 20875 masks (S main 35920; novel by both detectors with an informative lesion 20887, of which 12 with a failed MRI left out); comparison slice from E1 because C = 0: 25
+Brain-area group edges (px, B pool): 2053, 3666
+Group B: 280 masks matched to 56 A masks; per A mask 5-5
+A masks with fewer than 5 matches: 0
+
+Cells (n<informative lesions>|s<largest-lesion bin>|b<brain group>), A and B masks:
+  n1|s1|b0: A 1, B 5
+  n1|s1|b1: A 3, B 15
+  n1|s1|b2: A 2, B 10
+  n1|s2|b0: A 2, B 10
+  n1|s2|b1: A 4, B 20
+  n1|s2|b2: A 2, B 10
+  n1|s3|b0: A 12, B 60
+  n1|s3|b1: A 2, B 10
+  n1|s3|b2: A 6, B 30
+  n2|s1|b0: A 2, B 10
+  n2|s1|b2: A 7, B 35
+  n2|s2|b0: A 2, B 10
+  n2|s2|b1: A 2, B 10
+  n2|s2|b2: A 6, B 30
+  n2|s3|b0: A 1, B 5
+  n2|s3|b1: A 2, B 10
+
+Whole-mask match with the comparison slice (Dice over shifts), median [IQR]: A 0.93 [0.53, 0.95], B 0.62 [0.46, 0.77]
+Shifts on an E1 nearest neighbour equal to E1's stored shift: 109 of 109
+Comparison patients: A 41, B 66
+
+Within A: 56 runner-up slices (median Dice 0.76), 560 slices at z +- 1..5

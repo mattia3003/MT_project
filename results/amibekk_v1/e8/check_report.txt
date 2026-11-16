@@ -1,0 +1,22 @@
+E8 check: pool 'amibekk_v1' against 'stanford_brainmets', seed 2026
+(reproducing 'paired' re-reads S's MRIs; it verifies the stored values and cannot change a result)
+
+[PASS] all E8 decisions (AA-AE) are set and implemented (paired:)
+[PASS] 'select' outputs made with the current config values: seed, paired
+[PASS] 'rehearse' outputs made with the current config values: seed, paired, calibration.bootstrap_draws, brain
+[PASS] 'rehearse' ran after 'select': 2026-11-16T11:39:16 vs 2026-11-16T11:12:37
+[PASS] 'paired' outputs made with the current config values: seed, paired, calibration.bootstrap_draws, brain
+[PASS] 'paired' ran after 'rehearse': 2026-11-16T11:44:48 vs 2026-11-16T11:39:16
+[PASS] S's MRIs read by 'paired' only ('select' read S's tables, 'rehearse' no S data): select: ['S tables (E5, E7)', 'T']; rehearse: ['T', 'H-eval', 'H-cal', 'planted']; paired: ['S MRIs', 'T', 'H-eval reference']
+[PASS] E5's lock unchanged since S was scored, and as recorded by 'select' and 'paired'
+[PASS] the rehearsal was as required when 'paired' ran: {'heval': None, 'null': 'not supported', 'positive': 'supported (observational)'}
+[PASS] 'select' pairs reproduced (same seed): 952 pairs
+[PASS] rehearsal readings reproduced and as required (null not supported, positive supported): {'heval': None, 'null': 'not supported', 'positive': 'supported (observational)'}
+[PASS] every rehearsal table reproduced: 3 cases
+[PASS] 'paired' measures and tables reproduced (same seed): 4 tables
+[PASS] 'paired' reading reproduced: not supported
+[PASS] brain masks equal E0b's stored ones (every stored real slice and S sample used): 3047 images
+[PASS] every figure exists: 9 figures
+[PASS] unit tests (pytest) pass: 196 passed in 12.96s
+
+17 passed, 0 failed

@@ -1,0 +1,45 @@
+E8 rehearse (stanford_brainmets): the analysis `paired` will run on S, on held-out and planted sets (no S read).
+Settings: brain low_threshold_all (> 0.02); informative bound 12 px; lesion region +8 px; SSIM sigma 1.5, data range 10.0 (z-units); regions lesion, brain, ring; primary lesion; k = 5 controls per case.
+Positive mock: 200 of 200 planted P1/P2 masks (gated, E2-flagged, base patient as source); image = base BRAVO 2 slices away, moved by the planted shift.
+
+--- heval ---
+Pairs of kind t: 131 cases, 508 controls (cases with fewer than 5 controls: 35, with none: 25; every case counts in the AUC); query brain median 7977 px, comparison brain median 7769 px
+Tests (AUC = P(case SSIM > control SSIM); intervals by cluster bootstrap):
+  lesion: median SSIM 0.079 vs 0.066; AUC 0.532 [0.465, 0.605], Mann-Whitney p 0.127; n 131 / 508, left out (empty region) 0
+  brain: median SSIM 0.053 vs 0.058; AUC 0.468 [0.394, 0.529], Mann-Whitney p 0.871; n 131 / 508, left out (empty region) 0
+  ring: median SSIM 0.063 vs 0.062; AUC 0.515 [0.453, 0.581], Mann-Whitney p 0.298; n 131 / 508, left out (empty region) 0
+Secondary (ssim_lesion):
+  reason E1 copy: AUC 0.576 [0.472, 0.675] (n 62 / 235)
+  reason E2 full: AUC 0.543 [0.433, 0.667] (n 35 / 137)
+  reason E2 partial: AUC 0.432 [0.310, 0.525] (n 34 / 136)
+  brain half < 7977 px: AUC 0.522 [0.410, 0.636] (n 73 / 246)
+  brain half >= 7977 px: AUC 0.539 [0.439, 0.626] (n 58 / 262)
+
+--- null ---
+Pairs of kind t: 91 cases, 409 controls (cases with fewer than 5 controls: 13, with none: 6; every case counts in the AUC); query brain median 8160 px, comparison brain median 7529 px
+Tests (AUC = P(case SSIM > control SSIM); intervals by cluster bootstrap):
+  lesion: median SSIM 0.057 vs 0.075; AUC 0.479 [0.390, 0.563], Mann-Whitney p 0.731; n 91 / 409, left out (empty region) 0; H-eval AUC 0.532 [0.463, 0.603], difference -0.053 [-0.169, +0.057]
+  brain: median SSIM 0.061 vs 0.070; AUC 0.476 [0.392, 0.545], Mann-Whitney p 0.764; n 91 / 409, left out (empty region) 0; H-eval AUC 0.468 [0.398, 0.531], difference +0.008 [-0.097, +0.109]
+  ring: median SSIM 0.053 vs 0.070; AUC 0.466 [0.375, 0.546], Mann-Whitney p 0.844; n 91 / 409, left out (empty region) 0; H-eval AUC 0.515 [0.452, 0.579], difference -0.049 [-0.159, +0.049]
+Secondary (ssim_lesion):
+  reason E1 copy: AUC 0.512 [0.406, 0.622] (n 41 / 193)
+  reason E2 full: AUC 0.466 [0.280, 0.650] (n 31 / 134)
+  reason E2 partial: AUC 0.439 [0.332, 0.575] (n 19 / 82)
+  brain half < 8160 px: AUC 0.478 [0.334, 0.590] (n 45 / 205)
+  brain half >= 8160 px: AUC 0.483 [0.389, 0.581] (n 46 / 204)
+READING (ssim_lesion, against H-eval): not supported
+
+--- positive ---
+Pairs of kind t: 200 cases, 633 controls (cases with fewer than 5 controls: 84, with none: 64; every case counts in the AUC); query brain median 8206 px, comparison brain median 7465 px
+Tests (AUC = P(case SSIM > control SSIM); intervals by cluster bootstrap):
+  lesion: median SSIM 0.459 vs 0.069; AUC 0.985 [0.969, 0.996], Mann-Whitney p 1.66e-95; n 200 / 633, left out (empty region) 0; H-eval AUC 0.532 [0.459, 0.606], difference +0.453 [+0.377, +0.525]
+  brain: median SSIM 0.483 vs 0.064; AUC 1.000 [0.999, 1.000], Mann-Whitney p 3.63e-101; n 200 / 633, left out (empty region) 0; H-eval AUC 0.468 [0.396, 0.530], difference +0.532 [+0.470, +0.604]
+  ring: median SSIM 0.469 vs 0.060; AUC 0.984 [0.968, 0.996], Mann-Whitney p 5.01e-95; n 200 / 633, left out (empty region) 0; H-eval AUC 0.515 [0.453, 0.580], difference +0.469 [+0.402, +0.531]
+Secondary (ssim_lesion):
+  reason planted P1: AUC 0.986 [0.970, 0.997] (n 100 / 340)
+  reason planted P2: AUC 0.984 [0.969, 0.996] (n 100 / 293)
+  brain half < 8206 px: AUC 0.975 [0.942, 0.994] (n 102 / 314)
+  brain half >= 8206 px: AUC 0.996 [0.986, 1.000] (n 98 / 319)
+READING (ssim_lesion, against H-eval): supported (observational)
+
+Rehearsal as required (null not 'supported (observational)', positive 'supported (observational)'): yes

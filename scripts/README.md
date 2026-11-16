@@ -51,7 +51,10 @@ Status: ✅ implemented · ⏳ planned
 | `e7_reports.py planted` | ✅ | decisions X, Y, Z (`reports:`), E4's planted set and tables, E4's H-eval tables and `fp_heval.csv`, T and H-eval label maps, the frozen E3 file; never S | `results/<dataset>/e7/planted/`: report table with verdicts, correctness per variant and the criteria, deletion test (planted controls, H-eval chance flags), taxonomy confusion, one example report per variant; ~30 s |
 | `e7_reports.py reports` | ✅ | E5's S tables and `flagged.csv` (lock unchanged), E6 `exposure`, the planted criteria passed, E4 H-eval tables; config `reports:` | `results/<pool>/e7/reports/`: 76 match reports (`reports/`), `report_index.csv`, patient profiles of the most exposed patients (`patients/`, `patient_profiles.csv`), deletion test on S, taxonomy S vs H-eval, `review.txt`; ~7 min |
 | `e7_reports.py check` | ✅ | all E7 outputs, the planted set, T, H-eval, E5's S tables | `results/<pool>/e7/check_report.txt` (PASS/FAIL; reproduces every planted table, the selection, verdicts, deletion test, taxonomy and profiles on S; exit code 1 on any failure); ~8 min |
-| `e8_paired_mri.py` | ⏳ (optional) | E5 outputs, paired MRIs | paired-MRI similarity |
+| `e8_paired.py select` | ✅ | decisions AA, AB, AD (`paired:`), E7 `report_index.csv`, E5 `flagged.csv` and S tables (set main; refuses if E5's lock changed), pool `brain.csv`, `qc.csv`, `labels.npz`, T label maps, `patients.csv`; reads no MRI | `results/<pool>/e8/select/`: `pairs.csv` (group A, matched group B, comparison slices, alignment shifts, runner-up and Δz rows), `review.txt`; seconds |
+| `e8_paired.py rehearse` | ✅ | decisions AB–AE (`paired:`), the frozen E3 file, T / H-eval / H-cal label maps, real `brain.csv`, `patients.csv`, model-space BRAVO and `seg` volumes, E4 `heval_classes.csv`, `planted.csv`, `planted_labels.npz`, `planted_outcomes.csv`, E5's H-cal mock tables (`e5/rehearse/null/`); never S | `results/<dataset>/e8/rehearse/{heval,null,positive}/`: `measures.csv` (the pairs with SSIM per region), `tests.csv`, `secondary.csv`, `ssim_groups.png`, `examples.png`; `review.txt` (readings; null must not read *supported*, positive must), `run_info.json`; ~20 s |
+| `e8_paired.py paired` | ✅ | `select`'s `pairs.csv` and `rehearse`'s H-eval `measures.csv` (both made with the current `paired:`, rehearsal as required), E5's lock unchanged, S's MRIs and masks as saved (pool files via `synthetic_index.csv`), pool `labels.npz`, model-space BRAVO and `seg` volumes, E7 `report_index.csv` (figure captions), the frozen E3 file; the only stage that reads S's MRIs | `results/<pool>/e8/paired/`: `measures.csv`, `tests.csv`, `secondary.csv`, `within_a.csv`, `ssim_groups.png`, `within_a.png`, `examples.png`, `review.txt` ending in the reading; ~15 s |
+| `e8_paired.py check` | ✅ | all E8 outputs, their inputs (re-reads S's MRIs to reproduce `paired`'s measures), E0b's brain masks | `results/<pool>/e8/check_report.txt` (PASS/FAIL; reproduces every `select`, `rehearse` and `paired` table and reading; exit code 1 on any failure); ~1 min |
 
 ## Commands
 
@@ -138,6 +141,14 @@ decisions R, U, V, W; S only from E5's stored tables; see `docs/e6-e7-plan.md`)
 .venv\Scripts\python.exe scripts\e7_reports.py planted           # no S: reports, correctness, deletion test, taxonomy on planted copies, ~30 s
 .venv\Scripts\python.exe scripts\e7_reports.py reports           # match reports, deletion test, taxonomy on S (needs E6 exposure, planted passed), ~7 min
 .venv\Scripts\python.exe scripts\e7_reports.py check             # consistency checks of all E7 outputs (exit code 1 on failure), ~8 min
+```
+
+**E8: paired synthetic MRI check** (every choice in `paired:`, decisions AA–AE; rehearsed before S's MRIs are read)
+```powershell
+.venv\Scripts\python.exe scripts\e8_paired.py select              # no MRI: group A, matched B, comparison slices, shifts, within-A rows
+.venv\Scripts\python.exe scripts\e8_paired.py rehearse            # no S: the analysis on the H-eval reference, H-cal null, planted positive mock, ~20 s
+.venv\Scripts\python.exe scripts\e8_paired.py paired              # the rehearsed analysis on S's MRIs (one run; E5's lock checked), ~15 s
+.venv\Scripts\python.exe scripts\e8_paired.py check               # consistency checks of all E8 outputs (exit code 1 on failure), ~1 min
 ```
 
 **Look at one slice** (after `lesions`): full-size picture with its lesion table, written to

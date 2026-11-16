@@ -552,6 +552,26 @@ move the old ones, with the reason, to the process log.
   reading are reproduced from the stored raw tables with the same seed. The scoring and analysis
   code had been run first on mock query sets (H-cal; H-cal + planted copies) with the expected
   results. *Source: `results/amibekk_v1/e5/check_report.txt`, `docs/e5-plan.md`.*
+- **E8 design (decisions AA–AE, 2026-11-16, `docs/e8-plan.md`).** Group A = E7's 56 strong S cases
+  (near-exact, E2 beyond the held-out maximum, the most exposed patients; one per chained group), each
+  compared with its decision-J source slice; group B = 5 matched novel S masks each. Primary measure:
+  SSIM in the lesion neighbourhood (informative lesions + 8 px, inside both brains) after z-scoring each
+  image in its own brain and aligning by the E1 shift. A vs B is judged against H-eval flagged vs novel,
+  with a mechanical reading. Rehearsed on an H-cal null and a planted positive mock before S's MRIs are
+  read. Rejected: A vs B without a held-out reference (cannot separate a mask-as-key effect from mask
+  resemblance); whole-brain SSIM as primary (brain-size mismatch, section 4); a 2×-diameter crop (about
+  12 px across for the median lesion, barely larger than the SSIM window). SSIM data range fixed at 10
+  z-units for every pair (about the median whole-image range of z-scored T BRAVO, 9.80; set by the user
+  2026-11-16); rejected: the per-pair max − min, which changes with each lesion's brightness. *Source: planning session
+  2026-11-16; read-only queries on `results/amibekk_v1/e7/reports/report_index.csv`,
+  `processed_data/model_space/{amibekk_v1,stanford_brainmets}/brain.csv`, `e4/heval_classes.csv`.*
+- **E8 rehearsed before S's MRIs were read** (2026-11-16). On H-cal (no memorization possible) the
+  analysis reads "not supported" (lesion-neighbourhood AUC 0.48 [0.39, 0.56]); on planted copies whose
+  image is the source patient's BRAVO two slices away it reads "supported" (0.985 [0.97, 1.00]). In
+  real held-out data, closer masks make the lesion region only slightly more alike (H-eval flagged vs
+  novel AUC 0.53 [0.47, 0.61]); SSIM between different patients is low (medians 0.05–0.08), the same
+  patient two slices away about 0.46. The positive mock shows the analysis is correct, not how
+  sensitive it is to faint resemblance. *Source: `results/stanford_brainmets/e8/rehearse/review.txt`.*
 
 ## 3. Findings
 
@@ -1069,6 +1089,15 @@ move the old ones, with the reason, to the process log.
 
   *Source: `results/amibekk_v1/e5/analyze/sensitivity.csv`, `flagged.csv`; process log
   2026-11-15.*
+- **E8: no sign that stage 2 draws the matched patient's tissue** (2026-11-16, reading "not supported",
+  fixed beforehand and rehearsed). Synthetic MRIs of the 56 strongest mask resemblances (E7) are no
+  closer to the source slice's BRAVO than those of 280 matched novel masks are to their nearest training
+  slice: lesion-neighbourhood SSIM AUC 0.48 [0.40, 0.57] against H-eval's 0.53 (difference −0.05
+  [−0.16, +0.05]); whole brain and ring alike. Within group A, SSIM to the source equals SSIM to another
+  patient's slice with a similar mask (+0.002 [−0.018, +0.023]). The lesion-region SSIM peaks next to
+  the source slice (descriptive), consistent with lesions in the same place, not patient tissue.
+  Observational: RQ-M1 (master thesis) tests the mask as a key by intervention. *Source:
+  `results/amibekk_v1/e8/paired/review.txt`, `tests.csv`, `within_a.csv`; E8 check 17/17.*
 
 ## 4. Limitations and assumptions
 
@@ -1240,6 +1269,18 @@ move the old ones, with the reason, to the process log.
   `results/amibekk_v1/e7/reports/deletion_summary.csv`.*
 - **E7: no human rater checked the reports** (planned limitation): the taxonomy is rule-based, its
   rules fixed on the planted copies; a blinded human check moves to the master thesis.
+- **E8 compares brains of different size and is confounded by mask resemblance** (2026-11-16). An E8
+  group A synthetic brain covers a median 0.51× its source slice's brain area (10th–90th pct
+  0.12–1.42). Overlapping masks put lesions in the same place in both images, so lesion-region
+  similarity rises without any memorized tissue; E8 measures this on H-eval and reads H4 only beyond
+  it. Observational: only RQ-M1 can test the mask as a key. *Source:
+  `processed_data/model_space/amibekk_v1/brain.csv`, `stanford_brainmets/brain.csv`, group A from E7
+  `report_index.csv`; `docs/e8-plan.md`.*
+- **E8: two limits of the evidence** (2026-11-16). The positive mock (same patient's BRAVO two slices
+  away) shows the analysis is correct but not how faint a resemblance it could detect; and the z-offset
+  profile within group A is descriptive, with no held-out reference. Some held-out cases had no matched
+  control (H-eval 25 of 131); every case counts in the AUC, and matched cases only give 0.545 vs 0.532.
+  *Source: `docs/e8-plan.md`, steps 3–4.*
 
 ## 5. Open questions
 
@@ -1328,6 +1369,10 @@ move the old ones, with the reason, to the process log.
       lesions (a position-only null model) and training-data attribution for the most exposed
       patients (`Mets_230`, `Mets_058`) on retrained models would settle it (RQ-M2, RQ-M3). Noted at
       the E6 + E7 close, 2026-11-15.
+- [ ] **The mask as key, by intervention (RQ-M1).** E8 found no observational sign (2026-11-16). With
+      retrained models: fixed noise seeds, training vs held-out vs synthetic masks, perturbation
+      series; and a graded positive mock (BRAVO at z ± 1, 2, 5, 10) to show the measure's
+      sensitivity. Noted at the E8 close, 2026-11-16.
 
 ## 6. Figure and table candidates
 

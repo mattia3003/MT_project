@@ -49,7 +49,10 @@ ID columns as text.
 | `e7_reports.py` | `planted` | ✅ | decisions X, Y, Z (`reports:`), the frozen E3 file, E4's planted set and its tables (`planted_outcomes.csv`, `e1_planted.csv`, `e2_planted_*`, `planted_lesions.csv`), E4's H-eval tables and `fp_heval.csv`, T and H-eval label maps, real BRAVO volumes (figures); never S | `results/<dataset>/e7/planted/` |
 | | `reports` | ✅ | decisions X, Y, Z, E5's S tables (set main; lock unchanged) and `flagged.csv`, E6 `exposure` tables, E6 reference tables, E7 `planted` criteria (must pass), E4 H-eval tables and `fp_heval.csv`, pool `labels.npz`, `synthetic_index.csv` and sample files, T and H-eval label maps, real BRAVO volumes | `results/<pool>/e7/reports/` |
 | | `check` | ✅ | all E7 outputs, the planted set, T, H-eval, E5's S tables | `results/<pool>/e7/check_report.txt`, `check.run_info.json` |
-| `e8_paired_mri.py` | — | optional | E5 outputs, paired MRIs | paired-MRI similarity |
+| `e8_paired.py` | `select` | ✅ | decisions AA, AB, AD (`paired:`), E7 `report_index.csv`, E5 `flagged.csv` and S tables (`queries.csv`, `classes_main.csv`, `e1_main.csv`; set main; lock unchanged), pool `brain.csv`, `qc.csv`, `labels.npz`, T label maps, `patients.csv`; reads no MRI | `results/<pool>/e8/select/` |
+| | `rehearse` | ✅ | decisions AB–AE, the frozen E3 file, T / H-eval / H-cal label maps, real `brain.csv`, `patients.csv`, model-space `bravo` and `seg` volumes, E4 `heval_classes.csv`, `planted.csv`, `planted_labels.npz`, `planted_outcomes.csv`, E5's H-cal mock tables (`<output_root>/<dataset>/e5/rehearse/null/`); never S | `results/<dataset>/e8/rehearse/` |
+| | `paired` | ✅ | decisions AC, AD, `select`'s `pairs.csv`, `rehearse`'s `heval/measures.csv` and run logs (same `paired:`, rehearsal as required), E5's lock, S's pool files (MRI and mask as saved) via `synthetic_index.csv`, pool `labels.npz`, model-space `bravo` and `seg` volumes, E7 `report_index.csv` (captions), the frozen E3 file | `results/<pool>/e8/paired/` |
+| | `check` | ✅ | all E8 outputs and run logs, E5's lock, the inputs of `select`, `rehearse` and `paired` (re-reads S's MRIs to reproduce `measures.csv`), E0b's stored `brain_masks.npz` (real and pool) | `results/<pool>/e8/check_report.txt`, `check.run_info.json` |
 
 E1 (whole-mask detector) and E2 (lesion-level detector) have no scripts: they are `memtk`
 modules, run inside E3 (on H-cal), E4 (on planted copies) and E5 (on S).
@@ -100,7 +103,13 @@ which refuses while one is `null`): `exposure.classes`, `exposure.primary` (`cla
 `reports.selection` (decision X: `strong_tiers`, `top_exposed_patients`, `random_s_multi`,
 `random_heval`), `reports.deletion` (decision Y: `min_paired`, `planted_controls`),
 `reports.correctness` (decision Z: `slice_window`, `patient_min`, `patient_variants`,
-`lesions_min`, `lesion_variants`), `reports.taxonomy`. E4–E7
+`lesions_min`, `lesion_variants`), `reports.taxonomy`; E8 (`docs/e8-plan.md`, added 2026-11-16,
+every value fixed before `e8_paired.py paired` reads S's MRIs, which refuses while one is `null`):
+`paired.group_a` (decision AA: E7 report reason → `e1` or `e2` source), `paired.controls` (decision
+AB: `k`, `lesion_count_cap`, `size_bins_px`, `brain_quantiles`), `paired.measure` (decision AC:
+`ssim_sigma`, `data_range` in z-units, `region_grow_px`, `regions`, `primary`), `paired.test`
+(decision AD: `reference`, `auc_null`, `dz_max`), `paired.rehearsal` (decision AE: `null_set`,
+`positive_variants`, `positive_dz`). E4–E8
 take detector settings and thresholds from the frozen file, not from these config sections;
 `real_datasets.<name>` (`root`, `image_file`, `mask_file`, `train_split`,
 `heldout_split`, `heldout_sets`); `synthetic_pools.<name>` (`dir`, `glob`, `image_channel`,
@@ -800,3 +809,54 @@ decisions X, Y, Z; run logs of `planted`, `reports`; E5's lock; the planted crit
 table; on S the selection, every verdict and taxonomy, the deletion test, taxonomy and profile tables
 reproduced and every figure present; the unit tests). Exit code 1 on any failure. Run log:
 `check.run_info.json`.
+
+## 11. E8: paired synthetic MRI check (`e8_paired.py`; `docs/e8-plan.md`)
+
+Every E8 choice is in the config section `paired:` (decisions AA–AE). The pairs are chosen from
+stored tables (`select`, no MRI); the analysis is rehearsed on held-out and planted sets before
+`paired` reads S's MRIs.
+
+### `results/<pool>/e8/select/`
+
+Written by `select`. In git.
+
+| File | One row per | Columns / content |
+| --- | --- | --- |
+| `pairs.csv` | image pair to measure (S: 56 group A, 280 group B, 56 runner-up, 560 Δz rows) | `set` (S), `group` (A, B), `kind` (`t`: the case or control against its comparison slice; `runner_up`: an A mask against the best slice of the best other E1 patient; `dz`: an A mask against its source patient's slice at z + `dz`), `dz` (0 for `t` and `runner_up`), `query` (sample ID), `case` (the A mask a row belongs to), `reason` (the A mask's E7 report reason), `cell` (decision AB: `n<informative lesions, capped>\|s<largest-lesion bin>\|b<brain-area group>`), `cluster` (bootstrap unit: the comparison patient of the `t` row), `comparison` (T slice key), `comparison_patient`, `shift_row`, `shift_col` (moves the query onto the comparison slice, E1's convention; `dz` rows reuse t's shift), `match_dice` (whole-mask Dice over shifts with the comparison slice; empty for `dz`) |
+| `review.txt`, `run_info.json` | — | group A by reason, the B pool and its exclusions, brain-area group edges, matches per A mask and cell, whole-mask match of A and B with their comparison slices, agreement of the shifts with E1's stored ones; run log with E5's hashes |
+
+### `results/<dataset>/e8/rehearse/`
+
+Written by `rehearse`. In git. One folder per case: `heval` (the reference that `paired` reads),
+`null` (H-cal), `positive` (planted P1/P2 whose image is the base patient's BRAVO `positive_dz` slices
+away, moved by the planted shift; controls from H-cal).
+
+| File | One row per | Columns / content |
+| --- | --- | --- |
+| `<case>/measures.csv` | image pair (kind `t` only: cases = slices flagged by either detector, or planted masks; controls = matched novel slices) | the pair columns of `select`'s `pairs.csv` (`set` H-eval, H-cal or planted; `reason` E1 copy, E2 full, E2 partial or planted P1 / P2; `cluster` = the query's patient, planted: the base patient; `positive` only: `image`, the real slice whose BRAVO is the query image, the base patient's slice `positive_dz` away for a planted case, the query itself for a control), then `brain_q_px`, `brain_t_px` (brain areas of the query image and the comparison BRAVO), `ssim_<region>` and `px_<region>` for `lesion`, `brain`, `ring` (mean SSIM over the region and its size; NaN and 0 for an empty region) |
+| `<case>/tests.csv` | region | `auc` with `auc_low`, `auc_high` (cases vs controls, two-level bootstrap by cluster), `n_a`, `n_b`, `excluded` (empty region), `median_a`, `median_b`, `mw_p` (one-sided Mann–Whitney); for `null` and `positive` also `auc_ref` (H-eval) with interval and `delta`, `delta_low`, `delta_high` |
+| `<case>/secondary.csv` | reason or half of query brain area | `split`, `level`, AUC with interval and the counts of `tests.csv` (primary region) |
+| `<case>/ssim_groups.png`, `<case>/examples.png` | case | SSIM of cases and controls per region next to H-eval's flagged and novel slices; one example pair per reason (z-scored images, SSIM map, lesion neighbourhood outlined) |
+| `review.txt`, `run_info.json` | — | settings, the positive mock's counts, per case the tests, secondary splits and the reading against H-eval, and whether the readings are as required; run log with the readings |
+
+### `results/<pool>/e8/paired/`
+
+Written by `paired` (one run; the only E8 stage that reads S's MRIs). In git.
+
+| File | One row per | Columns / content |
+| --- | --- | --- |
+| `measures.csv` | pair of `select`'s `pairs.csv` (952: kinds `t`, `runner_up`, `dz`) | the pair columns, then `brain_q_px`, `brain_t_px`, `ssim_<region>`, `px_<region>` for `lesion`, `brain`, `ring` (as in `rehearse`) |
+| `tests.csv` | region | as in `rehearse` (group A vs B), with `auc_ref` from H-eval and the difference |
+| `secondary.csv` | reason or half of synthetic brain area | as in `rehearse` (primary region) |
+| `within_a.csv` | region × measure (× z offset) | `region`, `measure` (`t minus runner-up`: SSIM to t minus to the runner-up slice per A mask; `mean SSIM by z offset`: 0 = t), `dz`, `n`, `mean` with `low`, `high` (bootstrap by cluster), `wilcoxon_p` (one-sided, paired; runner-up only) |
+| `ssim_groups.png`, `within_a.png`, `examples.png` | — | A vs B next to H-eval flagged vs novel per region; the Δz profile and the runner-up difference; group A examples (median case per reason, the strongest, E7 report 50) with their E7 report numbers |
+| `review.txt`, `run_info.json` | — | the tests, secondary splits, within-A results and the reading (decision AD) with E5's hashes; run log with the reading |
+
+### `results/<pool>/e8/check_report.txt`
+
+Written by `check`. In git. One PASS/FAIL line per check: decisions AA–AE; run logs of `select`,
+`rehearse`, `paired` made with the current config and in order, with S's MRIs read by `paired` only;
+E5's lock as recorded by `select` and `paired`; the rehearsal readings reproduced and as required;
+`select`'s pairs, every rehearsal table and `paired`'s measures, tables and reading reproduced with the
+seed (reproducing `measures.csv` re-reads S's MRIs; verification only); brain masks equal E0b's stored
+ones; every figure present; the unit tests. Exit code 1 on any failure. Run log: `check.run_info.json`.

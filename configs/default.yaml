@@ -293,6 +293,56 @@ reports:
     lesion_variants: [P6-add, P6-remove]
   taxonomy: rule_based     # optional, first to cut; rules fixed on the planted variants
 
+# E8 (docs/e8-plan.md): paired synthetic MRI check (RQ4, H4, observational). Every value fixed before
+# `e8_paired.py paired` reads S's MRIs; that stage refuses while one is null. Group A, the held-out
+# reading, the primary measure and the rehearsal chosen by the user on 2026-11-16 in the planning
+# session; the other values approved with the plan the same day. Bootstrap draws:
+# calibration.bootstrap_draws; alignment shift search: the frozen E1 max_shift (3 px).
+paired:
+  # Decision AA: group A = these S rows of E7's report_index.csv (one per chained group); comparison
+  # slice = the tier's decision-J source (e1: flagged.csv e1_nn; e2: flagged.csv e2_source)
+  group_a:
+    near-exact: e1
+    beyond held-out: e2
+    exposed e1_copy multi: e1
+    exposed e2_full multi: e2
+  # Decision AB: k controls per case from S main novel masks (neither detector flags them, an
+  # informative lesion, MRI not failed), same cell = E2 stratum x informative lesions (1, 2, >= cap) x
+  # largest-lesion bin x brain-area quantile of the pool; comparison slice = E2 NN, E1 NN when C = 0.
+  # Held-out sets: flagged slices as cases, novel slices as controls, by the same rule
+  controls:
+    k: 5
+    lesion_count_cap: 3
+    size_bins_px: [12, 20, 40, 80]
+    brain_quantiles: 3
+  # Decision AC: z-score each image in its own brain (whole image transformed), align by the E1 shift
+  # (recomputed when the comparison slice is not the E1 NN), Gaussian SSIM map averaged over the
+  # regions; lesion = informative lesions grown by region_grow_px inside both brains (primary),
+  # brain = both brains, ring = lesion without the lesion pixels of either mask
+  measure:
+    ssim_sigma: 1.5
+    data_range: 10            # z-units; set 2026-11-16 by the user: about the median whole-image range of
+                              # z-scored T BRAVO (9.80; H-eval 9.26); fixed so every pair shares one scale
+    region_grow_px: 8
+    regions: [lesion, brain, ring]
+    primary: lesion
+  # Decision AD: AUC of A vs B (two-level bootstrap by patient) against the same AUC on H-eval
+  # (flagged vs novel); "supported (observational)" if the A-vs-B interval is above auc_null and the
+  # difference interval above 0, "explained by mask resemblance" if only the first holds, else "not
+  # supported". Within A: the E1 runner-up patient's best slice, and the source patient's slices at
+  # z +- 1..dz_max
+  test:
+    reference: H-eval
+    auc_null: 0.5
+    dz_max: 5
+  # Decision AE: rehearse on H-cal (null; must not read "supported") and on planted copies whose
+  # "MRI" is the base patient's BRAVO positive_dz slices away (z - positive_dz if outside the
+  # volume), shifted with the mask (positive; must read "supported")
+  rehearsal:
+    null_set: H-cal
+    positive_variants: [P1, P2]
+    positive_dz: 2
+
 real_datasets:
   stanford_brainmets:
     root: data/StanfordSkullStripped_1mm

@@ -1,0 +1,23 @@
+E8 paired (amibekk_v1): synthetic MRIs of group A (strong resemblances, E7) and matched group B (novel masks) against the BRAVO of their comparison slices, judged against H-eval (decision AD). S's MRIs were read by this stage only; E5's lock unchanged (audit_sha256 f726517bc091, frozen_sha256 3ea3b5de0589, e5_sha256 4aed7f78238f).
+
+--- S ---
+Pairs of kind t: 56 cases, 280 controls (cases with fewer than 5 controls: 0, with none: 0; every case counts in the AUC); query brain median 3030 px, comparison brain median 6558 px
+Tests (AUC = P(case SSIM > control SSIM); intervals by cluster bootstrap):
+  lesion: median SSIM 0.031 vs 0.049; AUC 0.481 [0.401, 0.565], Mann-Whitney p 0.677; n 56 / 280, left out (empty region) 0; H-eval AUC 0.532 [0.466, 0.600], difference -0.052 [-0.156, +0.054]
+  brain: median SSIM 0.037 vs 0.038; AUC 0.482 [0.406, 0.568], Mann-Whitney p 0.669; n 56 / 280, left out (empty region) 0; H-eval AUC 0.468 [0.403, 0.526], difference +0.014 [-0.083, +0.126]
+  ring: median SSIM 0.026 vs 0.036; AUC 0.466 [0.386, 0.544], Mann-Whitney p 0.791; n 56 / 280, left out (empty region) 0; H-eval AUC 0.515 [0.449, 0.580], difference -0.049 [-0.151, +0.059]
+Secondary (ssim_lesion):
+  reason beyond held-out: AUC 0.419 [0.286, 0.558] (n 19 / 95)
+  reason exposed e1_copy multi: AUC 0.550 [0.278, 0.806] (n 4 / 20)
+  reason exposed e2_full multi: AUC 0.200 [0.000, 0.444] (n 3 / 15)
+  reason near-exact: AUC 0.533 [0.412, 0.652] (n 30 / 150)
+  brain half < 3030 px: AUC 0.456 [0.345, 0.560] (n 28 / 140)
+  brain half >= 3030 px: AUC 0.515 [0.401, 0.642] (n 28 / 140)
+Within A:
+  lesion: SSIM to t minus to runner-up +0.002 [-0.018, +0.023], Wilcoxon p 0.696 (n 56)
+  brain: SSIM to t minus to runner-up +0.005 [-0.009, +0.019], Wilcoxon p 0.262 (n 56)
+  ring: SSIM to t minus to runner-up +0.005 [-0.015, +0.027], Wilcoxon p 0.615 (n 56)
+  z offset profile (ssim_lesion): -5: 0.025, -4: 0.032, -3: 0.039, -2: 0.046, -1: 0.057, +0: 0.054, +1: 0.047, +2: 0.044, +3: 0.043, +4: 0.035, +5: 0.034
+READING (ssim_lesion, against H-eval): not supported
+
+Observational only: a 'supported' reading would suggest that stage 2 draws tissue closer to the matched training slice for these masks (mask as key), but cannot separate that from both stages learning the same patient, or from common configurations giving similar tissue; only RQ-M1 (master thesis) can.

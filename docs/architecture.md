@@ -8,14 +8,16 @@ data flows between them, and how the code is organised. The details live in two 
 - `docs/module-reference.md`: every code module (purpose, main functions, imports and "used
   by", external libraries), the tests, and the planned modules.
 
-*Status (2026-11-15): E0 (E0a + E0b) done and closed; environment pinned in
+*Status (2026-11-16): E0 (E0a + E0b) done and closed; environment pinned in
 `requirements-lock.txt`. E1–E3 done: thresholds frozen in `configs/frozen/` (`docs/e1-e3-plan.md`).
 E4 (the gate) done (`docs/e4-plan.md`): gate ACCEPTED with a recorded deviation, check 16/16. E5
 (the main audit) done (`docs/e5-plan.md`): S scored once with every analysis choice fixed and
 locked beforehand; "memorization beyond chance" in multi-lesion masks only, check 26/26. E6 and
-E7 are in progress, planned together in `docs/e6-e7-plan.md` (decisions R, U–Z); E6 and E7 done
-(checks 18/18 and 14/14; plan closed): the E1 multi-lesion excess reads as typical placement, H1
-supported, no exact lesion-level copy. E8 awaits its go/no-go.*
+E7 done, planned together in `docs/e6-e7-plan.md` (decisions R, U–Z; checks 18/18 and 14/14; plan
+closed): the E1 multi-lesion excess reads as typical placement, H1 supported, no exact lesion-level
+copy. E8 (optional, lean) done (`docs/e8-plan.md`, decisions AA–AE; check 17/17; plan closed): synthetic MRIs
+of the strongest resemblances are not closer to their source slice than chance ("not supported").
+Next: report synthesis.*
 
 The diagrams are [Mermaid](https://mermaid.js.org/): GitHub renders them; in VS Code install
 *Markdown Preview Mermaid Support* (`bierner.markdown-mermaid`) and open the Markdown preview.
@@ -37,9 +39,9 @@ flowchart TD
     FREEZE[["Thresholds frozen ✅<br/>S is never scored before this"]]
     E4{"E4 · planted copies ✅<br/>go / no-go gate: accepted"}
     E5["E5 · main audit: score S once ✅<br/>RQ1, RQ2 · analysis locked"]
-    E6["E6 · patient exposure, rarity,<br/>duplication (RQ3a, H1, H3)"]
-    E7["E7 · match reports and their<br/>evaluation (RQ3b, xAI)"]
-    E8["E8 · paired-MRI check<br/>(optional, RQ4)"]
+    E6["E6 · patient exposure, rarity,<br/>duplication (RQ3a, H1, H3) ✅"]
+    E7["E7 · match reports and their<br/>evaluation (RQ3b, xAI) ✅"]
+    E8["E8 · paired-MRI check<br/>(optional, RQ4) ✅"]
 
     E0 --> E1 & E2
     E1 & E2 --> E3 --> FREEZE --> E4
@@ -47,12 +49,11 @@ flowchart TD
     E4 -.->|"fail: adjust on H-cal, re-freeze"| E3
     E5 --> E6 --> E7
     E5 --> E7
-    E5 -.-> E8
+    E5 --> E8
+    E7 --> E8
 
     classDef next fill:#fff3cd,stroke:#b8860b
     classDef planned stroke-dasharray: 5 5,color:#666
-    class E6,E7 next
-    class E8 planned
 ```
 
 ✅ done · yellow: next · dashed: planned. The procedures are in
@@ -68,13 +69,13 @@ synthetic masks (what is audited; the main audit uses the clean and minor masks)
 | Experiment | Reads | Produces | Used by |
 | --- | --- | --- | --- |
 | E0a (`e0a_prepare_data.py`) | raw real volumes, raw synthetic pool | patient split; real volumes in model space; index of the synthetic pool | everything after |
-| E0b (`e0b_audit.py`) | E0a outputs | brain masks; **lesion tables** (one row per lesion, label maps); **QC classes** of S; E0 statistics | E1–E7 |
+| E0b (`e0b_audit.py`) | E0a outputs | brain masks; **lesion tables** (one row per lesion, label maps); **QC classes** of S; E0 statistics | E1–E8 |
 | E3 with E1, E2 (`e3_calibrate.py`) | lesion tables of T and H-cal | detector tables for H-cal; **frozen thresholds** (`configs/frozen/`) | E4, E5 |
 | E4 (`e4_validate.py`) | frozen thresholds, T, H-eval | planted copies with their provenance; validation table; gate verdict; H-eval detector tables | gate for E5 and its H-eval baseline; E7 |
 | E5 (`e5_audit.py`) | frozen thresholds, the E4 gate and H-eval tables, T, H-cal, the planted copies (rehearsal only), S (`score` only) | the E5 file (`configs/frozen/`, values fixed before S); raw detector tables of S; rates against H-eval, tests, groups, near-exact copies; **`flagged.csv`** | E6, E7, E8 |
 | E6 (`e6_exposure.py`) | T volumes and lesion tables, E4 H-eval tables, E5's stored tables of S and its mock sets (never scores S) | 3D lesions of T, slice and patient rarity; exposure ratios, the copying-vs-placement reading, H3, H1 | E7 (Panel C, report selection) |
 | E7 (`e7_reports.py`) | E4's planted copies and H-eval tables (the generator is checked there first), E5's stored tables of S, E6's exposure | match reports with verdicts; correctness on planted copies; the deletion test; taxonomy | the report |
-| E8 | E5 outputs, paired MRIs | paired-MRI similarity | the report |
+| E8 (`e8_paired.py`) | E7's report selection (group A), E5's stored tables of S (matched novel masks, sources, shifts), S's MRIs (`paired` only), T BRAVO; H-eval, H-cal and the planted copies for the reference and the rehearsal | image pairs; SSIM in the lesion neighbourhood and whole brain; A vs B judged against H-eval | the report |
 
 Processed data goes to `processed_data/model_space/<dataset|pool>/` (not in git, regenerated by
 the stages); results go to `results/<dataset|pool>/<experiment>/` (in git). Every file, with its
@@ -85,7 +86,7 @@ from the data, a *review stage* writes the evidence and a proposed value; the us
 value in `configs/default.yaml` (with a dated comment); the *production stage* refuses to run
 while it is still `null`. E0b used this for decisions A–E; E3 continues with F–H, E4 with I–K,
 E5 with L–Q (the config section `audit:`), E6 + E7 with R, U–Z (`exposure:`, `reports:`; S and T
-skipped as letters). The stages of each experiment, in order, are listed in
+skipped as letters), E8 with AA–AE (`paired:`). The stages of each experiment, in order, are listed in
 its plan document and in `scripts/README.md`.
 
 **E5's lock.** E5 is the only experiment that reads S. Its analysis was fixed before S was scored
@@ -97,8 +98,8 @@ anything changed. E6–E8 only read E5's stored outputs; never change `audit:` o
 
 ```mermaid
 flowchart TB
-    L1["<b>Scripts</b> · scripts/<br/>the command line, one per experiment<br/>e0a_prepare_data.py · e0b_audit.py · e3_calibrate.py · e4_validate.py · e5_audit.py · e6_exposure.py · e7_reports.py"]
-    L2["<b>Stage packages</b> · src/memtk/e0b/, e3/, e4/, e5/, e6/, e7/<br/>one experiment's stages: read inputs, call building blocks, write outputs"]
+    L1["<b>Scripts</b> · scripts/<br/>the command line, one per experiment<br/>e0a_prepare_data.py · e0b_audit.py · e3_calibrate.py · e4_validate.py · e5_audit.py · e6_exposure.py · e7_reports.py · e8_paired.py"]
+    L2["<b>Stage packages</b> · src/memtk/e0b/, e3/, e4/, e5/, e6/, e7/, e8/<br/>one experiment's stages: read inputs, call building blocks, write outputs"]
     L3["<b>Library modules</b> · src/memtk/*.py<br/>building blocks that know nothing about stages"]
     L4["<b>Foundation</b> · config (YAML, paths, run logs) · io (files, tables, stacks)"]
     L1 --> L2 --> L3 --> L4
@@ -127,6 +128,7 @@ as from its script, e.g. `run_qc(load_config(), overwrite=True)`.
 | `lesions3d` | E6: 3D lesions of real volumes (slice-to-slice linking; 26-connectivity as sensitivity) |
 | `exposure` | E6: expected shares and exposure ratios, the concentration test, margins, slice and patient rarity, Spearman tests, H1 lesion credits |
 | `reports` | E7: match-report data, verdict lines and figures; correctness on planted copies; the deletion test; the taxonomy |
+| `paired` | E8: aligning a query image onto a training slice, z-scoring in the brain, lesion-neighbourhood regions, SSIM per region, matched controls |
 
 Functions, imports, "used by" and tests: `docs/module-reference.md`.
 

@@ -20,7 +20,8 @@ from memtk.ids import parse_slice_key
 ID_COLUMNS = ("source", "key", "lesion_id", "patient_id", "sample_id", "set", "filename",
               "query", "nn", "nn_patient", "runner_up_patient", "query_lesion", "best_train_lesion", "train",
               "train_lesion", "strongest_train", "strongest_patient", "base_key", "e1_nn", "e1_nn_patient",
-              "e2_nn", "e2_nn_patient", "e2_strongest_train", "e2_strongest_patient")
+              "e2_nn", "e2_nn_patient", "e2_strongest_train", "e2_strongest_patient",
+              "case", "comparison", "comparison_patient")   # E8 pair tables (added 2026-11-16)
 
 
 def read_table(path: str | Path) -> pd.DataFrame:

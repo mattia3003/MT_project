@@ -735,3 +735,67 @@ in full, with what replaced them.
   pool `brain_masks.npz`, `masks_raw.npz`, `qc.csv` with `mri_failed` (82 main masks), scikit-image
   0.26 for SSIM). CLAUDE.md points the next session at it; report-notes section 5 marks the go/no-go
   resolved.
+
+## 2026-11-16: E8 planned
+
+- **E8 planned in `docs/e8-plan.md`** (decisions AA–AE). The user chose group A, the held-out reading,
+  the primary measure and the rehearsal in one round of questions; the other values (k = 5 matched
+  controls, brain-size tertile as matching cell, Gaussian SSIM σ 1.5, z-score in each image's own
+  brain) were approved with the plan. Pointers updated in CLAUDE.md (active plan; the "still open: E8
+  go/no-go" line corrected, since report-notes had marked it resolved on 2026-11-15) and
+  `docs/experiment-plan.md` (E8 status).
+  - *Read-only queries while planning* (inline scripts, not in the repo; no MRI statistic of S
+    computed): group A = 56 masks from 41 source patients, none with a failed MRI
+    (`report_index.csv`, `qc.csv`); synthetic/source brain-area ratio median 0.51 (10th–90th pct
+    0.12–1.42; `brain.csv` of both sets); H-eval 148 flagged / 775 novel by both detectors
+    (`e4/heval_classes.csv`); about 22,000 novel S masks with an informative lesion and a valid MRI
+    (main and noisy counted together; `e5/classes_main.csv` holds both sets; the main-only count comes
+    from `select`); 29 novel masks with C = 0.
+  - *Found:* E7's `report_index.csv` `source` is the E2 source (`reports.report_data`), so E8 takes the
+    decision-J source per tier from `flagged.csv`; `planted.shift` refuses to push a non-zero pixel off
+    the image and cannot align MRIs (synthetic brain boxes reach row 127), so `paired.align` is a
+    separate zero-filled shift with E1's sign convention.
+- **E8 step 1: library and config** (2026-11-16). New `src/memtk/paired.py` and `tests/test_paired.py`
+  (9 tests; pytest 192). The plan's `comparison_shift` and `runner_up_slice` became one function,
+  `best_match` (the same search). Config `paired:` written with the approved values; the rehearsal key
+  `null` renamed `null_set` (YAML reads `null:` as an empty key). Read-only measurement on T and H-eval
+  (inline script, no S): brain masks recomputed with `lesions.brain_mask` equal E0b's stored ones on
+  every slice (3,823 T, 1,094 H-eval); z-scored whole-image range median 9.80 (T) / 9.26 (H-eval);
+  lesion neighbourhood (+8 px, in the brain) median 513 px on T (5th pct 282), so no minimum region
+  size. `paired.measure.data_range` set to 10 by the user. Module reference: `exposure` and `reports`
+  added to `wholemask`'s "used by" (missing before).
+- **E8 step 2: `select`** (2026-11-16). New `src/memtk/e8/` (`common`, `select`) and
+  `scripts/e8_paired.py`; reads E7's `report_index.csv`, E5's `flagged.csv` and S tables (E5's lock
+  checked), no MRI; seconds, re-run byte-identical. Group A 56 masks from 41 source patients; group B
+  280 (5 per A mask, none short) from a pool of 20,875 novel S main masks (12 with a failed MRI left
+  out); brain-area tertile edges 2,053 / 3,666 px; whole-mask Dice with the comparison slice A 0.93 vs
+  B 0.62 (median); recomputed shifts equal E1's stored ones (109 of 109); runner-up slices median
+  Dice 0.76. `io.ID_COLUMNS` extended with `case`, `comparison`, `comparison_patient` (sample IDs such
+  as `419` stay text). Type hints of `e8.common` widened to accept pandas Series (Pylance).
+  *Source: `results/amibekk_v1/e8/select/review.txt`.*
+- **E8 step 3: `rehearse`** (2026-11-16). New `e8.paired` (the measurement and analysis that `paired`
+  runs unchanged) and `e8.rehearse`; `e8.common.real_slices`, `synthetic_samples`;
+  `tests/test_e8_paired.py` (4 tests; pytest 196). ~20 s, no S read; a re-run reproduces every table.
+  Readings as required: null (H-cal) not supported (lesion AUC 0.479), positive (planted P1/P2 with the
+  base patient's BRAVO 2 slices away) supported (0.985). All 100 P2 shifts recovered exactly. Held-out
+  cases without a matched control (H-eval 25 of 131, H-cal 6 of 91, positive 64 of 200) kept in the AUC
+  as the rule says; read-only check with matched cases only: H-eval 0.545 vs 0.532. `test_table`
+  renamed `auc_tests` (pytest collected it as a test). After the user's question on the positive
+  `examples.png` (why the P1 image differs from its comparison slice, why P1 and P2 both show 0.46):
+  the caption now names the image's slice (base z + 2) and the positive `measures.csv` has an `image`
+  column; re-run: every other table and the readings byte-identical; P1 and P2 of a base give identical
+  SSIM for all 100 bases (same image after alignment), as expected. *Source:
+  `results/stanford_brainmets/e8/rehearse/review.txt`.*
+- **E8 step 4: `paired`** (2026-11-16), one run, 13 s: `run_paired` in `e8.paired` (guards: E5's lock,
+  `select` and `rehearse` made with the current `paired:`, rehearsal as required; checked read-only
+  before the run). 336 synthetic samples, 952 pairs, no empty region. Reading "not supported" (lesion
+  AUC 0.481). Example figure: the median case per reason, the strongest case and E7 report 50 (the
+  median of its tier, so 5 cases), captions with E7 report numbers. *Source:
+  `results/amibekk_v1/e8/paired/review.txt`.*
+- **E8 step 5: `check`; plan closed** (2026-11-16). New `e8.check` (17/17, ~1 min; reproducing
+  `paired`'s measures re-reads S's MRIs, verification only). Refactor for the check: `select_pairs`,
+  `rehearse_cases` (`Case`), `measure_s` split from the stage functions; the check reproduces the
+  outputs written before the refactor. Scratch test (not in the repo): a damaged copy (one AUC +0.001,
+  one row removed, one comparison key changed) was reported as `tests.auc`, `within_a`,
+  `measures.comparison`. Plan closed; E8 status in CLAUDE.md, experiment plan, architecture. *Source:
+  `results/amibekk_v1/e8/check_report.txt`.*

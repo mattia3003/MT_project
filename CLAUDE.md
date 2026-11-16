@@ -59,11 +59,15 @@ Reference docs (read the relevant one before starting work):
   Results: E1 multi-lesion excess reads as typical placement (E2 full multi undetermined); H1
   supported, H3 not; no exact lesion-level copy in S; planted correctness criteria pass. Open items
   moved to `docs/experiment-plan.md` (E8) and report-notes.
-- E8: GO, lean and exploratory (decided by the user 2026-11-15). Next session: plan it in
-  `docs/e8-plan.md` (not yet written). Start by reading `docs/experiment-plan.md` E8 in full: its
-  "Carried over from E5" and "from E6 + E7" notes and the "Ready for planning" brief (proposed design,
-  the choices to settle with the user, every input file and the code to reuse). After E8: report
-  synthesis and project walkthrough (schedule in `docs/experiment-plan.md`).
+- `docs/e8-plan.md`: E8 plan, CLOSED 2026-11-16 (reference only, not updated). Decisions AA (group A =
+  E7's 56 strong S cases, comparison slice = decision-J source), AB (group B = matched novel S masks, 5
+  per A), AC (z-score in own brain, E1-shift alignment, SSIM in the lesion neighbourhood = informative
+  lesions grown 8 px, data range 10 z-units; whole brain secondary, ring sensitivity), AD (A-vs-B AUC
+  judged against H-eval flagged vs novel; mechanical reading), AE (rehearse on H-cal null and a planted
+  positive mock before S's MRIs are read), all in config `paired:`. Result: reading "not supported"
+  (lesion AUC 0.48 [0.40, 0.57], H-eval 0.53; source slice no closer than another patient's slice with a
+  similar mask); E8 check 17/17. Open items moved to report-notes and the master thesis (RQ-M1).
+  Next: report synthesis and project walkthrough (schedule in `docs/experiment-plan.md`).
 This file is a summary. If it disagrees with the docs, the docs win; flag the mismatch.
 
 ## Data
@@ -129,8 +133,7 @@ This file is a summary. If it disagrees with the docs, the docs win; flag the mi
   as they are everywhere, reports included (decided 2026-11-15; a second P001-style naming was dropped).
 - Fixed during the work: the informative-lesion bound 12 px (decision G), stratified thresholds
   (H), the E4 go/no-go criteria (K), the E5 analysis (L-Q, locked), the E6 + E7 analysis (R, U-Z,
-  `docs/e6-e7-plan.md`). Still open: the E8 go/no-go on the chance-expected count (report-notes
-  section 5).
+  `docs/e6-e7-plan.md`), E8 go (2026-11-15) and its analysis (AA-AE, `docs/e8-plan.md`, 2026-11-16).
 - Environment: `requirements-lock.txt` pins only what the project needs (direct dependencies
   in `pyproject.toml` plus what they require; Python 3.11.9, Windows), at the versions that
   produced E0; install with `pip install --no-deps -r requirements-lock.txt` (monai 1.6.0
@@ -167,7 +170,7 @@ original weights = Branch A fallback); the preliminary toolkit is reused in the 
 
 Timeline: full draft to supervisor by 30 Nov 2026, submission 9 Dec 2026. Milestones:
 E0 + mask QC by 31 Oct (done 3 Nov); E1-E3 (bound + thresholds frozen) by 9 Nov (done 3 Nov); E4 gate by 13 Nov (done 4 Nov, ACCEPTED);
-E5 by 17 Nov (done 15 Nov); E6/E7 by 24 Nov (done 15 Nov); E8 (optional RQ4) last, if time (decided 2026-11-15: go, lean; plan and run 16–22 Nov). If behind, cut: E8 (moves to
+E5 by 17 Nov (done 15 Nov); E6/E7 by 24 Nov (done 15 Nov); E8 (optional RQ4) last, if time (decided 2026-11-15: go, lean; done 16 Nov, not supported). If behind, cut: E8 (moves to
 the master thesis), then optional small-lesion agreement (E2/E7) (null model already dropped),
 then E7 taxonomy, then the lesion-level part of
 the E7 correctness check (keep source-patient correctness + deletion test). Never cut E4.

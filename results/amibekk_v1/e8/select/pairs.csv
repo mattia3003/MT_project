@@ -1,0 +1,953 @@
+set,group,kind,dz,query,case,reason,cell,cluster,comparison,comparison_patient,shift_row,shift_col,match_dice
+S,A,t,0,419,419,near-exact,n1|s1|b1,Mets_167,Mets_167/z75,Mets_167,1,2,1.0
+S,A,t,0,file_2_4408,file_2_4408,near-exact,n1|s1|b2,Mets_058,Mets_058/z112,Mets_058,1,-1,1.0
+S,A,t,0,file_331,file_331,near-exact,n1|s1|b0,Mets_134,Mets_134/z143,Mets_134,0,3,1.0
+S,A,t,0,file_4_888,file_4_888,near-exact,n1|s1|b1,Mets_314,Mets_314/z22,Mets_314,1,1,1.0
+S,A,t,0,file_3_8620,file_3_8620,near-exact,n1|s2|b1,Mets_096,Mets_096/z106,Mets_096,0,-1,0.9836065573770492
+S,A,t,0,file_2_2353,file_2_2353,near-exact,n1|s2|b0,Mets_033,Mets_033/z30,Mets_033,-1,0,0.9777777777777777
+S,A,t,0,file_2_8240,file_2_8240,near-exact,n1|s2|b0,Mets_037,Mets_037/z140,Mets_037,-3,-1,0.9767441860465116
+S,A,t,0,file_2_456,file_2_456,near-exact,n1|s2|b1,Mets_016,Mets_016/z42,Mets_016,-1,2,0.975609756097561
+S,A,t,0,file_4_776,file_4_776,near-exact,n1|s2|b1,Mets_132,Mets_132/z110,Mets_132,0,-3,0.9743589743589743
+S,A,t,0,file_7173,file_7173,near-exact,n1|s1|b1,Mets_181,Mets_181/z119,Mets_181,1,-3,0.9743589743589743
+S,A,t,0,file_3_1676,file_3_1676,near-exact,n1|s2|b2,Mets_024,Mets_024/z114,Mets_024,0,1,0.9743589743589743
+S,A,t,0,file_5_7515,file_5_7515,near-exact,n1|s3|b2,Mets_170,Mets_170/z57,Mets_170,-2,3,0.968421052631579
+S,A,t,0,file_3_1081,file_3_1081,near-exact,n1|s3|b2,Mets_323,Mets_323/z109,Mets_323,3,0,0.954954954954955
+S,A,t,0,file_3621,file_3621,near-exact,n1|s3|b1,Mets_094,Mets_094/z126,Mets_094,-3,3,0.9506172839506173
+S,A,t,0,file_4_5137,file_4_5137,near-exact,n1|s3|b0,Mets_107,Mets_107/z126,Mets_107,0,0,0.95
+S,A,t,0,file_981,file_981,near-exact,n1|s3|b2,Mets_049,Mets_049/z67,Mets_049,1,0,0.946236559139785
+S,A,t,0,file_467,file_467,near-exact,n1|s3|b0,Mets_249,Mets_249/z25,Mets_249,3,-2,0.946236559139785
+S,A,t,0,file_3_1530,file_3_1530,near-exact,n1|s3|b0,Mets_225,Mets_225/z112,Mets_225,0,-3,0.9411764705882353
+S,A,t,0,file_2_3955,file_2_3955,near-exact,n1|s3|b1,Mets_323,Mets_323/z115,Mets_323,3,0,0.9411764705882353
+S,A,t,0,file_5_11978,file_5_11978,near-exact,n1|s3|b0,Mets_319,Mets_319/z42,Mets_319,1,3,0.9403973509933775
+S,A,t,0,file_2_1082,file_2_1082,near-exact,n1|s3|b0,Mets_148,Mets_148/z101,Mets_148,-2,-1,0.9402985074626866
+S,A,t,0,file_3_2183,file_3_2183,near-exact,n1|s3|b0,Mets_028,Mets_028/z84,Mets_028,-1,-2,0.9397590361445783
+S,A,t,0,file_4_5568,file_4_5568,near-exact,n1|s3|b0,Mets_005,Mets_005/z127,Mets_005,-2,0,0.9391304347826087
+S,A,t,0,621,621,near-exact,n1|s3|b0,Mets_289,Mets_289/z53,Mets_289,-1,-2,0.9391304347826087
+S,A,t,0,file_4_8548,file_4_8548,near-exact,n1|s3|b2,Mets_244,Mets_244/z55,Mets_244,-3,0,0.9367088607594937
+S,A,t,0,file_7582,file_7582,near-exact,n1|s3|b0,Mets_240,Mets_240/z144,Mets_240,2,3,0.9365079365079365
+S,A,t,0,file_2_1274,file_2_1274,near-exact,n1|s3|b0,Mets_058,Mets_058/z109,Mets_058,2,-1,0.9354838709677419
+S,A,t,0,file_3_2563,file_3_2563,near-exact,n1|s3|b2,Mets_271,Mets_271/z110,Mets_271,-3,0,0.935064935064935
+S,A,t,0,305,305,near-exact,n1|s3|b0,Mets_249,Mets_249/z26,Mets_249,1,2,0.9345794392523364
+S,A,t,0,file_2_1433,file_2_1433,near-exact,n1|s1|b2,Mets_069,Mets_069/z89,Mets_069,-1,2,0.9
+S,A,t,0,file_5_10547,file_5_10547,beyond held-out,n2|s1|b2,Mets_313,Mets_313/z115,Mets_313,2,-2,0.32941176470588235
+S,A,t,0,2623,2623,beyond held-out,n2|s3|b0,Mets_265,Mets_265/z43,Mets_265,1,0,0.8313253012048193
+S,A,t,0,file_3_1517,file_3_1517,beyond held-out,n2|s3|b1,Mets_051,Mets_051/z34,Mets_051,3,3,0.5342465753424658
+S,A,t,0,6550,6550,beyond held-out,n2|s1|b2,Mets_052,Mets_052/z36,Mets_052,1,-2,0.4594594594594595
+S,A,t,0,file_2_7649,file_2_7649,beyond held-out,n2|s1|b2,Mets_058,Mets_058/z124,Mets_058,3,-1,0.4788732394366197
+S,A,t,0,file_4_214,file_4_214,beyond held-out,n2|s1|b2,Mets_107,Mets_107/z33,Mets_107,-2,3,0.4838709677419355
+S,A,t,0,1601,1601,beyond held-out,n2|s1|b0,Mets_249,Mets_249/z111,Mets_249,-1,0,0.5277777777777778
+S,A,t,0,2692,2692,beyond held-out,n2|s1|b2,Mets_134,Mets_134/z118,Mets_134,3,-1,0.3291139240506329
+S,A,t,0,8532,8532,beyond held-out,n2|s1|b2,Mets_314,Mets_314/z42,Mets_314,2,1,0.35294117647058826
+S,A,t,0,file_5_7988,file_5_7988,beyond held-out,n2|s2|b2,Mets_289,Mets_289/z29,Mets_289,2,-3,0.547945205479452
+S,A,t,0,12408,12408,beyond held-out,n2|s2|b1,Mets_266,Mets_266/z94,Mets_266,0,-3,0.48148148148148145
+S,A,t,0,file_4_839,file_4_839,beyond held-out,n2|s2|b2,Mets_062,Mets_062/z111,Mets_062,2,0,0.5287356321839081
+S,A,t,0,7730,7730,beyond held-out,n2|s1|b2,Mets_314,Mets_314/z20,Mets_314,-1,-3,0.417910447761194
+S,A,t,0,file_2_884,file_2_884,beyond held-out,n2|s2|b2,Mets_059,Mets_059/z39,Mets_059,-1,-3,0.7341772151898734
+S,A,t,0,12089,12089,beyond held-out,n2|s2|b0,Mets_280,Mets_280/z42,Mets_280,3,0,0.7674418604651163
+S,A,t,0,3544,3544,beyond held-out,n2|s1|b0,Mets_024,Mets_024/z27,Mets_024,2,2,0.3939393939393939
+S,A,t,0,file_4_7885,file_4_7885,beyond held-out,n2|s2|b2,Mets_285,Mets_285/z132,Mets_285,-3,0,0.28888888888888886
+S,A,t,0,file_1496,file_1496,beyond held-out,n2|s2|b0,Mets_099,Mets_099/z33,Mets_099,-1,3,0.37168141592920356
+S,A,t,0,file_5_12710,file_5_12710,beyond held-out,n2|s2|b2,Mets_014,Mets_014/z40,Mets_014,1,0,0.56
+S,A,t,0,file_5944,file_5944,exposed e1_copy multi,n1|s3|b2,Mets_230,Mets_230/z110,Mets_230,-2,2,0.8923076923076924
+S,A,t,0,12260,12260,exposed e1_copy multi,n1|s2|b2,Mets_090,Mets_090/z126,Mets_090,-2,1,0.8493150684931506
+S,A,t,0,11577,11577,exposed e1_copy multi,n1|s2|b1,Mets_167,Mets_167/z77,Mets_167,-1,-1,0.8260869565217391
+S,A,t,0,file_3_3190,file_3_3190,exposed e1_copy multi,n1|s3|b0,Mets_099,Mets_099/z36,Mets_099,0,1,0.8363636363636363
+S,A,t,0,file_5_11473,file_5_11473,exposed e2_full multi,n2|s2|b1,Mets_328,Mets_328/z103,Mets_328,-3,-1,0.4842105263157895
+S,A,t,0,file_4_3607,file_4_3607,exposed e2_full multi,n2|s2|b2,Mets_225,Mets_225/z118,Mets_225,-1,3,0.35185185185185186
+S,A,t,0,file_5_6678,file_5_6678,exposed e2_full multi,n2|s3|b1,Mets_181,Mets_181/z113,Mets_181,3,-1,0.6338797814207651
+S,B,t,0,11211,419,near-exact,n1|s1|b1,Mets_120,Mets_120/z133,Mets_120,0,0,0.5454545454545454
+S,B,t,0,7860,419,near-exact,n1|s1|b1,Mets_032,Mets_032/z21,Mets_032,0,-1,0.7741935483870968
+S,B,t,0,file_2_574,419,near-exact,n1|s1|b1,Mets_132,Mets_132/z59,Mets_132,2,-3,0.6857142857142857
+S,B,t,0,file_4_1630,419,near-exact,n1|s1|b1,Mets_049,Mets_049/z111,Mets_049,-2,-1,0.4864864864864865
+S,B,t,0,file_5_4336,419,near-exact,n1|s1|b1,Mets_123,Mets_123/z108,Mets_123,2,3,0.5555555555555556
+S,B,t,0,file_2_6134,file_2_4408,near-exact,n1|s1|b2,Mets_176,Mets_176/z20,Mets_176,1,1,0.6923076923076923
+S,B,t,0,file_4_564,file_2_4408,near-exact,n1|s1|b2,Mets_319,Mets_319/z34,Mets_319,1,-2,0.7441860465116279
+S,B,t,0,file_5_10751,file_2_4408,near-exact,n1|s1|b2,Mets_134,Mets_134/z74,Mets_134,3,-1,0.5
+S,B,t,0,file_5_4137,file_2_4408,near-exact,n1|s1|b2,Mets_122,Mets_122/z33,Mets_122,-2,1,0.7111111111111111
+S,B,t,0,file_5_8717,file_2_4408,near-exact,n1|s1|b2,Mets_167,Mets_167/z70,Mets_167,1,3,0.48
+S,B,t,0,376,file_331,near-exact,n1|s1|b0,Mets_230,Mets_230/z93,Mets_230,1,3,0.11764705882352941
+S,B,t,0,8130,file_331,near-exact,n1|s1|b0,Mets_170,Mets_170/z17,Mets_170,-1,-3,0.5384615384615384
+S,B,t,0,file_2_4304,file_331,near-exact,n1|s1|b0,Mets_069,Mets_069/z33,Mets_069,-2,-3,0.6896551724137931
+S,B,t,0,file_4_8392,file_331,near-exact,n1|s1|b0,Mets_230,Mets_230/z93,Mets_230,0,3,0.3225806451612903
+S,B,t,0,file_7927,file_331,near-exact,n1|s1|b0,Mets_181,Mets_181/z104,Mets_181,0,-3,0.8333333333333334
+S,B,t,0,464,file_4_888,near-exact,n1|s1|b1,Mets_309,Mets_309/z104,Mets_309,-3,-3,0.5
+S,B,t,0,file_3_4401,file_4_888,near-exact,n1|s1|b1,Mets_051,Mets_051/z96,Mets_051,-1,-1,0.8
+S,B,t,0,file_4_2027,file_4_888,near-exact,n1|s1|b1,Mets_024,Mets_024/z96,Mets_024,2,-3,0.5294117647058824
+S,B,t,0,file_4_74,file_4_888,near-exact,n1|s1|b1,Mets_176,Mets_176/z74,Mets_176,0,0,0.7
+S,B,t,0,file_5_11827,file_4_888,near-exact,n1|s1|b1,Mets_251,Mets_251/z21,Mets_251,-1,-2,0.8148148148148148
+S,B,t,0,5582,file_3_8620,near-exact,n1|s2|b1,Mets_244,Mets_244/z17,Mets_244,0,3,0.7741935483870968
+S,B,t,0,6209,file_3_8620,near-exact,n1|s2|b1,Mets_134,Mets_134/z140,Mets_134,2,0,0.8405797101449275
+S,B,t,0,9603,file_3_8620,near-exact,n1|s2|b1,Mets_134,Mets_134/z144,Mets_134,1,-3,0.7272727272727273
+S,B,t,0,file_2980,file_3_8620,near-exact,n1|s2|b1,Mets_107,Mets_107/z79,Mets_107,-3,0,0.6666666666666666
+S,B,t,0,file_5_4979,file_3_8620,near-exact,n1|s2|b1,Mets_062,Mets_062/z102,Mets_062,-3,1,0.782608695652174
+S,B,t,0,10627,file_2_2353,near-exact,n1|s2|b0,Mets_319,Mets_319/z36,Mets_319,-3,-3,0.7105263157894737
+S,B,t,0,file_3_2105,file_2_2353,near-exact,n1|s2|b0,Mets_074,Mets_074/z89,Mets_074,0,0,0.8108108108108109
+S,B,t,0,file_3_3188,file_2_2353,near-exact,n1|s2|b0,Mets_052,Mets_052/z44,Mets_052,2,0,0.6363636363636364
+S,B,t,0,file_4_4206,file_2_2353,near-exact,n1|s2|b0,Mets_019,Mets_019/z52,Mets_019,-1,1,0.8
+S,B,t,0,file_5_12848,file_2_2353,near-exact,n1|s2|b0,Mets_024,Mets_024/z24,Mets_024,2,-2,0.6857142857142857
+S,B,t,0,file_2_5370,file_2_8240,near-exact,n1|s2|b0,Mets_271,Mets_271/z34,Mets_271,0,0,0.75
+S,B,t,0,file_3_1524,file_2_8240,near-exact,n1|s2|b0,Mets_309,Mets_309/z103,Mets_309,-2,0,0.6666666666666666
+S,B,t,0,file_3_369,file_2_8240,near-exact,n1|s2|b0,Mets_134,Mets_134/z145,Mets_134,1,3,0.8717948717948718
+S,B,t,0,file_4126,file_2_8240,near-exact,n1|s2|b0,Mets_265,Mets_265/z49,Mets_265,2,0,0.8372093023255814
+S,B,t,0,file_4_4379,file_2_8240,near-exact,n1|s2|b0,Mets_328,Mets_328/z93,Mets_328,1,2,0.8518518518518519
+S,B,t,0,file_3_4329,file_2_456,near-exact,n1|s2|b1,Mets_319,Mets_319/z47,Mets_319,-3,0,0.6349206349206349
+S,B,t,0,file_3_8617,file_2_456,near-exact,n1|s2|b1,Mets_016,Mets_016/z91,Mets_016,-2,-3,0.6075949367088608
+S,B,t,0,file_5991,file_2_456,near-exact,n1|s2|b1,Mets_123,Mets_123/z21,Mets_123,0,2,0.8378378378378378
+S,B,t,0,file_5_5964,file_2_456,near-exact,n1|s2|b1,Mets_266,Mets_266/z18,Mets_266,1,0,0.547945205479452
+S,B,t,0,file_7131,file_2_456,near-exact,n1|s2|b1,Mets_049,Mets_049/z24,Mets_049,2,3,0.7692307692307693
+S,B,t,0,file_2_8656,file_4_776,near-exact,n1|s2|b1,Mets_016,Mets_016/z40,Mets_016,2,-1,0.5490196078431373
+S,B,t,0,file_2_946,file_4_776,near-exact,n1|s2|b1,Mets_059,Mets_059/z30,Mets_059,0,3,0.7160493827160493
+S,B,t,0,file_3_6481,file_4_776,near-exact,n1|s2|b1,Mets_176,Mets_176/z71,Mets_176,3,1,0.6808510638297872
+S,B,t,0,file_3_8110,file_4_776,near-exact,n1|s2|b1,Mets_289,Mets_289/z55,Mets_289,3,2,0.8979591836734694
+S,B,t,0,file_5769,file_4_776,near-exact,n1|s2|b1,Mets_132,Mets_132/z85,Mets_132,2,-1,0.8115942028985508
+S,B,t,0,2435,file_7173,near-exact,n1|s1|b1,Mets_313,Mets_313/z127,Mets_313,0,-2,0.8
+S,B,t,0,file_2825,file_7173,near-exact,n1|s1|b1,Mets_314,Mets_314/z121,Mets_314,-1,1,0.9032258064516129
+S,B,t,0,file_2_334,file_7173,near-exact,n1|s1|b1,Mets_225,Mets_225/z79,Mets_225,0,-1,0.6511627906976745
+S,B,t,0,file_2_8330,file_7173,near-exact,n1|s1|b1,Mets_024,Mets_024/z118,Mets_024,1,1,0.5365853658536586
+S,B,t,0,file_4_4664,file_7173,near-exact,n1|s1|b1,Mets_052,Mets_052/z101,Mets_052,2,0,0.49056603773584906
+S,B,t,0,file_3_2043,file_3_1676,near-exact,n1|s2|b2,Mets_132,Mets_132/z35,Mets_132,-2,-1,0.6885245901639344
+S,B,t,0,file_3_3473,file_3_1676,near-exact,n1|s2|b2,Mets_132,Mets_132/z60,Mets_132,-2,-1,0.68
+S,B,t,0,file_3_6032,file_3_1676,near-exact,n1|s2|b2,Mets_290,Mets_290/z93,Mets_290,-3,-3,0.8571428571428571
+S,B,t,0,file_3_8301,file_3_1676,near-exact,n1|s2|b2,Mets_314,Mets_314/z92,Mets_314,3,1,0.5396825396825397
+S,B,t,0,file_4_1250,file_3_1676,near-exact,n1|s2|b2,Mets_016,Mets_016/z42,Mets_016,1,0,0.6206896551724138
+S,B,t,0,12106,file_5_7515,near-exact,n1|s3|b2,Mets_240,Mets_240/z141,Mets_240,2,3,0.7142857142857143
+S,B,t,0,file_2_7170,file_5_7515,near-exact,n1|s3|b2,Mets_251,Mets_251/z50,Mets_251,3,3,0.6021505376344086
+S,B,t,0,file_3_1863,file_5_7515,near-exact,n1|s3|b2,Mets_244,Mets_244/z74,Mets_244,3,0,0.5714285714285714
+S,B,t,0,file_3_6583,file_5_7515,near-exact,n1|s3|b2,Mets_251,Mets_251/z46,Mets_251,3,-1,0.851063829787234
+S,B,t,0,file_4700,file_5_7515,near-exact,n1|s3|b2,Mets_014,Mets_014/z42,Mets_014,-3,-1,0.6352941176470588
+S,B,t,0,12072,file_3_1081,near-exact,n1|s3|b2,Mets_014,Mets_014/z106,Mets_014,-3,-3,0.56
+S,B,t,0,file_3_2929,file_3_1081,near-exact,n1|s3|b2,Mets_032,Mets_032/z118,Mets_032,-2,1,0.8405797101449275
+S,B,t,0,file_4_3536,file_3_1081,near-exact,n1|s3|b2,Mets_271,Mets_271/z110,Mets_271,-3,-1,0.6304347826086957
+S,B,t,0,file_5_10859,file_3_1081,near-exact,n1|s3|b2,Mets_024,Mets_024/z22,Mets_024,3,-3,0.6944444444444444
+S,B,t,0,file_5_4018,file_3_1081,near-exact,n1|s3|b2,Mets_062,Mets_062/z21,Mets_062,1,2,0.8854961832061069
+S,B,t,0,10125,file_3621,near-exact,n1|s3|b1,Mets_319,Mets_319/z36,Mets_319,0,-1,0.7727272727272727
+S,B,t,0,12531,file_3621,near-exact,n1|s3|b1,Mets_244,Mets_244/z54,Mets_244,1,-2,0.7578947368421053
+S,B,t,0,file_3_4865,file_3621,near-exact,n1|s3|b1,Mets_049,Mets_049/z67,Mets_049,-1,0,0.8627450980392157
+S,B,t,0,file_5910,file_3621,near-exact,n1|s3|b1,Mets_323,Mets_323/z109,Mets_323,2,-3,0.8173913043478261
+S,B,t,0,file_5_6252,file_3621,near-exact,n1|s3|b1,Mets_148,Mets_148/z105,Mets_148,3,0,0.46808510638297873
+S,B,t,0,378,file_4_5137,near-exact,n1|s3|b0,Mets_014,Mets_014/z23,Mets_014,3,-3,0.7901234567901234
+S,B,t,0,8120,file_4_5137,near-exact,n1|s3|b0,Mets_059,Mets_059/z32,Mets_059,-3,-2,0.6890756302521008
+S,B,t,0,file_2_4458,file_4_5137,near-exact,n1|s3|b0,Mets_123,Mets_123/z93,Mets_123,1,0,0.7631578947368421
+S,B,t,0,file_3_2192,file_4_5137,near-exact,n1|s3|b0,Mets_055,Mets_055/z39,Mets_055,2,3,0.7107438016528925
+S,B,t,0,file_5_9039,file_4_5137,near-exact,n1|s3|b0,Mets_059,Mets_059/z32,Mets_059,3,2,0.5614035087719298
+S,B,t,0,file_2_4567,file_981,near-exact,n1|s3|b2,Mets_244,Mets_244/z54,Mets_244,0,0,0.8043478260869565
+S,B,t,0,file_2_636,file_981,near-exact,n1|s3|b2,Mets_059,Mets_059/z32,Mets_059,3,-3,0.5333333333333333
+S,B,t,0,file_4_4756,file_981,near-exact,n1|s3|b2,Mets_049,Mets_049/z108,Mets_049,0,3,0.8333333333333334
+S,B,t,0,file_4_6774,file_981,near-exact,n1|s3|b2,Mets_328,Mets_328/z132,Mets_328,0,1,0.6511627906976745
+S,B,t,0,file_4_7230,file_981,near-exact,n1|s3|b2,Mets_311,Mets_311/z59,Mets_311,0,-3,0.3006535947712418
+S,B,t,0,891,file_467,near-exact,n1|s3|b0,Mets_249,Mets_249/z26,Mets_249,-3,1,0.8440366972477065
+S,B,t,0,file_3_6247,file_467,near-exact,n1|s3|b0,Mets_173,Mets_173/z46,Mets_173,3,-1,0.7947019867549668
+S,B,t,0,file_5_10265,file_467,near-exact,n1|s3|b0,Mets_101,Mets_101/z19,Mets_101,0,2,0.7304347826086957
+S,B,t,0,file_6977,file_467,near-exact,n1|s3|b0,Mets_005,Mets_005/z128,Mets_005,-3,2,0.7037037037037037
+S,B,t,0,file_7657,file_467,near-exact,n1|s3|b0,Mets_142,Mets_142/z94,Mets_142,-3,2,0.9166666666666666
+S,B,t,0,11850,file_3_1530,near-exact,n1|s3|b0,Mets_142,Mets_142/z82,Mets_142,3,0,0.8
+S,B,t,0,4345,file_3_1530,near-exact,n1|s3|b0,Mets_014,Mets_014/z20,Mets_014,2,0,0.7819548872180451
+S,B,t,0,7277,file_3_1530,near-exact,n1|s3|b0,Mets_036,Mets_036/z99,Mets_036,2,-3,0.803921568627451
+S,B,t,0,file_2_2770,file_3_1530,near-exact,n1|s3|b0,Mets_107,Mets_107/z131,Mets_107,0,1,0.8043478260869565
+S,B,t,0,file_6945,file_3_1530,near-exact,n1|s3|b0,Mets_230,Mets_230/z94,Mets_230,1,2,0.8155339805825242
+S,B,t,0,1776,file_2_3955,near-exact,n1|s3|b1,Mets_251,Mets_251/z51,Mets_251,1,-1,0.8048780487804879
+S,B,t,0,3036,file_2_3955,near-exact,n1|s3|b1,Mets_068,Mets_068/z17,Mets_068,0,-3,0.6595744680851063
+S,B,t,0,4023,file_2_3955,near-exact,n1|s3|b1,Mets_062,Mets_062/z20,Mets_062,-1,-3,0.6194690265486725
+S,B,t,0,file_3_2713,file_2_3955,near-exact,n1|s3|b1,Mets_039,Mets_039/z82,Mets_039,-2,3,0.6371681415929203
+S,B,t,0,file_4_2810,file_2_3955,near-exact,n1|s3|b1,Mets_049,Mets_049/z108,Mets_049,2,-2,0.7368421052631579
+S,B,t,0,file_3_4608,file_5_11978,near-exact,n1|s3|b0,Mets_244,Mets_244/z74,Mets_244,3,0,0.723404255319149
+S,B,t,0,file_3_8129,file_5_11978,near-exact,n1|s3|b0,Mets_028,Mets_028/z84,Mets_028,-3,-2,0.6
+S,B,t,0,file_4_1577,file_5_11978,near-exact,n1|s3|b0,Mets_230,Mets_230/z94,Mets_230,1,2,0.8070175438596491
+S,B,t,0,file_4_1591,file_5_11978,near-exact,n1|s3|b0,Mets_249,Mets_249/z26,Mets_249,-3,2,0.7850467289719626
+S,B,t,0,file_6561,file_5_11978,near-exact,n1|s3|b0,Mets_323,Mets_323/z110,Mets_323,-1,-1,0.7669172932330827
+S,B,t,0,7964,file_2_1082,near-exact,n1|s3|b0,Mets_266,Mets_266/z81,Mets_266,-3,1,0.8641975308641975
+S,B,t,0,8864,file_2_1082,near-exact,n1|s3|b0,Mets_058,Mets_058/z109,Mets_058,3,2,0.8429752066115702
+S,B,t,0,file_2_1599,file_2_1082,near-exact,n1|s3|b0,Mets_240,Mets_240/z132,Mets_240,-3,-1,0.8923076923076924
+S,B,t,0,file_2_4464,file_2_1082,near-exact,n1|s3|b0,Mets_014,Mets_014/z105,Mets_014,-3,2,0.49411764705882355
+S,B,t,0,file_5_9646,file_2_1082,near-exact,n1|s3|b0,Mets_101,Mets_101/z36,Mets_101,1,3,0.8571428571428571
+S,B,t,0,2518,file_3_2183,near-exact,n1|s3|b0,Mets_319,Mets_319/z59,Mets_319,-1,-1,0.8611111111111112
+S,B,t,0,3038,file_3_2183,near-exact,n1|s3|b0,Mets_148,Mets_148/z101,Mets_148,-3,-3,0.5616438356164384
+S,B,t,0,file_3_7732,file_3_2183,near-exact,n1|s3|b0,Mets_249,Mets_249/z26,Mets_249,2,-1,0.7964601769911505
+S,B,t,0,file_4_3433,file_3_2183,near-exact,n1|s3|b0,Mets_055,Mets_055/z40,Mets_055,-2,-3,0.5794392523364486
+S,B,t,0,file_4_435,file_3_2183,near-exact,n1|s3|b0,Mets_249,Mets_249/z124,Mets_249,-1,2,0.8316831683168316
+S,B,t,0,file_3_3636,file_4_5568,near-exact,n1|s3|b0,Mets_230,Mets_230/z94,Mets_230,-3,2,0.5544554455445545
+S,B,t,0,file_4_1451,file_4_5568,near-exact,n1|s3|b0,Mets_176,Mets_176/z71,Mets_176,2,1,0.7216494845360825
+S,B,t,0,file_4_8293,file_4_5568,near-exact,n1|s3|b0,Mets_049,Mets_049/z118,Mets_049,0,-2,0.75
+S,B,t,0,file_5827,file_4_5568,near-exact,n1|s3|b0,Mets_249,Mets_249/z123,Mets_249,-1,3,0.6
+S,B,t,0,file_5_12271,file_4_5568,near-exact,n1|s3|b0,Mets_014,Mets_014/z22,Mets_014,3,-3,0.6666666666666666
+S,B,t,0,2477,621,near-exact,n1|s3|b0,Mets_142,Mets_142/z93,Mets_142,3,0,0.7916666666666666
+S,B,t,0,6524,621,near-exact,n1|s3|b0,Mets_058,Mets_058/z108,Mets_058,3,-2,0.7733333333333333
+S,B,t,0,file_2_6219,621,near-exact,n1|s3|b0,Mets_089,Mets_089/z38,Mets_089,3,1,0.7428571428571429
+S,B,t,0,file_315,621,near-exact,n1|s3|b0,Mets_059,Mets_059/z32,Mets_059,3,1,0.4067796610169492
+S,B,t,0,file_5755,621,near-exact,n1|s3|b0,Mets_173,Mets_173/z46,Mets_173,-3,-1,0.8194444444444444
+S,B,t,0,11997,file_4_8548,near-exact,n1|s3|b2,Mets_094,Mets_094/z127,Mets_094,1,-1,0.88
+S,B,t,0,file_2_4707,file_4_8548,near-exact,n1|s3|b2,Mets_244,Mets_244/z54,Mets_244,-3,3,0.6597938144329897
+S,B,t,0,file_2_6444,file_4_8548,near-exact,n1|s3|b2,Mets_249,Mets_249/z122,Mets_249,2,3,0.8448275862068966
+S,B,t,0,file_4_1045,file_4_8548,near-exact,n1|s3|b2,Mets_062,Mets_062/z114,Mets_062,0,-3,0.8322147651006712
+S,B,t,0,file_6000,file_4_8548,near-exact,n1|s3|b2,Mets_107,Mets_107/z131,Mets_107,2,1,0.8571428571428571
+S,B,t,0,5538,file_7582,near-exact,n1|s3|b0,Mets_148,Mets_148/z105,Mets_148,-1,2,0.8351648351648352
+S,B,t,0,file_2_3336,file_7582,near-exact,n1|s3|b0,Mets_089,Mets_089/z38,Mets_089,-1,-3,0.6363636363636364
+S,B,t,0,file_3_3463,file_7582,near-exact,n1|s3|b0,Mets_107,Mets_107/z131,Mets_107,-1,-3,0.8723404255319149
+S,B,t,0,file_4_486,file_7582,near-exact,n1|s3|b0,Mets_059,Mets_059/z32,Mets_059,-3,-2,0.546875
+S,B,t,0,file_5_12520,file_7582,near-exact,n1|s3|b0,Mets_014,Mets_014/z42,Mets_014,-1,0,0.7297297297297297
+S,B,t,0,file_2208,file_2_1274,near-exact,n1|s3|b0,Mets_323,Mets_323/z109,Mets_323,-3,3,0.6825396825396826
+S,B,t,0,file_3_1008,file_2_1274,near-exact,n1|s3|b0,Mets_265,Mets_265/z41,Mets_265,-1,-2,0.831858407079646
+S,B,t,0,file_3_7957,file_2_1274,near-exact,n1|s3|b0,Mets_230,Mets_230/z94,Mets_230,-2,1,0.7927927927927928
+S,B,t,0,file_6057,file_2_1274,near-exact,n1|s3|b0,Mets_094,Mets_094/z81,Mets_094,0,3,0.7865168539325843
+S,B,t,0,file_6821,file_2_1274,near-exact,n1|s3|b0,Mets_051,Mets_051/z100,Mets_051,2,-1,0.8679245283018868
+S,B,t,0,file_2_4629,file_3_2563,near-exact,n1|s3|b2,Mets_251,Mets_251/z48,Mets_251,0,-2,0.582089552238806
+S,B,t,0,file_2_626,file_3_2563,near-exact,n1|s3|b2,Mets_055,Mets_055/z21,Mets_055,2,0,0.7288135593220338
+S,B,t,0,file_4_7530,file_3_2563,near-exact,n1|s3|b2,Mets_251,Mets_251/z50,Mets_251,3,1,0.7722772277227723
+S,B,t,0,file_5820,file_3_2563,near-exact,n1|s3|b2,Mets_244,Mets_244/z74,Mets_244,3,0,0.7391304347826086
+S,B,t,0,file_5_5286,file_3_2563,near-exact,n1|s3|b2,Mets_313,Mets_313/z13,Mets_313,2,3,0.8633093525179856
+S,B,t,0,file_2_1776,305,near-exact,n1|s3|b0,Mets_170,Mets_170/z56,Mets_170,3,3,0.6762589928057554
+S,B,t,0,file_2_3888,305,near-exact,n1|s3|b0,Mets_099,Mets_099/z35,Mets_099,3,2,0.6666666666666666
+S,B,t,0,file_3_2610,305,near-exact,n1|s3|b0,Mets_036,Mets_036/z100,Mets_036,0,-3,0.6973684210526315
+S,B,t,0,file_4_4676,305,near-exact,n1|s3|b0,Mets_323,Mets_323/z110,Mets_323,2,1,0.8396946564885496
+S,B,t,0,file_5_12708,305,near-exact,n1|s3|b0,Mets_148,Mets_148/z101,Mets_148,-3,-2,0.6917293233082706
+S,B,t,0,file_3_6052,file_2_1433,near-exact,n1|s1|b2,Mets_032,Mets_032/z113,Mets_032,-2,2,0.5769230769230769
+S,B,t,0,file_4_5378,file_2_1433,near-exact,n1|s1|b2,Mets_328,Mets_328/z100,Mets_328,0,3,0.20408163265306123
+S,B,t,0,file_4_8243,file_2_1433,near-exact,n1|s1|b2,Mets_309,Mets_309/z101,Mets_309,-3,1,0.6521739130434783
+S,B,t,0,file_5_9937,file_2_1433,near-exact,n1|s1|b2,Mets_249,Mets_249/z100,Mets_249,2,-1,0.7407407407407407
+S,B,t,0,file_7484,file_2_1433,near-exact,n1|s1|b2,Mets_134,Mets_134/z110,Mets_134,3,1,0.5185185185185185
+S,B,t,0,file_3802,file_5_10547,beyond held-out,n2|s1|b2,Mets_069,Mets_069/z28,Mets_069,2,0,0.46875
+S,B,t,0,file_4_1819,file_5_10547,beyond held-out,n2|s1|b2,Mets_266,Mets_266/z115,Mets_266,-2,1,0.5652173913043478
+S,B,t,0,file_4_459,file_5_10547,beyond held-out,n2|s1|b2,Mets_052,Mets_052/z43,Mets_052,0,-3,0.2564102564102564
+S,B,t,0,file_4_5167,file_5_10547,beyond held-out,n2|s1|b2,Mets_249,Mets_249/z108,Mets_249,3,3,0.5581395348837209
+S,B,t,0,file_5_9869,file_5_10547,beyond held-out,n2|s1|b2,Mets_120,Mets_120/z78,Mets_120,-2,-2,0.4745762711864407
+S,B,t,0,file_3_2280,2623,beyond held-out,n2|s3|b0,Mets_171,Mets_171/z15,Mets_171,1,1,0.5333333333333333
+S,B,t,0,file_3_8303,2623,beyond held-out,n2|s3|b0,Mets_249,Mets_249/z124,Mets_249,3,3,0.5441176470588235
+S,B,t,0,file_4_3834,2623,beyond held-out,n2|s3|b0,Mets_120,Mets_120/z88,Mets_120,-3,0,0.208955223880597
+S,B,t,0,file_4_4199,2623,beyond held-out,n2|s3|b0,Mets_074,Mets_074/z90,Mets_074,-1,3,0.5365853658536586
+S,B,t,0,file_4_7504,2623,beyond held-out,n2|s3|b0,Mets_099,Mets_099/z34,Mets_099,0,2,0.28272251308900526
+S,B,t,0,12001,file_3_1517,beyond held-out,n2|s3|b1,Mets_289,Mets_289/z52,Mets_289,-3,3,0.5147058823529411
+S,B,t,0,8281,file_3_1517,beyond held-out,n2|s3|b1,Mets_049,Mets_049/z44,Mets_049,-1,-3,0.11553784860557768
+S,B,t,0,9894,file_3_1517,beyond held-out,n2|s3|b1,Mets_068,Mets_068/z17,Mets_068,0,3,0.5033112582781457
+S,B,t,0,file_2_5029,file_3_1517,beyond held-out,n2|s3|b1,Mets_062,Mets_062/z37,Mets_062,1,-2,0.46153846153846156
+S,B,t,0,file_6328,file_3_1517,beyond held-out,n2|s3|b1,Mets_265,Mets_265/z48,Mets_265,2,-3,0.411214953271028
+S,B,t,0,11950,6550,beyond held-out,n2|s1|b2,Mets_134,Mets_134/z132,Mets_134,-3,3,0.3508771929824561
+S,B,t,0,2598,6550,beyond held-out,n2|s1|b2,Mets_039,Mets_039/z114,Mets_039,1,-1,0.4
+S,B,t,0,file_1773,6550,beyond held-out,n2|s1|b2,Mets_055,Mets_055/z85,Mets_055,3,3,0.4782608695652174
+S,B,t,0,file_4_7896,6550,beyond held-out,n2|s1|b2,Mets_132,Mets_132/z90,Mets_132,1,-3,0.425531914893617
+S,B,t,0,file_5_7309,6550,beyond held-out,n2|s1|b2,Mets_314,Mets_314/z95,Mets_314,3,2,0.38596491228070173
+S,B,t,0,5623,file_2_7649,beyond held-out,n2|s1|b2,Mets_062,Mets_062/z119,Mets_062,0,-1,0.1032258064516129
+S,B,t,0,9355,file_2_7649,beyond held-out,n2|s1|b2,Mets_059,Mets_059/z121,Mets_059,-2,3,0.4918032786885246
+S,B,t,0,file_2553,file_2_7649,beyond held-out,n2|s1|b2,Mets_314,Mets_314/z20,Mets_314,-2,-1,0.2222222222222222
+S,B,t,0,file_4_2460,file_2_7649,beyond held-out,n2|s1|b2,Mets_265,Mets_265/z46,Mets_265,-2,-2,0.3106796116504854
+S,B,t,0,file_4_2790,file_2_7649,beyond held-out,n2|s1|b2,Mets_314,Mets_314/z122,Mets_314,3,-2,0.5263157894736842
+S,B,t,0,50,file_4_214,beyond held-out,n2|s1|b2,Mets_058,Mets_058/z121,Mets_058,-1,-3,0.6511627906976745
+S,B,t,0,6959,file_4_214,beyond held-out,n2|s1|b2,Mets_028,Mets_028/z142,Mets_028,0,1,0.410958904109589
+S,B,t,0,file_2_900,file_4_214,beyond held-out,n2|s1|b2,Mets_134,Mets_134/z114,Mets_134,1,0,0.24242424242424243
+S,B,t,0,file_4_2437,file_4_214,beyond held-out,n2|s1|b2,Mets_051,Mets_051/z48,Mets_051,1,-2,0.625
+S,B,t,0,file_4_8123,file_4_214,beyond held-out,n2|s1|b2,Mets_134,Mets_134/z114,Mets_134,1,-3,0.32786885245901637
+S,B,t,0,6212,1601,beyond held-out,n2|s1|b0,Mets_314,Mets_314/z80,Mets_314,-1,2,0.3225806451612903
+S,B,t,0,987,1601,beyond held-out,n2|s1|b0,Mets_225,Mets_225/z79,Mets_225,2,2,0.5957446808510638
+S,B,t,0,file_1122,1601,beyond held-out,n2|s1|b0,Mets_014,Mets_014/z40,Mets_014,-1,1,0.36363636363636365
+S,B,t,0,file_3_4488,1601,beyond held-out,n2|s1|b0,Mets_328,Mets_328/z97,Mets_328,3,1,0.4864864864864865
+S,B,t,0,file_5_10765,1601,beyond held-out,n2|s1|b0,Mets_107,Mets_107/z33,Mets_107,-1,-3,0.3880597014925373
+S,B,t,0,10878,2692,beyond held-out,n2|s1|b2,Mets_285,Mets_285/z136,Mets_285,-3,-3,0.6101694915254238
+S,B,t,0,449,2692,beyond held-out,n2|s1|b2,Mets_244,Mets_244/z15,Mets_244,1,0,0.5
+S,B,t,0,file_3_707,2692,beyond held-out,n2|s1|b2,Mets_176,Mets_176/z60,Mets_176,-3,1,0.5238095238095238
+S,B,t,0,file_3_7113,2692,beyond held-out,n2|s1|b2,Mets_059,Mets_059/z101,Mets_059,2,2,0.42857142857142855
+S,B,t,0,file_6468,2692,beyond held-out,n2|s1|b2,Mets_032,Mets_032/z47,Mets_032,-1,-1,0.5283018867924528
+S,B,t,0,6595,8532,beyond held-out,n2|s1|b2,Mets_055,Mets_055/z36,Mets_055,0,-1,0.43478260869565216
+S,B,t,0,file_2_4558,8532,beyond held-out,n2|s1|b2,Mets_132,Mets_132/z41,Mets_132,1,2,0.6363636363636364
+S,B,t,0,file_3618,8532,beyond held-out,n2|s1|b2,Mets_107,Mets_107/z107,Mets_107,0,3,0.2857142857142857
+S,B,t,0,file_3_6962,8532,beyond held-out,n2|s1|b2,Mets_032,Mets_032/z22,Mets_032,0,-2,0.6
+S,B,t,0,file_4_3884,8532,beyond held-out,n2|s1|b2,Mets_052,Mets_052/z53,Mets_052,-1,1,0.39436619718309857
+S,B,t,0,1426,file_5_7988,beyond held-out,n2|s2|b2,Mets_107,Mets_107/z126,Mets_107,-1,0,0.6732673267326733
+S,B,t,0,5679,file_5_7988,beyond held-out,n2|s2|b2,Mets_049,Mets_049/z107,Mets_049,3,2,0.3220338983050847
+S,B,t,0,file_2_1493,file_5_7988,beyond held-out,n2|s2|b2,Mets_016,Mets_016/z119,Mets_016,0,1,0.20168067226890757
+S,B,t,0,file_5_4479,file_5_7988,beyond held-out,n2|s2|b2,Mets_296,Mets_296/z63,Mets_296,0,-3,0.5116279069767442
+S,B,t,0,file_5_5216,file_5_7988,beyond held-out,n2|s2|b2,Mets_249,Mets_249/z19,Mets_249,-3,3,0.45098039215686275
+S,B,t,0,8117,12408,beyond held-out,n2|s2|b1,Mets_167,Mets_167/z77,Mets_167,0,0,0.6274509803921569
+S,B,t,0,file_1965,12408,beyond held-out,n2|s2|b1,Mets_240,Mets_240/z130,Mets_240,-2,-1,0.6666666666666666
+S,B,t,0,file_3_3099,12408,beyond held-out,n2|s2|b1,Mets_271,Mets_271/z68,Mets_271,-2,-3,0.25510204081632654
+S,B,t,0,file_4_7357,12408,beyond held-out,n2|s2|b1,Mets_026,Mets_026/z47,Mets_026,0,1,0.3728813559322034
+S,B,t,0,file_4_7428,12408,beyond held-out,n2|s2|b1,Mets_123,Mets_123/z108,Mets_123,-2,-2,0.4067796610169492
+S,B,t,0,file_269,file_4_839,beyond held-out,n2|s2|b2,Mets_107,Mets_107/z60,Mets_107,3,0,0.20224719101123595
+S,B,t,0,file_3_2300,file_4_839,beyond held-out,n2|s2|b2,Mets_052,Mets_052/z25,Mets_052,2,-2,0.21978021978021978
+S,B,t,0,file_4_1620,file_4_839,beyond held-out,n2|s2|b2,Mets_120,Mets_120/z83,Mets_120,2,3,0.42424242424242425
+S,B,t,0,file_4_7905,file_4_839,beyond held-out,n2|s2|b2,Mets_313,Mets_313/z126,Mets_313,1,0,0.5625
+S,B,t,0,file_5_11690,file_4_839,beyond held-out,n2|s2|b2,Mets_297,Mets_297/z29,Mets_297,1,0,0.5151515151515151
+S,B,t,0,6028,7730,beyond held-out,n2|s1|b2,Mets_058,Mets_058/z124,Mets_058,-1,-3,0.32786885245901637
+S,B,t,0,file_2_3280,7730,beyond held-out,n2|s1|b2,Mets_052,Mets_052/z87,Mets_052,2,1,0.2857142857142857
+S,B,t,0,file_2_7757,7730,beyond held-out,n2|s1|b2,Mets_132,Mets_132/z51,Mets_132,0,-2,0.37142857142857144
+S,B,t,0,file_3_5947,7730,beyond held-out,n2|s1|b2,Mets_120,Mets_120/z69,Mets_120,-2,3,0.16149068322981366
+S,B,t,0,file_8703,7730,beyond held-out,n2|s1|b2,Mets_314,Mets_314/z80,Mets_314,2,1,0.4444444444444444
+S,B,t,0,11024,file_2_884,beyond held-out,n2|s2|b2,Mets_058,Mets_058/z127,Mets_058,0,1,0.3
+S,B,t,0,file_3_3494,file_2_884,beyond held-out,n2|s2|b2,Mets_054,Mets_054/z75,Mets_054,3,1,0.5142857142857142
+S,B,t,0,file_3_4275,file_2_884,beyond held-out,n2|s2|b2,Mets_059,Mets_059/z88,Mets_059,-3,0,0.3188405797101449
+S,B,t,0,file_3_851,file_2_884,beyond held-out,n2|s2|b2,Mets_309,Mets_309/z35,Mets_309,3,-1,0.45161290322580644
+S,B,t,0,file_4_1977,file_2_884,beyond held-out,n2|s2|b2,Mets_028,Mets_028/z85,Mets_028,-3,1,0.6933333333333334
+S,B,t,0,file_2_2974,12089,beyond held-out,n2|s2|b0,Mets_019,Mets_019/z53,Mets_019,2,0,0.48333333333333334
+S,B,t,0,file_2_5363,12089,beyond held-out,n2|s2|b0,Mets_014,Mets_014/z24,Mets_014,1,-1,0.5316455696202531
+S,B,t,0,file_5_5055,12089,beyond held-out,n2|s2|b0,Mets_314,Mets_314/z21,Mets_314,-1,-1,0.3125
+S,B,t,0,file_5_5208,12089,beyond held-out,n2|s2|b0,Mets_328,Mets_328/z38,Mets_328,-3,-1,0.46511627906976744
+S,B,t,0,file_9167,12089,beyond held-out,n2|s2|b0,Mets_024,Mets_024/z27,Mets_024,-2,-2,0.32989690721649484
+S,B,t,0,7428,3544,beyond held-out,n2|s1|b0,Mets_266,Mets_266/z93,Mets_266,0,-1,0.36065573770491804
+S,B,t,0,file_3_3932,3544,beyond held-out,n2|s1|b0,Mets_176,Mets_176/z82,Mets_176,3,0,0.6938775510204082
+S,B,t,0,file_4_8371,3544,beyond held-out,n2|s1|b0,Mets_024,Mets_024/z27,Mets_024,1,-2,0.21686746987951808
+S,B,t,0,file_5_10714,3544,beyond held-out,n2|s1|b0,Mets_181,Mets_181/z113,Mets_181,-2,3,0.1724137931034483
+S,B,t,0,file_5_6636,3544,beyond held-out,n2|s1|b0,Mets_134,Mets_134/z29,Mets_134,3,3,0.72
+S,B,t,0,7697,file_4_7885,beyond held-out,n2|s2|b2,Mets_101,Mets_101/z38,Mets_101,1,-1,0.2830188679245283
+S,B,t,0,8149,file_4_7885,beyond held-out,n2|s2|b2,Mets_055,Mets_055/z29,Mets_055,-2,1,0.3247863247863248
+S,B,t,0,file_2_8156,file_4_7885,beyond held-out,n2|s2|b2,Mets_059,Mets_059/z120,Mets_059,0,3,0.4222222222222222
+S,B,t,0,file_5_5188,file_4_7885,beyond held-out,n2|s2|b2,Mets_296,Mets_296/z72,Mets_296,-1,-3,0.5
+S,B,t,0,file_5_7050,file_4_7885,beyond held-out,n2|s2|b2,Mets_313,Mets_313/z99,Mets_313,0,2,0.2631578947368421
+S,B,t,0,file_2327,file_1496,beyond held-out,n2|s2|b0,Mets_134,Mets_134/z122,Mets_134,3,-3,0.14634146341463414
+S,B,t,0,file_2_149,file_1496,beyond held-out,n2|s2|b0,Mets_314,Mets_314/z20,Mets_314,1,1,0.3448275862068966
+S,B,t,0,file_2_8788,file_1496,beyond held-out,n2|s2|b0,Mets_314,Mets_314/z42,Mets_314,2,1,0.2619047619047619
+S,B,t,0,file_3_7071,file_1496,beyond held-out,n2|s2|b0,Mets_134,Mets_134/z138,Mets_134,1,1,0.448
+S,B,t,0,file_4_5942,file_1496,beyond held-out,n2|s2|b0,Mets_266,Mets_266/z19,Mets_266,-3,0,0.5471698113207547
+S,B,t,0,file_2191,file_5_12710,beyond held-out,n2|s2|b2,Mets_062,Mets_062/z123,Mets_062,-3,2,0.1111111111111111
+S,B,t,0,file_2_5719,file_5_12710,beyond held-out,n2|s2|b2,Mets_014,Mets_014/z44,Mets_014,-3,-1,0.5671641791044776
+S,B,t,0,file_2_7492,file_5_12710,beyond held-out,n2|s2|b2,Mets_014,Mets_014/z42,Mets_014,1,2,0.6753246753246753
+S,B,t,0,file_3_140,file_5_12710,beyond held-out,n2|s2|b2,Mets_019,Mets_019/z69,Mets_019,-1,-3,0.5365853658536586
+S,B,t,0,file_5_8527,file_5_12710,beyond held-out,n2|s2|b2,Mets_314,Mets_314/z122,Mets_314,0,1,0.5079365079365079
+S,B,t,0,5095,file_5944,exposed e1_copy multi,n1|s3|b2,Mets_319,Mets_319/z22,Mets_319,-2,2,0.8863636363636364
+S,B,t,0,file_3661,file_5944,exposed e1_copy multi,n1|s3|b2,Mets_120,Mets_120/z119,Mets_120,-3,-2,0.5370370370370371
+S,B,t,0,file_3_3685,file_5944,exposed e1_copy multi,n1|s3|b2,Mets_030,Mets_030/z95,Mets_030,-1,-2,0.8631578947368421
+S,B,t,0,file_4640,file_5944,exposed e1_copy multi,n1|s3|b2,Mets_126,Mets_126/z126,Mets_126,2,3,0.7007299270072993
+S,B,t,0,file_4_158,file_5944,exposed e1_copy multi,n1|s3|b2,Mets_068,Mets_068/z18,Mets_068,1,-3,0.6625766871165644
+S,B,t,0,3640,12260,exposed e1_copy multi,n1|s2|b2,Mets_010,Mets_010/z84,Mets_010,0,-2,0.7692307692307693
+S,B,t,0,file_2_2508,12260,exposed e1_copy multi,n1|s2|b2,Mets_032,Mets_032/z113,Mets_032,0,1,0.8372093023255814
+S,B,t,0,file_2_7495,12260,exposed e1_copy multi,n1|s2|b2,Mets_049,Mets_049/z83,Mets_049,1,1,0.8837209302325582
+S,B,t,0,file_3_5148,12260,exposed e1_copy multi,n1|s2|b2,Mets_026,Mets_026/z39,Mets_026,-3,3,0.6578947368421053
+S,B,t,0,file_3_8184,12260,exposed e1_copy multi,n1|s2|b2,Mets_132,Mets_132/z59,Mets_132,1,-3,0.6666666666666666
+S,B,t,0,10882,11577,exposed e1_copy multi,n1|s2|b1,Mets_323,Mets_323/z119,Mets_323,0,0,0.6666666666666666
+S,B,t,0,11414,11577,exposed e1_copy multi,n1|s2|b1,Mets_132,Mets_132/z34,Mets_132,0,0,0.4482758620689655
+S,B,t,0,8486,11577,exposed e1_copy multi,n1|s2|b1,Mets_328,Mets_328/z92,Mets_328,2,-3,0.8260869565217391
+S,B,t,0,file_4_1308,11577,exposed e1_copy multi,n1|s2|b1,Mets_107,Mets_107/z125,Mets_107,1,1,0.5357142857142857
+S,B,t,0,file_5_6830,11577,exposed e1_copy multi,n1|s2|b1,Mets_314,Mets_314/z129,Mets_314,-1,-3,0.4583333333333333
+S,B,t,0,file_2_7747,file_3_3190,exposed e1_copy multi,n1|s3|b0,Mets_266,Mets_266/z75,Mets_266,0,0,0.6021505376344086
+S,B,t,0,file_3_4293,file_3_3190,exposed e1_copy multi,n1|s3|b0,Mets_005,Mets_005/z127,Mets_005,-3,2,0.6194690265486725
+S,B,t,0,file_3_46,file_3_3190,exposed e1_copy multi,n1|s3|b0,Mets_101,Mets_101/z19,Mets_101,-1,-2,0.822429906542056
+S,B,t,0,file_3_5479,file_3_3190,exposed e1_copy multi,n1|s3|b0,Mets_014,Mets_014/z106,Mets_014,-3,1,0.8928571428571429
+S,B,t,0,file_4_3833,file_3_3190,exposed e1_copy multi,n1|s3|b0,Mets_014,Mets_014/z21,Mets_014,3,-3,0.6666666666666666
+S,B,t,0,file_2_7360,file_5_11473,exposed e2_full multi,n2|s2|b1,Mets_120,Mets_120/z129,Mets_120,1,2,0.3368421052631579
+S,B,t,0,file_2_9208,file_5_11473,exposed e2_full multi,n2|s2|b1,Mets_167,Mets_167/z75,Mets_167,0,-1,0.36666666666666664
+S,B,t,0,file_3_1494,file_5_11473,exposed e2_full multi,n2|s2|b1,Mets_039,Mets_039/z100,Mets_039,-3,3,0.36666666666666664
+S,B,t,0,file_4_1153,file_5_11473,exposed e2_full multi,n2|s2|b1,Mets_107,Mets_107/z25,Mets_107,1,3,0.5294117647058824
+S,B,t,0,file_5_10737,file_5_11473,exposed e2_full multi,n2|s2|b1,Mets_090,Mets_090/z71,Mets_090,1,3,0.4634146341463415
+S,B,t,0,4386,file_4_3607,exposed e2_full multi,n2|s2|b2,Mets_134,Mets_134/z116,Mets_134,-2,-1,0.3148148148148148
+S,B,t,0,file_271,file_4_3607,exposed e2_full multi,n2|s2|b2,Mets_052,Mets_052/z100,Mets_052,2,1,0.2823529411764706
+S,B,t,0,file_2_5368,file_4_3607,exposed e2_full multi,n2|s2|b2,Mets_244,Mets_244/z74,Mets_244,2,1,0.6666666666666666
+S,B,t,0,file_3_2832,file_4_3607,exposed e2_full multi,n2|s2|b2,Mets_055,Mets_055/z110,Mets_055,-3,3,0.3146067415730337
+S,B,t,0,file_3_6458,file_4_3607,exposed e2_full multi,n2|s2|b2,Mets_184,Mets_184/z50,Mets_184,-3,2,0.35135135135135137
+S,B,t,0,1556,file_5_6678,exposed e2_full multi,n2|s3|b1,Mets_033,Mets_033/z31,Mets_033,-1,-3,0.3764705882352941
+S,B,t,0,4032,file_5_6678,exposed e2_full multi,n2|s3|b1,Mets_062,Mets_062/z87,Mets_062,-2,-1,0.06779661016949153
+S,B,t,0,9571,file_5_6678,exposed e2_full multi,n2|s3|b1,Mets_170,Mets_170/z135,Mets_170,-3,-3,0.4444444444444444
+S,B,t,0,9729,file_5_6678,exposed e2_full multi,n2|s3|b1,Mets_026,Mets_026/z29,Mets_026,-2,3,0.3114754098360656
+S,B,t,0,file_5_10548,file_5_6678,exposed e2_full multi,n2|s3|b1,Mets_266,Mets_266/z79,Mets_266,-1,2,0.5142857142857142
+S,A,runner_up,0,419,419,near-exact,n1|s1|b1,Mets_167,Mets_265/z51,Mets_265,-1,2,0.8333333333333334
+S,A,runner_up,0,file_2_4408,file_2_4408,near-exact,n1|s1|b2,Mets_058,Mets_181/z56,Mets_181,3,0,0.8666666666666667
+S,A,runner_up,0,file_331,file_331,near-exact,n1|s1|b0,Mets_134,Mets_090/z69,Mets_090,1,2,0.8421052631578947
+S,A,runner_up,0,file_4_888,file_4_888,near-exact,n1|s1|b1,Mets_314,Mets_280/z51,Mets_280,1,-1,0.9230769230769231
+S,A,runner_up,0,file_3_8620,file_3_8620,near-exact,n1|s2|b1,Mets_096,Mets_134/z130,Mets_134,-3,-1,0.9310344827586207
+S,A,runner_up,0,file_2_2353,file_2_2353,near-exact,n1|s2|b0,Mets_033,Mets_170/z131,Mets_170,0,1,0.8936170212765957
+S,A,runner_up,0,file_2_8240,file_2_8240,near-exact,n1|s2|b0,Mets_037,Mets_271/z54,Mets_271,2,-3,0.8947368421052632
+S,A,runner_up,0,file_2_456,file_2_456,near-exact,n1|s2|b1,Mets_016,Mets_107/z79,Mets_107,-1,1,0.8235294117647058
+S,A,runner_up,0,file_4_776,file_4_776,near-exact,n1|s2|b1,Mets_132,Mets_314/z110,Mets_314,-3,-2,0.8333333333333334
+S,A,runner_up,0,file_7173,file_7173,near-exact,n1|s1|b1,Mets_181,Mets_189/z70,Mets_189,0,0,0.8235294117647058
+S,A,runner_up,0,file_3_1676,file_3_1676,near-exact,n1|s2|b2,Mets_024,Mets_148/z107,Mets_148,0,-2,0.8444444444444444
+S,A,runner_up,0,file_5_7515,file_5_7515,near-exact,n1|s3|b2,Mets_170,Mets_028/z139,Mets_028,-3,-1,0.5538461538461539
+S,A,runner_up,0,file_3_1081,file_3_1081,near-exact,n1|s3|b2,Mets_323,Mets_032/z124,Mets_032,-3,2,0.8264462809917356
+S,A,runner_up,0,file_3621,file_3621,near-exact,n1|s3|b1,Mets_094,Mets_170/z58,Mets_170,-3,-2,0.8091603053435115
+S,A,runner_up,0,file_4_5137,file_4_5137,near-exact,n1|s3|b0,Mets_107,Mets_142/z94,Mets_142,3,2,0.8080808080808081
+S,A,runner_up,0,file_981,file_981,near-exact,n1|s3|b2,Mets_049,Mets_313/z10,Mets_313,-1,3,0.8484848484848485
+S,A,runner_up,0,file_467,file_467,near-exact,n1|s3|b0,Mets_249,Mets_099/z37,Mets_099,2,3,0.9024390243902439
+S,A,runner_up,0,file_3_1530,file_3_1530,near-exact,n1|s3|b0,Mets_225,Mets_026/z23,Mets_026,0,-2,0.8478260869565217
+S,A,runner_up,0,file_2_3955,file_2_3955,near-exact,n1|s3|b1,Mets_323,Mets_314/z129,Mets_314,1,-1,0.7142857142857143
+S,A,runner_up,0,file_5_11978,file_5_11978,near-exact,n1|s3|b0,Mets_319,Mets_230/z109,Mets_230,-3,1,0.7323943661971831
+S,A,runner_up,0,file_2_1082,file_2_1082,near-exact,n1|s3|b0,Mets_148,Mets_309/z103,Mets_309,0,-2,0.5894736842105263
+S,A,runner_up,0,file_3_2183,file_3_2183,near-exact,n1|s3|b0,Mets_028,Mets_134/z84,Mets_134,3,0,0.7945205479452054
+S,A,runner_up,0,file_4_5568,file_4_5568,near-exact,n1|s3|b0,Mets_005,Mets_289/z52,Mets_289,1,3,0.8703703703703703
+S,A,runner_up,0,621,621,near-exact,n1|s3|b0,Mets_289,Mets_230/z94,Mets_230,2,1,0.8990825688073395
+S,A,runner_up,0,file_4_8548,file_4_8548,near-exact,n1|s3|b2,Mets_244,Mets_185/z33,Mets_185,0,3,0.8450704225352113
+S,A,runner_up,0,file_7582,file_7582,near-exact,n1|s3|b0,Mets_240,Mets_051/z99,Mets_051,-1,3,0.8759124087591241
+S,A,runner_up,0,file_2_1274,file_2_1274,near-exact,n1|s3|b0,Mets_058,Mets_011/z74,Mets_011,-2,-3,0.8571428571428571
+S,A,runner_up,0,file_3_2563,file_3_2563,near-exact,n1|s3|b2,Mets_271,Mets_120/z105,Mets_120,-2,0,0.6724137931034483
+S,A,runner_up,0,305,305,near-exact,n1|s3|b0,Mets_249,Mets_266/z81,Mets_266,1,-1,0.851063829787234
+S,A,runner_up,0,file_2_1433,file_2_1433,near-exact,n1|s1|b2,Mets_069,Mets_132/z90,Mets_132,-3,1,0.7428571428571429
+S,A,runner_up,0,file_5_10547,file_5_10547,beyond held-out,n2|s1|b2,Mets_313,Mets_044/z56,Mets_044,1,0,0.40540540540540543
+S,A,runner_up,0,2623,2623,beyond held-out,n2|s3|b0,Mets_265,Mets_058/z110,Mets_058,1,-1,0.7651006711409396
+S,A,runner_up,0,file_3_1517,file_3_1517,beyond held-out,n2|s3|b1,Mets_051,Mets_244/z20,Mets_244,2,3,0.672
+S,A,runner_up,0,6550,6550,beyond held-out,n2|s1|b2,Mets_052,Mets_069/z112,Mets_069,-3,2,0.46808510638297873
+S,A,runner_up,0,file_2_7649,file_2_7649,beyond held-out,n2|s1|b2,Mets_058,Mets_120/z79,Mets_120,0,-1,0.5245901639344263
+S,A,runner_up,0,file_4_214,file_4_214,beyond held-out,n2|s1|b2,Mets_107,Mets_328/z111,Mets_328,1,-1,0.6086956521739131
+S,A,runner_up,0,1601,1601,beyond held-out,n2|s1|b0,Mets_249,Mets_062/z108,Mets_062,1,-1,0.6274509803921569
+S,A,runner_up,0,2692,2692,beyond held-out,n2|s1|b2,Mets_134,Mets_107/z77,Mets_107,0,2,0.5714285714285714
+S,A,runner_up,0,8532,8532,beyond held-out,n2|s1|b2,Mets_314,Mets_271/z53,Mets_271,3,1,0.6666666666666666
+S,A,runner_up,0,file_5_7988,file_5_7988,beyond held-out,n2|s2|b2,Mets_289,Mets_102/z27,Mets_102,2,-1,0.6666666666666666
+S,A,runner_up,0,12408,12408,beyond held-out,n2|s2|b1,Mets_266,Mets_033/z32,Mets_033,0,-1,0.64
+S,A,runner_up,0,file_4_839,file_4_839,beyond held-out,n2|s2|b2,Mets_062,Mets_128/z85,Mets_128,1,-1,0.6268656716417911
+S,A,runner_up,0,7730,7730,beyond held-out,n2|s1|b2,Mets_314,Mets_123/z91,Mets_123,0,0,0.5483870967741935
+S,A,runner_up,0,file_2_884,file_2_884,beyond held-out,n2|s2|b2,Mets_059,Mets_134/z141,Mets_134,0,1,0.5897435897435898
+S,A,runner_up,0,12089,12089,beyond held-out,n2|s2|b0,Mets_280,Mets_319/z40,Mets_319,-3,2,0.5691056910569106
+S,A,runner_up,0,3544,3544,beyond held-out,n2|s1|b0,Mets_024,Mets_271/z54,Mets_271,0,3,0.5909090909090909
+S,A,runner_up,0,file_4_7885,file_4_7885,beyond held-out,n2|s2|b2,Mets_285,Mets_100/z24,Mets_100,0,2,0.5675675675675675
+S,A,runner_up,0,file_1496,file_1496,beyond held-out,n2|s2|b0,Mets_099,Mets_176/z71,Mets_176,-1,1,0.5769230769230769
+S,A,runner_up,0,file_5_12710,file_5_12710,beyond held-out,n2|s2|b2,Mets_014,Mets_314/z109,Mets_314,3,-3,0.5925925925925926
+S,A,runner_up,0,file_5944,file_5944,exposed e1_copy multi,n1|s3|b2,Mets_230,Mets_290/z95,Mets_290,-3,-3,0.6796116504854369
+S,A,runner_up,0,12260,12260,exposed e1_copy multi,n1|s2|b2,Mets_090,Mets_289/z14,Mets_289,-2,2,0.7792207792207793
+S,A,runner_up,0,11577,11577,exposed e1_copy multi,n1|s2|b1,Mets_167,Mets_170/z53,Mets_170,3,1,0.8070175438596491
+S,A,runner_up,0,file_3_3190,file_3_3190,exposed e1_copy multi,n1|s3|b0,Mets_099,Mets_297/z36,Mets_297,2,2,0.7580645161290323
+S,A,runner_up,0,file_5_11473,file_5_11473,exposed e2_full multi,n2|s2|b1,Mets_328,Mets_132/z85,Mets_132,-3,0,0.6075949367088608
+S,A,runner_up,0,file_4_3607,file_4_3607,exposed e2_full multi,n2|s2|b2,Mets_225,Mets_185/z33,Mets_185,0,0,0.5542168674698795
+S,A,runner_up,0,file_5_6678,file_5_6678,exposed e2_full multi,n2|s3|b1,Mets_181,Mets_026/z22,Mets_026,0,0,0.7792207792207793
+S,A,dz,-5,419,419,near-exact,n1|s1|b1,Mets_167,Mets_167/z70,Mets_167,1,2,
+S,A,dz,-4,419,419,near-exact,n1|s1|b1,Mets_167,Mets_167/z71,Mets_167,1,2,
+S,A,dz,-3,419,419,near-exact,n1|s1|b1,Mets_167,Mets_167/z72,Mets_167,1,2,
+S,A,dz,-2,419,419,near-exact,n1|s1|b1,Mets_167,Mets_167/z73,Mets_167,1,2,
+S,A,dz,-1,419,419,near-exact,n1|s1|b1,Mets_167,Mets_167/z74,Mets_167,1,2,
+S,A,dz,1,419,419,near-exact,n1|s1|b1,Mets_167,Mets_167/z76,Mets_167,1,2,
+S,A,dz,2,419,419,near-exact,n1|s1|b1,Mets_167,Mets_167/z77,Mets_167,1,2,
+S,A,dz,3,419,419,near-exact,n1|s1|b1,Mets_167,Mets_167/z78,Mets_167,1,2,
+S,A,dz,4,419,419,near-exact,n1|s1|b1,Mets_167,Mets_167/z79,Mets_167,1,2,
+S,A,dz,5,419,419,near-exact,n1|s1|b1,Mets_167,Mets_167/z80,Mets_167,1,2,
+S,A,dz,-5,file_2_4408,file_2_4408,near-exact,n1|s1|b2,Mets_058,Mets_058/z107,Mets_058,1,-1,
+S,A,dz,-4,file_2_4408,file_2_4408,near-exact,n1|s1|b2,Mets_058,Mets_058/z108,Mets_058,1,-1,
+S,A,dz,-3,file_2_4408,file_2_4408,near-exact,n1|s1|b2,Mets_058,Mets_058/z109,Mets_058,1,-1,
+S,A,dz,-2,file_2_4408,file_2_4408,near-exact,n1|s1|b2,Mets_058,Mets_058/z110,Mets_058,1,-1,
+S,A,dz,-1,file_2_4408,file_2_4408,near-exact,n1|s1|b2,Mets_058,Mets_058/z111,Mets_058,1,-1,
+S,A,dz,1,file_2_4408,file_2_4408,near-exact,n1|s1|b2,Mets_058,Mets_058/z113,Mets_058,1,-1,
+S,A,dz,2,file_2_4408,file_2_4408,near-exact,n1|s1|b2,Mets_058,Mets_058/z114,Mets_058,1,-1,
+S,A,dz,3,file_2_4408,file_2_4408,near-exact,n1|s1|b2,Mets_058,Mets_058/z115,Mets_058,1,-1,
+S,A,dz,4,file_2_4408,file_2_4408,near-exact,n1|s1|b2,Mets_058,Mets_058/z116,Mets_058,1,-1,
+S,A,dz,5,file_2_4408,file_2_4408,near-exact,n1|s1|b2,Mets_058,Mets_058/z117,Mets_058,1,-1,
+S,A,dz,-5,file_331,file_331,near-exact,n1|s1|b0,Mets_134,Mets_134/z138,Mets_134,0,3,
+S,A,dz,-4,file_331,file_331,near-exact,n1|s1|b0,Mets_134,Mets_134/z139,Mets_134,0,3,
+S,A,dz,-3,file_331,file_331,near-exact,n1|s1|b0,Mets_134,Mets_134/z140,Mets_134,0,3,
+S,A,dz,-2,file_331,file_331,near-exact,n1|s1|b0,Mets_134,Mets_134/z141,Mets_134,0,3,
+S,A,dz,-1,file_331,file_331,near-exact,n1|s1|b0,Mets_134,Mets_134/z142,Mets_134,0,3,
+S,A,dz,1,file_331,file_331,near-exact,n1|s1|b0,Mets_134,Mets_134/z144,Mets_134,0,3,
+S,A,dz,2,file_331,file_331,near-exact,n1|s1|b0,Mets_134,Mets_134/z145,Mets_134,0,3,
+S,A,dz,3,file_331,file_331,near-exact,n1|s1|b0,Mets_134,Mets_134/z146,Mets_134,0,3,
+S,A,dz,4,file_331,file_331,near-exact,n1|s1|b0,Mets_134,Mets_134/z147,Mets_134,0,3,
+S,A,dz,5,file_331,file_331,near-exact,n1|s1|b0,Mets_134,Mets_134/z148,Mets_134,0,3,
+S,A,dz,-5,file_4_888,file_4_888,near-exact,n1|s1|b1,Mets_314,Mets_314/z17,Mets_314,1,1,
+S,A,dz,-4,file_4_888,file_4_888,near-exact,n1|s1|b1,Mets_314,Mets_314/z18,Mets_314,1,1,
+S,A,dz,-3,file_4_888,file_4_888,near-exact,n1|s1|b1,Mets_314,Mets_314/z19,Mets_314,1,1,
+S,A,dz,-2,file_4_888,file_4_888,near-exact,n1|s1|b1,Mets_314,Mets_314/z20,Mets_314,1,1,
+S,A,dz,-1,file_4_888,file_4_888,near-exact,n1|s1|b1,Mets_314,Mets_314/z21,Mets_314,1,1,
+S,A,dz,1,file_4_888,file_4_888,near-exact,n1|s1|b1,Mets_314,Mets_314/z23,Mets_314,1,1,
+S,A,dz,2,file_4_888,file_4_888,near-exact,n1|s1|b1,Mets_314,Mets_314/z24,Mets_314,1,1,
+S,A,dz,3,file_4_888,file_4_888,near-exact,n1|s1|b1,Mets_314,Mets_314/z25,Mets_314,1,1,
+S,A,dz,4,file_4_888,file_4_888,near-exact,n1|s1|b1,Mets_314,Mets_314/z26,Mets_314,1,1,
+S,A,dz,5,file_4_888,file_4_888,near-exact,n1|s1|b1,Mets_314,Mets_314/z27,Mets_314,1,1,
+S,A,dz,-5,file_3_8620,file_3_8620,near-exact,n1|s2|b1,Mets_096,Mets_096/z101,Mets_096,0,-1,
+S,A,dz,-4,file_3_8620,file_3_8620,near-exact,n1|s2|b1,Mets_096,Mets_096/z102,Mets_096,0,-1,
+S,A,dz,-3,file_3_8620,file_3_8620,near-exact,n1|s2|b1,Mets_096,Mets_096/z103,Mets_096,0,-1,
+S,A,dz,-2,file_3_8620,file_3_8620,near-exact,n1|s2|b1,Mets_096,Mets_096/z104,Mets_096,0,-1,
+S,A,dz,-1,file_3_8620,file_3_8620,near-exact,n1|s2|b1,Mets_096,Mets_096/z105,Mets_096,0,-1,
+S,A,dz,1,file_3_8620,file_3_8620,near-exact,n1|s2|b1,Mets_096,Mets_096/z107,Mets_096,0,-1,
+S,A,dz,2,file_3_8620,file_3_8620,near-exact,n1|s2|b1,Mets_096,Mets_096/z108,Mets_096,0,-1,
+S,A,dz,3,file_3_8620,file_3_8620,near-exact,n1|s2|b1,Mets_096,Mets_096/z109,Mets_096,0,-1,
+S,A,dz,4,file_3_8620,file_3_8620,near-exact,n1|s2|b1,Mets_096,Mets_096/z110,Mets_096,0,-1,
+S,A,dz,5,file_3_8620,file_3_8620,near-exact,n1|s2|b1,Mets_096,Mets_096/z111,Mets_096,0,-1,
+S,A,dz,-5,file_2_2353,file_2_2353,near-exact,n1|s2|b0,Mets_033,Mets_033/z25,Mets_033,-1,0,
+S,A,dz,-4,file_2_2353,file_2_2353,near-exact,n1|s2|b0,Mets_033,Mets_033/z26,Mets_033,-1,0,
+S,A,dz,-3,file_2_2353,file_2_2353,near-exact,n1|s2|b0,Mets_033,Mets_033/z27,Mets_033,-1,0,
+S,A,dz,-2,file_2_2353,file_2_2353,near-exact,n1|s2|b0,Mets_033,Mets_033/z28,Mets_033,-1,0,
+S,A,dz,-1,file_2_2353,file_2_2353,near-exact,n1|s2|b0,Mets_033,Mets_033/z29,Mets_033,-1,0,
+S,A,dz,1,file_2_2353,file_2_2353,near-exact,n1|s2|b0,Mets_033,Mets_033/z31,Mets_033,-1,0,
+S,A,dz,2,file_2_2353,file_2_2353,near-exact,n1|s2|b0,Mets_033,Mets_033/z32,Mets_033,-1,0,
+S,A,dz,3,file_2_2353,file_2_2353,near-exact,n1|s2|b0,Mets_033,Mets_033/z33,Mets_033,-1,0,
+S,A,dz,4,file_2_2353,file_2_2353,near-exact,n1|s2|b0,Mets_033,Mets_033/z34,Mets_033,-1,0,
+S,A,dz,5,file_2_2353,file_2_2353,near-exact,n1|s2|b0,Mets_033,Mets_033/z35,Mets_033,-1,0,
+S,A,dz,-5,file_2_8240,file_2_8240,near-exact,n1|s2|b0,Mets_037,Mets_037/z135,Mets_037,-3,-1,
+S,A,dz,-4,file_2_8240,file_2_8240,near-exact,n1|s2|b0,Mets_037,Mets_037/z136,Mets_037,-3,-1,
+S,A,dz,-3,file_2_8240,file_2_8240,near-exact,n1|s2|b0,Mets_037,Mets_037/z137,Mets_037,-3,-1,
+S,A,dz,-2,file_2_8240,file_2_8240,near-exact,n1|s2|b0,Mets_037,Mets_037/z138,Mets_037,-3,-1,
+S,A,dz,-1,file_2_8240,file_2_8240,near-exact,n1|s2|b0,Mets_037,Mets_037/z139,Mets_037,-3,-1,
+S,A,dz,1,file_2_8240,file_2_8240,near-exact,n1|s2|b0,Mets_037,Mets_037/z141,Mets_037,-3,-1,
+S,A,dz,2,file_2_8240,file_2_8240,near-exact,n1|s2|b0,Mets_037,Mets_037/z142,Mets_037,-3,-1,
+S,A,dz,3,file_2_8240,file_2_8240,near-exact,n1|s2|b0,Mets_037,Mets_037/z143,Mets_037,-3,-1,
+S,A,dz,4,file_2_8240,file_2_8240,near-exact,n1|s2|b0,Mets_037,Mets_037/z144,Mets_037,-3,-1,
+S,A,dz,5,file_2_8240,file_2_8240,near-exact,n1|s2|b0,Mets_037,Mets_037/z145,Mets_037,-3,-1,
+S,A,dz,-5,file_2_456,file_2_456,near-exact,n1|s2|b1,Mets_016,Mets_016/z37,Mets_016,-1,2,
+S,A,dz,-4,file_2_456,file_2_456,near-exact,n1|s2|b1,Mets_016,Mets_016/z38,Mets_016,-1,2,
+S,A,dz,-3,file_2_456,file_2_456,near-exact,n1|s2|b1,Mets_016,Mets_016/z39,Mets_016,-1,2,
+S,A,dz,-2,file_2_456,file_2_456,near-exact,n1|s2|b1,Mets_016,Mets_016/z40,Mets_016,-1,2,
+S,A,dz,-1,file_2_456,file_2_456,near-exact,n1|s2|b1,Mets_016,Mets_016/z41,Mets_016,-1,2,
+S,A,dz,1,file_2_456,file_2_456,near-exact,n1|s2|b1,Mets_016,Mets_016/z43,Mets_016,-1,2,
+S,A,dz,2,file_2_456,file_2_456,near-exact,n1|s2|b1,Mets_016,Mets_016/z44,Mets_016,-1,2,
+S,A,dz,3,file_2_456,file_2_456,near-exact,n1|s2|b1,Mets_016,Mets_016/z45,Mets_016,-1,2,
+S,A,dz,4,file_2_456,file_2_456,near-exact,n1|s2|b1,Mets_016,Mets_016/z46,Mets_016,-1,2,
+S,A,dz,5,file_2_456,file_2_456,near-exact,n1|s2|b1,Mets_016,Mets_016/z47,Mets_016,-1,2,
+S,A,dz,-5,file_4_776,file_4_776,near-exact,n1|s2|b1,Mets_132,Mets_132/z105,Mets_132,0,-3,
+S,A,dz,-4,file_4_776,file_4_776,near-exact,n1|s2|b1,Mets_132,Mets_132/z106,Mets_132,0,-3,
+S,A,dz,-3,file_4_776,file_4_776,near-exact,n1|s2|b1,Mets_132,Mets_132/z107,Mets_132,0,-3,
+S,A,dz,-2,file_4_776,file_4_776,near-exact,n1|s2|b1,Mets_132,Mets_132/z108,Mets_132,0,-3,
+S,A,dz,-1,file_4_776,file_4_776,near-exact,n1|s2|b1,Mets_132,Mets_132/z109,Mets_132,0,-3,
+S,A,dz,1,file_4_776,file_4_776,near-exact,n1|s2|b1,Mets_132,Mets_132/z111,Mets_132,0,-3,
+S,A,dz,2,file_4_776,file_4_776,near-exact,n1|s2|b1,Mets_132,Mets_132/z112,Mets_132,0,-3,
+S,A,dz,3,file_4_776,file_4_776,near-exact,n1|s2|b1,Mets_132,Mets_132/z113,Mets_132,0,-3,
+S,A,dz,4,file_4_776,file_4_776,near-exact,n1|s2|b1,Mets_132,Mets_132/z114,Mets_132,0,-3,
+S,A,dz,5,file_4_776,file_4_776,near-exact,n1|s2|b1,Mets_132,Mets_132/z115,Mets_132,0,-3,
+S,A,dz,-5,file_7173,file_7173,near-exact,n1|s1|b1,Mets_181,Mets_181/z114,Mets_181,1,-3,
+S,A,dz,-4,file_7173,file_7173,near-exact,n1|s1|b1,Mets_181,Mets_181/z115,Mets_181,1,-3,
+S,A,dz,-3,file_7173,file_7173,near-exact,n1|s1|b1,Mets_181,Mets_181/z116,Mets_181,1,-3,
+S,A,dz,-2,file_7173,file_7173,near-exact,n1|s1|b1,Mets_181,Mets_181/z117,Mets_181,1,-3,
+S,A,dz,-1,file_7173,file_7173,near-exact,n1|s1|b1,Mets_181,Mets_181/z118,Mets_181,1,-3,
+S,A,dz,1,file_7173,file_7173,near-exact,n1|s1|b1,Mets_181,Mets_181/z120,Mets_181,1,-3,
+S,A,dz,2,file_7173,file_7173,near-exact,n1|s1|b1,Mets_181,Mets_181/z121,Mets_181,1,-3,
+S,A,dz,3,file_7173,file_7173,near-exact,n1|s1|b1,Mets_181,Mets_181/z122,Mets_181,1,-3,
+S,A,dz,4,file_7173,file_7173,near-exact,n1|s1|b1,Mets_181,Mets_181/z123,Mets_181,1,-3,
+S,A,dz,5,file_7173,file_7173,near-exact,n1|s1|b1,Mets_181,Mets_181/z124,Mets_181,1,-3,
+S,A,dz,-5,file_3_1676,file_3_1676,near-exact,n1|s2|b2,Mets_024,Mets_024/z109,Mets_024,0,1,
+S,A,dz,-4,file_3_1676,file_3_1676,near-exact,n1|s2|b2,Mets_024,Mets_024/z110,Mets_024,0,1,
+S,A,dz,-3,file_3_1676,file_3_1676,near-exact,n1|s2|b2,Mets_024,Mets_024/z111,Mets_024,0,1,
+S,A,dz,-2,file_3_1676,file_3_1676,near-exact,n1|s2|b2,Mets_024,Mets_024/z112,Mets_024,0,1,
+S,A,dz,-1,file_3_1676,file_3_1676,near-exact,n1|s2|b2,Mets_024,Mets_024/z113,Mets_024,0,1,
+S,A,dz,1,file_3_1676,file_3_1676,near-exact,n1|s2|b2,Mets_024,Mets_024/z115,Mets_024,0,1,
+S,A,dz,2,file_3_1676,file_3_1676,near-exact,n1|s2|b2,Mets_024,Mets_024/z116,Mets_024,0,1,
+S,A,dz,3,file_3_1676,file_3_1676,near-exact,n1|s2|b2,Mets_024,Mets_024/z117,Mets_024,0,1,
+S,A,dz,4,file_3_1676,file_3_1676,near-exact,n1|s2|b2,Mets_024,Mets_024/z118,Mets_024,0,1,
+S,A,dz,5,file_3_1676,file_3_1676,near-exact,n1|s2|b2,Mets_024,Mets_024/z119,Mets_024,0,1,
+S,A,dz,-5,file_5_7515,file_5_7515,near-exact,n1|s3|b2,Mets_170,Mets_170/z52,Mets_170,-2,3,
+S,A,dz,-4,file_5_7515,file_5_7515,near-exact,n1|s3|b2,Mets_170,Mets_170/z53,Mets_170,-2,3,
+S,A,dz,-3,file_5_7515,file_5_7515,near-exact,n1|s3|b2,Mets_170,Mets_170/z54,Mets_170,-2,3,
+S,A,dz,-2,file_5_7515,file_5_7515,near-exact,n1|s3|b2,Mets_170,Mets_170/z55,Mets_170,-2,3,
+S,A,dz,-1,file_5_7515,file_5_7515,near-exact,n1|s3|b2,Mets_170,Mets_170/z56,Mets_170,-2,3,
+S,A,dz,1,file_5_7515,file_5_7515,near-exact,n1|s3|b2,Mets_170,Mets_170/z58,Mets_170,-2,3,
+S,A,dz,2,file_5_7515,file_5_7515,near-exact,n1|s3|b2,Mets_170,Mets_170/z59,Mets_170,-2,3,
+S,A,dz,3,file_5_7515,file_5_7515,near-exact,n1|s3|b2,Mets_170,Mets_170/z60,Mets_170,-2,3,
+S,A,dz,4,file_5_7515,file_5_7515,near-exact,n1|s3|b2,Mets_170,Mets_170/z61,Mets_170,-2,3,
+S,A,dz,5,file_5_7515,file_5_7515,near-exact,n1|s3|b2,Mets_170,Mets_170/z62,Mets_170,-2,3,
+S,A,dz,-5,file_3_1081,file_3_1081,near-exact,n1|s3|b2,Mets_323,Mets_323/z104,Mets_323,3,0,
+S,A,dz,-4,file_3_1081,file_3_1081,near-exact,n1|s3|b2,Mets_323,Mets_323/z105,Mets_323,3,0,
+S,A,dz,-3,file_3_1081,file_3_1081,near-exact,n1|s3|b2,Mets_323,Mets_323/z106,Mets_323,3,0,
+S,A,dz,-2,file_3_1081,file_3_1081,near-exact,n1|s3|b2,Mets_323,Mets_323/z107,Mets_323,3,0,
+S,A,dz,-1,file_3_1081,file_3_1081,near-exact,n1|s3|b2,Mets_323,Mets_323/z108,Mets_323,3,0,
+S,A,dz,1,file_3_1081,file_3_1081,near-exact,n1|s3|b2,Mets_323,Mets_323/z110,Mets_323,3,0,
+S,A,dz,2,file_3_1081,file_3_1081,near-exact,n1|s3|b2,Mets_323,Mets_323/z111,Mets_323,3,0,
+S,A,dz,3,file_3_1081,file_3_1081,near-exact,n1|s3|b2,Mets_323,Mets_323/z112,Mets_323,3,0,
+S,A,dz,4,file_3_1081,file_3_1081,near-exact,n1|s3|b2,Mets_323,Mets_323/z113,Mets_323,3,0,
+S,A,dz,5,file_3_1081,file_3_1081,near-exact,n1|s3|b2,Mets_323,Mets_323/z114,Mets_323,3,0,
+S,A,dz,-5,file_3621,file_3621,near-exact,n1|s3|b1,Mets_094,Mets_094/z121,Mets_094,-3,3,
+S,A,dz,-4,file_3621,file_3621,near-exact,n1|s3|b1,Mets_094,Mets_094/z122,Mets_094,-3,3,
+S,A,dz,-3,file_3621,file_3621,near-exact,n1|s3|b1,Mets_094,Mets_094/z123,Mets_094,-3,3,
+S,A,dz,-2,file_3621,file_3621,near-exact,n1|s3|b1,Mets_094,Mets_094/z124,Mets_094,-3,3,
+S,A,dz,-1,file_3621,file_3621,near-exact,n1|s3|b1,Mets_094,Mets_094/z125,Mets_094,-3,3,
+S,A,dz,1,file_3621,file_3621,near-exact,n1|s3|b1,Mets_094,Mets_094/z127,Mets_094,-3,3,
+S,A,dz,2,file_3621,file_3621,near-exact,n1|s3|b1,Mets_094,Mets_094/z128,Mets_094,-3,3,
+S,A,dz,3,file_3621,file_3621,near-exact,n1|s3|b1,Mets_094,Mets_094/z129,Mets_094,-3,3,
+S,A,dz,4,file_3621,file_3621,near-exact,n1|s3|b1,Mets_094,Mets_094/z130,Mets_094,-3,3,
+S,A,dz,5,file_3621,file_3621,near-exact,n1|s3|b1,Mets_094,Mets_094/z131,Mets_094,-3,3,
+S,A,dz,-5,file_4_5137,file_4_5137,near-exact,n1|s3|b0,Mets_107,Mets_107/z121,Mets_107,0,0,
+S,A,dz,-4,file_4_5137,file_4_5137,near-exact,n1|s3|b0,Mets_107,Mets_107/z122,Mets_107,0,0,
+S,A,dz,-3,file_4_5137,file_4_5137,near-exact,n1|s3|b0,Mets_107,Mets_107/z123,Mets_107,0,0,
+S,A,dz,-2,file_4_5137,file_4_5137,near-exact,n1|s3|b0,Mets_107,Mets_107/z124,Mets_107,0,0,
+S,A,dz,-1,file_4_5137,file_4_5137,near-exact,n1|s3|b0,Mets_107,Mets_107/z125,Mets_107,0,0,
+S,A,dz,1,file_4_5137,file_4_5137,near-exact,n1|s3|b0,Mets_107,Mets_107/z127,Mets_107,0,0,
+S,A,dz,2,file_4_5137,file_4_5137,near-exact,n1|s3|b0,Mets_107,Mets_107/z128,Mets_107,0,0,
+S,A,dz,3,file_4_5137,file_4_5137,near-exact,n1|s3|b0,Mets_107,Mets_107/z129,Mets_107,0,0,
+S,A,dz,4,file_4_5137,file_4_5137,near-exact,n1|s3|b0,Mets_107,Mets_107/z130,Mets_107,0,0,
+S,A,dz,5,file_4_5137,file_4_5137,near-exact,n1|s3|b0,Mets_107,Mets_107/z131,Mets_107,0,0,
+S,A,dz,-5,file_981,file_981,near-exact,n1|s3|b2,Mets_049,Mets_049/z62,Mets_049,1,0,
+S,A,dz,-4,file_981,file_981,near-exact,n1|s3|b2,Mets_049,Mets_049/z63,Mets_049,1,0,
+S,A,dz,-3,file_981,file_981,near-exact,n1|s3|b2,Mets_049,Mets_049/z64,Mets_049,1,0,
+S,A,dz,-2,file_981,file_981,near-exact,n1|s3|b2,Mets_049,Mets_049/z65,Mets_049,1,0,
+S,A,dz,-1,file_981,file_981,near-exact,n1|s3|b2,Mets_049,Mets_049/z66,Mets_049,1,0,
+S,A,dz,1,file_981,file_981,near-exact,n1|s3|b2,Mets_049,Mets_049/z68,Mets_049,1,0,
+S,A,dz,2,file_981,file_981,near-exact,n1|s3|b2,Mets_049,Mets_049/z69,Mets_049,1,0,
+S,A,dz,3,file_981,file_981,near-exact,n1|s3|b2,Mets_049,Mets_049/z70,Mets_049,1,0,
+S,A,dz,4,file_981,file_981,near-exact,n1|s3|b2,Mets_049,Mets_049/z71,Mets_049,1,0,
+S,A,dz,5,file_981,file_981,near-exact,n1|s3|b2,Mets_049,Mets_049/z72,Mets_049,1,0,
+S,A,dz,-5,file_467,file_467,near-exact,n1|s3|b0,Mets_249,Mets_249/z20,Mets_249,3,-2,
+S,A,dz,-4,file_467,file_467,near-exact,n1|s3|b0,Mets_249,Mets_249/z21,Mets_249,3,-2,
+S,A,dz,-3,file_467,file_467,near-exact,n1|s3|b0,Mets_249,Mets_249/z22,Mets_249,3,-2,
+S,A,dz,-2,file_467,file_467,near-exact,n1|s3|b0,Mets_249,Mets_249/z23,Mets_249,3,-2,
+S,A,dz,-1,file_467,file_467,near-exact,n1|s3|b0,Mets_249,Mets_249/z24,Mets_249,3,-2,
+S,A,dz,1,file_467,file_467,near-exact,n1|s3|b0,Mets_249,Mets_249/z26,Mets_249,3,-2,
+S,A,dz,2,file_467,file_467,near-exact,n1|s3|b0,Mets_249,Mets_249/z27,Mets_249,3,-2,
+S,A,dz,3,file_467,file_467,near-exact,n1|s3|b0,Mets_249,Mets_249/z28,Mets_249,3,-2,
+S,A,dz,4,file_467,file_467,near-exact,n1|s3|b0,Mets_249,Mets_249/z29,Mets_249,3,-2,
+S,A,dz,5,file_467,file_467,near-exact,n1|s3|b0,Mets_249,Mets_249/z30,Mets_249,3,-2,
+S,A,dz,-5,file_3_1530,file_3_1530,near-exact,n1|s3|b0,Mets_225,Mets_225/z107,Mets_225,0,-3,
+S,A,dz,-4,file_3_1530,file_3_1530,near-exact,n1|s3|b0,Mets_225,Mets_225/z108,Mets_225,0,-3,
+S,A,dz,-3,file_3_1530,file_3_1530,near-exact,n1|s3|b0,Mets_225,Mets_225/z109,Mets_225,0,-3,
+S,A,dz,-2,file_3_1530,file_3_1530,near-exact,n1|s3|b0,Mets_225,Mets_225/z110,Mets_225,0,-3,
+S,A,dz,-1,file_3_1530,file_3_1530,near-exact,n1|s3|b0,Mets_225,Mets_225/z111,Mets_225,0,-3,
+S,A,dz,1,file_3_1530,file_3_1530,near-exact,n1|s3|b0,Mets_225,Mets_225/z113,Mets_225,0,-3,
+S,A,dz,2,file_3_1530,file_3_1530,near-exact,n1|s3|b0,Mets_225,Mets_225/z114,Mets_225,0,-3,
+S,A,dz,3,file_3_1530,file_3_1530,near-exact,n1|s3|b0,Mets_225,Mets_225/z115,Mets_225,0,-3,
+S,A,dz,4,file_3_1530,file_3_1530,near-exact,n1|s3|b0,Mets_225,Mets_225/z116,Mets_225,0,-3,
+S,A,dz,5,file_3_1530,file_3_1530,near-exact,n1|s3|b0,Mets_225,Mets_225/z117,Mets_225,0,-3,
+S,A,dz,-5,file_2_3955,file_2_3955,near-exact,n1|s3|b1,Mets_323,Mets_323/z110,Mets_323,3,0,
+S,A,dz,-4,file_2_3955,file_2_3955,near-exact,n1|s3|b1,Mets_323,Mets_323/z111,Mets_323,3,0,
+S,A,dz,-3,file_2_3955,file_2_3955,near-exact,n1|s3|b1,Mets_323,Mets_323/z112,Mets_323,3,0,
+S,A,dz,-2,file_2_3955,file_2_3955,near-exact,n1|s3|b1,Mets_323,Mets_323/z113,Mets_323,3,0,
+S,A,dz,-1,file_2_3955,file_2_3955,near-exact,n1|s3|b1,Mets_323,Mets_323/z114,Mets_323,3,0,
+S,A,dz,1,file_2_3955,file_2_3955,near-exact,n1|s3|b1,Mets_323,Mets_323/z116,Mets_323,3,0,
+S,A,dz,2,file_2_3955,file_2_3955,near-exact,n1|s3|b1,Mets_323,Mets_323/z117,Mets_323,3,0,
+S,A,dz,3,file_2_3955,file_2_3955,near-exact,n1|s3|b1,Mets_323,Mets_323/z118,Mets_323,3,0,
+S,A,dz,4,file_2_3955,file_2_3955,near-exact,n1|s3|b1,Mets_323,Mets_323/z119,Mets_323,3,0,
+S,A,dz,5,file_2_3955,file_2_3955,near-exact,n1|s3|b1,Mets_323,Mets_323/z120,Mets_323,3,0,
+S,A,dz,-5,file_5_11978,file_5_11978,near-exact,n1|s3|b0,Mets_319,Mets_319/z37,Mets_319,1,3,
+S,A,dz,-4,file_5_11978,file_5_11978,near-exact,n1|s3|b0,Mets_319,Mets_319/z38,Mets_319,1,3,
+S,A,dz,-3,file_5_11978,file_5_11978,near-exact,n1|s3|b0,Mets_319,Mets_319/z39,Mets_319,1,3,
+S,A,dz,-2,file_5_11978,file_5_11978,near-exact,n1|s3|b0,Mets_319,Mets_319/z40,Mets_319,1,3,
+S,A,dz,-1,file_5_11978,file_5_11978,near-exact,n1|s3|b0,Mets_319,Mets_319/z41,Mets_319,1,3,
+S,A,dz,1,file_5_11978,file_5_11978,near-exact,n1|s3|b0,Mets_319,Mets_319/z43,Mets_319,1,3,
+S,A,dz,2,file_5_11978,file_5_11978,near-exact,n1|s3|b0,Mets_319,Mets_319/z44,Mets_319,1,3,
+S,A,dz,3,file_5_11978,file_5_11978,near-exact,n1|s3|b0,Mets_319,Mets_319/z45,Mets_319,1,3,
+S,A,dz,4,file_5_11978,file_5_11978,near-exact,n1|s3|b0,Mets_319,Mets_319/z46,Mets_319,1,3,
+S,A,dz,5,file_5_11978,file_5_11978,near-exact,n1|s3|b0,Mets_319,Mets_319/z47,Mets_319,1,3,
+S,A,dz,-5,file_2_1082,file_2_1082,near-exact,n1|s3|b0,Mets_148,Mets_148/z96,Mets_148,-2,-1,
+S,A,dz,-4,file_2_1082,file_2_1082,near-exact,n1|s3|b0,Mets_148,Mets_148/z97,Mets_148,-2,-1,
+S,A,dz,-3,file_2_1082,file_2_1082,near-exact,n1|s3|b0,Mets_148,Mets_148/z98,Mets_148,-2,-1,
+S,A,dz,-2,file_2_1082,file_2_1082,near-exact,n1|s3|b0,Mets_148,Mets_148/z99,Mets_148,-2,-1,
+S,A,dz,-1,file_2_1082,file_2_1082,near-exact,n1|s3|b0,Mets_148,Mets_148/z100,Mets_148,-2,-1,
+S,A,dz,1,file_2_1082,file_2_1082,near-exact,n1|s3|b0,Mets_148,Mets_148/z102,Mets_148,-2,-1,
+S,A,dz,2,file_2_1082,file_2_1082,near-exact,n1|s3|b0,Mets_148,Mets_148/z103,Mets_148,-2,-1,
+S,A,dz,3,file_2_1082,file_2_1082,near-exact,n1|s3|b0,Mets_148,Mets_148/z104,Mets_148,-2,-1,
+S,A,dz,4,file_2_1082,file_2_1082,near-exact,n1|s3|b0,Mets_148,Mets_148/z105,Mets_148,-2,-1,
+S,A,dz,5,file_2_1082,file_2_1082,near-exact,n1|s3|b0,Mets_148,Mets_148/z106,Mets_148,-2,-1,
+S,A,dz,-5,file_3_2183,file_3_2183,near-exact,n1|s3|b0,Mets_028,Mets_028/z79,Mets_028,-1,-2,
+S,A,dz,-4,file_3_2183,file_3_2183,near-exact,n1|s3|b0,Mets_028,Mets_028/z80,Mets_028,-1,-2,
+S,A,dz,-3,file_3_2183,file_3_2183,near-exact,n1|s3|b0,Mets_028,Mets_028/z81,Mets_028,-1,-2,
+S,A,dz,-2,file_3_2183,file_3_2183,near-exact,n1|s3|b0,Mets_028,Mets_028/z82,Mets_028,-1,-2,
+S,A,dz,-1,file_3_2183,file_3_2183,near-exact,n1|s3|b0,Mets_028,Mets_028/z83,Mets_028,-1,-2,
+S,A,dz,1,file_3_2183,file_3_2183,near-exact,n1|s3|b0,Mets_028,Mets_028/z85,Mets_028,-1,-2,
+S,A,dz,2,file_3_2183,file_3_2183,near-exact,n1|s3|b0,Mets_028,Mets_028/z86,Mets_028,-1,-2,
+S,A,dz,3,file_3_2183,file_3_2183,near-exact,n1|s3|b0,Mets_028,Mets_028/z87,Mets_028,-1,-2,
+S,A,dz,4,file_3_2183,file_3_2183,near-exact,n1|s3|b0,Mets_028,Mets_028/z88,Mets_028,-1,-2,
+S,A,dz,5,file_3_2183,file_3_2183,near-exact,n1|s3|b0,Mets_028,Mets_028/z89,Mets_028,-1,-2,
+S,A,dz,-5,file_4_5568,file_4_5568,near-exact,n1|s3|b0,Mets_005,Mets_005/z122,Mets_005,-2,0,
+S,A,dz,-4,file_4_5568,file_4_5568,near-exact,n1|s3|b0,Mets_005,Mets_005/z123,Mets_005,-2,0,
+S,A,dz,-3,file_4_5568,file_4_5568,near-exact,n1|s3|b0,Mets_005,Mets_005/z124,Mets_005,-2,0,
+S,A,dz,-2,file_4_5568,file_4_5568,near-exact,n1|s3|b0,Mets_005,Mets_005/z125,Mets_005,-2,0,
+S,A,dz,-1,file_4_5568,file_4_5568,near-exact,n1|s3|b0,Mets_005,Mets_005/z126,Mets_005,-2,0,
+S,A,dz,1,file_4_5568,file_4_5568,near-exact,n1|s3|b0,Mets_005,Mets_005/z128,Mets_005,-2,0,
+S,A,dz,2,file_4_5568,file_4_5568,near-exact,n1|s3|b0,Mets_005,Mets_005/z129,Mets_005,-2,0,
+S,A,dz,3,file_4_5568,file_4_5568,near-exact,n1|s3|b0,Mets_005,Mets_005/z130,Mets_005,-2,0,
+S,A,dz,4,file_4_5568,file_4_5568,near-exact,n1|s3|b0,Mets_005,Mets_005/z131,Mets_005,-2,0,
+S,A,dz,5,file_4_5568,file_4_5568,near-exact,n1|s3|b0,Mets_005,Mets_005/z132,Mets_005,-2,0,
+S,A,dz,-5,621,621,near-exact,n1|s3|b0,Mets_289,Mets_289/z48,Mets_289,-1,-2,
+S,A,dz,-4,621,621,near-exact,n1|s3|b0,Mets_289,Mets_289/z49,Mets_289,-1,-2,
+S,A,dz,-3,621,621,near-exact,n1|s3|b0,Mets_289,Mets_289/z50,Mets_289,-1,-2,
+S,A,dz,-2,621,621,near-exact,n1|s3|b0,Mets_289,Mets_289/z51,Mets_289,-1,-2,
+S,A,dz,-1,621,621,near-exact,n1|s3|b0,Mets_289,Mets_289/z52,Mets_289,-1,-2,
+S,A,dz,1,621,621,near-exact,n1|s3|b0,Mets_289,Mets_289/z54,Mets_289,-1,-2,
+S,A,dz,2,621,621,near-exact,n1|s3|b0,Mets_289,Mets_289/z55,Mets_289,-1,-2,
+S,A,dz,3,621,621,near-exact,n1|s3|b0,Mets_289,Mets_289/z56,Mets_289,-1,-2,
+S,A,dz,4,621,621,near-exact,n1|s3|b0,Mets_289,Mets_289/z57,Mets_289,-1,-2,
+S,A,dz,5,621,621,near-exact,n1|s3|b0,Mets_289,Mets_289/z58,Mets_289,-1,-2,
+S,A,dz,-5,file_4_8548,file_4_8548,near-exact,n1|s3|b2,Mets_244,Mets_244/z50,Mets_244,-3,0,
+S,A,dz,-4,file_4_8548,file_4_8548,near-exact,n1|s3|b2,Mets_244,Mets_244/z51,Mets_244,-3,0,
+S,A,dz,-3,file_4_8548,file_4_8548,near-exact,n1|s3|b2,Mets_244,Mets_244/z52,Mets_244,-3,0,
+S,A,dz,-2,file_4_8548,file_4_8548,near-exact,n1|s3|b2,Mets_244,Mets_244/z53,Mets_244,-3,0,
+S,A,dz,-1,file_4_8548,file_4_8548,near-exact,n1|s3|b2,Mets_244,Mets_244/z54,Mets_244,-3,0,
+S,A,dz,1,file_4_8548,file_4_8548,near-exact,n1|s3|b2,Mets_244,Mets_244/z56,Mets_244,-3,0,
+S,A,dz,2,file_4_8548,file_4_8548,near-exact,n1|s3|b2,Mets_244,Mets_244/z57,Mets_244,-3,0,
+S,A,dz,3,file_4_8548,file_4_8548,near-exact,n1|s3|b2,Mets_244,Mets_244/z58,Mets_244,-3,0,
+S,A,dz,4,file_4_8548,file_4_8548,near-exact,n1|s3|b2,Mets_244,Mets_244/z59,Mets_244,-3,0,
+S,A,dz,5,file_4_8548,file_4_8548,near-exact,n1|s3|b2,Mets_244,Mets_244/z60,Mets_244,-3,0,
+S,A,dz,-5,file_7582,file_7582,near-exact,n1|s3|b0,Mets_240,Mets_240/z139,Mets_240,2,3,
+S,A,dz,-4,file_7582,file_7582,near-exact,n1|s3|b0,Mets_240,Mets_240/z140,Mets_240,2,3,
+S,A,dz,-3,file_7582,file_7582,near-exact,n1|s3|b0,Mets_240,Mets_240/z141,Mets_240,2,3,
+S,A,dz,-2,file_7582,file_7582,near-exact,n1|s3|b0,Mets_240,Mets_240/z142,Mets_240,2,3,
+S,A,dz,-1,file_7582,file_7582,near-exact,n1|s3|b0,Mets_240,Mets_240/z143,Mets_240,2,3,
+S,A,dz,1,file_7582,file_7582,near-exact,n1|s3|b0,Mets_240,Mets_240/z145,Mets_240,2,3,
+S,A,dz,2,file_7582,file_7582,near-exact,n1|s3|b0,Mets_240,Mets_240/z146,Mets_240,2,3,
+S,A,dz,3,file_7582,file_7582,near-exact,n1|s3|b0,Mets_240,Mets_240/z147,Mets_240,2,3,
+S,A,dz,4,file_7582,file_7582,near-exact,n1|s3|b0,Mets_240,Mets_240/z148,Mets_240,2,3,
+S,A,dz,5,file_7582,file_7582,near-exact,n1|s3|b0,Mets_240,Mets_240/z149,Mets_240,2,3,
+S,A,dz,-5,file_2_1274,file_2_1274,near-exact,n1|s3|b0,Mets_058,Mets_058/z104,Mets_058,2,-1,
+S,A,dz,-4,file_2_1274,file_2_1274,near-exact,n1|s3|b0,Mets_058,Mets_058/z105,Mets_058,2,-1,
+S,A,dz,-3,file_2_1274,file_2_1274,near-exact,n1|s3|b0,Mets_058,Mets_058/z106,Mets_058,2,-1,
+S,A,dz,-2,file_2_1274,file_2_1274,near-exact,n1|s3|b0,Mets_058,Mets_058/z107,Mets_058,2,-1,
+S,A,dz,-1,file_2_1274,file_2_1274,near-exact,n1|s3|b0,Mets_058,Mets_058/z108,Mets_058,2,-1,
+S,A,dz,1,file_2_1274,file_2_1274,near-exact,n1|s3|b0,Mets_058,Mets_058/z110,Mets_058,2,-1,
+S,A,dz,2,file_2_1274,file_2_1274,near-exact,n1|s3|b0,Mets_058,Mets_058/z111,Mets_058,2,-1,
+S,A,dz,3,file_2_1274,file_2_1274,near-exact,n1|s3|b0,Mets_058,Mets_058/z112,Mets_058,2,-1,
+S,A,dz,4,file_2_1274,file_2_1274,near-exact,n1|s3|b0,Mets_058,Mets_058/z113,Mets_058,2,-1,
+S,A,dz,5,file_2_1274,file_2_1274,near-exact,n1|s3|b0,Mets_058,Mets_058/z114,Mets_058,2,-1,
+S,A,dz,-5,file_3_2563,file_3_2563,near-exact,n1|s3|b2,Mets_271,Mets_271/z105,Mets_271,-3,0,
+S,A,dz,-4,file_3_2563,file_3_2563,near-exact,n1|s3|b2,Mets_271,Mets_271/z106,Mets_271,-3,0,
+S,A,dz,-3,file_3_2563,file_3_2563,near-exact,n1|s3|b2,Mets_271,Mets_271/z107,Mets_271,-3,0,
+S,A,dz,-2,file_3_2563,file_3_2563,near-exact,n1|s3|b2,Mets_271,Mets_271/z108,Mets_271,-3,0,
+S,A,dz,-1,file_3_2563,file_3_2563,near-exact,n1|s3|b2,Mets_271,Mets_271/z109,Mets_271,-3,0,
+S,A,dz,1,file_3_2563,file_3_2563,near-exact,n1|s3|b2,Mets_271,Mets_271/z111,Mets_271,-3,0,
+S,A,dz,2,file_3_2563,file_3_2563,near-exact,n1|s3|b2,Mets_271,Mets_271/z112,Mets_271,-3,0,
+S,A,dz,3,file_3_2563,file_3_2563,near-exact,n1|s3|b2,Mets_271,Mets_271/z113,Mets_271,-3,0,
+S,A,dz,4,file_3_2563,file_3_2563,near-exact,n1|s3|b2,Mets_271,Mets_271/z114,Mets_271,-3,0,
+S,A,dz,5,file_3_2563,file_3_2563,near-exact,n1|s3|b2,Mets_271,Mets_271/z115,Mets_271,-3,0,
+S,A,dz,-5,305,305,near-exact,n1|s3|b0,Mets_249,Mets_249/z21,Mets_249,1,2,
+S,A,dz,-4,305,305,near-exact,n1|s3|b0,Mets_249,Mets_249/z22,Mets_249,1,2,
+S,A,dz,-3,305,305,near-exact,n1|s3|b0,Mets_249,Mets_249/z23,Mets_249,1,2,
+S,A,dz,-2,305,305,near-exact,n1|s3|b0,Mets_249,Mets_249/z24,Mets_249,1,2,
+S,A,dz,-1,305,305,near-exact,n1|s3|b0,Mets_249,Mets_249/z25,Mets_249,1,2,
+S,A,dz,1,305,305,near-exact,n1|s3|b0,Mets_249,Mets_249/z27,Mets_249,1,2,
+S,A,dz,2,305,305,near-exact,n1|s3|b0,Mets_249,Mets_249/z28,Mets_249,1,2,
+S,A,dz,3,305,305,near-exact,n1|s3|b0,Mets_249,Mets_249/z29,Mets_249,1,2,
+S,A,dz,4,305,305,near-exact,n1|s3|b0,Mets_249,Mets_249/z30,Mets_249,1,2,
+S,A,dz,5,305,305,near-exact,n1|s3|b0,Mets_249,Mets_249/z31,Mets_249,1,2,
+S,A,dz,-5,file_2_1433,file_2_1433,near-exact,n1|s1|b2,Mets_069,Mets_069/z84,Mets_069,-1,2,
+S,A,dz,-4,file_2_1433,file_2_1433,near-exact,n1|s1|b2,Mets_069,Mets_069/z85,Mets_069,-1,2,
+S,A,dz,-3,file_2_1433,file_2_1433,near-exact,n1|s1|b2,Mets_069,Mets_069/z86,Mets_069,-1,2,
+S,A,dz,-2,file_2_1433,file_2_1433,near-exact,n1|s1|b2,Mets_069,Mets_069/z87,Mets_069,-1,2,
+S,A,dz,-1,file_2_1433,file_2_1433,near-exact,n1|s1|b2,Mets_069,Mets_069/z88,Mets_069,-1,2,
+S,A,dz,1,file_2_1433,file_2_1433,near-exact,n1|s1|b2,Mets_069,Mets_069/z90,Mets_069,-1,2,
+S,A,dz,2,file_2_1433,file_2_1433,near-exact,n1|s1|b2,Mets_069,Mets_069/z91,Mets_069,-1,2,
+S,A,dz,3,file_2_1433,file_2_1433,near-exact,n1|s1|b2,Mets_069,Mets_069/z92,Mets_069,-1,2,
+S,A,dz,4,file_2_1433,file_2_1433,near-exact,n1|s1|b2,Mets_069,Mets_069/z93,Mets_069,-1,2,
+S,A,dz,5,file_2_1433,file_2_1433,near-exact,n1|s1|b2,Mets_069,Mets_069/z94,Mets_069,-1,2,
+S,A,dz,-5,file_5_10547,file_5_10547,beyond held-out,n2|s1|b2,Mets_313,Mets_313/z110,Mets_313,2,-2,
+S,A,dz,-4,file_5_10547,file_5_10547,beyond held-out,n2|s1|b2,Mets_313,Mets_313/z111,Mets_313,2,-2,
+S,A,dz,-3,file_5_10547,file_5_10547,beyond held-out,n2|s1|b2,Mets_313,Mets_313/z112,Mets_313,2,-2,
+S,A,dz,-2,file_5_10547,file_5_10547,beyond held-out,n2|s1|b2,Mets_313,Mets_313/z113,Mets_313,2,-2,
+S,A,dz,-1,file_5_10547,file_5_10547,beyond held-out,n2|s1|b2,Mets_313,Mets_313/z114,Mets_313,2,-2,
+S,A,dz,1,file_5_10547,file_5_10547,beyond held-out,n2|s1|b2,Mets_313,Mets_313/z116,Mets_313,2,-2,
+S,A,dz,2,file_5_10547,file_5_10547,beyond held-out,n2|s1|b2,Mets_313,Mets_313/z117,Mets_313,2,-2,
+S,A,dz,3,file_5_10547,file_5_10547,beyond held-out,n2|s1|b2,Mets_313,Mets_313/z118,Mets_313,2,-2,
+S,A,dz,4,file_5_10547,file_5_10547,beyond held-out,n2|s1|b2,Mets_313,Mets_313/z119,Mets_313,2,-2,
+S,A,dz,5,file_5_10547,file_5_10547,beyond held-out,n2|s1|b2,Mets_313,Mets_313/z120,Mets_313,2,-2,
+S,A,dz,-5,2623,2623,beyond held-out,n2|s3|b0,Mets_265,Mets_265/z38,Mets_265,1,0,
+S,A,dz,-4,2623,2623,beyond held-out,n2|s3|b0,Mets_265,Mets_265/z39,Mets_265,1,0,
+S,A,dz,-3,2623,2623,beyond held-out,n2|s3|b0,Mets_265,Mets_265/z40,Mets_265,1,0,
+S,A,dz,-2,2623,2623,beyond held-out,n2|s3|b0,Mets_265,Mets_265/z41,Mets_265,1,0,
+S,A,dz,-1,2623,2623,beyond held-out,n2|s3|b0,Mets_265,Mets_265/z42,Mets_265,1,0,
+S,A,dz,1,2623,2623,beyond held-out,n2|s3|b0,Mets_265,Mets_265/z44,Mets_265,1,0,
+S,A,dz,2,2623,2623,beyond held-out,n2|s3|b0,Mets_265,Mets_265/z45,Mets_265,1,0,
+S,A,dz,3,2623,2623,beyond held-out,n2|s3|b0,Mets_265,Mets_265/z46,Mets_265,1,0,
+S,A,dz,4,2623,2623,beyond held-out,n2|s3|b0,Mets_265,Mets_265/z47,Mets_265,1,0,
+S,A,dz,5,2623,2623,beyond held-out,n2|s3|b0,Mets_265,Mets_265/z48,Mets_265,1,0,
+S,A,dz,-5,file_3_1517,file_3_1517,beyond held-out,n2|s3|b1,Mets_051,Mets_051/z29,Mets_051,3,3,
+S,A,dz,-4,file_3_1517,file_3_1517,beyond held-out,n2|s3|b1,Mets_051,Mets_051/z30,Mets_051,3,3,
+S,A,dz,-3,file_3_1517,file_3_1517,beyond held-out,n2|s3|b1,Mets_051,Mets_051/z31,Mets_051,3,3,
+S,A,dz,-2,file_3_1517,file_3_1517,beyond held-out,n2|s3|b1,Mets_051,Mets_051/z32,Mets_051,3,3,
+S,A,dz,-1,file_3_1517,file_3_1517,beyond held-out,n2|s3|b1,Mets_051,Mets_051/z33,Mets_051,3,3,
+S,A,dz,1,file_3_1517,file_3_1517,beyond held-out,n2|s3|b1,Mets_051,Mets_051/z35,Mets_051,3,3,
+S,A,dz,2,file_3_1517,file_3_1517,beyond held-out,n2|s3|b1,Mets_051,Mets_051/z36,Mets_051,3,3,
+S,A,dz,3,file_3_1517,file_3_1517,beyond held-out,n2|s3|b1,Mets_051,Mets_051/z37,Mets_051,3,3,
+S,A,dz,4,file_3_1517,file_3_1517,beyond held-out,n2|s3|b1,Mets_051,Mets_051/z38,Mets_051,3,3,
+S,A,dz,5,file_3_1517,file_3_1517,beyond held-out,n2|s3|b1,Mets_051,Mets_051/z39,Mets_051,3,3,
+S,A,dz,-5,6550,6550,beyond held-out,n2|s1|b2,Mets_052,Mets_052/z31,Mets_052,1,-2,
+S,A,dz,-4,6550,6550,beyond held-out,n2|s1|b2,Mets_052,Mets_052/z32,Mets_052,1,-2,
+S,A,dz,-3,6550,6550,beyond held-out,n2|s1|b2,Mets_052,Mets_052/z33,Mets_052,1,-2,
+S,A,dz,-2,6550,6550,beyond held-out,n2|s1|b2,Mets_052,Mets_052/z34,Mets_052,1,-2,
+S,A,dz,-1,6550,6550,beyond held-out,n2|s1|b2,Mets_052,Mets_052/z35,Mets_052,1,-2,
+S,A,dz,1,6550,6550,beyond held-out,n2|s1|b2,Mets_052,Mets_052/z37,Mets_052,1,-2,
+S,A,dz,2,6550,6550,beyond held-out,n2|s1|b2,Mets_052,Mets_052/z38,Mets_052,1,-2,
+S,A,dz,3,6550,6550,beyond held-out,n2|s1|b2,Mets_052,Mets_052/z39,Mets_052,1,-2,
+S,A,dz,4,6550,6550,beyond held-out,n2|s1|b2,Mets_052,Mets_052/z40,Mets_052,1,-2,
+S,A,dz,5,6550,6550,beyond held-out,n2|s1|b2,Mets_052,Mets_052/z41,Mets_052,1,-2,
+S,A,dz,-5,file_2_7649,file_2_7649,beyond held-out,n2|s1|b2,Mets_058,Mets_058/z119,Mets_058,3,-1,
+S,A,dz,-4,file_2_7649,file_2_7649,beyond held-out,n2|s1|b2,Mets_058,Mets_058/z120,Mets_058,3,-1,
+S,A,dz,-3,file_2_7649,file_2_7649,beyond held-out,n2|s1|b2,Mets_058,Mets_058/z121,Mets_058,3,-1,
+S,A,dz,-2,file_2_7649,file_2_7649,beyond held-out,n2|s1|b2,Mets_058,Mets_058/z122,Mets_058,3,-1,
+S,A,dz,-1,file_2_7649,file_2_7649,beyond held-out,n2|s1|b2,Mets_058,Mets_058/z123,Mets_058,3,-1,
+S,A,dz,1,file_2_7649,file_2_7649,beyond held-out,n2|s1|b2,Mets_058,Mets_058/z125,Mets_058,3,-1,
+S,A,dz,2,file_2_7649,file_2_7649,beyond held-out,n2|s1|b2,Mets_058,Mets_058/z126,Mets_058,3,-1,
+S,A,dz,3,file_2_7649,file_2_7649,beyond held-out,n2|s1|b2,Mets_058,Mets_058/z127,Mets_058,3,-1,
+S,A,dz,4,file_2_7649,file_2_7649,beyond held-out,n2|s1|b2,Mets_058,Mets_058/z128,Mets_058,3,-1,
+S,A,dz,5,file_2_7649,file_2_7649,beyond held-out,n2|s1|b2,Mets_058,Mets_058/z129,Mets_058,3,-1,
+S,A,dz,-5,file_4_214,file_4_214,beyond held-out,n2|s1|b2,Mets_107,Mets_107/z28,Mets_107,-2,3,
+S,A,dz,-4,file_4_214,file_4_214,beyond held-out,n2|s1|b2,Mets_107,Mets_107/z29,Mets_107,-2,3,
+S,A,dz,-3,file_4_214,file_4_214,beyond held-out,n2|s1|b2,Mets_107,Mets_107/z30,Mets_107,-2,3,
+S,A,dz,-2,file_4_214,file_4_214,beyond held-out,n2|s1|b2,Mets_107,Mets_107/z31,Mets_107,-2,3,
+S,A,dz,-1,file_4_214,file_4_214,beyond held-out,n2|s1|b2,Mets_107,Mets_107/z32,Mets_107,-2,3,
+S,A,dz,1,file_4_214,file_4_214,beyond held-out,n2|s1|b2,Mets_107,Mets_107/z34,Mets_107,-2,3,
+S,A,dz,2,file_4_214,file_4_214,beyond held-out,n2|s1|b2,Mets_107,Mets_107/z35,Mets_107,-2,3,
+S,A,dz,3,file_4_214,file_4_214,beyond held-out,n2|s1|b2,Mets_107,Mets_107/z36,Mets_107,-2,3,
+S,A,dz,4,file_4_214,file_4_214,beyond held-out,n2|s1|b2,Mets_107,Mets_107/z37,Mets_107,-2,3,
+S,A,dz,5,file_4_214,file_4_214,beyond held-out,n2|s1|b2,Mets_107,Mets_107/z38,Mets_107,-2,3,
+S,A,dz,-5,1601,1601,beyond held-out,n2|s1|b0,Mets_249,Mets_249/z106,Mets_249,-1,0,
+S,A,dz,-4,1601,1601,beyond held-out,n2|s1|b0,Mets_249,Mets_249/z107,Mets_249,-1,0,
+S,A,dz,-3,1601,1601,beyond held-out,n2|s1|b0,Mets_249,Mets_249/z108,Mets_249,-1,0,
+S,A,dz,-2,1601,1601,beyond held-out,n2|s1|b0,Mets_249,Mets_249/z109,Mets_249,-1,0,
+S,A,dz,-1,1601,1601,beyond held-out,n2|s1|b0,Mets_249,Mets_249/z110,Mets_249,-1,0,
+S,A,dz,1,1601,1601,beyond held-out,n2|s1|b0,Mets_249,Mets_249/z112,Mets_249,-1,0,
+S,A,dz,2,1601,1601,beyond held-out,n2|s1|b0,Mets_249,Mets_249/z113,Mets_249,-1,0,
+S,A,dz,3,1601,1601,beyond held-out,n2|s1|b0,Mets_249,Mets_249/z114,Mets_249,-1,0,
+S,A,dz,4,1601,1601,beyond held-out,n2|s1|b0,Mets_249,Mets_249/z115,Mets_249,-1,0,
+S,A,dz,5,1601,1601,beyond held-out,n2|s1|b0,Mets_249,Mets_249/z116,Mets_249,-1,0,
+S,A,dz,-5,2692,2692,beyond held-out,n2|s1|b2,Mets_134,Mets_134/z113,Mets_134,3,-1,
+S,A,dz,-4,2692,2692,beyond held-out,n2|s1|b2,Mets_134,Mets_134/z114,Mets_134,3,-1,
+S,A,dz,-3,2692,2692,beyond held-out,n2|s1|b2,Mets_134,Mets_134/z115,Mets_134,3,-1,
+S,A,dz,-2,2692,2692,beyond held-out,n2|s1|b2,Mets_134,Mets_134/z116,Mets_134,3,-1,
+S,A,dz,-1,2692,2692,beyond held-out,n2|s1|b2,Mets_134,Mets_134/z117,Mets_134,3,-1,
+S,A,dz,1,2692,2692,beyond held-out,n2|s1|b2,Mets_134,Mets_134/z119,Mets_134,3,-1,
+S,A,dz,2,2692,2692,beyond held-out,n2|s1|b2,Mets_134,Mets_134/z120,Mets_134,3,-1,
+S,A,dz,3,2692,2692,beyond held-out,n2|s1|b2,Mets_134,Mets_134/z121,Mets_134,3,-1,
+S,A,dz,4,2692,2692,beyond held-out,n2|s1|b2,Mets_134,Mets_134/z122,Mets_134,3,-1,
+S,A,dz,5,2692,2692,beyond held-out,n2|s1|b2,Mets_134,Mets_134/z123,Mets_134,3,-1,
+S,A,dz,-5,8532,8532,beyond held-out,n2|s1|b2,Mets_314,Mets_314/z37,Mets_314,2,1,
+S,A,dz,-4,8532,8532,beyond held-out,n2|s1|b2,Mets_314,Mets_314/z38,Mets_314,2,1,
+S,A,dz,-3,8532,8532,beyond held-out,n2|s1|b2,Mets_314,Mets_314/z39,Mets_314,2,1,
+S,A,dz,-2,8532,8532,beyond held-out,n2|s1|b2,Mets_314,Mets_314/z40,Mets_314,2,1,
+S,A,dz,-1,8532,8532,beyond held-out,n2|s1|b2,Mets_314,Mets_314/z41,Mets_314,2,1,
+S,A,dz,1,8532,8532,beyond held-out,n2|s1|b2,Mets_314,Mets_314/z43,Mets_314,2,1,
+S,A,dz,2,8532,8532,beyond held-out,n2|s1|b2,Mets_314,Mets_314/z44,Mets_314,2,1,
+S,A,dz,3,8532,8532,beyond held-out,n2|s1|b2,Mets_314,Mets_314/z45,Mets_314,2,1,
+S,A,dz,4,8532,8532,beyond held-out,n2|s1|b2,Mets_314,Mets_314/z46,Mets_314,2,1,
+S,A,dz,5,8532,8532,beyond held-out,n2|s1|b2,Mets_314,Mets_314/z47,Mets_314,2,1,
+S,A,dz,-5,file_5_7988,file_5_7988,beyond held-out,n2|s2|b2,Mets_289,Mets_289/z24,Mets_289,2,-3,
+S,A,dz,-4,file_5_7988,file_5_7988,beyond held-out,n2|s2|b2,Mets_289,Mets_289/z25,Mets_289,2,-3,
+S,A,dz,-3,file_5_7988,file_5_7988,beyond held-out,n2|s2|b2,Mets_289,Mets_289/z26,Mets_289,2,-3,
+S,A,dz,-2,file_5_7988,file_5_7988,beyond held-out,n2|s2|b2,Mets_289,Mets_289/z27,Mets_289,2,-3,
+S,A,dz,-1,file_5_7988,file_5_7988,beyond held-out,n2|s2|b2,Mets_289,Mets_289/z28,Mets_289,2,-3,
+S,A,dz,1,file_5_7988,file_5_7988,beyond held-out,n2|s2|b2,Mets_289,Mets_289/z30,Mets_289,2,-3,
+S,A,dz,2,file_5_7988,file_5_7988,beyond held-out,n2|s2|b2,Mets_289,Mets_289/z31,Mets_289,2,-3,
+S,A,dz,3,file_5_7988,file_5_7988,beyond held-out,n2|s2|b2,Mets_289,Mets_289/z32,Mets_289,2,-3,
+S,A,dz,4,file_5_7988,file_5_7988,beyond held-out,n2|s2|b2,Mets_289,Mets_289/z33,Mets_289,2,-3,
+S,A,dz,5,file_5_7988,file_5_7988,beyond held-out,n2|s2|b2,Mets_289,Mets_289/z34,Mets_289,2,-3,
+S,A,dz,-5,12408,12408,beyond held-out,n2|s2|b1,Mets_266,Mets_266/z89,Mets_266,0,-3,
+S,A,dz,-4,12408,12408,beyond held-out,n2|s2|b1,Mets_266,Mets_266/z90,Mets_266,0,-3,
+S,A,dz,-3,12408,12408,beyond held-out,n2|s2|b1,Mets_266,Mets_266/z91,Mets_266,0,-3,
+S,A,dz,-2,12408,12408,beyond held-out,n2|s2|b1,Mets_266,Mets_266/z92,Mets_266,0,-3,
+S,A,dz,-1,12408,12408,beyond held-out,n2|s2|b1,Mets_266,Mets_266/z93,Mets_266,0,-3,
+S,A,dz,1,12408,12408,beyond held-out,n2|s2|b1,Mets_266,Mets_266/z95,Mets_266,0,-3,
+S,A,dz,2,12408,12408,beyond held-out,n2|s2|b1,Mets_266,Mets_266/z96,Mets_266,0,-3,
+S,A,dz,3,12408,12408,beyond held-out,n2|s2|b1,Mets_266,Mets_266/z97,Mets_266,0,-3,
+S,A,dz,4,12408,12408,beyond held-out,n2|s2|b1,Mets_266,Mets_266/z98,Mets_266,0,-3,
+S,A,dz,5,12408,12408,beyond held-out,n2|s2|b1,Mets_266,Mets_266/z99,Mets_266,0,-3,
+S,A,dz,-5,file_4_839,file_4_839,beyond held-out,n2|s2|b2,Mets_062,Mets_062/z106,Mets_062,2,0,
+S,A,dz,-4,file_4_839,file_4_839,beyond held-out,n2|s2|b2,Mets_062,Mets_062/z107,Mets_062,2,0,
+S,A,dz,-3,file_4_839,file_4_839,beyond held-out,n2|s2|b2,Mets_062,Mets_062/z108,Mets_062,2,0,
+S,A,dz,-2,file_4_839,file_4_839,beyond held-out,n2|s2|b2,Mets_062,Mets_062/z109,Mets_062,2,0,
+S,A,dz,-1,file_4_839,file_4_839,beyond held-out,n2|s2|b2,Mets_062,Mets_062/z110,Mets_062,2,0,
+S,A,dz,1,file_4_839,file_4_839,beyond held-out,n2|s2|b2,Mets_062,Mets_062/z112,Mets_062,2,0,
+S,A,dz,2,file_4_839,file_4_839,beyond held-out,n2|s2|b2,Mets_062,Mets_062/z113,Mets_062,2,0,
+S,A,dz,3,file_4_839,file_4_839,beyond held-out,n2|s2|b2,Mets_062,Mets_062/z114,Mets_062,2,0,
+S,A,dz,4,file_4_839,file_4_839,beyond held-out,n2|s2|b2,Mets_062,Mets_062/z115,Mets_062,2,0,
+S,A,dz,5,file_4_839,file_4_839,beyond held-out,n2|s2|b2,Mets_062,Mets_062/z116,Mets_062,2,0,
+S,A,dz,-5,7730,7730,beyond held-out,n2|s1|b2,Mets_314,Mets_314/z15,Mets_314,-1,-3,
+S,A,dz,-4,7730,7730,beyond held-out,n2|s1|b2,Mets_314,Mets_314/z16,Mets_314,-1,-3,
+S,A,dz,-3,7730,7730,beyond held-out,n2|s1|b2,Mets_314,Mets_314/z17,Mets_314,-1,-3,
+S,A,dz,-2,7730,7730,beyond held-out,n2|s1|b2,Mets_314,Mets_314/z18,Mets_314,-1,-3,
+S,A,dz,-1,7730,7730,beyond held-out,n2|s1|b2,Mets_314,Mets_314/z19,Mets_314,-1,-3,
+S,A,dz,1,7730,7730,beyond held-out,n2|s1|b2,Mets_314,Mets_314/z21,Mets_314,-1,-3,
+S,A,dz,2,7730,7730,beyond held-out,n2|s1|b2,Mets_314,Mets_314/z22,Mets_314,-1,-3,
+S,A,dz,3,7730,7730,beyond held-out,n2|s1|b2,Mets_314,Mets_314/z23,Mets_314,-1,-3,
+S,A,dz,4,7730,7730,beyond held-out,n2|s1|b2,Mets_314,Mets_314/z24,Mets_314,-1,-3,
+S,A,dz,5,7730,7730,beyond held-out,n2|s1|b2,Mets_314,Mets_314/z25,Mets_314,-1,-3,
+S,A,dz,-5,file_2_884,file_2_884,beyond held-out,n2|s2|b2,Mets_059,Mets_059/z34,Mets_059,-1,-3,
+S,A,dz,-4,file_2_884,file_2_884,beyond held-out,n2|s2|b2,Mets_059,Mets_059/z35,Mets_059,-1,-3,
+S,A,dz,-3,file_2_884,file_2_884,beyond held-out,n2|s2|b2,Mets_059,Mets_059/z36,Mets_059,-1,-3,
+S,A,dz,-2,file_2_884,file_2_884,beyond held-out,n2|s2|b2,Mets_059,Mets_059/z37,Mets_059,-1,-3,
+S,A,dz,-1,file_2_884,file_2_884,beyond held-out,n2|s2|b2,Mets_059,Mets_059/z38,Mets_059,-1,-3,
+S,A,dz,1,file_2_884,file_2_884,beyond held-out,n2|s2|b2,Mets_059,Mets_059/z40,Mets_059,-1,-3,
+S,A,dz,2,file_2_884,file_2_884,beyond held-out,n2|s2|b2,Mets_059,Mets_059/z41,Mets_059,-1,-3,
+S,A,dz,3,file_2_884,file_2_884,beyond held-out,n2|s2|b2,Mets_059,Mets_059/z42,Mets_059,-1,-3,
+S,A,dz,4,file_2_884,file_2_884,beyond held-out,n2|s2|b2,Mets_059,Mets_059/z43,Mets_059,-1,-3,
+S,A,dz,5,file_2_884,file_2_884,beyond held-out,n2|s2|b2,Mets_059,Mets_059/z44,Mets_059,-1,-3,
+S,A,dz,-5,12089,12089,beyond held-out,n2|s2|b0,Mets_280,Mets_280/z37,Mets_280,3,0,
+S,A,dz,-4,12089,12089,beyond held-out,n2|s2|b0,Mets_280,Mets_280/z38,Mets_280,3,0,
+S,A,dz,-3,12089,12089,beyond held-out,n2|s2|b0,Mets_280,Mets_280/z39,Mets_280,3,0,
+S,A,dz,-2,12089,12089,beyond held-out,n2|s2|b0,Mets_280,Mets_280/z40,Mets_280,3,0,
+S,A,dz,-1,12089,12089,beyond held-out,n2|s2|b0,Mets_280,Mets_280/z41,Mets_280,3,0,
+S,A,dz,1,12089,12089,beyond held-out,n2|s2|b0,Mets_280,Mets_280/z43,Mets_280,3,0,
+S,A,dz,2,12089,12089,beyond held-out,n2|s2|b0,Mets_280,Mets_280/z44,Mets_280,3,0,
+S,A,dz,3,12089,12089,beyond held-out,n2|s2|b0,Mets_280,Mets_280/z45,Mets_280,3,0,
+S,A,dz,4,12089,12089,beyond held-out,n2|s2|b0,Mets_280,Mets_280/z46,Mets_280,3,0,
+S,A,dz,5,12089,12089,beyond held-out,n2|s2|b0,Mets_280,Mets_280/z47,Mets_280,3,0,
+S,A,dz,-5,3544,3544,beyond held-out,n2|s1|b0,Mets_024,Mets_024/z22,Mets_024,2,2,
+S,A,dz,-4,3544,3544,beyond held-out,n2|s1|b0,Mets_024,Mets_024/z23,Mets_024,2,2,
+S,A,dz,-3,3544,3544,beyond held-out,n2|s1|b0,Mets_024,Mets_024/z24,Mets_024,2,2,
+S,A,dz,-2,3544,3544,beyond held-out,n2|s1|b0,Mets_024,Mets_024/z25,Mets_024,2,2,
+S,A,dz,-1,3544,3544,beyond held-out,n2|s1|b0,Mets_024,Mets_024/z26,Mets_024,2,2,
+S,A,dz,1,3544,3544,beyond held-out,n2|s1|b0,Mets_024,Mets_024/z28,Mets_024,2,2,
+S,A,dz,2,3544,3544,beyond held-out,n2|s1|b0,Mets_024,Mets_024/z29,Mets_024,2,2,
+S,A,dz,3,3544,3544,beyond held-out,n2|s1|b0,Mets_024,Mets_024/z30,Mets_024,2,2,
+S,A,dz,4,3544,3544,beyond held-out,n2|s1|b0,Mets_024,Mets_024/z31,Mets_024,2,2,
+S,A,dz,5,3544,3544,beyond held-out,n2|s1|b0,Mets_024,Mets_024/z32,Mets_024,2,2,
+S,A,dz,-5,file_4_7885,file_4_7885,beyond held-out,n2|s2|b2,Mets_285,Mets_285/z127,Mets_285,-3,0,
+S,A,dz,-4,file_4_7885,file_4_7885,beyond held-out,n2|s2|b2,Mets_285,Mets_285/z128,Mets_285,-3,0,
+S,A,dz,-3,file_4_7885,file_4_7885,beyond held-out,n2|s2|b2,Mets_285,Mets_285/z129,Mets_285,-3,0,
+S,A,dz,-2,file_4_7885,file_4_7885,beyond held-out,n2|s2|b2,Mets_285,Mets_285/z130,Mets_285,-3,0,
+S,A,dz,-1,file_4_7885,file_4_7885,beyond held-out,n2|s2|b2,Mets_285,Mets_285/z131,Mets_285,-3,0,
+S,A,dz,1,file_4_7885,file_4_7885,beyond held-out,n2|s2|b2,Mets_285,Mets_285/z133,Mets_285,-3,0,
+S,A,dz,2,file_4_7885,file_4_7885,beyond held-out,n2|s2|b2,Mets_285,Mets_285/z134,Mets_285,-3,0,
+S,A,dz,3,file_4_7885,file_4_7885,beyond held-out,n2|s2|b2,Mets_285,Mets_285/z135,Mets_285,-3,0,
+S,A,dz,4,file_4_7885,file_4_7885,beyond held-out,n2|s2|b2,Mets_285,Mets_285/z136,Mets_285,-3,0,
+S,A,dz,5,file_4_7885,file_4_7885,beyond held-out,n2|s2|b2,Mets_285,Mets_285/z137,Mets_285,-3,0,
+S,A,dz,-5,file_1496,file_1496,beyond held-out,n2|s2|b0,Mets_099,Mets_099/z28,Mets_099,-1,3,
+S,A,dz,-4,file_1496,file_1496,beyond held-out,n2|s2|b0,Mets_099,Mets_099/z29,Mets_099,-1,3,
+S,A,dz,-3,file_1496,file_1496,beyond held-out,n2|s2|b0,Mets_099,Mets_099/z30,Mets_099,-1,3,
+S,A,dz,-2,file_1496,file_1496,beyond held-out,n2|s2|b0,Mets_099,Mets_099/z31,Mets_099,-1,3,
+S,A,dz,-1,file_1496,file_1496,beyond held-out,n2|s2|b0,Mets_099,Mets_099/z32,Mets_099,-1,3,
+S,A,dz,1,file_1496,file_1496,beyond held-out,n2|s2|b0,Mets_099,Mets_099/z34,Mets_099,-1,3,
+S,A,dz,2,file_1496,file_1496,beyond held-out,n2|s2|b0,Mets_099,Mets_099/z35,Mets_099,-1,3,
+S,A,dz,3,file_1496,file_1496,beyond held-out,n2|s2|b0,Mets_099,Mets_099/z36,Mets_099,-1,3,
+S,A,dz,4,file_1496,file_1496,beyond held-out,n2|s2|b0,Mets_099,Mets_099/z37,Mets_099,-1,3,
+S,A,dz,5,file_1496,file_1496,beyond held-out,n2|s2|b0,Mets_099,Mets_099/z38,Mets_099,-1,3,
+S,A,dz,-5,file_5_12710,file_5_12710,beyond held-out,n2|s2|b2,Mets_014,Mets_014/z35,Mets_014,1,0,
+S,A,dz,-4,file_5_12710,file_5_12710,beyond held-out,n2|s2|b2,Mets_014,Mets_014/z36,Mets_014,1,0,
+S,A,dz,-3,file_5_12710,file_5_12710,beyond held-out,n2|s2|b2,Mets_014,Mets_014/z37,Mets_014,1,0,
+S,A,dz,-2,file_5_12710,file_5_12710,beyond held-out,n2|s2|b2,Mets_014,Mets_014/z38,Mets_014,1,0,
+S,A,dz,-1,file_5_12710,file_5_12710,beyond held-out,n2|s2|b2,Mets_014,Mets_014/z39,Mets_014,1,0,
+S,A,dz,1,file_5_12710,file_5_12710,beyond held-out,n2|s2|b2,Mets_014,Mets_014/z41,Mets_014,1,0,
+S,A,dz,2,file_5_12710,file_5_12710,beyond held-out,n2|s2|b2,Mets_014,Mets_014/z42,Mets_014,1,0,
+S,A,dz,3,file_5_12710,file_5_12710,beyond held-out,n2|s2|b2,Mets_014,Mets_014/z43,Mets_014,1,0,
+S,A,dz,4,file_5_12710,file_5_12710,beyond held-out,n2|s2|b2,Mets_014,Mets_014/z44,Mets_014,1,0,
+S,A,dz,5,file_5_12710,file_5_12710,beyond held-out,n2|s2|b2,Mets_014,Mets_014/z45,Mets_014,1,0,
+S,A,dz,-5,file_5944,file_5944,exposed e1_copy multi,n1|s3|b2,Mets_230,Mets_230/z105,Mets_230,-2,2,
+S,A,dz,-4,file_5944,file_5944,exposed e1_copy multi,n1|s3|b2,Mets_230,Mets_230/z106,Mets_230,-2,2,
+S,A,dz,-3,file_5944,file_5944,exposed e1_copy multi,n1|s3|b2,Mets_230,Mets_230/z107,Mets_230,-2,2,
+S,A,dz,-2,file_5944,file_5944,exposed e1_copy multi,n1|s3|b2,Mets_230,Mets_230/z108,Mets_230,-2,2,
+S,A,dz,-1,file_5944,file_5944,exposed e1_copy multi,n1|s3|b2,Mets_230,Mets_230/z109,Mets_230,-2,2,
+S,A,dz,1,file_5944,file_5944,exposed e1_copy multi,n1|s3|b2,Mets_230,Mets_230/z111,Mets_230,-2,2,
+S,A,dz,2,file_5944,file_5944,exposed e1_copy multi,n1|s3|b2,Mets_230,Mets_230/z112,Mets_230,-2,2,
+S,A,dz,3,file_5944,file_5944,exposed e1_copy multi,n1|s3|b2,Mets_230,Mets_230/z113,Mets_230,-2,2,
+S,A,dz,4,file_5944,file_5944,exposed e1_copy multi,n1|s3|b2,Mets_230,Mets_230/z114,Mets_230,-2,2,
+S,A,dz,5,file_5944,file_5944,exposed e1_copy multi,n1|s3|b2,Mets_230,Mets_230/z115,Mets_230,-2,2,
+S,A,dz,-5,12260,12260,exposed e1_copy multi,n1|s2|b2,Mets_090,Mets_090/z121,Mets_090,-2,1,
+S,A,dz,-4,12260,12260,exposed e1_copy multi,n1|s2|b2,Mets_090,Mets_090/z122,Mets_090,-2,1,
+S,A,dz,-3,12260,12260,exposed e1_copy multi,n1|s2|b2,Mets_090,Mets_090/z123,Mets_090,-2,1,
+S,A,dz,-2,12260,12260,exposed e1_copy multi,n1|s2|b2,Mets_090,Mets_090/z124,Mets_090,-2,1,
+S,A,dz,-1,12260,12260,exposed e1_copy multi,n1|s2|b2,Mets_090,Mets_090/z125,Mets_090,-2,1,
+S,A,dz,1,12260,12260,exposed e1_copy multi,n1|s2|b2,Mets_090,Mets_090/z127,Mets_090,-2,1,
+S,A,dz,2,12260,12260,exposed e1_copy multi,n1|s2|b2,Mets_090,Mets_090/z128,Mets_090,-2,1,
+S,A,dz,3,12260,12260,exposed e1_copy multi,n1|s2|b2,Mets_090,Mets_090/z129,Mets_090,-2,1,
+S,A,dz,4,12260,12260,exposed e1_copy multi,n1|s2|b2,Mets_090,Mets_090/z130,Mets_090,-2,1,
+S,A,dz,5,12260,12260,exposed e1_copy multi,n1|s2|b2,Mets_090,Mets_090/z131,Mets_090,-2,1,
+S,A,dz,-5,11577,11577,exposed e1_copy multi,n1|s2|b1,Mets_167,Mets_167/z72,Mets_167,-1,-1,
+S,A,dz,-4,11577,11577,exposed e1_copy multi,n1|s2|b1,Mets_167,Mets_167/z73,Mets_167,-1,-1,
+S,A,dz,-3,11577,11577,exposed e1_copy multi,n1|s2|b1,Mets_167,Mets_167/z74,Mets_167,-1,-1,
+S,A,dz,-2,11577,11577,exposed e1_copy multi,n1|s2|b1,Mets_167,Mets_167/z75,Mets_167,-1,-1,
+S,A,dz,-1,11577,11577,exposed e1_copy multi,n1|s2|b1,Mets_167,Mets_167/z76,Mets_167,-1,-1,
+S,A,dz,1,11577,11577,exposed e1_copy multi,n1|s2|b1,Mets_167,Mets_167/z78,Mets_167,-1,-1,
+S,A,dz,2,11577,11577,exposed e1_copy multi,n1|s2|b1,Mets_167,Mets_167/z79,Mets_167,-1,-1,
+S,A,dz,3,11577,11577,exposed e1_copy multi,n1|s2|b1,Mets_167,Mets_167/z80,Mets_167,-1,-1,
+S,A,dz,4,11577,11577,exposed e1_copy multi,n1|s2|b1,Mets_167,Mets_167/z81,Mets_167,-1,-1,
+S,A,dz,5,11577,11577,exposed e1_copy multi,n1|s2|b1,Mets_167,Mets_167/z82,Mets_167,-1,-1,
+S,A,dz,-5,file_3_3190,file_3_3190,exposed e1_copy multi,n1|s3|b0,Mets_099,Mets_099/z31,Mets_099,0,1,
+S,A,dz,-4,file_3_3190,file_3_3190,exposed e1_copy multi,n1|s3|b0,Mets_099,Mets_099/z32,Mets_099,0,1,
+S,A,dz,-3,file_3_3190,file_3_3190,exposed e1_copy multi,n1|s3|b0,Mets_099,Mets_099/z33,Mets_099,0,1,
+S,A,dz,-2,file_3_3190,file_3_3190,exposed e1_copy multi,n1|s3|b0,Mets_099,Mets_099/z34,Mets_099,0,1,
+S,A,dz,-1,file_3_3190,file_3_3190,exposed e1_copy multi,n1|s3|b0,Mets_099,Mets_099/z35,Mets_099,0,1,
+S,A,dz,1,file_3_3190,file_3_3190,exposed e1_copy multi,n1|s3|b0,Mets_099,Mets_099/z37,Mets_099,0,1,
+S,A,dz,2,file_3_3190,file_3_3190,exposed e1_copy multi,n1|s3|b0,Mets_099,Mets_099/z38,Mets_099,0,1,
+S,A,dz,3,file_3_3190,file_3_3190,exposed e1_copy multi,n1|s3|b0,Mets_099,Mets_099/z39,Mets_099,0,1,
+S,A,dz,4,file_3_3190,file_3_3190,exposed e1_copy multi,n1|s3|b0,Mets_099,Mets_099/z40,Mets_099,0,1,
+S,A,dz,5,file_3_3190,file_3_3190,exposed e1_copy multi,n1|s3|b0,Mets_099,Mets_099/z41,Mets_099,0,1,
+S,A,dz,-5,file_5_11473,file_5_11473,exposed e2_full multi,n2|s2|b1,Mets_328,Mets_328/z98,Mets_328,-3,-1,
+S,A,dz,-4,file_5_11473,file_5_11473,exposed e2_full multi,n2|s2|b1,Mets_328,Mets_328/z99,Mets_328,-3,-1,
+S,A,dz,-3,file_5_11473,file_5_11473,exposed e2_full multi,n2|s2|b1,Mets_328,Mets_328/z100,Mets_328,-3,-1,
+S,A,dz,-2,file_5_11473,file_5_11473,exposed e2_full multi,n2|s2|b1,Mets_328,Mets_328/z101,Mets_328,-3,-1,
+S,A,dz,-1,file_5_11473,file_5_11473,exposed e2_full multi,n2|s2|b1,Mets_328,Mets_328/z102,Mets_328,-3,-1,
+S,A,dz,1,file_5_11473,file_5_11473,exposed e2_full multi,n2|s2|b1,Mets_328,Mets_328/z104,Mets_328,-3,-1,
+S,A,dz,2,file_5_11473,file_5_11473,exposed e2_full multi,n2|s2|b1,Mets_328,Mets_328/z105,Mets_328,-3,-1,
+S,A,dz,3,file_5_11473,file_5_11473,exposed e2_full multi,n2|s2|b1,Mets_328,Mets_328/z106,Mets_328,-3,-1,
+S,A,dz,4,file_5_11473,file_5_11473,exposed e2_full multi,n2|s2|b1,Mets_328,Mets_328/z107,Mets_328,-3,-1,
+S,A,dz,5,file_5_11473,file_5_11473,exposed e2_full multi,n2|s2|b1,Mets_328,Mets_328/z108,Mets_328,-3,-1,
+S,A,dz,-5,file_4_3607,file_4_3607,exposed e2_full multi,n2|s2|b2,Mets_225,Mets_225/z113,Mets_225,-1,3,
+S,A,dz,-4,file_4_3607,file_4_3607,exposed e2_full multi,n2|s2|b2,Mets_225,Mets_225/z114,Mets_225,-1,3,
+S,A,dz,-3,file_4_3607,file_4_3607,exposed e2_full multi,n2|s2|b2,Mets_225,Mets_225/z115,Mets_225,-1,3,
+S,A,dz,-2,file_4_3607,file_4_3607,exposed e2_full multi,n2|s2|b2,Mets_225,Mets_225/z116,Mets_225,-1,3,
+S,A,dz,-1,file_4_3607,file_4_3607,exposed e2_full multi,n2|s2|b2,Mets_225,Mets_225/z117,Mets_225,-1,3,
+S,A,dz,1,file_4_3607,file_4_3607,exposed e2_full multi,n2|s2|b2,Mets_225,Mets_225/z119,Mets_225,-1,3,
+S,A,dz,2,file_4_3607,file_4_3607,exposed e2_full multi,n2|s2|b2,Mets_225,Mets_225/z120,Mets_225,-1,3,
+S,A,dz,3,file_4_3607,file_4_3607,exposed e2_full multi,n2|s2|b2,Mets_225,Mets_225/z121,Mets_225,-1,3,
+S,A,dz,4,file_4_3607,file_4_3607,exposed e2_full multi,n2|s2|b2,Mets_225,Mets_225/z122,Mets_225,-1,3,
+S,A,dz,5,file_4_3607,file_4_3607,exposed e2_full multi,n2|s2|b2,Mets_225,Mets_225/z123,Mets_225,-1,3,
+S,A,dz,-5,file_5_6678,file_5_6678,exposed e2_full multi,n2|s3|b1,Mets_181,Mets_181/z108,Mets_181,3,-1,
+S,A,dz,-4,file_5_6678,file_5_6678,exposed e2_full multi,n2|s3|b1,Mets_181,Mets_181/z109,Mets_181,3,-1,
+S,A,dz,-3,file_5_6678,file_5_6678,exposed e2_full multi,n2|s3|b1,Mets_181,Mets_181/z110,Mets_181,3,-1,
+S,A,dz,-2,file_5_6678,file_5_6678,exposed e2_full multi,n2|s3|b1,Mets_181,Mets_181/z111,Mets_181,3,-1,
+S,A,dz,-1,file_5_6678,file_5_6678,exposed e2_full multi,n2|s3|b1,Mets_181,Mets_181/z112,Mets_181,3,-1,
+S,A,dz,1,file_5_6678,file_5_6678,exposed e2_full multi,n2|s3|b1,Mets_181,Mets_181/z114,Mets_181,3,-1,
+S,A,dz,2,file_5_6678,file_5_6678,exposed e2_full multi,n2|s3|b1,Mets_181,Mets_181/z115,Mets_181,3,-1,
+S,A,dz,3,file_5_6678,file_5_6678,exposed e2_full multi,n2|s3|b1,Mets_181,Mets_181/z116,Mets_181,3,-1,
+S,A,dz,4,file_5_6678,file_5_6678,exposed e2_full multi,n2|s3|b1,Mets_181,Mets_181/z117,Mets_181,3,-1,
+S,A,dz,5,file_5_6678,file_5_6678,exposed e2_full multi,n2|s3|b1,Mets_181,Mets_181/z118,Mets_181,3,-1,
