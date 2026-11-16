@@ -1,0 +1,18 @@
+figure,section,content,sources
+T1_data_sets,2.1,"patients and lesion slices per set, with roles",results/stanford_brainmets/e0b/stats/description_amibekk_v1.csv
+T2_description,3.1,"lesion counts, areas and positions, real sets vs S main",results/stanford_brainmets/e0b/stats/description_amibekk_v1.csv
+T3a_thresholds,3.2,frozen thresholds with intervals,results/stanford_brainmets/e3/calibrate/thresholds.csv
+T3b_chance_rates,"3.2, 3.3",chance rates on H-cal and H-eval with the gate limits,results/stanford_brainmets/e4/validate/fp_heval.csv
+T4_validation,3.3,recall per variant and detector,results/stanford_brainmets/e4/validate/validation.csv
+T4b_gate,3.3,E4 gate criteria and results,results/stanford_brainmets/e4/validate/gate.csv
+T5_main_audit,3.4,"main audit: rates, excess, Holm p",results/amibekk_v1/e5/analyze/rates.csv
+T6_exposure,3.5,E6 readings per primary cell,results/amibekk_v1/e6/exposure/concentration.csv; results/amibekk_v1/e6/exposure/margins.csv
+T6b_h1_h3,3.5,H1 per size bin and weighted; H3 Spearman,results/amibekk_v1/e6/exposure/h1.csv; results/amibekk_v1/e6/exposure/h3.csv
+T7a_correctness; T7b_deletion,3.6,correctness criteria; deletion test,results/stanford_brainmets/e7/planted/criteria.csv; results/amibekk_v1/e7/reports/deletion_summary.csv
+T8_paired,3.7,E8 tests per region and within A,results/amibekk_v1/e8/paired/tests.csv; results/amibekk_v1/e8/paired/within_a.csv
+A_decisions,App. A,"decisions A-AE: what each fixes, its value, config key, section",docs/report-synthesis.md
+D_h2,App. D (4.2),H2: excesses and their difference,results/amibekk_v1/e5/analyze/h2.csv
+D_rates_by_size,App. D (3.4),primary-class rates by largest-lesion size,results/amibekk_v1/e5/analyze/rates_by_size.csv
+F_rehearsals,App. F (2.8),mock sets: required vs obtained readings,results/stanford_brainmets/e5/rehearse/null/review.txt; results/stanford_brainmets/e6/rehearse/null/review.txt; results/stanford_brainmets/e8/rehearse/run_info.json
+F_checks,App. F (2.13),check results per experiment,results/stanford_brainmets/e0a/check_report_amibekk_v1.txt; results/stanford_brainmets/e0b/check_report_amibekk_v1.txt; results/stanford_brainmets/e3/check_report.txt; results/stanford_brainmets/e4/check_report.txt; results/amibekk_v1/e5/check_report.txt; results/amibekk_v1/e6/check_report.txt; results/amibekk_v1/e7/check_report.txt; results/amibekk_v1/e8/check_report.txt; results/amibekk_v1/report/check_report.txt
+F_software,App. F (2.13),software versions from the run logs,results/amibekk_v1/e8/paired/run_info.json

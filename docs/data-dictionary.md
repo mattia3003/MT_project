@@ -53,6 +53,11 @@ ID columns as text.
 | | `rehearse` | ✅ | decisions AB–AE, the frozen E3 file, T / H-eval / H-cal label maps, real `brain.csv`, `patients.csv`, model-space `bravo` and `seg` volumes, E4 `heval_classes.csv`, `planted.csv`, `planted_labels.npz`, `planted_outcomes.csv`, E5's H-cal mock tables (`<output_root>/<dataset>/e5/rehearse/null/`); never S | `results/<dataset>/e8/rehearse/` |
 | | `paired` | ✅ | decisions AC, AD, `select`'s `pairs.csv`, `rehearse`'s `heval/measures.csv` and run logs (same `paired:`, rehearsal as required), E5's lock, S's pool files (MRI and mask as saved) via `synthetic_index.csv`, pool `labels.npz`, model-space `bravo` and `seg` volumes, E7 `report_index.csv` (captions), the frozen E3 file | `results/<pool>/e8/paired/` |
 | | `check` | ✅ | all E8 outputs and run logs, E5's lock, the inputs of `select`, `rehearse` and `paired` (re-reads S's MRIs to reproduce `measures.csv`), E0b's stored `brain_masks.npz` (real and pool) | `results/<pool>/e8/check_report.txt`, `check.run_info.json` |
+| `r_report_figures.py` | `method` | ✅ | E0b `brain_masks.npz`, `brain.csv`, `masks_raw.npz`, `qc.csv`, `patients.csv`, one patient's model-space and raw native volumes (`seg_soft`), E4 `planted.csv`, `planted_labels.npz`, `e1_planted.csv`, E2 planted tables, `planted_outcomes.csv`, `area_change.csv`, E7 planted `reports.csv`, the frozen E3 file, T `labels.npz` | `results/<pool>/report/method/` |
+| | `appendix` | ✅ | E0b stats and lesions-review tables, real and pool `brain.csv`, `qc.csv`, `slices.csv`, `labels.npz`, model-space volumes, `masks_raw.npz`; E3 H-cal tables, `thresholds.csv`, `best_matches_hcal.csv`; E4 `lesion_fate.csv`, `planted_outcomes.csv`, planted and H-eval tables, `heval_classes.csv`; E5 `rates.csv`, `flagged.csv` and S tables (lock unchanged); E6 exposure and rehearsal tables, reference tables; E7 `report_index.csv`; E8 `measures.csv`, `within_a.csv`; the S samples and T slices shown | `results/<pool>/report/appendix/` |
+| | `tables` | ✅ | E0b `description_*.csv`; E3 `thresholds.csv`; E4 `fp_heval.csv`, `validation.csv`, `gate.csv`; E5 `rates.csv`, `h2.csv`, `rates_by_size.csv`, rehearsal reviews; E6 `concentration.csv`, `margins.csv`, `h1.csv`, `h3.csv`, `review.txt`, rehearsal reviews; E7 `criteria.csv`, both `deletion_summary.csv`; E8 `tests.csv`, `within_a.csv`, run logs; every check report; the synthesis's decision register | `results/<pool>/report/tables/` |
+| | `check` | ✅ | the three figure folders, the tables folder and their run logs, the experiment stages' run logs, E5's lock | `results/<pool>/report/check_report.txt`, `check.run_info.json` |
+| | `results` | ✅ | E0b `lesions.csv` (real and pool), pool `qc.csv`, E3 `chance_rates.csv`, E4 `recall_by_group.csv`, `heval_classes.csv`, `e1_heval.csv`, E6 `exposure.csv`, E8 rehearse `positive/measures.csv`, E5 `classes_main.csv`, `e1_main.csv`, `e2_main_lesion_pairs.parquet`, `auc.csv` (lock unchanged), E6 `flag_details.csv`, `margins.csv`, `h1_rates.csv`, E7 `report_index.csv`, `patient_profiles.csv`, E8 `measures.csv`, `tests.csv` (S and H-eval), one S sample's NIfTI, one T BRAVO slice, both `labels.npz` | `results/<pool>/report/results/` |
 
 E1 (whole-mask detector) and E2 (lesion-level detector) have no scripts: they are `memtk`
 modules, run inside E3 (on H-cal), E4 (on planted copies) and E5 (on S).
@@ -860,3 +865,95 @@ E5's lock as recorded by `select` and `paired`; the rehearsal readings reproduce
 `select`'s pairs, every rehearsal table and `paired`'s measures, tables and reading reproduced with the
 seed (reproducing `measures.csv` re-reads S's MRIs; verification only); brain masks equal E0b's stored
 ones; every figure present; the unit tests. Exit code 1 on any failure. Run log: `check.run_info.json`.
+
+## 12. Report figures (`r_report_figures.py`; added 2026-11-16)
+
+Compact, print-sized redraws of the experiments' figures for the written report (figure register in
+`docs/report-synthesis.md`, section 3). They are drawn only from the stored tables listed in the index
+above, with no new numbers. 16 cm wide; PNG at 300 dpi and PDF.
+
+### `results/<pool>/report/method/`
+
+Written by `method`. In git.
+
+| File | Report section | Content |
+| --- | --- | --- |
+| `2-3_preprocessing_qc.{png,pdf}` | 2.3 | `Mets_120/z40` native (with its annotation) and in model space with E0's brain outline, brain box and numbered lesions; a zoom (white box) on the resized mask of a 15 px lesion with the 0.01 threshold against plain downscaling (0.5); one synthetic sample per mask class (clean, minor, noisy, no lesion) after attach-or-drop |
+| `2-4_e1_shift_search.{png,pdf}` | 2.4 | the P2 copy (2 px shift) of the example base against its source: overlay as generated with the plain Dice, the Dice of every shift of the ±3 px search, overlay after the best shift |
+| `2-5_e2_lesion_pairs.{png,pdf}` | 2.5 | the P4 copy (5° rotation) of the example base: copy and source with partner lesions in the same colours, the overlay with pair lines labelled s, each pair's centred crops with shape × position × size = s, and C |
+| `2-7_planted_variants.{png,pdf}` | 2.7 | every planted variant of the example base over the base mask; a 14 px and a 90 px T lesion eroded and dilated by 1 px with their areas |
+| `2-11_match_report.{png,pdf}` | 2.11 | the match report's images on the P6-add copy of the example base (copy, named source, where it lies, overlay with pair lines) and its verdict line |
+| `figures.csv`, `run_info.json` | — | as for `results/` (the run log names the example base slice) |
+
+### `results/<pool>/report/appendix/`
+
+Written by `appendix`. In git. PNG at 300 dpi and PDF, cropped to content, mostly drawn by the experiments' own figure functions from their stored tables, without a suptitle; example tiles are picked with this stage's seeded generators, so they can differ from the original sheets. B3 and B4 are compact redraws from stored counts.
+
+| File | Report section | Content |
+| --- | --- | --- |
+| `B1_native_vs_model.png` | App. B (2.3) | model-space lesion area against plain downscaling; enlargement by native size |
+| `B2_brain_by_height.png` | App. B (3.1) | real brain area by position in the head against the synthetic median; brain-area distributions |
+| `B3_component_sizes.{png,pdf}` | App. B (2.3) | share of mask components by size, T, H-cal, H-eval, S (decision B) |
+| `B4_specks_by_gap.{png,pdf}` | App. B (2.3) | synthetic specks per 1 px of gap to the nearest lesion (decision C) |
+| `B5_brain_methods.png` | App. B (2.3) | plain Otsu, Otsu with every region, and the chosen threshold on four T slices where Otsu fails and two random ones (decision A) |
+| `B6_qc_classes.png` | App. B (2.3) | four random samples per QC class |
+| `B7_adjacency_dice.png` | App. B (2.8) | Dice between consecutive lesion slices of a patient |
+| `B8_score_histograms.png` | App. B (2.6, 3.2) | H-cal scores against T by stratum with the thresholds |
+| `B9_chance_lesion_matches.png` | App. B (3.2) | H-cal lesions and their best T match per area bin |
+| `C1_area_change.png` | App. C (2.7) | lesion area before and after P4 and P5 |
+| `C2_factors.png` | App. C (3.3) | shape, position, size and s of each planted lesion against its base lesion |
+| `C3_misses.png` | App. C (3.3) | the gated planted masks missed by their criterion's detector |
+| `C4_heval_chance_flags.png` | App. C (3.2, 3.3) | H-eval chance flags per class next to the training slice |
+| `D1_sensitivity_forest.png` | App. D (3.4, 4.6) | excess over H-eval with intervals per set, variant and stratum |
+| `D2_near_exact.png`, `D3_groups_top.png` | App. D (3.4) | near-exact masks, and one mask per largest E2 group, next to their source slice |
+| `D4_exposure_sorted.png` | App. D (3.5) | observed vs expected flags per patient with chance bands, both primary cells |
+| `D5_rarity_exposure.png`, `D6_h1_span.png` | App. D (3.5) | flags by patient-rarity group (H3); Spearman of span and lesion credits per size bin (H1) |
+| `D7_rehearsal_margins_null.png`, `D8_..._positive.png`, `D9_..._placement_compact.png` | App. D (2.10) | margins and source rarity of each rehearsal mock's flags against H-eval chance flags |
+| `E1_report_02.png`, `E2_report_57.png`, `E3_report_67.png` | App. E (3.6) | E7 match reports 02 (E2's 1 px rounding, caught by E1), 57 (a random S flag), 67 (an H-eval chance flag), redrawn with E7's report data and context |
+| `E4_profile_Mets_058.png` | App. E (3.6) | the full patient profile of `Mets_058` |
+| `E5_e8_examples.png`, `E6_e8_within_a.png` | App. E (3.7) | the E8 example pairs with SSIM maps; within group A by z offset and against the runner-up |
+| `figures.csv`, `run_info.json` | — | as for `results/` |
+
+### `results/<pool>/report/results/`
+
+Written by `results`. In git.
+
+| File | Report section | Content |
+| --- | --- | --- |
+| `3-1_lesions_synthetic_vs_real.{png,pdf}` | 3.1 | lesion area (cumulative share) of T, H (H-cal + H-eval) and S main; lesion-centroid density of T and S main in pixels and relative to the brain box |
+| `3-2_chance_rates.{png,pdf}` | 3.2 | (a) chance lesion-match rate of H-cal lesions by area for τ_L 0.5, 0.7 and 0.77 (provisional), the 5% and 10% cuts, the 12 px bound; (b) H-eval chance matches next to their E1 training slice (the two exact single-lesion matches, score 1.0, and the top multi-lesion one) |
+| `3-3_recall_by_size.{png,pdf}` | 3.3 | planted copies caught (decision J) by size of the base's largest lesion, P3–P6, E1 / E2 / either (P1, P2 are 100% everywhere) |
+| `3-4_score_distributions_multi.{png,pdf}` | 3.4 | multi-lesion distributions of the E1 score, E2 C and strongest pair, S main vs H-eval, frozen thresholds, AUCs |
+| `3-5a_exposure_margins.{png,pdf}` | 3.5 | E1 multi-lesion cell: observed vs expected S flags per T patient with each patient's 95% chance band (22 above their band); margin and source rarity of S flags vs H-eval chance flags with AUCs |
+| `3-5b_h1_rates.{png,pdf}` | 3.5 | H1: matches per 3D lesion by slice span relative to the size bin's average, S vs H-eval, one panel per size bin |
+| `3-6_report50_profile.{png,pdf}` | 3.6 | E7 report 50 compact (synthetic MRI moved by E1's shift, the source slice, the mask overlay, the largest lesion pair's factors) and `Mets_230`'s S flags per slice (all strata) with the lesion area |
+| `3-7_ssim_lesion.{png,pdf}` | 3.7 | (a) lesion-neighbourhood SSIM of S group A and B and H-eval flagged and novel, with the A-vs-B AUC and H-eval's; (b-d) example pairs measured by E8's own code: the median group-A case, the strongest, and the median planted P1 of the rehearsal positive (image two slices away), each with its SSIM map and lesion region |
+| `figures.csv` | — | one row per figure: `figure` (file stem), `section`, `content`, `sources` (repo-relative) |
+| `run_info.json` | — | run log, with E5's lock hashes |
+
+### `results/<pool>/report/tables/`
+
+Written by `tables`. In git. One `.tex` file per table: a `table` environment with a booktabs tabular, a placeholder caption (`TODO: ...`) below the tabular and a label (`tab:<name>`), for `\input{}` in Overleaf (needs `\usepackage{booktabs}`). Rates in %, one decimal; intervals 95% bootstrap.
+
+| File | Report section | Content |
+| --- | --- | --- |
+| `T1_data_sets.tex` | 2.1 | patients and lesion slices per set, with roles |
+| `T2_description.tex` | 3.1 | lesion counts, areas and positions, real sets vs S main |
+| `T3a_thresholds.tex`, `T3b_chance_rates.tex` | 3.2, 3.3 | frozen thresholds with intervals; chance rates on H-cal and H-eval with the gate limits |
+| `T4_validation.tex`, `T4b_gate.tex` | 3.3 | recall per variant and detector; the gate criteria and results |
+| `T5_main_audit.tex` | 3.4 | S main vs H-eval per class and stratum, excess, Holm p |
+| `T6_exposure.tex`, `T6b_h1_h3.tex` | 3.5 | E6 readings per primary cell; H1 per size bin and weighted, H3 |
+| `T7a_correctness.tex`, `T7b_deletion.tex` | 3.6 | correctness criteria; deletion test (planted, H-eval, S) |
+| `T8_paired.tex` | 3.7 | E8 tests per region and within A |
+| `A_decisions.tex` | App. A | decisions A-AE |
+| `D_h2.tex`, `D_rates_by_size.tex` | App. D | H2; primary-class rates by largest-lesion size |
+| `F_rehearsals.tex`, `F_checks.tex`, `F_software.tex` | App. F | mock readings required vs obtained; check results; package versions |
+| `tables.csv`, `run_info.json` | — | index (section, content, sources) and run log |
+
+### `results/<pool>/report/appendix.tex`
+
+Written by `tables`. In git. The whole appendix for `\input{appendix}` after `\appendix`: sections A-F with subsections, every appendix figure (PDF, placeholder caption from its `figures.csv` description, label `fig:app_<code>`; tall sheets on a page of their own) and the appendix tables. Paths assume the report folder is uploaded as `figures/` next to the main file; preamble needs `graphicx`, `booktabs`, `placeins`.
+
+### `results/<pool>/report/check_report.txt`
+
+Written by `check`. In git. One PASS/FAIL line per check (21; also: `appendix.tex` includes every appendix figure and table): each figure stage's and the tables stage's run log made with the current config and later than every experiment stage it reads; every listed table present as a LaTeX tabular; E5's lock unchanged and as recorded by `results` and `appendix`; per figure folder, every listed figure present (PNG, and PDF where written), no unlisted figure, every named source path present; the unit tests. Exit code 1 on any failure. Run log: `check.run_info.json`.

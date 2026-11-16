@@ -1,0 +1,22 @@
+\begin{table}[htbp]
+\centering
+\footnotesize
+\begin{tabular}{llrll}
+\toprule
+Criterion & Detail & Value & Limit & Result \\
+\midrule
+recall P1 & both, P1, 100 gated masks & 1.000 & $\geq$ 1.0 & pass \\
+recall P2 & any, P2, 100 gated masks & 1.000 & $\geq$ 0.9 & pass \\
+recall P4 & any, P4, 94 gated masks & 0.989 & $\geq$ 0.9 & pass \\
+recall P6 & lesion, P6-remove + P6-add, 137 gated masks & 0.971 & $\geq$ 0.8 & pass \\
+false positives e1\_copy single & H-eval, 696 slices & 0.072 & $\leq$ 0.07 & accepted \\
+false positives e1\_copy multi & H-eval, 393 slices & 0.074 & $\leq$ 0.07 & accepted \\
+false positives e2\_full single & H-eval, 634 slices & 0.071 & $\leq$ 0.07 & accepted \\
+false positives e2\_full multi & H-eval, 272 slices & 0.029 & $\leq$ 0.07 & pass \\
+false positives e2\_flagged single & H-eval, 634 slices & 0.101 & $\leq$ 0.12 & pass \\
+false positives e2\_flagged multi & H-eval, 272 slices & 0.085 & $\leq$ 0.12 & pass \\
+\bottomrule
+\end{tabular}
+\caption{TODO: go/no-go criteria of the gate (decision K).}
+\label{tab:gate}
+\end{table}

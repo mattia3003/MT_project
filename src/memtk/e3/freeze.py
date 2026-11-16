@@ -68,7 +68,8 @@ def run_freeze(cfg: dict, dataset: str | None = None, pool: str | None = None, o
                       "lesion": {**cfg["detectors"]["lesion"], "sigma_px": settings["sigma_px"],
                                  "prefilter_px": settings["prefilter_px"]}},
         "hcal_chance_rates": chance_rates_at(e1, e2, patients, frozen_values),
-        "source": {"thresholds": repo_relative(table_path), "tables": repo_relative(config.output_dir(cfg, name) / "e3")},
+        "source": {"thresholds": config.repo_relative(table_path),
+                   "tables": config.repo_relative(config.output_dir(cfg, name) / "e3")},
     }
     path.parent.mkdir(parents=True, exist_ok=True)
     header = (f"# Frozen E3 thresholds for '{name}', written by 'e3_calibrate.py freeze'. Do not edit by hand:\n"
@@ -81,13 +82,6 @@ def run_freeze(cfg: dict, dataset: str | None = None, pool: str | None = None, o
 
 
 # --- frozen values ----------------------------------------------------------------------------
-
-def repo_relative(path) -> str:
-    """A path relative to the repository root when it lies inside it, else as given."""
-    try:
-        return path.relative_to(config.REPO_ROOT).as_posix()
-    except ValueError:
-        return str(path)
 
 def compare_tables(recomputed: pd.DataFrame, stored: pd.DataFrame, tol: float = 1e-9) -> list[str]:
     """Threshold values that differ between a recomputation and the stored `thresholds.csv`."""

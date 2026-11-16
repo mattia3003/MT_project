@@ -67,7 +67,16 @@ Reference docs (read the relevant one before starting work):
   positive mock before S's MRIs are read), all in config `paired:`. Result: reading "not supported"
   (lesion AUC 0.48 [0.40, 0.57], H-eval 0.53; source slice no closer than another patient's slice with a
   similar mask); E8 check 17/17. Open items moved to report-notes and the master thesis (RQ-M1).
-  Next: report synthesis and project walkthrough (schedule in `docs/experiment-plan.md`).
+  Next: report synthesis and project walkthrough (done 2026-11-16, below), then writing.
+- `docs/report-synthesis.md`: the map from the project to the report (IMRAD, Method 2.1–2.13 with a
+  shared statistics subsection 2.8): the story, per subsection what to cover and why, maths, decisions
+  to name, figure and table register (main / appendix / omit; compact redraws), equations, decisions
+  A–AE with deviations, glossary and wording rules. Start here when helping write the report.
+- `docs/project-walkthrough.md`: plain-language walkthrough of E0–E8 (question, steps, maths,
+  decisions, how to read each figure, result, wording, examiner questions), how the results fit
+  together, limitations and how to defend them. Includes an exploratory E5 finding (2026-11-16): most
+  of the E1 multi-lesion excess comes from S's lesion-count composition (re-weighted +2.9 [−0.4, +6.7];
+  ≥ 2 informative lesions +5.2 [+2.8, +6.9]); report-notes section 3.
 This file is a summary. If it disagrees with the docs, the docs win; flag the mismatch.
 
 ## Data
@@ -120,7 +129,8 @@ This file is a summary. If it disagrees with the docs, the docs win; flag the mi
 - All synthetic MRIs started from ONE shared initial noise tensor (noise_mr created once).
 - Checkpoints used for sampling (epoch 149 of 200): stage 1
   `correct_validation_data_16_Epoch149_of_200`, stage 2 `conditional_syn_26mars_16_Epoch149_of_200`.
-  The stage-1 name implies a validation set; assume it came only from the 105 training patients.
+  Despite the stage-1 name, CONFIRMED by the previous author (2026-11-16): both models were trained on
+  the entire train set (105 patients), nothing held out; the 51 test patients were never seen.
 - Stage 1 (mask generator) was trained only on lesion-containing (non-empty) mask slices.
 - Stage 2 (image generator) was trained on (nearly) all BRAVO slices, each concatenated with
   its own real annotation mask (empty masks for lesion-free slices).

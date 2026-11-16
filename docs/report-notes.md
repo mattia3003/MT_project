@@ -963,8 +963,9 @@ move the old ones, with the reason, to the process log.
   rehearsed beforehand, decisions R, U, V, W; decision U amended after the placement mock, before
   this run).
   - *E1 copy, multi-lesion* (2,662 flags, the cell with E5's largest excess): the flags are piled on
-    some patients far more than chance predicts (20 patients clearly above their chance range,
-    about 2 expected). But each flag fits its best training patient *less* uniquely than held-out
+    some patients far more than chance predicts (22 patients above their 95% chance band, about 2.2
+    expected under the null; 20 have an exposure-ratio interval above 1; *corrected 2026-11-16*: this
+    first read "20 … about 2 expected", mixing the two counts). But each flag fits its best training patient *less* uniquely than held-out
     chance flags do (margin AUC 0.36 [0.24, 0.495]), and the matched training slices are more
     *typical* than those chance flags hit (rarity AUC 0.42 [0.34, 0.498]; against all training slices
     0.23). Pre-stated reading: **typical placement**. The concentration fits that too: S places its
@@ -1089,6 +1090,36 @@ move the old ones, with the reason, to the process log.
 
   *Source: `results/amibekk_v1/e5/analyze/sensitivity.csv`, `flagged.csv`; process log
   2026-11-15.*
+- **E5, exploratory (found 2026-11-16, while writing the walkthrough; after the lock): most of the E1
+  multi-lesion excess comes from S's lesion-count composition.** E1's strata count lesions ≥ 4 px, so
+  "multi" includes masks with one informative lesion (≥ 12 px) plus small extras (e.g. E7 report 50:
+  58 px + 6 px). Such masks behave like single-lesion masks (a small extra barely lowers Dice) but are
+  judged against the multi threshold (τ_D 0.729 instead of 0.905). E1 multi masks by informative
+  lesions (0 / 1 / 2+):
+
+  | | 0 | 1 | 2+ |
+  | --- | --- | --- | --- |
+  | Share of S main (16,803) | 22% | 42% | 36% |
+  | Share of H-eval (393, 26 patients) | 10% | 21% | 69% |
+  | E1 copy rate, S | 3.5% | 29.8% | 7.0% |
+  | E1 copy rate, H-eval | 5.3% | 26.5% | 1.8% |
+
+  - *Composition re-weighting:* H-eval's rates weighted by S's mix give 13.0%. The E1 multi excess
+    falls from +8.5 to **+2.9 points [−0.4, +6.7]**.
+  - *By group:* the one-informative group's excess is +3.3 [−4.2, +12.0]. In masks with two or more
+    informative lesions it is **+5.2 [+2.8, +6.9]**, the same population as E2's multi stratum (+3.0).
+  - *Uncertainty:* each H-eval group rests on 14 patients.
+  - *Reading:* about two thirds of the headline E1 excess reflects how often S draws one lesion plus
+    small extras, not closer matching. The robust multi-lesion excess is smaller and agrees with E2.
+  - *Status:* the pre-registered result and its reading stand as reported (decision M). This analysis
+    is exploratory and changes the interpretation, not the locked result.
+  - *Not covered by the pre-registered check:* the size-confound standardisation (decision M) uses
+    the largest lesion's size × stratum, not the number of informative lesions.
+
+  *Source: read-only computation on `processed_data/model_space/amibekk_v1/e5/classes_main.csv` (S main
+  via `qc.csv` mask class clean or minor) and `processed_data/model_space/stanford_brainmets/e4/
+  heval_classes.csv`. Intervals: 2,000 draws, S by mask, H-eval by patient (`audit.resample_sums`),
+  seed 2026; process log 2026-11-16.*
 - **E8: no sign that stage 2 draws the matched patient's tissue** (2026-11-16, reading "not supported",
   fixed beforehand and rehearsed). Synthetic MRIs of the 56 strongest mask resemblances (E7) are no
   closer to the source slice's BRAVO than those of 280 matched novel masks are to their nearest training
@@ -1101,7 +1132,15 @@ move the old ones, with the reason, to the process log.
 
 ## 4. Limitations and assumptions
 
-- **Stage-1 validation set unknown.** The checkpoint name (`correct_validation_data_16_...`)
+- **Stage-1 validation set: resolved 2026-11-16, no longer a limitation.** The previous author
+  confirmed that both models were trained on the entire train set (105 patients), with nothing held
+  out from it, and that the 51 test patients were never seen by either model; stage 1 saw lesion
+  slices only. So scenario A below is ruled out: T is everything the mask generator could have
+  memorized, the dilution caveat for H1 and H3 falls away, and the planned removal sensitivity is not
+  needed. *Source: the previous author, via the user, 2026-11-16.* The entry as first recorded
+  (2026-11-01):
+
+  *Stage-1 validation set unknown.* The checkpoint name (`correct_validation_data_16_...`)
   suggests a validation set, but which data it held out is unknown, and the original code used
   no seeds. Scenarios:
   - A. Some training patients held out → T contains patients stage 1 never saw.
@@ -1266,7 +1305,11 @@ move the old ones, with the reason, to the process log.
   (2026-11-15): most multi-lesion S masks have two informative lesions, so either deletion leaves a
   single-lesion mask, judged by the stricter single-lesion thresholds (224 vs 203 lose the flag).
   Faithfulness on S rests on ΔC and the whole-mask score. *Source:
-  `results/amibekk_v1/e7/reports/deletion_summary.csv`.*
+  `results/amibekk_v1/e7/reports/deletion_summary.csv`.* *Made precise 2026-11-16:* the measure is
+  at its ceiling rather than flat. All 21 discordant masks flip only after the top deletion, so the
+  McNemar p is below 0.001 (4.8e−7). But almost every mask loses its flag whichever lesion is deleted,
+  so the test says little about which lesion drives the match. Report it with both counts, not as
+  "no difference".
 - **E7: no human rater checked the reports** (planned limitation): the taxonomy is rule-based, its
   rules fixed on the planted copies; a blinded human check moves to the master thesis.
 - **E8 compares brains of different size and is confounded by mask resemblance** (2026-11-16). An E8
@@ -1284,11 +1327,13 @@ move the old ones, with the reason, to the process log.
 
 ## 5. Open questions
 
-**For the previous author** (status: open, 2026-11-01)
-- [ ] Was there a validation set for stage 1 (and stage 2)? What was it used for (loss
-      monitoring, checkpoint choice)?
-- [ ] Was it drawn from the 105 training patients or the 51 test patients? By patient or by
+**For the previous author** (status: open, 2026-11-01; first two answered 2026-11-16)
+- [x] Was there a validation set for stage 1 (and stage 2)? What was it used for (loss
+      monitoring, checkpoint choice)? *Answered 2026-11-16: no validation patients were held out;
+      both models were trained on the entire train set (see section 4).*
+- [x] Was it drawn from the 105 training patients or the 51 test patients? By patient or by
       slice, and what fraction? Is there any patient list, folder listing, log or script?
+      *Answered 2026-11-16: nothing was held out from the 105; the 51 test patients were never used.*
 - [ ] Which slice filter was actually used for stage-1 training, and were masks binarized for it?
 - [ ] Were all six sampling rounds made with the same checkpoints and the same filters?
 - [ ] Which MONAI version was used for training?

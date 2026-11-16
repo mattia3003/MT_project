@@ -1,0 +1,25 @@
+Report figures check: pool 'amibekk_v1', dataset 'stanford_brainmets'
+
+[PASS] 'method' outputs made with the current config values: seed, brain, lesions, detectors, calibration, audit, exposure, reports, paired
+[PASS] 'results' outputs made with the current config values: seed, brain, lesions, detectors, calibration, audit, exposure, reports, paired
+[PASS] 'appendix' outputs made with the current config values: seed, brain, lesions, detectors, calibration, audit, exposure, reports, paired
+[PASS] 'method' drawn after every experiment stage it reads: 7 run logs older
+[PASS] 'results' drawn after every experiment stage it reads: 7 run logs older
+[PASS] 'appendix' drawn after every experiment stage it reads: 7 run logs older
+[PASS] E5's lock unchanged and as recorded by 'results' and 'appendix'
+[PASS] 'method': every listed figure exists (PNG, PDF)
+[PASS] 'method': no unlisted figure in the folder
+[PASS] 'method': every source path named exists
+[PASS] 'results': every listed figure exists (PNG, PDF)
+[PASS] 'results': no unlisted figure in the folder
+[PASS] 'results': every source path named exists
+[PASS] 'appendix': every listed figure exists (PNG, PDF)
+[PASS] 'appendix': no unlisted figure in the folder
+[PASS] 'appendix': every source path named exists
+[PASS] 'tables' outputs made with the current config values: seed, brain, lesions, detectors, calibration, audit, exposure, reports, paired
+[PASS] 'tables' made after every experiment stage it reads
+[PASS] 'tables': every listed table exists as a LaTeX tabular: 18 tables
+[PASS] 'appendix.tex' includes every appendix figure and appendix table: 28 figures
+[PASS] unit tests (pytest) pass: 200 passed in 13.60s
+
+21 passed, 0 failed

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import textwrap
 from collections.abc import Sequence
+from contextlib import contextmanager
 from pathlib import Path
 
 import numpy as np
@@ -19,6 +20,8 @@ from matplotlib.patches import Rectangle
 from memtk.lesions import LesionLabels, label_components
 
 TITLE_FONTSIZE = 10
+SAVE_DPI = 90          # default resolution of `save`; `resolution` changes it for a block
+SAVE_FOR_PRINT = False # `resolution(..., for_print=True)`: crop to content and add a PDF
 
 # Outline colours used in every E0 figure
 BRAIN_COLOR, LESION_COLOR, BOX_COLOR, HIGHLIGHT_COLOR, SPECK_COLOR = "cyan", "red", "yellow", "lime", "orange"
@@ -62,8 +65,9 @@ def hide_unused(axes: np.ndarray, n_used: int) -> None:
         ax.axis("off")
 
 
-def save(fig: Figure, path: Path, title: str = "", dpi: int = 90) -> Path:
-    """Add an optional title, lay out and save; creates the folder.
+def save(fig: Figure, path: Path, title: str = "", dpi: int | None = None) -> Path:
+    """Add an optional title, lay out and save; creates the folder. The resolution is `dpi`, else
+    the current `SAVE_DPI` (90; see `resolution`).
 
     The title is wrapped to the figure width, and the constrained layout reserves room for it, so
     it neither covers the tile titles of the first row nor runs off the image.
@@ -73,8 +77,25 @@ def save(fig: Figure, path: Path, title: str = "", dpi: int = 90) -> Path:
         fig.suptitle(textwrap.fill(title, chars_per_line), fontsize=TITLE_FONTSIZE)
     fig.set_layout_engine("constrained")
     path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(path, dpi=dpi)
+    tight = {"bbox_inches": "tight", "pad_inches": 0.03} if SAVE_FOR_PRINT else {}
+    fig.savefig(path, dpi=dpi or SAVE_DPI, **tight)
+    if SAVE_FOR_PRINT:
+        fig.savefig(path.with_suffix(".pdf"), **tight)
     return path
+
+
+@contextmanager
+def resolution(dpi: int, for_print: bool = False):
+    """Every `save` inside the block writes at `dpi`; with `for_print` it also crops the figure to its
+    content and writes a PDF next to the PNG (added 2026-11-16 for the report's appendix, which redraws
+    the experiments' own figures; the stages keep 90 dpi, uncropped, PNG only)."""
+    global SAVE_DPI, SAVE_FOR_PRINT
+    before = SAVE_DPI, SAVE_FOR_PRINT
+    SAVE_DPI, SAVE_FOR_PRINT = dpi, for_print
+    try:
+        yield
+    finally:
+        SAVE_DPI, SAVE_FOR_PRINT = before
 
 
 # --- labelled slices (lesion colours, strays, specks) -----------------------------------------

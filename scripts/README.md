@@ -55,6 +55,11 @@ Status: ✅ implemented · ⏳ planned
 | `e8_paired.py rehearse` | ✅ | decisions AB–AE (`paired:`), the frozen E3 file, T / H-eval / H-cal label maps, real `brain.csv`, `patients.csv`, model-space BRAVO and `seg` volumes, E4 `heval_classes.csv`, `planted.csv`, `planted_labels.npz`, `planted_outcomes.csv`, E5's H-cal mock tables (`e5/rehearse/null/`); never S | `results/<dataset>/e8/rehearse/{heval,null,positive}/`: `measures.csv` (the pairs with SSIM per region), `tests.csv`, `secondary.csv`, `ssim_groups.png`, `examples.png`; `review.txt` (readings; null must not read *supported*, positive must), `run_info.json`; ~20 s |
 | `e8_paired.py paired` | ✅ | `select`'s `pairs.csv` and `rehearse`'s H-eval `measures.csv` (both made with the current `paired:`, rehearsal as required), E5's lock unchanged, S's MRIs and masks as saved (pool files via `synthetic_index.csv`), pool `labels.npz`, model-space BRAVO and `seg` volumes, E7 `report_index.csv` (figure captions), the frozen E3 file; the only stage that reads S's MRIs | `results/<pool>/e8/paired/`: `measures.csv`, `tests.csv`, `secondary.csv`, `within_a.csv`, `ssim_groups.png`, `within_a.png`, `examples.png`, `review.txt` ending in the reading; ~15 s |
 | `e8_paired.py check` | ✅ | all E8 outputs, their inputs (re-reads S's MRIs to reproduce `paired`'s measures), E0b's brain masks | `results/<pool>/e8/check_report.txt` (PASS/FAIL; reproduces every `select`, `rehearse` and `paired` table and reading; exit code 1 on any failure); ~1 min |
+| `r_report_figures.py method` | ✅ | E0b outputs, one patient's native volume, E4 planted set and tables, E7 planted reports, the frozen E3 file | `results/<pool>/report/method/`: figures 2-3, 2-4, 2-5, 2-7, 2-11 (PNG 300 dpi + PDF), `figures.csv`, `run_info.json`; ~20 s |
+| `r_report_figures.py appendix` | ✅ | the stored tables of E0b-E8 (E5's lock checked), the S samples and T slices shown | `results/<pool>/report/appendix/`: B1-B9, C1-C4, D1-D9, E1-E6 at 300 dpi (PNG + PDF, cropped), `figures.csv`, `run_info.json`; ~50 s |
+| `r_report_figures.py tables` | ✅ | the experiments' stored tables and check reports, the synthesis's decision register | `results/<pool>/report/tables/`: 18 LaTeX tables (booktabs, caption below), `tables.csv`, `run_info.json`; and `results/<pool>/report/appendix.tex` (the whole appendix); seconds |
+| `r_report_figures.py check` | ✅ | the figure and table folders and run logs, the experiment stages' run logs | `results/<pool>/report/check_report.txt` (PASS/FAIL, 21 checks; exit code 1 on any failure); ~20 s |
+| `r_report_figures.py results` | ✅ | the stored tables of E0b–E8 (E5's lock checked; nothing re-scored), one S sample and one T slice for figure 3.6 | `results/<pool>/report/results/`: figures 3-1 … 3-7 as PNG (300 dpi) and PDF, 16 cm wide; `figures.csv` (section, content, sources), `run_info.json`; ~1 min |
 
 ## Commands
 
@@ -149,6 +154,16 @@ decisions R, U, V, W; S only from E5's stored tables; see `docs/e6-e7-plan.md`)
 .venv\Scripts\python.exe scripts\e8_paired.py rehearse            # no S: the analysis on the H-eval reference, H-cal null, planted positive mock, ~20 s
 .venv\Scripts\python.exe scripts\e8_paired.py paired              # the rehearsed analysis on S's MRIs (one run; E5's lock checked), ~15 s
 .venv\Scripts\python.exe scripts\e8_paired.py check               # consistency checks of all E8 outputs (exit code 1 on failure), ~1 min
+```
+
+**Report figures** (compact redraws for the written report; register in `docs/report-synthesis.md`, section 3)
+```powershell
+.venv\Scripts\python.exe scripts\r_report_figures.py method                  # Method figures 2.3, 2.4 (E1), 2.5 (E2), 2.7, 2.11 (report), ~20 s
+.venv\Scripts\python.exe scripts\r_report_figures.py results                 # Results figures 3.1-3.7, PNG + PDF, ~1 min
+.venv\Scripts\python.exe scripts\r_report_figures.py appendix                # appendix figures at 300 dpi (B-E), ~50 s
+.venv\Scripts\python.exe scripts\r_report_figures.py check                   # consistency checks of every report figure and table (exit code 1 on failure), ~20 s
+.venv\Scripts\python.exe scripts\r_report_figures.py tables                  # the report's tables as LaTeX (booktabs), seconds
+.venv\Scripts\python.exe scripts\r_report_figures.py results --overwrite     # redraw after a style change
 ```
 
 **Look at one slice** (after `lesions`): full-size picture with its lesion table, written to

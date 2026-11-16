@@ -30,6 +30,15 @@ def resolve_path(path: str | Path) -> Path:
     return path if path.is_absolute() else REPO_ROOT / path
 
 
+def repo_relative(path: str | Path) -> str:
+    """A path relative to the repository root (POSIX form) when it lies inside it, else as given.
+    Moved from `memtk.e3.freeze` on 2026-11-16 (the report figures need it too)."""
+    try:
+        return Path(path).resolve().relative_to(REPO_ROOT).as_posix()
+    except ValueError:
+        return str(path)
+
+
 def load_config(path: str | Path | None = None) -> dict:
     """Load a YAML config. The resolved config path is stored under `_config_path`."""
     path = resolve_path(path) if path else DEFAULT_CONFIG

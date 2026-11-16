@@ -799,3 +799,193 @@ in full, with what replaced them.
   one row removed, one comparison key changed) was reported as `tests.auc`, `within_a`,
   `measures.comparison`. Plan closed; E8 status in CLAUDE.md, experiment plan, architecture. *Source:
   `results/amibekk_v1/e8/check_report.txt`.*
+
+## 2026-11-16: report synthesis and project walkthrough
+
+- **Planned and written** (scheduled 25–26 Nov in `docs/experiment-plan.md`; done early). The user
+  chose a Method layout with a shared statistics subsection (2.8), one subsection per experiment for
+  E5–E8, a short implementation subsection (2.13), and a 30–40 page main text. Written:
+  - `docs/report-synthesis.md`: the story, a plan per report subsection, a figure and table register
+    (13 + 8 main), the equations, decisions A–AE with deviations, a glossary, open items;
+  - `docs/project-walkthrough.md`: a plain-language walkthrough of E0–E8 with figure readings and
+    examiner questions.
+
+  Every cited repo path was checked to exist (except the planned `results/report/`). Main numbers were
+  spot-checked against `e5/analyze/review.txt`, `e6/exposure/margins.csv`, `h1.csv` and
+  `e3/calibrate/thresholds.csv`. The E1 margin and the H1 bin weights were read from the code
+  (`wholemask.match`, `exposure.h1_table`).
+- **Previous author's confirmation** (via the user, 2026-11-16): the whole train set was used for both
+  models, with no validation patients held out; the test patients were never seen. Report-notes section
+  4 "Stage-1 validation set" is marked resolved, its section 5 questions answered, and CLAUDE.md updated.
+- **Exploratory check, E1 multi-lesion composition** (read-only, after the lock). Prompted by E7 report
+  50, a 58 px + 6 px mask that E1 calls multi and E2 single.
+  - Method: E1 multi masks of S main (`e5/classes_main.csv`, filtered to clean/minor via `qc.csv`) and
+    H-eval (`e4/heval_classes.csv`) split by `n_informative` (0 / 1 / 2+); copy rates per group; H-eval
+    re-weighted to S's mix.
+  - Intervals: 2,000 draws with `audit.resample_sums` (S by mask, H-eval by patient), seed 2026, an
+    inline script.
+  - Result: the re-weighted excess is +2.9 [−0.4, +6.7] (against +8.5 pre-registered); 2+ informative
+    +5.2 [+2.8, +6.9].
+  - Recorded in report-notes section 3 as exploratory.
+  - A first run without the QC filter (all 37,161 scored masks, so noisy ones included) gave the same
+    pattern (S 15.4%); replaced by the S main numbers.
+- **Corrections found while writing:**
+  - report-notes' E6 entry said "20 patients clearly above their chance range, about 2 expected". The 2
+    belongs to the null-band count, which is 22 (`concentration.csv` `above_null_band`, expected 2.2);
+    20 is the count with an exposure-ratio interval above 1 (`exposure.csv`). Corrected.
+  - The E7 re-match limitation was made precise: a ceiling effect, McNemar p 4.8e−7 on 21 discordant
+    pairs, not "no difference" (`e7/reports/deletion_summary.csv`).
+- **Report figures, step 1: the Results figures** (2026-11-16). The user decided:
+  - a script and stage package (`scripts/r_report_figures.py`, `src/memtk/report_figures/` with
+    `common` and `results`), named to sort after `e8_`;
+  - PNG at 300 dpi plus PDF, 16 cm wide;
+  - the Results figures first.
+
+  What was built:
+  - Stage `results` redraws figures 7–13 of the synthesis register from the experiments' stored
+    tables. E5's lock is checked; nothing is re-scored.
+  - Output: `results/amibekk_v1/report/results/` (seven figures, `figures.csv`, run log), about 1 min.
+  - Each figure was viewed and redrawn until legible: line shades and legend in 3-2; legend position in
+    3-4; titles and "≥" span labels in 3-5; the lesion-pair factors moved into the overlay tile in 3-6.
+
+  Two things noticed:
+  - The E5 `score_distributions.png` includes noisy masks: it plots every scored S mask (n 17,672
+    multi), against 16,803 in S main. The report version shows S main only.
+  - The 3-6 profile counts S flags of all strata on `Mets_230`'s slices (91 E1 flags), not only the 77
+    E1 multi-lesion flags of E6. The axis label says "all strata".
+
+  Refactor: `repo_relative` moved from `e3.freeze` to `config` (the second user is the figure index).
+  E3's frozen file paths are unchanged in form; pytest 196 passed; Pylance clean after the row lookups
+  became `.to_dict()` and an rc-key stub false alarm got one ignore.
+
+  Docs: module reference (new package, script row, `config`, `e3.freeze`); data dictionary (index row,
+  section 12); scripts README (status row, commands); architecture (data flow, layers); synthesis
+  register (status "done").
+- **Report figures, step 1b: the Results figures revised after the user's review** (2026-11-16). The
+  user writes in Overleaf; PDF is recommended for charts there, and both formats are kept.
+  - **Placements agreed:**
+    - Method Fig 3 shows E0 on real data (brain outline and box, numbered lesions) with one synthetic
+      mask per QC class;
+    - Fig 5 gets `area_change` as a panel;
+    - `exposure_sorted` goes into the main text (3.5);
+    - native-vs-model, brain-by-height, component sizes, specks by gap, the `Mets_058` full profile
+      and the full E8 examples go to the appendix;
+    - the tissue histogram is left out.
+  - **Redrawn:**
+    - 3-1 shows both position frames (pixels and brain box), with the legend clear of the curves;
+    - 3-2 gets panel (b) with H-eval chance matches (the two exact single-lesion matches at E1 1.00,
+      `Mets_021/z96`–`Mets_051/z88` and `Mets_053/z75`–`Mets_167/z65`, and the top multi-lesion match,
+      0.83), laid out as sub-figures;
+    - 3.5 is split into 3-5a (observed vs expected flags with each patient's chance band, red = above
+      it: 22, plus margins and rarity) and 3-5b (H1);
+    - 3-6 has its overlay text moved to its own row;
+    - 3-7 gets three example pairs drawn with E8's own `pair_images`: the median A case (0.03), the
+      strongest (0.26) and the median rehearsal P1 (0.46).
+  - Each figure was viewed after every change. Pylance clean (one stub false alarm on `subfigures`
+    ignored); pytest 196 passed.
+  - Next, as agreed: a `method` stage (Figs 3–6), then an `appendix` stage redrawing the chosen
+    appendix figures at 300 dpi, and a `check` stage.
+- **Report figures, step 2: the Method figures** (2026-11-16). New stage `method`
+  (`src/memtk/report_figures/method.py`), output `results/amibekk_v1/report/method/`, about 20 s.
+  - **2-3 (preprocessing and QC):**
+    - `Mets_120/z40` native 160×192 with its annotation, and in model space with E0's brain outline, box
+      and lesions L1–L5;
+    - the soft mask of its 15 px lesion L3: 32 px above 0.01 against 16 px above 0.5. This is the
+      enlargement, shown;
+    - one seeded synthetic sample per mask class: clean `7535`, minor `11232`, noisy `file_4_2414`, no
+      lesion `file_2_7012`.
+  - **2-5 (detectors and report):**
+    - Figures 4 and 6 of the register were merged: both would show the same planted copy.
+    - Seeded P6-add copy of `Mets_271/z122`, a base with 3 informative lesions, so 4 with the added one.
+    - E1 0.96 ≥ 0.73; three pairs at s 1.00, the added lesion unpaired; C = 3 / 4 = 0.75 → full, not
+      every lesion copied.
+    - The first draft picked a single-lesion base and printed "→ E1 copy" whatever the score. The class
+      is now computed from the score, and the pick requires ≥ 3 informative lesions.
+  - **2-7 (planted variants):**
+    - all eight variants of `Mets_271/z122` over the base mask;
+    - lesion area after / before by size for P5 erode, P5 dilate and P4, on a linear axis;
+    - 0 = a lesion lost, or merged by dilation.
+  - Each figure was viewed and its layout corrected. Pylance clean (an `.loc` row lookup replaced by a
+    boolean row); pytest 196 passed.
+  - Docs: module reference, data dictionary (index row, `method/` table), scripts README, synthesis
+    register (figures 3–6 done, 4 and 6 merged).
+- **Report figures, step 2b: the Method figures reworked after the user's review** (2026-11-16). Less text
+  in the figures, since the report's captions explain them; the merged detector figure is split again.
+  - **2-3:** a white box in (b) marks the zoom of (c); (c) has thicker lines and a key: L3 is 15 px kept at
+    > 0.01 against 5 px at > 0.5. The first draft counted the whole zoom window (32 / 16 px) instead
+    of the lesion. The noisy example now has 60–150 specks (`file_4_4170`, 65).
+  - **2-4 (new, E1):** P2 copy of `Mets_271/z122`: plain Dice 0.78, the 7×7 Dice per shift, 1.00 after
+    moving (0, −2).
+  - **2-5 (new, E2):** P4 copy of the same base, chosen for partial overlaps.
+    - Pairs at s 0.80 (0.88 × 0.92 × 0.99), 0.85 and 0.58 (shape 0.62), shown as centred crops.
+    - C = (0.80 + 0.85 + 0.58) / 3 = 0.74.
+  - **2-7:** panel (b) now shows a 14 px and a 90 px T lesion eroded and dilated by 1 px, in place of the
+    area-ratio chart, which goes to Appendix C:
+    - 14 px → 3 px (× 0.21) / 29 px (× 2.07);
+    - 90 px → 59 px (× 0.66) / 125 px (× 1.39).
+  - **2-11 (report):** the P6-add images with only the verdict line.
+  - Pylance clean (`index_row` takes a `Sequence`; an `.at` lookup replaced); pytest 196 passed.
+- **Report figures, step 3a: the appendix, part 1 (E0-E4)** (2026-11-16). New stage `appendix`
+  (`src/memtk/report_figures/appendix.py`), output `results/amibekk_v1/report/appendix/`, about 25 s.
+  - **Approach:**
+    - The experiments' own figure functions, called with their stored tables, saved at 300 dpi
+      without a suptitle.
+    - The stages were not re-run: that would rewrite run logs that E5's lock and the check stages
+      verify.
+    - To allow this, `plotting.save` takes its default resolution from `SAVE_DPI` (90), and
+      `plotting.resolution(dpi)` changes it for a block. Every stage keeps 90 dpi (pytest 196 passed).
+    - Example tiles are picked with a generator per figure (seed + figure name), so they can differ
+      from the original sheets.
+  - **Two redraws from stored counts:** B3 (component sizes) and B4 (specks per 1 px of gap, the halo
+    at 1–2 px against about 1,150 per px at 4–10).
+  - **Rebuilt:** B5 (brain methods) by scanning T for slices where plain Otsu leaves a lesion more than
+    half outside: `Mets_052` z31, z86, z87 and z127.
+  - **Drawn:** B1–B9, C1–C4. Each new or redrawn figure was viewed; the B3 legend was moved off the
+    bars.
+  - Next: part 2 (E5-E8) and the `check` stage.
+- **Report figures, step 3b: the appendix, part 2 (E5-E8), and the `check` stage** (2026-11-16).
+  - **Appendix part 2:** D1-D9 and E1-E6, drawn by the experiments' own figure functions from stored
+    tables (E5's lock checked). The full appendix stage takes about 50 s.
+    - The three extra match reports (02, 57, 67) are rebuilt with E7's `report_data`, `Context` and
+      `verdict`. Their verdict lines equal those in `report_index.csv` (checked by hand).
+    - The `Mets_058` profile is drawn with E7's `profile_data` and `draw_patient_profile`.
+  - **The `check` stage (`report_figures.check`), 17/17:**
+    - run logs current and later than the 7 experiment run logs read;
+    - E5's lock as recorded;
+    - every listed figure present and none unlisted;
+    - every source path present;
+    - pytest.
+    - Scratch test: a figure PDF was hidden; the check reported it (16/17, exit 1) and passed again
+      once it was restored.
+    - The first run ended with a TypeError after writing its report: `CheckReport.all_passed` is a
+      property, not a method. Fixed.
+  - **New tests:** `tests/test_report_figures.py` (4: centred crop, repo-relative sources, the save
+    resolution, the check's path filter); pytest 200.
+- **Report figures, step 4: LaTeX tables, print-ready appendix, docs synced** (2026-11-16; prompted by the
+  user's questions on appendix PDFs, page whitespace and table typesetting).
+  - **New stage `tables`:** 18 booktabs `.tex` files written straight from the stored CSVs, with
+    placeholder captions and labels.
+    - The main-text tables T1-T8 (with T3b, T4b, T6b, T7a/b), appendix A (parsed from the
+      synthesis's decision register), D (H2, rates by size) and F (rehearsal readings, check results,
+      software versions).
+    - Spot-checked against the report numbers: T5 primary family (+8.5 [+4.3, +11.1], Holm 0.004 …);
+      T6 (22 above band, 2.2 expected; margin AUC 0.36); F_checks (32/43/16/16/26/18/14/17/17).
+  - **Print mode:**
+    - `save_both` and `plotting.resolution(dpi, for_print=True)` crop every report figure to its
+      content (pad 0.03 in), so no empty margin follows a figure on the page;
+    - the appendix figures now also get a PDF;
+    - every experiment stage keeps 90 dpi, uncropped, PNG only.
+  - **`check` now 20/20:** adds the tables (run log; every listed table present as a tabular) and
+    requires PDFs for all appendix figures. pytest 200; the resolution test also covers print mode.
+  - **Docs synced:**
+    - the synthesis gets a 'Final files' map at the top of section 2, and its outdated figure bullets
+      are replaced (figures 3, 4a/4b, 5, 6; appendix B and C; data overview not drawn);
+    - the walkthrough gets an original → report-version map in section 0 and a pointer under each
+      'Reading the figures' heading.
+  - Table captions moved below the tabular (the author's choice); tables re-run, check 20/20.
+- **Report figures, step 5: `appendix.tex`** (2026-11-16, at the user's request):
+  - The `tables` stage also writes `results/amibekk_v1/report/appendix.tex`: sections A-F with
+    subsections, 28 figures (PDF, placeholder captions from `figures.csv`, labels `fig:app_<code>`,
+    tall sheets on `[p]` pages) and 6 appendix tables. `\FloatBarrier` closes each section.
+  - Tau subscripts in the tables are fixed (`$\tau_D$`, not `$\tau$\_D`).
+  - Check 21/21 (new: `appendix.tex` includes every appendix figure and table).

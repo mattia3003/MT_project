@@ -1,0 +1,41 @@
+\begin{table}[htbp]
+\centering
+\scriptsize
+\begin{tabular}{lp{3.2cm}p{4.6cm}p{3.2cm}l}
+\toprule
+ & Fixes & Value & Config key & Section \\
+\midrule
+A & Brain mask; failed MRI & threshold 0.02, all regions $\geq$ 30 px, filled; failed $<$ 20 px of tissue & brain: & 2.3 \\
+B & Minimum lesion area & 4 px & lesions.min\_lesion\_area & 2.3 \\
+C & Attach gap for strays & 2 px & lesions.attach\_gap & 2.3 \\
+D & Noisy-mask cut & $>$ 9 isolated specks & qc.max\_isolated\_specks & 2.3 \\
+E & Sampling filters on held-out sets & pixel sum $<$ 2,000 only & filters.real\_sets & 2.2 \\
+F & Position frame & pixel coordinates, σ 6.4 px, prefilter 25.6 px & detectors.lesion & 2.5 \\
+G & Informative-lesion bound & 12 px (chance rate $\leq$ 10\%) & calibration.informative\_bound\_px & 2.6 \\
+H & Stratified thresholds & single / multi for both detectors & calibration.strata & 2.6 \\
+I & Planting design & 20 $\times$ 5 bases; P1--P6; gate on base lesions $\geq$ bound & validation: & 2.7 \\
+J & What counts as caught & flagged + right source patient & validation.caught & 2.7 \\
+K & Go/no-go criteria & see 2.7 & validation.criteria & 2.7 \\
+L & Audit sets & S main; noisy as separate rows & audit.sets & 2.9 \\
+M & RQ1 tests & primary family of 4, Holm; secondary list & audit.primary & 2.8--2.9 \\
+N & Adjacent slices & chained groups, z gap $\leq$ 2 & audit.window & 2.8 \\
+O & Sensitivity on S & 99th pct, σ 0.08, bound 10/25, drop-only & audit.sensitivity & 2.9 \\
+P & H2 at equal FPR & (i) frozen; (ii) $\tau_D$\textbackslash{}* & audit (H2) & 2.9 \\
+Q & Near-exact & $\geq$ 0.9 and above the held-out max per stratum $\times$ size bin & audit.near\_exact & 2.9 \\
+R & Exposure & one source per flag; π\_p from H-eval NN, m = 52.5 & exposure.expected & 2.10 \\
+U & Copying vs placement reading & margin + rarity AUC vs chance flags; amended rule & exposure.reading & 2.10 \\
+V & Rarity, H3 & slice and patient rarity; Spearman with permutation & exposure.rarity & 2.10 \\
+W & H1 & slice-to-slice linking; $\rho$\_S − $\rho$\_H in size bins & exposure (H1) & 2.10 \\
+X & Report selection and content & 76 reports; both NN and strongest pair & reports.selection & 2.11 \\
+Y & Deletion test & three measures & reports.deletion & 2.11 \\
+Z & Correctness; taxonomy & thesis-plan criteria; rule-based & reports.correctness, reports.taxonomy & 2.11 \\
+AA & E8 group A and comparison slice & E7's 56 strong cases; decision-J source & paired.group\_a & 2.12 \\
+AB & E8 group B & k = 5 matched novel masks & paired.controls & 2.12 \\
+AC & E8 measure & z-score, E1 shift, SSIM σ 1.5, range 10, regions & paired.measure & 2.12 \\
+AD & E8 test and reading & AUC vs H-eval reference, mechanical reading & paired.test & 2.12 \\
+AE & E8 rehearsal & H-cal null, planted positive & paired.rehearsal & 2.12 \\
+\bottomrule
+\end{tabular}
+\caption{TODO: the analysis decisions, fixed before the data they concern were read.}
+\label{tab:decisions}
+\end{table}

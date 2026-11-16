@@ -1,0 +1,17 @@
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{lrrl}
+\toprule
+Set & Patients & Lesion slices / masks & Role \\
+\midrule
+T & 105 & 3,823 & training patients: what could be memorized (reference) \\
+H-cal & 25 & 992 & held out: sets the thresholds \\
+H-eval & 26 & 1,094 & held out: false-positive check and baseline \\
+S main & -- & 35,920 & synthetic, QC clean or minor: audited \\
+S all & -- & 37,624 & every synthetic sample, noisy masks included \\
+\bottomrule
+\end{tabular}
+\caption{TODO: the data sets.}
+\label{tab:data_sets}
+\end{table}
