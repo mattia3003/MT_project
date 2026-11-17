@@ -22,6 +22,7 @@ from memtk.lesions import LesionLabels, label_components
 TITLE_FONTSIZE = 10
 SAVE_DPI = 90          # default resolution of `save`; `resolution` changes it for a block
 SAVE_FOR_PRINT = False # `resolution(..., for_print=True)`: crop to content and add a PDF
+SAVE_MAX_WIDTH_IN = None  # `resolution(..., max_width_in=w)`: wider figures are shrunk to w (text keeps its size)
 
 # Outline colours used in every E0 figure
 BRAIN_COLOR, LESION_COLOR, BOX_COLOR, HIGHLIGHT_COLOR, SPECK_COLOR = "cyan", "red", "yellow", "lime", "orange"
@@ -72,6 +73,9 @@ def save(fig: Figure, path: Path, title: str = "", dpi: int | None = None) -> Pa
     The title is wrapped to the figure width, and the constrained layout reserves room for it, so
     it neither covers the tile titles of the first row nor runs off the image.
     """
+    if SAVE_MAX_WIDTH_IN and fig.get_figwidth() > SAVE_MAX_WIDTH_IN:
+        w, h = fig.get_size_inches()
+        fig.set_size_inches(SAVE_MAX_WIDTH_IN, h * SAVE_MAX_WIDTH_IN / w)
     if title:
         chars_per_line = max(30, int(fig.get_figwidth() * 72 / (0.6 * TITLE_FONTSIZE)))
         fig.suptitle(textwrap.fill(title, chars_per_line), fontsize=TITLE_FONTSIZE)
@@ -85,17 +89,19 @@ def save(fig: Figure, path: Path, title: str = "", dpi: int | None = None) -> Pa
 
 
 @contextmanager
-def resolution(dpi: int, for_print: bool = False):
+def resolution(dpi: int, for_print: bool = False, max_width_in: float | None = None):
     """Every `save` inside the block writes at `dpi`; with `for_print` it also crops the figure to its
-    content and writes a PDF next to the PNG (added 2026-11-16 for the report's appendix, which redraws
-    the experiments' own figures; the stages keep 90 dpi, uncropped, PNG only)."""
-    global SAVE_DPI, SAVE_FOR_PRINT
-    before = SAVE_DPI, SAVE_FOR_PRINT
-    SAVE_DPI, SAVE_FOR_PRINT = dpi, for_print
+    content and writes a PDF next to the PNG; with `max_width_in` a wider figure is shrunk to that width
+    (aspect kept) while its text keeps its point size, so it stays legible on the printed page (added
+    2026-11-16/17 for the report's appendix, which redraws some experiment figures; the stages keep
+    90 dpi, uncropped, PNG only, full size)."""
+    global SAVE_DPI, SAVE_FOR_PRINT, SAVE_MAX_WIDTH_IN
+    before = SAVE_DPI, SAVE_FOR_PRINT, SAVE_MAX_WIDTH_IN
+    SAVE_DPI, SAVE_FOR_PRINT, SAVE_MAX_WIDTH_IN = dpi, for_print, max_width_in
     try:
         yield
     finally:
-        SAVE_DPI, SAVE_FOR_PRINT = before
+        SAVE_DPI, SAVE_FOR_PRINT, SAVE_MAX_WIDTH_IN = before
 
 
 # --- labelled slices (lesion colours, strays, specks) -----------------------------------------

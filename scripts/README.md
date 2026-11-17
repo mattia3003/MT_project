@@ -160,7 +160,7 @@ decisions R, U, V, W; S only from E5's stored tables; see `docs/e6-e7-plan.md`)
 ```powershell
 .venv\Scripts\python.exe scripts\r_report_figures.py method                  # Method figures 2.3, 2.4 (E1), 2.5 (E2), 2.7, 2.11 (report), ~20 s
 .venv\Scripts\python.exe scripts\r_report_figures.py results                 # Results figures 3.1-3.7, PNG + PDF, ~1 min
-.venv\Scripts\python.exe scripts\r_report_figures.py appendix                # appendix figures at 300 dpi (B-E), ~50 s
+.venv\Scripts\python.exe scripts\r_report_figures.py appendix --overwrite    # the 14 appendix figures (B-E) at print size, PNG + PDF, ~40 s
 .venv\Scripts\python.exe scripts\r_report_figures.py check                   # consistency checks of every report figure and table (exit code 1 on failure), ~20 s
 .venv\Scripts\python.exe scripts\r_report_figures.py tables                  # the report's tables as LaTeX (booktabs), seconds
 .venv\Scripts\python.exe scripts\r_report_figures.py results --overwrite     # redraw after a style change

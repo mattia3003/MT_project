@@ -1,14 +1,18 @@
-\begin{table}[htbp]
+\begin{table}
 \centering
-\footnotesize
-\begin{tabular}{lrrrrrl}
+\small
+\begin{tabular}{p{7.2cm}rr}
 \toprule
-Cell & Flags & Dispersion (null 95th) & Above band (expected) & Margin AUC & Rarity AUC & Reading \\
+ & E1 copy, multi-lesion & E2 full, multi-lesion \\
 \midrule
-E1 copy multi & 2,662 & 7,910 (2,027) & 22 (2.2) & 0.36 [0.24, 0.50] & 0.42 [0.34, 0.50] & typical placement \\
-E2 full multi & 357 & 647 (384) & 12 (1.6) & 0.55 [0.27, 0.72] & 0.62 [0.49, 0.81] & undetermined \\
+S flags & 2,662 & 357 \\
+Spread over patients: dispersion (95th percentile by chance) & 7,910 (2,027) & 647 (384) \\
+Patients above their chance band (expected by chance) & 22 (2.2) & 12 (1.6) \\
+Margin to the second-best patient: AUC of S flags vs chance flags & 0.36 [0.24, 0.50] & 0.55 [0.27, 0.72] \\
+Rarity of the source slice: AUC of S flags vs chance flags & 0.42 [0.34, 0.50] & 0.62 [0.49, 0.81] \\
+Reading (decision U) & typical placement & undetermined \\
 \bottomrule
 \end{tabular}
-\caption{TODO: concentration of S flags over patients, and margin and source rarity against H-eval chance flags.}
+\caption{TODO: how the S flags spread over training patients, and whether they fit their best patient more uniquely (margin) or point to rarer slices (rarity) than H-eval's chance flags do. AUC above 0.5 points to copying, below to typical placement; 95% CI in brackets.}
 \label{tab:exposure}
 \end{table}

@@ -989,3 +989,42 @@ in full, with what replaced them.
     tall sheets on `[p]` pages) and 6 appendix tables. `\FloatBarrier` closes each section.
   - Tau subscripts in the tables are fixed (`$\tau_D$`, not `$\tau$\_D`).
   - Check 21/21 (new: `appendix.tex` includes every appendix figure and table).
+- **Report figures, step 6: shorter appendix, tables that fit the page** (2026-11-17, after the user's
+  first Overleaf pass: 39 pages without front matter, sections 3-5 still placeholders).
+  - **Tables redone (`tables` stage):**
+    - T5: the columns are now "S scored" / "H-eval scored", the number of masks each detector can
+      score in the stratum (the denominator of the rate). E1: masks with lesions of 4 px or more,
+      19,117 single + 16,803 multi = 35,920. E2: masks with an informative lesion, 19,911 + 6,006 = 25,917.
+      The caption says so.
+    - T6 (exposure) is transposed: one column per primary cell. T6b keeps only H1 (per size bin and the
+      pre-stated weighted mean); H3 moves to the text.
+    - T7b (deletion) is transposed: rows are measures, columns are planted copies, S flags and H-eval
+      chance flags.
+    - Appendix A is cut to 14 critical decisions (B, C, D, F, G, H, J, K, M, N, Q, U, AC, AD) with no
+      config keys; the rest is referenced to the repository in 2.13.
+  - **`appendix.tex`:** wrapped in the `appendices` environment (package `appendix`, `[toc,page]`), which
+    gives an "Appendices" page and a contents entry; used without `\appendix`. Figures `[H]` and
+    `\floatplacement{table}{H}` keep every float in its subsection. An optional, commented
+    `\captionsetup{list=no}` keeps appendix floats out of the lists.
+  - **Appendix figures cut from 28 to 14** (the user chose the slim option):
+    - Kept: figures that back a decision or a claim and are not in the main text.
+    - Cut as redundant with the main text or a number in the text: QC classes, adjacency Dice, chance
+      lesion matches, area change, factors, H-eval chance flags, largest groups, exposure sorted, H1 span,
+      reports 57 and 67, E8 examples.
+    - Root cause of the small text: the experiments' own functions draw on 25-38 cm canvases, so
+      7-8 pt text printed at 4-5 pt at 16 cm. B1, B2, B6, C1, D1, D3, D4, E1, E2 and E3 are now compact
+      16 cm redraws in the report style from the same stored tables.
+    - B5 (3 slices, was 6) and D2 (6 pairs, was 12) still use the experiments' sheets. They go through
+      the new `plotting.resolution(..., max_width_in)`, which shrinks a wider figure to the column
+      width while its text keeps its point size.
+    - The three rehearsal-margin sheets are now one AUC figure (D4) that also shows S.
+  - **Shared helpers:** `results.match_tiles` and `results.profile_bars` are factored out of figure 3-6 and
+    reused by appendix E1 and E2. Figure 3-6 now takes its named slice from E1's nearest neighbour (the
+    slice the shift belongs to); for report 50 that is the same slice as before (`Mets_230/z110`), and only
+    its tile titles change to two lines.
+  - The old appendix PNG/PDF files were deleted before the re-run, so the "no unlisted figure" check
+    holds. `appendix`, `results` and `tables` were re-run; check 21/21; pytest 200.
+  - **Pylance (2026-11-17, at the user's request):** reportArgumentType errors from the pandas stubs (one cell typed
+    `Scalar`/`Series`) in `appendix.py` and `tables.py` were fixed by reading rows as dicts (`to_dict("records")`,
+    `to_dict("index")`); `idxmax` (typed `Hashable`) has a one-line ignore. Diagnostics clean; outputs unchanged
+    (appendix and tables re-run, check 21/21).

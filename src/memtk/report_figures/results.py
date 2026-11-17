@@ -348,12 +348,35 @@ def report_figure(cfg: dict, name: str, pool_name: str, pool_cfg: dict, res_pool
     profile (S flags per slice along its metastasis, with the lesion area)."""
     index = read_table(res_pool / "e7" / "reports" / "report_index.csv")
     r = index[index["report"] == EXAMPLE_REPORT].iloc[0].to_dict()
-    key, source, patient = str(r["key"]), str(r["source"]), str(r["source_patient"])
+    key, patient = str(r["key"]), str(r["source_patient"])
+    syn_dir = config.output_dir(cfg, pool_name)
+    fig = figure(12.0)
+    grid = fig.add_gridspec(3, 3, height_ratios=[1, 0.16, 0.85])
+    source = match_tiles(fig, [grid[0, j] for j in range(3)], grid[1, :], cfg, name, pool_name, pool_cfg, key)
+    prof = read_table(res_pool / "e7" / "reports" / "patient_profiles.csv")
+    ax = fig.add_subplot(grid[2, :])
+    profile_bars(ax, prof[prof["patient_id"] == patient], f"slice z of {patient} (one metastasis over {{n}} slices)",
+                 "lesion area (px)")
+    ax.set_title(f"(d) {patient}: S flags per slice along its metastasis")
+    out_name = "3-6_report50_profile"
+    save_both(fig, out, out_name)
+    return index_row(out_name, "3.6", f"E7 report 50 ({key} vs {source}) compact, and {patient}'s profile",
+                     [res_pool / "e7" / "reports" / f for f in ("report_index.csv", "patient_profiles.csv")]
+                     + [syn_dir / "e5" / "e1_main.csv", syn_dir / "e5" / "e2_main_lesion_pairs.parquet",
+                        "the sample's NIfTI", "T BRAVO"])
+
+
+def match_tiles(fig, cells: list, note_cell, cfg: dict, name: str, pool_name: str, pool_cfg: dict, key: str) -> str:
+    """A match report in compact form, drawn into three gridspec `cells` and a `note_cell`: (a) the S
+    sample's MRI and mask moved by E1's shift, (b) E1's nearest training slice (the slice the shift belongs
+    to), (c) the masks overlaid with the E1 score; the note gives the largest lesion pair's three factors
+    against that slice (E2's lesion-pair table). Returns the training slice's key."""
     syn_dir = config.output_dir(cfg, pool_name)
     e1_table = read_table(syn_dir / "e5" / "e1_main.csv")
     e1 = e1_table[e1_table["query"] == key].iloc[0].to_dict()
+    source = str(e1["nn"])
     pairs = pd.read_parquet(syn_dir / "e5" / "e2_main_lesion_pairs.parquet")
-    pair = pairs[(pairs["query"] == key) & (pairs["train"] == source)].sort_values("s").iloc[-1].to_dict()
+    pairs = pairs[(pairs["query"] == key) & (pairs["train"] == source)].sort_values("s")
     files = read_table(syn_dir / "synthetic_index.csv").set_index("sample_id")["filename"]
     q_image, _ = load_sample(config.resolve_path(pool_cfg["dir"]) / files[key], pool_cfg)
     q_labels = LabelStack(syn_dir / "labels.npz")[key]
@@ -362,50 +385,47 @@ def report_figure(cfg: dict, name: str, pool_name: str, pool_cfg: dict, res_pool
     dr, dc = int(e1["shift_row"]), int(e1["shift_col"])
     q_moved, q_img_moved = align(q_labels > 0, dr, dc), align(q_image, dr, dc)
     window = zoom_window([q_moved, t_labels > 0])
-
-    fig = figure(12.0)
-    grid = fig.add_gridspec(3, 3, height_ratios=[1, 0.16, 0.85])
-    image_tile(fig.add_subplot(grid[0, 0]), q_img_moved[window], [(q_moved[window], COLORS["S"])],
-               f"(a) synthetic {key}, moved ({dr:+d}, {dc:+d})")
-    image_tile(fig.add_subplot(grid[0, 1]), t_image[window], [((t_labels > 0)[window], COLORS["T"])],
-               f"(b) named source {source}")
-    ax = fig.add_subplot(grid[0, 2])
+    image_tile(fig.add_subplot(cells[0]), q_img_moved[window], [(q_moved[window], COLORS["S"])],
+               f"(a) synthetic {key}\nmoved ({dr:+d}, {dc:+d})")
+    image_tile(fig.add_subplot(cells[1]), t_image[window], [((t_labels > 0)[window], COLORS["T"])],
+               f"(b) named source\n{source}")
+    ax = fig.add_subplot(cells[2])
     q, t = q_moved[window], (t_labels > 0)[window]
-    image_tile(ax, np.ones(q.shape), [], f"(c) overlay, E1 score {float(e1['score']):.2f}")
+    image_tile(ax, np.ones(q.shape), [], f"(c) overlay\nE1 score {float(e1['score']):.2f}")
     fill(ax, [(q & t, "tab:green"), (q & ~t, COLORS["S"]), (t & ~q, COLORS["T"])], alpha=0.9)
     for spine in ax.spines.values():
         spine.set_visible(True)
         spine.set_color("0.6")
-    note = fig.add_subplot(grid[1, :])
+    if len(pairs):
+        pair = pairs.iloc[-1].to_dict()
+        factors = (f"Largest lesion pair: shape {float(pair['shape']):.2f} × position {float(pair['position']):.2f} × "
+                   f"size {float(pair['size']):.2f} = s {float(pair['s']):.2f}")
+    else:
+        factors = "No lesion pair with s ≥ 0.1 against this slice"
+    note = fig.add_subplot(note_cell)
     note.axis("off")
-    note.text(0.5, 0.5, "overlay: green = both, red = synthetic only, blue = source only.   Largest lesion pair: "
-              f"shape {float(pair['shape']):.2f} × position {float(pair['position']):.2f} × size "
-              f"{float(pair['size']):.2f} = s {float(pair['s']):.2f}", ha="center", va="center", fontsize=6.5,
-              transform=note.transAxes)
+    note.text(0.5, 0.5, f"overlay: green = both, red = synthetic only, blue = source only.   {factors}", ha="center",
+              va="center", fontsize=6.5, transform=note.transAxes)
+    return source
 
-    prof = read_table(res_pool / "e7" / "reports" / "patient_profiles.csv")
-    prof = prof[prof["patient_id"] == patient]
+
+def profile_bars(ax, prof: pd.DataFrame, xlabel: str, area_label: str, legend_loc: str = "upper right") -> None:
+    """A patient profile (E7's `patient_profiles` rows of one patient): S flags naming each slice, E1 and
+    E2 side by side, with the slice's lesion area (summed over its lesions) on a second axis. `xlabel`
+    may contain `{n}`, the number of slices spanned."""
     per_z = prof.groupby("z")[["e1_flags", "e2_flags", "area"]].sum().astype(float)
     zs = np.arange(int(per_z.index.min()), int(per_z.index.max()) + 1)
     per_z = per_z.reindex(zs, fill_value=0)
-    ax = fig.add_subplot(grid[2, :])
     ax.bar(zs - 0.2, per_z["e1_flags"], width=0.4, color=COLORS["E1"], label="E1 flags naming the slice")
     ax.bar(zs + 0.2, per_z["e2_flags"], width=0.4, color=COLORS["E2"], label="E2 flags (full or partial)")
-    ax.set_xlabel(f"slice z of {patient} (one metastasis over {len(zs)} slices)")
+    ax.set_xlabel(xlabel.format(n=len(zs)))
     ax.set_ylabel("S flags (all strata)")
-    ax.set_xticks(zs[::2])
+    ax.set_xticks(zs[::2] if len(zs) <= 30 else zs[zs % 10 == 0])
     twin = ax.twinx()
     twin.plot(zs, per_z["area"], color="0.4", lw=0.9, ls=":", marker=".", ms=3)
-    twin.set_ylabel("lesion area (px)", color="0.4")
+    twin.set_ylabel(area_label, color="0.4")
     twin.spines["right"].set_visible(True)
-    ax.legend(frameon=False, loc="upper right")
-    ax.set_title(f"(d) {patient}: S flags per slice along its metastasis")
-    out_name = "3-6_report50_profile"
-    save_both(fig, out, out_name)
-    return index_row(out_name, "3.6", f"E7 report 50 ({key} vs {source}) compact, and {patient}'s profile",
-                     [res_pool / "e7" / "reports" / f for f in ("report_index.csv", "patient_profiles.csv")]
-                     + [syn_dir / "e5" / "e1_main.csv", syn_dir / "e5" / "e2_main_lesion_pairs.parquet",
-                        "the sample's NIfTI", "T BRAVO"])
+    ax.legend(frameon=False, loc=legend_loc)
 
 
 # --- 3.7: paired-MRI SSIM ------------------------------------------------------------------------

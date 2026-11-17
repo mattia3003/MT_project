@@ -887,31 +887,24 @@ Written by `method`. In git.
 
 ### `results/<pool>/report/appendix/`
 
-Written by `appendix`. In git. PNG at 300 dpi and PDF, cropped to content, mostly drawn by the experiments' own figure functions from their stored tables, without a suptitle; example tiles are picked with this stage's seeded generators, so they can differ from the original sheets. B3 and B4 are compact redraws from stored counts.
+Written by `appendix`. In git. Slim set (2026-11-17, 14 figures, replacing the first set of 28): only figures that back a decision or a claim and are not in the main text. Each `{png,pdf}`, PNG at 300 dpi, 16 cm wide with 6-8 pt text at print size. Most are compact redraws from the experiments' stored tables; B5 and D2 are the experiments' own sheets with fewer examples, shrunk to the column width with their text kept at its point size. Example tiles are picked with this stage's seeded generators.
 
 | File | Report section | Content |
 | --- | --- | --- |
-| `B1_native_vs_model.png` | App. B (2.3) | model-space lesion area against plain downscaling; enlargement by native size |
-| `B2_brain_by_height.png` | App. B (3.1) | real brain area by position in the head against the synthetic median; brain-area distributions |
-| `B3_component_sizes.{png,pdf}` | App. B (2.3) | share of mask components by size, T, H-cal, H-eval, S (decision B) |
-| `B4_specks_by_gap.{png,pdf}` | App. B (2.3) | synthetic specks per 1 px of gap to the nearest lesion (decision C) |
-| `B5_brain_methods.png` | App. B (2.3) | plain Otsu, Otsu with every region, and the chosen threshold on four T slices where Otsu fails and two random ones (decision A) |
-| `B6_qc_classes.png` | App. B (2.3) | four random samples per QC class |
-| `B7_adjacency_dice.png` | App. B (2.8) | Dice between consecutive lesion slices of a patient |
-| `B8_score_histograms.png` | App. B (2.6, 3.2) | H-cal scores against T by stratum with the thresholds |
-| `B9_chance_lesion_matches.png` | App. B (3.2) | H-cal lesions and their best T match per area bin |
-| `C1_area_change.png` | App. C (2.7) | lesion area before and after P4 and P5 |
-| `C2_factors.png` | App. C (3.3) | shape, position, size and s of each planted lesion against its base lesion |
-| `C3_misses.png` | App. C (3.3) | the gated planted masks missed by their criterion's detector |
-| `C4_heval_chance_flags.png` | App. C (3.2, 3.3) | H-eval chance flags per class next to the training slice |
-| `D1_sensitivity_forest.png` | App. D (3.4, 4.6) | excess over H-eval with intervals per set, variant and stratum |
-| `D2_near_exact.png`, `D3_groups_top.png` | App. D (3.4) | near-exact masks, and one mask per largest E2 group, next to their source slice |
-| `D4_exposure_sorted.png` | App. D (3.5) | observed vs expected flags per patient with chance bands, both primary cells |
-| `D5_rarity_exposure.png`, `D6_h1_span.png` | App. D (3.5) | flags by patient-rarity group (H3); Spearman of span and lesion credits per size bin (H1) |
-| `D7_rehearsal_margins_null.png`, `D8_..._positive.png`, `D9_..._placement_compact.png` | App. D (2.10) | margins and source rarity of each rehearsal mock's flags against H-eval chance flags |
-| `E1_report_02.png`, `E2_report_57.png`, `E3_report_67.png` | App. E (3.6) | E7 match reports 02 (E2's 1 px rounding, caught by E1), 57 (a random S flag), 67 (an H-eval chance flag), redrawn with E7's report data and context |
-| `E4_profile_Mets_058.png` | App. E (3.6) | the full patient profile of `Mets_058` |
-| `E5_e8_examples.png`, `E6_e8_within_a.png` | App. E (3.7) | the E8 example pairs with SSIM maps; within group A by z offset and against the runner-up |
+| `B1_native_vs_model` | App. B (2.3) | model-space lesion area against plain downscaling; enlargement factor by native size (median per bin) |
+| `B2_brain_by_height` | App. B (3.1) | real brain area by position in the head against the synthetic median; brain-area distributions |
+| `B3_component_sizes` | App. B (2.3) | share of mask components by size, T, H-cal, H-eval, S (decision B) |
+| `B4_specks_by_gap` | App. B (2.3) | synthetic specks per 1 px of gap to the nearest lesion (decision C) |
+| `B5_brain_methods` | App. B (2.3) | plain Otsu, Otsu with every region, and the chosen threshold on two T slices where Otsu fails and one random one (decision A) |
+| `B6_score_histograms` | App. B (2.6, 3.2) | H-cal E1 score, E2 strongest pair and C by stratum, frozen stratum thresholds dashed (decision H) |
+| `C1_misses` | App. C (3.3) | four of the gated planted masks missed by their criterion's detector: base, planted mask (variant, why missed, E1 score, E2 class), nearest neighbour found |
+| `D1_sensitivity` | App. D (3.4, 4.6) | excess over H-eval in points with 95% intervals, E1 copy and E2 full, single and multi, under each sensitivity variant (main analysis shaded) |
+| `D2_near_exact` | App. D (3.4) | the six near-exact S masks with the highest E1 score next to their source slice (decision Q) |
+| `D3_rarity_exposure` | App. D (3.5) | observed / expected flags per patient-rarity fifth, both primary cells, with the H3 Spearman |
+| `D4_rehearsal_margins` | App. D (2.10, 3.5) | margin and source-rarity AUCs (flags vs H-eval chance flags) of the null, positive and compact-placement mocks and of S, both primary cells (decision U) |
+| `E1_report_02` | App. E (3.6) | E7 report 02 compact: `file_2_4408` moved by E1's shift against `Mets_058/z112` (E1 1.00), overlay, and the lesion pair's factors (shape 0.39: E2's 1 px limit of centred crops) |
+| `E2_profile_Mets_058` | App. E (3.6) | `Mets_058`'s S flags per slice (E1, E2) with the summed lesion area; its most-matched slice next to the three S masks naming it with the highest E1 score |
+| `E3_e8_within_a` | App. E (3.7) | within group A: mean SSIM by z offset from the source per region; source minus runner-up per region with Wilcoxon p |
 | `figures.csv`, `run_info.json` | — | as for `results/` |
 
 ### `results/<pool>/report/results/`

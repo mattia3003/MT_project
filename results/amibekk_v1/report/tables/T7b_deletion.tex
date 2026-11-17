@@ -1,16 +1,19 @@
-\begin{table}[htbp]
+\begin{table}
 \centering
-\footnotesize
-\begin{tabular}{lrrrrrrr}
+\small
+\begin{tabular}{p{6.2cm}rrr}
 \toprule
-Set & Masks & $\Delta$C top / small & p & $\Delta$E1 top / small & p & Lost flag top / small & p \\
+Removing the top vs the smallest contributor & Planted copies & S flags & H-eval chance flags \\
 \midrule
-planted controls & 106 & 0.43 / 0.41 & 4e-07 & 0.33 / 0.15 & 1.1e-13 & 23 / 6 & 0.00076 \\
-H-eval chance flags & 7 & 0.21 / 0.08 & 0.0078 & 0.16 / 0.10 & 0.77 & 7 / 4 & 0.12 \\
-S & 224 & 0.29 / 0.16 & 8.4e-39 & 0.16 / -0.03 & 8e-23 & 224 / 203 & 4.8e-07 \\
-H-eval chance flags & 7 & 0.21 / 0.08 & 0.0078 & 0.16 / 0.10 & 0.77 & 7 / 4 & 0.12 \\
+Masks tested & 106 & 224 & 7 \\
+Drop in C (configuration score) & 0.43 vs 0.41 & 0.29 vs 0.16 & 0.21 vs 0.08 \\
+ & p $<$ 0.001 & p $<$ 0.001 & p = 0.0078 \\
+Drop in the whole-mask score (E1) & 0.33 vs 0.15 & 0.16 vs -0.03 & 0.16 vs 0.10 \\
+ & p $<$ 0.001 & p $<$ 0.001 & p = 0.77 \\
+Masks that lose the flag or its patient after a full re-match & 23 vs 6 & 224 vs 203 & 7 vs 4 \\
+ & p $<$ 0.001 & p $<$ 0.001 & p = 0.12 \\
 \bottomrule
 \end{tabular}
-\caption{TODO: deletion test, top against smallest contributor (paired Wilcoxon; McNemar for lost flags).}
+\caption{TODO: deletion test. Each cell compares removing the lesion the report ranks first (top) with removing the lowest-ranked one (smallest); p from a paired Wilcoxon test (drops) or McNemar's test (lost flags).}
 \label{tab:deletion}
 \end{table}

@@ -19,7 +19,7 @@ Report figures check: pool 'amibekk_v1', dataset 'stanford_brainmets'
 [PASS] 'tables' outputs made with the current config values: seed, brain, lesions, detectors, calibration, audit, exposure, reports, paired
 [PASS] 'tables' made after every experiment stage it reads
 [PASS] 'tables': every listed table exists as a LaTeX tabular: 18 tables
-[PASS] 'appendix.tex' includes every appendix figure and appendix table: 28 figures
-[PASS] unit tests (pytest) pass: 200 passed in 13.60s
+[PASS] 'appendix.tex' includes every appendix figure and appendix table: 14 figures
+[PASS] unit tests (pytest) pass: 200 passed in 13.15s
 
 21 passed, 0 failed

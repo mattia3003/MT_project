@@ -1,41 +1,26 @@
-\begin{table}[htbp]
+\begin{table}
 \centering
-\scriptsize
-\begin{tabular}{lp{3.2cm}p{4.6cm}p{3.2cm}l}
+\footnotesize
+\begin{tabular}{lp{3.6cm}p{9.6cm}}
 \toprule
- & Fixes & Value & Config key & Section \\
+ & Decision & Value \\
 \midrule
-A & Brain mask; failed MRI & threshold 0.02, all regions $\geq$ 30 px, filled; failed $<$ 20 px of tissue & brain: & 2.3 \\
-B & Minimum lesion area & 4 px & lesions.min\_lesion\_area & 2.3 \\
-C & Attach gap for strays & 2 px & lesions.attach\_gap & 2.3 \\
-D & Noisy-mask cut & $>$ 9 isolated specks & qc.max\_isolated\_specks & 2.3 \\
-E & Sampling filters on held-out sets & pixel sum $<$ 2,000 only & filters.real\_sets & 2.2 \\
-F & Position frame & pixel coordinates, σ 6.4 px, prefilter 25.6 px & detectors.lesion & 2.5 \\
-G & Informative-lesion bound & 12 px (chance rate $\leq$ 10\%) & calibration.informative\_bound\_px & 2.6 \\
-H & Stratified thresholds & single / multi for both detectors & calibration.strata & 2.6 \\
-I & Planting design & 20 $\times$ 5 bases; P1--P6; gate on base lesions $\geq$ bound & validation: & 2.7 \\
-J & What counts as caught & flagged + right source patient & validation.caught & 2.7 \\
-K & Go/no-go criteria & see 2.7 & validation.criteria & 2.7 \\
-L & Audit sets & S main; noisy as separate rows & audit.sets & 2.9 \\
-M & RQ1 tests & primary family of 4, Holm; secondary list & audit.primary & 2.8--2.9 \\
-N & Adjacent slices & chained groups, z gap $\leq$ 2 & audit.window & 2.8 \\
-O & Sensitivity on S & 99th pct, σ 0.08, bound 10/25, drop-only & audit.sensitivity & 2.9 \\
-P & H2 at equal FPR & (i) frozen; (ii) $\tau_D$\textbackslash{}* & audit (H2) & 2.9 \\
-Q & Near-exact & $\geq$ 0.9 and above the held-out max per stratum $\times$ size bin & audit.near\_exact & 2.9 \\
-R & Exposure & one source per flag; π\_p from H-eval NN, m = 52.5 & exposure.expected & 2.10 \\
-U & Copying vs placement reading & margin + rarity AUC vs chance flags; amended rule & exposure.reading & 2.10 \\
-V & Rarity, H3 & slice and patient rarity; Spearman with permutation & exposure.rarity & 2.10 \\
-W & H1 & slice-to-slice linking; $\rho$\_S − $\rho$\_H in size bins & exposure (H1) & 2.10 \\
-X & Report selection and content & 76 reports; both NN and strongest pair & reports.selection & 2.11 \\
-Y & Deletion test & three measures & reports.deletion & 2.11 \\
-Z & Correctness; taxonomy & thesis-plan criteria; rule-based & reports.correctness, reports.taxonomy & 2.11 \\
-AA & E8 group A and comparison slice & E7's 56 strong cases; decision-J source & paired.group\_a & 2.12 \\
-AB & E8 group B & k = 5 matched novel masks & paired.controls & 2.12 \\
-AC & E8 measure & z-score, E1 shift, SSIM σ 1.5, range 10, regions & paired.measure & 2.12 \\
-AD & E8 test and reading & AUC vs H-eval reference, mechanical reading & paired.test & 2.12 \\
-AE & E8 rehearsal & H-cal null, planted positive & paired.rehearsal & 2.12 \\
+B & What counts as a lesion & an 8-connected component of at least 4 px \\
+C & Specks near a lesion & a smaller component within 2 px of a lesion is attached to it; others are dropped \\
+D & Noisy synthetic masks & more than 9 isolated specks: left out of the main audit, reported separately \\
+F & Lesion position (E2) & pixel coordinates; position factor with $\sigma$ = 6.4 px \\
+G & Informative lesion (E2) & at least 12 px (chance lesion-match rate at most 10\% from this size up) \\
+H & Copy thresholds & 95th percentile of H-cal, separately for single- and multi-lesion slices (Table 3a) \\
+J & A planted copy is caught & flagged, and the named source patient is the base patient \\
+K & Validation gate & P1 100\% by both detectors; P2, P4 at least 90\%; P6 at least 80\% (E2); H-eval false positives at most 7\% (E1 copy, E2 full) and 12\% (E2 flagged) \\
+M & Main test & excess of S over H-eval for E1 copy and E2 full, single and multi; Holm-adjusted p $<$ 0.05 \\
+N & Counting copies & per source patient; source slices within 2 of each other count as one group \\
+Q & Near-exact copy & E1 score at least 0.9 and above every held-out score in its stratum and size bin \\
+U & Copying vs placement & margin and source rarity of S flags against H-eval chance flags (Section 2.10) \\
+AC & Paired-MRI measure & SSIM ($\sigma$ 1.5 px, data range 10) in the lesion neighbourhood (+8 px), after z-scoring each image in its brain and aligning by E1's shift \\
+AD & Paired-MRI test & AUC of group A vs B, judged against H-eval flagged vs novel \\
 \bottomrule
 \end{tabular}
-\caption{TODO: the analysis decisions, fixed before the data they concern were read.}
+\caption{TODO: the critical analysis decisions, each fixed before the data it concerns was read. Every other setting is in the project repository.}
 \label{tab:decisions}
 \end{table}

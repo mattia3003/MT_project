@@ -998,11 +998,11 @@ Every subsection follows the same pattern:
 
 | Appendix | Content |
 | --- | --- |
-| A Settings and decisions | One table: decision letter (A–AE), what it fixes, the value, the config key, and the section where it matters (section 5 below gives the rows) |
-| B Data and QC | drawn (2026-11-16) in `results/amibekk_v1/report/appendix/`: B1 native vs model space, B2 brain size by height, B3 component sizes, B4 specks by gap, B5 brain-mask methods, B6 QC classes, B7 adjacency Dice, B8 H-cal score histograms, B9 chance lesion matches |
-| C Validation | drawn: C1 area change (P4, P5), C2 factors, C3 misses, C4 H-eval chance flags (the variants are in Method figure 2-7) |
-| D Audit and exposure | drawn: D1 sensitivity forest, D2 near-exact, D3 largest groups, D4 exposure (both cells), D5 rarity, D6 H1 span, D7-D9 rehearsal margins (null, positive, compact placement); as tables in LaTeX: H2 (`h2.csv`), rates by size (`rates_by_size.csv`) |
-| E Match reports and E8 | drawn: E1-E3 reports 02, 57, 67; E4 the `Mets_058` profile; E5 E8 examples; E6 within A |
+| A Settings and decisions | One table of the 14 critical decisions (B, C, D, F, G, H, J, K, M, N, Q, U, AC, AD) with their values, no config keys (curated 2026-11-17, `tables/A_decisions`); the rest is referenced to the repository in 2.13 |
+| B Data and QC | slim set (2026-11-17) in `results/amibekk_v1/report/appendix/`: B1 native vs model space, B2 brain size by height, B3 component sizes, B4 specks by gap, B5 brain-mask methods (3 slices), B6 H-cal score histograms with the stratum thresholds |
+| C Validation | C1 four missed planted copies (the variants are in Method figure 2-7, recall in 3-3) |
+| D Audit and exposure | D1 sensitivity (excess per variant, E1 copy and E2 full), D2 six near-exact masks, D3 rarity fifths (H3), D4 rehearsal-mock and S margin and rarity AUCs; as tables: H2 (`D_h2`), rates by size (`D_rates_by_size`) |
+| E Match reports and E8 | E1 report 02 compact (E2's 1 px limit, caught by E1), E2 the `Mets_058` profile, E3 E8 within group A |
 | F Reproducibility | rehearsal table (mock → expected → obtained); check results per experiment; software versions |
 
 ---
@@ -1195,10 +1195,13 @@ copying" as the names of E6 readings; DDPM, never LDM; self-attention only; pati
 
 - **Tables:** drawn as LaTeX by `r_report_figures.py tables` into `results/amibekk_v1/report/tables/` (18 files, placeholder captions `TODO: ...` to replace; needs `\usepackage{booktabs}`). The whole appendix is
   `results/amibekk_v1/report/appendix.tex` (sections A-F, every appendix figure and table, placeholder
-  captions), for `\input{appendix}` after `\appendix`.
+  captions), for `\input{appendix}` (its own `appendices` environment gives an "Appendices" page and
+  contents entry and keeps floats in their subsections; preamble lines are in its header; no `\appendix`).
 - **Figures:** the Method and Results figures are drawn (`r_report_figures.py method`, `results`,
-  2026-11-16; E1 and E2 as separate figures 4a and 4b). Still to do: nothing: the appendix figures (B-E) and a
-  `check` stage (17/17) are done too; all figures live in `results/amibekk_v1/report/{method,results,appendix}/`.
+  2026-11-16; E1 and E2 as separate figures 4a and 4b). The appendix figures were cut to a slim set of 14
+  readable at print size (2026-11-17; section 3's appendix table); `check` 21/21. All figures live in
+  `results/amibekk_v1/report/{method,results,appendix}/`.
+- **Appendix F** (reproducibility) may be cut later (e.g. the software table); left as it is for now.
 - **Previous author:**
   - answered 2026-11-16: the whole train set was used, nothing held out from it, the test set never
     seen;

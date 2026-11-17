@@ -64,7 +64,8 @@ def tex(text: object) -> str:
     s = re.sub(r"τ_([A-Za-z])", "\x00\\1", str(text))          # tau with a subscript, restored below
     for a, b in (("\\", r"\textbackslash{}"), ("_", r"\_"), ("%", r"\%"), ("&", r"\&"), ("#", r"\#"),
                  (">=", r"$\geq$"), ("<=", r"$\leq$"), ("≥", r"$\geq$"), ("≤", r"$\leq$"), ("×", r"$\times$"),
-                 ("τ", r"$\tau$"), ("ρ", r"$\rho$"), ("Δ", r"$\Delta$"), ("–", "--"), ("→", r"$\to$")):
+                 ("τ", r"$\tau$"), ("ρ", r"$\rho$"), ("σ", r"$\sigma$"), ("Δ", r"$\Delta$"), ("–", "--"),
+                 ("→", r"$\to$")):
         s = s.replace(a, b)
     s = re.sub(r"(?<!\$)([<>])(?!\$)", r"$\1$", s)
     return re.sub("\x00([A-Za-z])", r"$\\tau_\1$", s)
@@ -92,7 +93,7 @@ def write_tex(out: Path, name: str, header: list[str], body: list[list[str]], ca
     """One `table` environment with a booktabs tabular and the caption below it (the author's choice,
     2026-11-16); cells are already LaTeX (header escaped here)."""
     align = align or "l" + "r" * (len(header) - 1)
-    lines = [r"\begin{table}[htbp]", r"\centering", size,
+    lines = [r"\begin{table}", r"\centering", size,     # default placement (the appendix pins it: \floatplacement)
              rf"\begin{{tabular}}{{{align}}}", r"\toprule", " & ".join(tex(h) for h in header) + r" \\", r"\midrule"]
     lines += [" & ".join(r) + r" \\" for r in body]
     lines += [r"\bottomrule", r"\end{tabular}", rf"\caption{{{caption}}}", rf"\label{{tab:{label}}}", r"\end{table}", ""]
@@ -208,14 +209,17 @@ def main_audit(syn: Path, out: Path) -> dict:
         for s in STRATA:
             x = r[(r["class"] == cls) & (r["stratum"] == s)].iloc[0]
             primary = str(x["primary"]).lower() == "true"
-            body.append([tex(CLASS_NAMES[cls]), s, f"{int(x['n_s']):,}", pct(x["rate_s"]), pct(x["rate_h"]),
+            body.append([tex(CLASS_NAMES[cls]), s, f"{int(x['n_s']):,}", f"{int(x['n_h']):,}", pct(x["rate_s"]),
+                         pct(x["rate_h"]),
                          f"{num(100 * float(x['excess']), 1, sign=True)} "
                          f"{ci(100 * float(x['excess_low']), 100 * float(x['excess_high']), digits=1, sign=True)}",
                          num(x["p_holm"], 3) if primary else "--"])
-    write_tex(out, "T5_main_audit", ["Class", "Stratum", "S masks", "S (%)", "H-eval (%)", "Excess (points) [95% CI]",
-                                     "Holm p"], body,
-              "TODO: share of S main and H-eval flagged per class and stratum; primary family (E1 copy, E2 full) with "
-              "Holm-adjusted p.", "main_audit", "llrrrrr")
+    write_tex(out, "T5_main_audit", ["Class", "Stratum", "S scored", "H-eval scored", "S (%)", "H-eval (%)",
+                                     "Excess (points) [95% CI]", "Holm p"], body,
+              "TODO: share of S main and H-eval flagged per class and stratum. Scored = the masks (slices) the detector "
+              "can score in the stratum (E1: lesions of at least 4 px; E2: informative lesions of at least 12 px); the "
+              "rates are flagged / scored. Primary family (E1 copy, E2 full) with Holm-adjusted p.",
+              "main_audit", "llrrrrrr", r"\footnotesize")
     return index_row("T5_main_audit", "3.4", "main audit: rates, excess, Holm p", [path])
 
 
@@ -227,19 +231,24 @@ def exposure(syn: Path, out: Path) -> dict:
     conc = conc[pd.to_numeric(conc["m"]) == 52.5].set_index("cell")
     marg = marg.set_index("cell")
     readings = dict(re.findall(r"^\s+(\S+ \S+): ([a-z ]+) \(", (d / "review.txt").read_text(encoding="utf-8"), re.M))
-    body = []
-    for cell in marg.index[marg["primary"].astype(str).str.lower() == "true"]:
-        c, m = conc.loc[cell], marg.loc[cell]
-        body.append([tex(cell.replace("e1_copy", "E1 copy").replace("e2_full", "E2 full")), f"{int(c['flags']):,}",
-                     f"{float(c['dispersion']):,.0f} ({float(c['dispersion_null_p95']):,.0f})",
-                     f"{int(c['above_null_band'])} ({float(c['above_null_band_expected']):.1f})",
-                     f"{num(m['margin_auc'])} {ci(m['margin_auc_low'], m['margin_auc_high'])}",
-                     f"{num(m['rarity_auc'])} {ci(m['rarity_auc_low'], m['rarity_auc_high'])}",
-                     tex(readings.get(cell, "--"))])
-    write_tex(out, "T6_exposure", ["Cell", "Flags", "Dispersion (null 95th)", "Above band (expected)",
-                                   "Margin AUC", "Rarity AUC", "Reading"], body,
-              "TODO: concentration of S flags over patients, and margin and source rarity against H-eval chance flags.",
-              "exposure", "lrrrrrl", r"\footnotesize")
+    cells = list(marg.index[marg["primary"].astype(str).str.lower() == "true"])
+    c, m = {k: conc.loc[k] for k in cells}, {k: marg.loc[k] for k in cells}
+    rows = [("S flags", lambda k: f"{int(c[k]['flags']):,}"),
+            ("Spread over patients: dispersion (95th percentile by chance)",
+             lambda k: f"{float(c[k]['dispersion']):,.0f} ({float(c[k]['dispersion_null_p95']):,.0f})"),
+            ("Patients above their chance band (expected by chance)",
+             lambda k: f"{int(c[k]['above_null_band'])} ({float(c[k]['above_null_band_expected']):.1f})"),
+            ("Margin to the second-best patient: AUC of S flags vs chance flags",
+             lambda k: f"{num(m[k]['margin_auc'])} {ci(m[k]['margin_auc_low'], m[k]['margin_auc_high'])}"),
+            ("Rarity of the source slice: AUC of S flags vs chance flags",
+             lambda k: f"{num(m[k]['rarity_auc'])} {ci(m[k]['rarity_auc_low'], m[k]['rarity_auc_high'])}"),
+            ("Reading (decision U)", lambda k: tex(readings.get(k, "--")))]
+    body = [[tex(label), *[f(k) for k in cells]] for label, f in rows]
+    header = ["", *[k.replace("e1_copy", "E1 copy,").replace("e2_full", "E2 full,") + "-lesion" for k in cells]]
+    write_tex(out, "T6_exposure", header, body,
+              "TODO: how the S flags spread over training patients, and whether they fit their best patient more uniquely "
+              "(margin) or point to rarer slices (rarity) than H-eval's chance flags do. AUC above 0.5 points to copying, "
+              "below to typical placement; 95% CI in brackets.", "exposure", r"p{7.2cm}rr")
     return index_row("T6_exposure", "3.5", "E6 readings per primary cell", [d / "concentration.csv", d / "margins.csv"])
 
 
@@ -248,17 +257,15 @@ def h1_h3(syn: Path, out: Path) -> dict:
     d = syn / "e6" / "exposure"
     h1 = read_table(d / "h1.csv")
     h1 = h1[(h1["method"] == "slice_linking") & h1["difference"].notna()]
-    body = [[tex(r["bin"]), f"{int(r['lesions3d']):,}", num(r["rho_s"]), num(r["rho_h"]),
-             f"{num(r['difference'], 3, sign=True)} {ci(r['difference_low'], r['difference_high'], digits=3, sign=True)}"]
+    body = [[tex("weighted mean (the pre-stated test)" if r["bin"] == "weighted" else r["bin"]),
+             f"{int(r['lesions3d']):,}", num(r["rho_s"]), num(r["rho_h"]),
+             f"{num(r['difference'], 2, sign=True)} {ci(r['difference_low'], r['difference_high'], sign=True)}"]
             for _, r in h1.iterrows()]
-    h3 = read_table(d / "h3.csv")
-    h3 = h3[h3["primary"].astype(str).str.lower() == "true"]
-    body += [[tex(f"H3 {c}"), f"{int(n)}", rf"$\rho$ {num(rho)} {ci(lo, hi)}", f"p = {num(p, 2)}", ""]
-             for c, n, rho, lo, hi, p in zip(h3["cell"], h3["n"], h3["rho"], h3["rho_low"], h3["rho_high"],
-                                             h3["p_permutation"])]
-    write_tex(out, "T6b_h1_h3", ["Size bin / test", "3D lesions / patients", "ρ S", "ρ H-eval", "ρ S − ρ H-eval [95% CI]"],
-              body, "TODO: H1 per size bin (weighted: the pre-stated test) and H3.", "h1_h3")
-    return index_row("T6b_h1_h3", "3.5", "H1 per size bin and weighted; H3 Spearman", [d / "h1.csv", d / "h3.csv"])
+    write_tex(out, "T6b_h1_h3", ["Largest area of the 3D lesion", "3D lesions", "ρ, S", "ρ, H-eval", "Difference [95% CI]"],
+              body, "TODO: H1. Within each size bin, the Spearman correlation between how many training slices a 3D "
+              "lesion spans and how many masks match it, for S and for H-eval (chance); H1 holds if S's correlation is "
+              "higher (weighted difference above 0).", "h1_h3")
+    return index_row("T6b_h1_h3", "3.5", "H1 per size bin and weighted (H3 is given in the text)", [d / "h1.csv"])
 
 
 def explanations(real: Path, syn: Path, out: Path) -> dict:
@@ -270,15 +277,27 @@ def explanations(real: Path, syn: Path, out: Path) -> dict:
     write_tex(out, "T7a_correctness", ["Criterion", "Value (%)", "Minimum (%)", "Pass"], body,
               "TODO: correctness of the match reports on planted copies.", "correctness", "lrrl")
     dels = pd.concat([read_table(real / "e7" / "planted" / "deletion_summary.csv"),
-                      read_table(syn / "e7" / "reports" / "deletion_summary.csv")])
-    body = [[tex(r["set"]), f"{int(r['masks'])}", f"{num(r['C_drop_top'])} / {num(r['C_drop_small'])}",
-             f"{float(r['C_wilcoxon_p']):.2g}", f"{num(r['e1_drop_top'])} / {num(r['e1_drop_small'])}",
-             f"{float(r['e1_wilcoxon_p']):.2g}", f"{int(r['flips_top'])} / {int(r['flips_small'])}",
-             f"{float(r['mcnemar_p']):.2g}"] for _, r in dels.iterrows()]
-    write_tex(out, "T7b_deletion", ["Set", "Masks", "ΔC top / small", "p", "ΔE1 top / small", "p",
-                                    "Lost flag top / small", "p"], body,
-              "TODO: deletion test, top against smallest contributor (paired Wilcoxon; McNemar for lost flags).",
-              "deletion", "lrrrrrrr", r"\footnotesize")
+                      read_table(syn / "e7" / "reports" / "deletion_summary.csv")]).drop_duplicates("set").set_index("set")
+    order = {"planted controls": "Planted copies", "S": "S flags", "H-eval chance flags": "H-eval chance flags"}
+    sets = [s for s in order if s in dels.index]
+    d = dels.loc[sets].to_dict("index")
+
+    def p(x: Any) -> str:
+        return tex("p < 0.001") if float(x) < 0.001 else f"p = {float(x):.2g}"
+
+    rows = [("Masks tested", lambda s: f"{int(d[s]['masks'])}"),
+            ("Drop in C (configuration score)", lambda s: f"{num(d[s]['C_drop_top'])} vs {num(d[s]['C_drop_small'])}"),
+            ("", lambda s: p(d[s]["C_wilcoxon_p"])),
+            ("Drop in the whole-mask score (E1)", lambda s: f"{num(d[s]['e1_drop_top'])} vs {num(d[s]['e1_drop_small'])}"),
+            ("", lambda s: p(d[s]["e1_wilcoxon_p"])),
+            ("Masks that lose the flag or its patient after a full re-match",
+             lambda s: f"{int(d[s]['flips_top'])} vs {int(d[s]['flips_small'])}"),
+            ("", lambda s: p(d[s]["mcnemar_p"]))]
+    body = [[tex(label), *[f(s) for s in sets]] for label, f in rows]
+    write_tex(out, "T7b_deletion", ["Removing the top vs the smallest contributor", *[order[s] for s in sets]], body,
+              "TODO: deletion test. Each cell compares removing the lesion the report ranks first (top) with removing "
+              "the lowest-ranked one (smallest); p from a paired Wilcoxon test (drops) or McNemar's test (lost flags).",
+              "deletion", r"p{6.2cm}rrr")
     return index_row("T7a_correctness; T7b_deletion", "3.6", "correctness criteria; deletion test",
                      [real / "e7" / "planted" / "criteria.csv", syn / "e7" / "reports" / "deletion_summary.csv"])
 
@@ -302,21 +321,35 @@ def paired(syn: Path, out: Path) -> dict:
 
 # --- appendix ---------------------------------------------------------------------------------
 
+CRITICAL_DECISIONS = (   # the choices that define what is measured; the rest are in the repository (2.13)
+    ("B", "What counts as a lesion", "an 8-connected component of at least 4 px"),
+    ("C", "Specks near a lesion", "a smaller component within 2 px of a lesion is attached to it; others are dropped"),
+    ("D", "Noisy synthetic masks", "more than 9 isolated specks: left out of the main audit, reported separately"),
+    ("F", "Lesion position (E2)", "pixel coordinates; position factor with σ = 6.4 px"),
+    ("G", "Informative lesion (E2)", "at least 12 px (chance lesion-match rate at most 10% from this size up)"),
+    ("H", "Copy thresholds", "95th percentile of H-cal, separately for single- and multi-lesion slices (Table 3a)"),
+    ("J", "A planted copy is caught", "flagged, and the named source patient is the base patient"),
+    ("K", "Validation gate", "P1 100% by both detectors; P2, P4 at least 90%; P6 at least 80% (E2); H-eval false "
+                             "positives at most 7% (E1 copy, E2 full) and 12% (E2 flagged)"),
+    ("M", "Main test", "excess of S over H-eval for E1 copy and E2 full, single and multi; Holm-adjusted p < 0.05"),
+    ("N", "Counting copies", "per source patient; source slices within 2 of each other count as one group"),
+    ("Q", "Near-exact copy", "E1 score at least 0.9 and above every held-out score in its stratum and size bin"),
+    ("U", "Copying vs placement", "margin and source rarity of S flags against H-eval chance flags (Section 2.10)"),
+    ("AC", "Paired-MRI measure", "SSIM (σ 1.5 px, data range 10) in the lesion neighbourhood (+8 px), after z-scoring "
+                                 "each image in its brain and aligning by E1's shift"),
+    ("AD", "Paired-MRI test", "AUC of group A vs B, judged against H-eval flagged vs novel"),
+)
+
+
 def decisions(out: Path) -> dict:
-    """Appendix A: decisions A-AE from the decision register in `docs/report-synthesis.md` (section 5)."""
-    path = config.REPO_ROOT / "docs" / "report-synthesis.md"
-    text = path.read_text(encoding="utf-8")
-    section = text[text.index("## 5. Decision register"):text.index("## 6.")]
-    rows = [line for line in section.split("\n") if re.match(r"^\| (A[A-E]?|[B-Z]) \| ", line)]
-    body = []
-    for line in rows:
-        cells = [c.strip() for c in line.strip("|").split("|")]
-        body.append([tex(cells[0]), tex(cells[1]), tex(cells[2].replace("`", "")), tex(cells[3].replace("`", "")),
-                     tex(cells[4])])
-    write_tex(out, "A_decisions", ["", "Fixes", "Value", "Config key", "Section"], body,
-              "TODO: the analysis decisions, fixed before the data they concern were read.", "decisions",
-              r"lp{3.2cm}p{4.6cm}p{3.2cm}l", r"\scriptsize")
-    return index_row("A_decisions", "App. A", "decisions A-AE: what each fixes, its value, config key, section", [path])
+    """Appendix A: the critical analysis decisions (`CRITICAL_DECISIONS`, letters as in the project's
+    plans); every other setting is in the repository's config and decision register."""
+    body = [[tex(letter), tex(what), tex(value)] for letter, what, value in CRITICAL_DECISIONS]
+    write_tex(out, "A_decisions", ["", "Decision", "Value"], body,
+              "TODO: the critical analysis decisions, each fixed before the data it concerns was read. Every other "
+              "setting is in the project repository.", "decisions", r"lp{3.6cm}p{9.6cm}", r"\footnotesize")
+    return index_row("A_decisions", "App. A", f"the {len(CRITICAL_DECISIONS)} critical decisions and their values",
+                     [config.REPO_ROOT / "docs" / "report-synthesis.md"])
 
 
 def h2(syn: Path, out: Path) -> dict:
@@ -409,17 +442,16 @@ def software(syn: Path, out: Path) -> dict:
 APPENDIX_LAYOUT = (
     ("Settings and decisions", "app:decisions", [(None, ["table:A_decisions"])]),
     ("Data, preprocessing and calibration", "app:data",
-     [("Model space and lesions", ["B1", "B3", "B4"]), ("Brain masks and quality control", ["B2", "B5", "B6"]),
-      ("Neighbouring slices and calibration", ["B7", "B8", "B9"])]),
-    ("Validation with planted copies", "app:validation", [(None, ["C1", "C2", "C3", "C4"])]),
+     [("Model space and lesions", ["B1", "B3", "B4"]), ("Brain masks", ["B2", "B5"]), ("Calibration", ["B6"])]),
+    ("Validation with planted copies", "app:validation", [(None, ["C1"])]),
     ("Main audit and exposure", "app:audit",
-     [("Main audit", ["D1", "D2", "D3", "table:D_h2", "table:D_rates_by_size"]),
-      ("Exposure and duplication", ["D4", "D5", "D6"]), ("Rehearsal of the placement reading", ["D7", "D8", "D9"])]),
+     [("Main audit", ["D1", "table:D_h2", "table:D_rates_by_size", "D2"]),
+      ("Exposure and the placement reading", ["D3", "D4"])]),
     ("Match reports and the paired-MRI check", "app:reports",
-     [("Match reports", ["E1", "E2", "E3", "E4"]), ("Paired-MRI check", ["E5", "E6"])]),
+     [("Match reports", ["E1", "E2"]), ("Paired-MRI check", ["E3"])]),
     ("Reproducibility", "app:repro", [(None, ["table:F_rehearsals", "table:F_checks", "table:F_software"])]),
 )
-TALL_SHEETS = ("B5", "B6", "B9", "C3", "C4", "D2", "D3", "E4", "E5")   # given a page of their own ([p])
+TALL_SHEETS = ("B5", "D2")   # image sheets whose height is capped at 0.8 \textheight
 REPORT_DIR = "figures"   # where the report folder (results/<pool>/report/) is uploaded in the LaTeX project
 
 
@@ -435,9 +467,13 @@ def appendix_tex(report: Path) -> Path:
         raise SystemExit(f"Appendix figures without a place in APPENDIX_LAYOUT: {missing}")
     lines = ["% The report's appendix, generated by `scripts/r_report_figures.py tables` (do not edit the paths by hand;",
              f"% captions are placeholders). Assumes results/<pool>/report/ is uploaded as `{REPORT_DIR}/` next to the",
-             r"% main file, and in the preamble: \usepackage{graphicx, booktabs, placeins}.",
-             r"% Use after \appendix:  \input{appendix}", "",
-             r"\counterwithin{figure}{section}", r"\counterwithin{table}{section}", ""]
+             r"% main file, and in the preamble: \usepackage{graphicx, booktabs, float, caption}",
+             r"%                                  \usepackage[toc,page]{appendix}",
+             r"% Use (without \appendix):  \input{appendix}", "",
+             r"\begin{appendices}",
+             r"\counterwithin{figure}{section}", r"\counterwithin{table}{section}",
+             r"\floatplacement{table}{H}     % every appendix table and figure stays in its own subsection",
+             r"% \captionsetup{list=no}      % uncomment to keep appendix figures and tables out of the lists", ""]
     for title, label, subsections in APPENDIX_LAYOUT:
         lines += [rf"\section{{{title}}}\label{{{label}}}", "% TODO: one or two sentences on what this appendix shows.", ""]
         for subtitle, items in subsections:
@@ -448,11 +484,11 @@ def appendix_tex(report: Path) -> Path:
                     lines += [rf"\input{{{REPORT_DIR}/tables/{item.removeprefix('table:')}}}", ""]
                     continue
                 name, content = figures[item]
-                size = r"height=0.85\textheight,width=\textwidth,keepaspectratio" if item in TALL_SHEETS else r"width=\textwidth"
-                lines += [rf"\begin{{figure}}[{'p' if item in TALL_SHEETS else 'htbp'}]", r"  \centering",
+                size = r"height=0.8\textheight,width=\textwidth,keepaspectratio" if item in TALL_SHEETS else r"width=\textwidth"
+                lines += [r"\begin{figure}[H]", r"  \centering",
                           rf"  \includegraphics[{size}]{{{REPORT_DIR}/appendix/{name}.pdf}}",
                           rf"  \caption{{TODO: {tex(content)}.}}", rf"  \label{{fig:app_{item}}}", r"\end{figure}", ""]
-        lines += [r"\FloatBarrier", ""]
+    lines += [r"\end{appendices}", ""]
     path = report / "appendix.tex"
     path.write_text("\n".join(lines), encoding="utf-8")
     return path

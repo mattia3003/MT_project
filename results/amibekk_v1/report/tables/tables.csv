@@ -7,10 +7,10 @@ T4_validation,3.3,recall per variant and detector,results/stanford_brainmets/e4/
 T4b_gate,3.3,E4 gate criteria and results,results/stanford_brainmets/e4/validate/gate.csv
 T5_main_audit,3.4,"main audit: rates, excess, Holm p",results/amibekk_v1/e5/analyze/rates.csv
 T6_exposure,3.5,E6 readings per primary cell,results/amibekk_v1/e6/exposure/concentration.csv; results/amibekk_v1/e6/exposure/margins.csv
-T6b_h1_h3,3.5,H1 per size bin and weighted; H3 Spearman,results/amibekk_v1/e6/exposure/h1.csv; results/amibekk_v1/e6/exposure/h3.csv
+T6b_h1_h3,3.5,H1 per size bin and weighted (H3 is given in the text),results/amibekk_v1/e6/exposure/h1.csv
 T7a_correctness; T7b_deletion,3.6,correctness criteria; deletion test,results/stanford_brainmets/e7/planted/criteria.csv; results/amibekk_v1/e7/reports/deletion_summary.csv
 T8_paired,3.7,E8 tests per region and within A,results/amibekk_v1/e8/paired/tests.csv; results/amibekk_v1/e8/paired/within_a.csv
-A_decisions,App. A,"decisions A-AE: what each fixes, its value, config key, section",docs/report-synthesis.md
+A_decisions,App. A,the 14 critical decisions and their values,docs/report-synthesis.md
 D_h2,App. D (4.2),H2: excesses and their difference,results/amibekk_v1/e5/analyze/h2.csv
 D_rates_by_size,App. D (3.4),primary-class rates by largest-lesion size,results/amibekk_v1/e5/analyze/rates_by_size.csv
 F_rehearsals,App. F (2.8),mock sets: required vs obtained readings,results/stanford_brainmets/e5/rehearse/null/review.txt; results/stanford_brainmets/e6/rehearse/null/review.txt; results/stanford_brainmets/e8/rehearse/run_info.json

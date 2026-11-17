@@ -1,20 +1,20 @@
-\begin{table}[htbp]
+\begin{table}
 \centering
-\small
-\begin{tabular}{llrrrrr}
+\footnotesize
+\begin{tabular}{llrrrrrr}
 \toprule
-Class & Stratum & S masks & S (\%) & H-eval (\%) & Excess (points) [95\% CI] & Holm p \\
+Class & Stratum & S scored & H-eval scored & S (\%) & H-eval (\%) & Excess (points) [95\% CI] & Holm p \\
 \midrule
-E1 copy & single & 19,117 & 8.5 & 7.2 & +1.3 [-1.4, +3.9] & 0.319 \\
-E1 copy & multi & 16,803 & 15.8 & 7.4 & +8.5 [+4.3, +11.1] & 0.004 \\
-E2 full & single & 19,911 & 6.9 & 7.1 & -0.2 [-2.7, +2.2] & 0.560 \\
-E2 full & multi & 6,006 & 5.9 & 2.9 & +3.0 [+0.4, +4.6] & 0.036 \\
-E2 partial & single & 19,911 & 3.3 & 3.0 & +0.3 [-1.4, +1.8] & -- \\
-E2 partial & multi & 6,006 & 1.1 & 5.5 & -4.4 [-7.4, +0.1] & -- \\
-E2 flagged & single & 19,911 & 10.3 & 10.1 & +0.2 [-2.6, +3.0] & -- \\
-E2 flagged & multi & 6,006 & 7.1 & 8.5 & -1.4 [-3.7, +2.7] & -- \\
+E1 copy & single & 19,117 & 696 & 8.5 & 7.2 & +1.3 [-1.4, +3.9] & 0.319 \\
+E1 copy & multi & 16,803 & 393 & 15.8 & 7.4 & +8.5 [+4.3, +11.1] & 0.004 \\
+E2 full & single & 19,911 & 634 & 6.9 & 7.1 & -0.2 [-2.7, +2.2] & 0.560 \\
+E2 full & multi & 6,006 & 272 & 5.9 & 2.9 & +3.0 [+0.4, +4.6] & 0.036 \\
+E2 partial & single & 19,911 & 634 & 3.3 & 3.0 & +0.3 [-1.4, +1.8] & -- \\
+E2 partial & multi & 6,006 & 272 & 1.1 & 5.5 & -4.4 [-7.4, +0.1] & -- \\
+E2 flagged & single & 19,911 & 634 & 10.3 & 10.1 & +0.2 [-2.6, +3.0] & -- \\
+E2 flagged & multi & 6,006 & 272 & 7.1 & 8.5 & -1.4 [-3.7, +2.7] & -- \\
 \bottomrule
 \end{tabular}
-\caption{TODO: share of S main and H-eval flagged per class and stratum; primary family (E1 copy, E2 full) with Holm-adjusted p.}
+\caption{TODO: share of S main and H-eval flagged per class and stratum. Scored = the masks (slices) the detector can score in the stratum (E1: lesions of at least 4 px; E2: informative lesions of at least 12 px); the rates are flagged / scored. Primary family (E1 copy, E2 full) with Holm-adjusted p.}
 \label{tab:main_audit}
 \end{table}
